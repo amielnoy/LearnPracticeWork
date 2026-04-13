@@ -20,7 +20,7 @@ import {
   SiTypescript, 
   SiAppium
 } from "react-icons/si";
-import { FaJava } from "react-icons/fa";
+import { FaJava, FaWhatsapp } from "react-icons/fa";
 import { VscAzureDevops } from "react-icons/vsc";
 
 import profileImg from "@assets/image_1776081510333.png";
@@ -293,6 +293,12 @@ export default function Home() {
                 <a href="https://www.youtube.com/@amielnoy" target="_blank" rel="noreferrer">
                   <Youtube className="w-5 h-5 mr-2 text-red-500" />
                   YouTube Channel
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" className="rounded-full font-bold px-8 border-secondary-border hover:bg-secondary-border" asChild>
+                <a href="https://chat.whatsapp.com/Bwjb01CGfxqIE04lkz2us0?mode=gi_t" target="_blank" rel="noreferrer">
+                  <FaWhatsapp className="w-5 h-5 mr-2 text-green-500" />
+                  AI Automation & DevOps Community
                 </a>
               </Button>
             </div>
