@@ -290,7 +290,7 @@ export default function Home() {
                 </a>
               </Button>
               <Button size="lg" variant="outline" className="rounded-full font-bold px-8 border-secondary-border hover:bg-secondary-border" asChild>
-                <a href="https://www.youtube.com/@amielpeled" target="_blank" rel="noreferrer">
+                <a href="https://www.youtube.com/@amielnoy" target="_blank" rel="noreferrer">
                   <Youtube className="w-5 h-5 mr-2 text-red-500" />
                   YouTube Channel
                 </a>
