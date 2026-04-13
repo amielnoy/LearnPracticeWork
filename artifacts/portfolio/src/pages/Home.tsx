@@ -12,19 +12,25 @@ import {
   Code2,
   Shield,
   Cpu,
-  Users,
-  Cloud
+  Users
 } from "lucide-react";
 import { 
-  SiSelenium,
   SiGithubactions, 
   SiCircleci, 
   SiTypescript, 
   SiAppium
 } from "react-icons/si";
 import { FaJava } from "react-icons/fa";
+import { VscAzureDevops } from "react-icons/vsc";
+
 import profileImg from "@assets/image_1776081510333.png";
 import { Button } from "@/components/ui/button";
+
+const PlaywrightIcon = ({ className = "" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1.5 5.5c1.38 0 2.5 1.12 2.5 2.5S11.88 12.5 10.5 12.5 8 11.38 8 10s1.12-2.5 2.5-2.5zm5 0c.828 0 1.5.672 1.5 1.5S16.328 10.5 15.5 10.5 14 9.828 14 9s.672-1.5 1.5-1.5zm-8 8c0-1.657 2.015-3 4.5-3s4.5 1.343 4.5 3H7.5z"/>
+  </svg>
+);
 
 const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
   <motion.div
@@ -115,9 +121,9 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-70">
             {[
-              { Icon: SiSelenium, name: "Playwright" },
+              { Icon: PlaywrightIcon, name: "Playwright" },
               { Icon: SiAppium, name: "Appium" },
-              { Icon: Cloud, name: "Azure DevOps" },
+              { Icon: VscAzureDevops, name: "Azure DevOps" },
               { Icon: SiGithubactions, name: "GitHub Actions" },
               { Icon: SiCircleci, name: "CircleCI" },
               { Icon: FaJava, name: "Java" },
