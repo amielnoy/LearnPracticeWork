@@ -284,7 +284,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" className="rounded-full font-bold px-8 bg-primary text-primary-foreground hover:bg-primary/90" asChild>
-                <a href="mailto:amiel@example.com">
+                <a href="mailto:amielnoy@gmail.com">
                   <Mail className="w-5 h-5 mr-2" />
                   Send an Email
                 </a>
