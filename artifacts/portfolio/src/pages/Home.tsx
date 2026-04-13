@@ -12,12 +12,12 @@ import {
   Code2,
   Shield,
   Cpu,
-  Users
+  Users,
+  Cloud
 } from "lucide-react";
 import { 
-  SiPlaywright, 
+  SiSelenium,
   SiGithubactions, 
-  SiAzuredevops, 
   SiCircleci, 
   SiTypescript, 
   SiAppium
@@ -115,9 +115,9 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-70">
             {[
-              { Icon: SiPlaywright, name: "Playwright" },
+              { Icon: SiSelenium, name: "Playwright" },
               { Icon: SiAppium, name: "Appium" },
-              { Icon: SiAzuredevops, name: "Azure DevOps" },
+              { Icon: Cloud, name: "Azure DevOps" },
               { Icon: SiGithubactions, name: "GitHub Actions" },
               { Icon: SiCircleci, name: "CircleCI" },
               { Icon: FaJava, name: "Java" },
