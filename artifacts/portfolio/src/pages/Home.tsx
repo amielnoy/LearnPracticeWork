@@ -236,10 +236,10 @@ export default function Home() {
               </div>
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-xl">Tech Lead, Automation & DevOps</h4>
+                  <h4 className="font-bold text-xl">AI Test Automation & DevOps Tech Lead</h4>
                   <span className="text-xs font-mono text-muted-foreground">Ovalix</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Currently leading automation and DevOps strategies, mentoring the team, and ensuring top-tier software quality delivery.</p>
+                <p className="text-sm text-muted-foreground">Leading automation and DevOps strategy with a focus on AI-assisted quality engineering, mentoring the team, and building reliable delivery systems.</p>
               </div>
             </FadeIn>
 
@@ -252,7 +252,7 @@ export default function Home() {
                   <h4 className="font-bold text-xl">QA to DevOps Engineer</h4>
                   <span className="text-xs font-mono text-muted-foreground">Sepio Cyber</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Started in QA, quickly promoted to DevOps. Built the full CI/CD environment on Azure DevOps from the ground up.</p>
+                <p className="text-sm text-muted-foreground">Started in QA, then moved into DevOps. Built the full CI/CD environment on Azure DevOps from the ground up and helped formalize the automation infrastructure.</p>
               </div>
             </FadeIn>
 
@@ -265,7 +265,7 @@ export default function Home() {
                   <h4 className="font-bold text-xl">Automation Engineer</h4>
                   <span className="text-xs font-mono text-muted-foreground">Intel</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Evaluated and championed Ranorex as the core automation tool for the Advanced Analytics team.</p>
+                <p className="text-sm text-muted-foreground">Evaluated and championed Ranorex as the automation tool for the Advanced Analytics team, helping shape a scalable testing approach.</p>
               </div>
             </FadeIn>
 
