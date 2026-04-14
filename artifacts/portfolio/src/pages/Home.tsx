@@ -236,10 +236,10 @@ export default function Home() {
               </div>
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-xl">Test Automation & DevOps AP Technical Leader</h4>
-                  <span className="text-xs font-mono text-muted-foreground">Melio</span>
+                  <h4 className="font-bold text-xl">AI Test Automation & DevOps Tech Lead</h4>
+                  <span className="text-xs font-mono text-muted-foreground">Ovalix</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Designing and developing GUI and API automation tests using Playwright, leading a multi-layer test automation framework, and integrating automation into CI pipelines.</p>
+                <p className="text-sm text-muted-foreground">Leading automation and DevOps strategy with a focus on AI-assisted quality engineering, mentoring the team, and building reliable delivery systems.</p>
               </div>
             </FadeIn>
 
@@ -249,10 +249,10 @@ export default function Home() {
               </div>
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-xl">AI Test Automation & DevOps Tech Lead</h4>
-                  <span className="text-xs font-mono text-muted-foreground">Ovalix</span>
+                  <h4 className="font-bold text-xl">Test Automation & DevOps AP Technical Leader</h4>
+                  <span className="text-xs font-mono text-muted-foreground">Melio</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Leading automation and DevOps strategy with a focus on AI-assisted quality engineering, mentoring the team, and building reliable delivery systems.</p>
+                <p className="text-sm text-muted-foreground">Designing and developing GUI and API automation tests using Playwright, leading a multi-layer test automation framework, and integrating automation into CI pipelines.</p>
               </div>
             </FadeIn>
 
