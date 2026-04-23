@@ -237,7 +237,7 @@ export default function Home() {
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-bold text-xl">Automation Testing & DevOps Architect</h4>
-                  <span className="text-xs font-mono text-muted-foreground">MSD Animal Health Intelligence Technology Labs</span>
+                  <span className="text-xs font-mono text-muted-foreground">Animal Health Intelligence Technology Labs</span>
                 </div>
                 <p className="text-sm text-muted-foreground">Designed and established 3 automation projects, including REST and SOAP API testing for SQL Server and MongoDB, mail and SMS testing with Java and Allure reporting, and GUI testing with Selenium. All projects ran on Azure DevOps CI, with setups pulled automatically from Amazon S3 and deployed via Azure DevOps Pipelines.</p>
               </div>
@@ -250,7 +250,7 @@ export default function Home() {
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-bold text-xl">Automation Testing & DevOps Architect</h4>
-                  <span className="text-xs font-mono text-muted-foreground">MSD Animal Health Intelligence Technology Labs</span>
+                  <span className="text-xs font-mono text-muted-foreground">Animal Health Intelligence Technology Labs</span>
                 </div>
                 <p className="text-sm text-muted-foreground">Designed and established 3 automation projects, including REST and SOAP API testing for SQL Server and MongoDB, mail and SMS testing with Java and Allure reporting, and GUI testing with Selenium. All projects ran on Azure DevOps CI, with setups pulled automatically from Amazon S3 and deployed via Azure DevOps Pipelines.</p>
               </div>
