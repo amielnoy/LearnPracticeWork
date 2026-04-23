@@ -220,6 +220,43 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <FadeIn className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-4xl font-bold mb-4">AI Courses</h2>
+            <p className="text-muted-foreground text-lg">
+              Practical AI training for business domains and the education sector.
+            </p>
+          </FadeIn>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <FadeIn>
+              <div className="p-8 rounded-2xl bg-card border shadow-sm h-full">
+                <div className="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-6">
+                  <Briefcase className="w-6 h-6" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">AI for Business Domains</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Courses focused on applying AI across product, operations, quality, and management workflows — with practical use cases, automation ideas, and team-ready adoption patterns.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.1}>
+              <div className="p-8 rounded-2xl bg-card border shadow-sm h-full">
+                <div className="w-12 h-12 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center mb-6">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">AI for Education</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Training for schools, teachers, and students on using AI responsibly for learning, lesson design, study support, and project-based exploration.
+                </p>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
       {/* Career Highlights */}
       <section id="career" className="py-24 px-6">
         <div className="max-w-3xl mx-auto">
