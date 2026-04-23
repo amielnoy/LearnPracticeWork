@@ -231,7 +231,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <FadeIn>
-              <div className="p-8 rounded-2xl bg-card border shadow-sm h-full">
+              <a href="https://docs.google.com/spreadsheets/d/1IaTpcqOQhrIeh8YgX_CKEUR89twpw-B2/edit?usp=drive_link&ouid=103822320646748524987&rtpof=true&sd=true" target="_blank" rel="noreferrer" className="block p-8 rounded-2xl bg-card border shadow-sm h-full hover:border-primary hover:shadow-md transition-all">
                 <div className="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-6">
                   <Briefcase className="w-6 h-6" />
                 </div>
@@ -239,7 +239,7 @@ export default function Home() {
                 <p className="text-muted-foreground leading-relaxed">
                   Courses focused on applying AI across product, operations, quality, and management workflows — with practical use cases, automation ideas, and team-ready adoption patterns.
                 </p>
-              </div>
+              </a>
             </FadeIn>
 
             <FadeIn delay={0.1}>
