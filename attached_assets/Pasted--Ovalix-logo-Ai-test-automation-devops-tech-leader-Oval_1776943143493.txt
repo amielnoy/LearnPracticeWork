@@ -1,0 +1,52 @@
+
+
+Ovalix logo
+Ai test automation & devops tech leader
+
+Ovalix · Full-time
+
+Feb 2026 - Present · 3 mos
+
+Tel Aviv District, Israel · Hybrid
+
+LinkedIn helped me get this job helped me get this job
+
+🚀 Built and scaled a complete quality engineering ecosystem from scratch — driving speed, visibility, and reliability across the organization
+
+🔹 Owned E2E quality from zero → production scale
+Designed and implemented a full Playwright + TypeScript regression framework, enabling fast, stable UI coverage and significantly reducing manual regression cycles.
+
+🔹 Scaled backend test automation
+Built robust Python + Pytest frameworks covering critical services, improving defect detection early in the pipeline and increasing backend reliability.
+
+🔹 CI/CD acceleration & automation-first culture
+Architected and implemented GitHub Actions pipelines (Bash + Python)
+→ Reduced feedback loops from hours to minutes
+→ Enabled consistent, automated validation on every change
+
+🔹 Drove data-driven quality with Allure TestOps (AWS)
+Led full adoption end-to-end (evaluation → rollout → team onboarding)
+→ Integrated with GitHub Actions & JIRA
+→ Built real-time dashboards, KPIs, and trend analysis
+→ Transformed testing from reactive → measurable & predictive
+
+🔹 Advanced validation in high-risk domains
+Executed deep testing across:
+• DLP (Data Loss Prevention)
+• Prompt Injection & AI security vectors
+• Complex integrations (connectors, proxies, webhooks)
+
+🔹 AI-powered engineering workflow
+Leveraged tools like Claude Code, Cursor, Windsurf, Kiro to accelerate development, reduce cycle time, and push productivity boundaries.
+
+📊 Impact:
+✔️ Major reduction in manual regression effort
+✔️ Faster release cycles & higher deployment confidence
+✔️ Increased test visibility across engineering & product
+✔️ Shifted quality left with scalable, automation-first infrastructure
+
+💡 Focused on building high-leverage systems that scale quality, not just tests.
+
+If you're working on AI systems, platform quality, or modern test infra — let’s connect.
+
+ prompt security, Cybersecurity and +15 skills

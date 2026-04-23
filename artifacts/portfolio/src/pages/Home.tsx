@@ -229,7 +229,6 @@ export default function Home() {
           </FadeIn>
 
           <div className="space-y-12 relative before:absolute before:inset-0 before:ml-6 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-border">
-            
             <FadeIn className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
               <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-background bg-secondary text-secondary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
                 <Briefcase className="w-5 h-5" />
@@ -245,19 +244,6 @@ export default function Home() {
 
             <FadeIn className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
               <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-background bg-secondary text-secondary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                <Shield className="w-5 h-5" />
-              </div>
-              <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-xl">Test Automation & DevOps AP Technical Leader</h4>
-                  <span className="text-xs font-mono text-muted-foreground">Melio</span>
-                </div>
-                <p className="text-sm text-muted-foreground">Designing and developing GUI and API automation tests using Playwright, leading a multi-layer test automation framework, and integrating automation into CI pipelines.</p>
-              </div>
-            </FadeIn>
-
-            <FadeIn className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-background bg-secondary text-secondary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
                 <Briefcase className="w-5 h-5" />
               </div>
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
@@ -266,6 +252,19 @@ export default function Home() {
                   <span className="text-xs font-mono text-muted-foreground">Perception Point</span>
                 </div>
                 <p className="text-sm text-muted-foreground">Planning, designing, and developing frontend and cloud infrastructure for test automation and DevOps workflows using Playwright, Python, JavaScript, Bash, Java, and C#. Built GitHub Actions and Azure Pipelines, Docker-based environments, AWS services, secure browser testing, and Terraform-managed Azure machines.</p>
+              </div>
+            </FadeIn>
+
+            <FadeIn className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-background bg-secondary text-secondary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-bold text-xl">Test Automation & DevOps AP Technical Leader</h4>
+                  <span className="text-xs font-mono text-muted-foreground">Melio</span>
+                </div>
+                <p className="text-sm text-muted-foreground">Designing and developing GUI and API automation tests using Playwright, leading a multi-layer test automation framework, and integrating automation into CI pipelines.</p>
               </div>
             </FadeIn>
 
