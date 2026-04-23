@@ -69,12 +69,12 @@
 
 :root {
   /* Slate & Amber Light Theme */
-  --background: 210 40% 98%;
+  --background: 210 40% 97%;
   --foreground: 222 47% 11%;
   
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
-  --card-border: 214 32% 91%;
+  --card-border: 214 32% 88%;
   
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
@@ -86,16 +86,16 @@
   --secondary: 215 25% 27%; /* Deep Slate */
   --secondary-foreground: 210 40% 98%;
   
-  --muted: 210 40% 96.1%;
+  --muted: 210 40% 95%;
   --muted-foreground: 215.4 16.3% 46.9%;
   
-  --accent: 210 40% 96.1%;
+  --accent: 210 40% 95%;
   --accent-foreground: 222.2 47.4% 11.2%;
   
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 214.3 31.8% 91.4%;
+  --border: 214.3 31.8% 88%;
   --input: 214.3 31.8% 91.4%;
   --ring: 222.2 84% 4.9%;
 
@@ -120,9 +120,9 @@
   --background: 222 47% 11%;
   --foreground: 210 40% 98%;
   
-  --card: 217 33% 17%;
+  --card: 217 33% 16%;
   --card-foreground: 210 40% 98%;
-  --card-border: 215 25% 27%;
+  --card-border: 215 25% 24%;
   
   --popover: 222 47% 11%;
   --popover-foreground: 210 40% 98%;
@@ -134,16 +134,16 @@
   --secondary: 217 33% 17%;
   --secondary-foreground: 210 40% 98%;
   
-  --muted: 217 33% 17%;
+  --muted: 217 33% 16%;
   --muted-foreground: 215 20.2% 65.1%;
   
-  --accent: 217 33% 17%;
+  --accent: 217 33% 16%;
   --accent-foreground: 210 40% 98%;
   
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 33% 17%;
+  --border: 215 25% 24%;
   --input: 217 33% 17%;
   --ring: 212.7 26.8% 83.9%;
 
@@ -161,7 +161,11 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    background-image: radial-gradient(circle at top, hsl(var(--primary) / 0.07), transparent 30%), radial-gradient(circle at right, hsl(var(--secondary) / 0.06), transparent 24%);
   }
 }
