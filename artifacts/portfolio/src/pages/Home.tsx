@@ -213,13 +213,13 @@ export default function Home() {
               { icon: Briefcase, title: "Custom Development", desc: "Tailored software solutions designed for scale and maintainability." },
             ].map((service, i) => (
               <FadeIn key={service.title} delay={i * 0.1}>
-                <div className="p-8 rounded-2xl bg-card border hover:border-primary hover:shadow-md transition-all duration-300 group">
+                <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation" target="_blank" rel="noreferrer" className="block p-8 rounded-2xl bg-card border hover:border-primary hover:shadow-md transition-all duration-300 group cursor-pointer">
                   <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <service.icon className="w-6 h-6" />
                   </div>
                   <h4 className="text-xl font-bold mb-2">{service.title}</h4>
                   <p className="text-muted-foreground text-sm leading-relaxed">{service.desc}</p>
-                </div>
+                </a>
               </FadeIn>
             ))}
           </div>
