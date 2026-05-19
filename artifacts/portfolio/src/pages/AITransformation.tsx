@@ -8,7 +8,7 @@ import {
   Workflow,
   Users,
   BarChart3,
-  Sparkles,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,80 +27,80 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
 const tabs = [
   {
     id: "vision",
-    label: "Vision",
-    icon: Sparkles,
-    title: "AI Test Transformation Vision",
-    content: `The future of quality engineering isn't more manual testers—it's intelligent automation that learns, adapts, and predicts. AI Test Transformation is the journey from traditional scripted automation to AI-augmented quality systems that self-heal, generate test scenarios from requirements, and provide predictive insights before code reaches production.`,
+    label: "The Shift",
+    icon: Rocket,
+    title: "Shift Your Test Automation to the AI Era",
+    content: `I provide a comprehensive AI Test Automation transformation service that takes your team from traditional scripted testing into the AI-powered quality engineering era. This isn't just tooling—it's a strategic shift in how your organization approaches quality, velocity, and engineering culture.`,
     bullets: [
-      "Shift from reactive testing to predictive quality assurance",
-      "Empower testers to become AI-augmented quality engineers",
-      "Reduce test maintenance overhead by 70%+ through self-healing selectors",
-      "Generate comprehensive test coverage from natural language requirements",
+      "Move from brittle, high-maintenance test suites to self-healing, AI-augmented automation",
+      "Replace manual test authoring with AI-generated scenarios from requirements and user stories",
+      "Empower your QA engineers to become AI-first quality architects",
+      "Achieve predictive quality insights instead of reactive bug hunting",
     ],
   },
   {
     id: "methodology",
-    label: "Methodology",
+    label: "How It Works",
     icon: Workflow,
-    title: "The Transformation Methodology",
-    content: `A structured, phased approach to integrating AI into your testing lifecycle. We don't replace your existing automation—we enhance it with AI capabilities that compound value over time.`,
+    title: "My Transformation Methodology",
+    content: `A hands-on, phased engagement designed to minimize disruption while maximizing adoption. I work directly with your team to build AI capabilities into your existing pipelines, not alongside them.`,
     bullets: [
-      "Phase 1: Assessment & AI Readiness Audit of current test suite",
-      "Phase 2: Pilot implementation with self-healing and smart assertions",
-      "Phase 3: AI test generation from user stories and API contracts",
-      "Phase 4: Predictive analytics dashboard and continuous optimization",
+      "Audit: Deep analysis of your current automation stack, flakiness hotspots, and AI readiness",
+      "Pilot: Deploy self-healing selectors and smart assertions on your most painful test suites",
+      "Scale: Roll out AI test generation integrated with your CI/CD, Jira, and API contracts",
+      "Optimize: Continuous feedback loops with predictive dashboards and team coaching",
     ],
   },
   {
     id: "solutions",
-    label: "Solutions",
+    label: "What I Deliver",
     icon: Zap,
-    title: "AI-Powered Solutions",
-    content: `Practical implementations that deliver immediate ROI while building toward a fully AI-augmented quality pipeline.`,
+    title: "AI Test Automation Solutions I Provide",
+    content: `Practical, production-ready implementations that your team owns and operates. Every solution is tailored to your tech stack and integrated into your delivery pipeline.`,
     bullets: [
-      "Self-healing UI automation that adapts to DOM changes automatically",
-      "Visual regression powered by computer vision and LLM reasoning",
-      "Intelligent test data generation with synthetic data and edge-case discovery",
-      "Natural language to test case conversion using fine-tuned models",
+      "Self-healing UI automation using Playwright + AI selectors that adapt to DOM changes",
+      "AI-generated test cases from natural language requirements, PRDs, and API specs",
+      "Visual regression testing powered by computer vision and LLM-based reasoning",
+      "Intelligent test data synthesis with edge-case generation and privacy-safe synthetic data",
     ],
   },
   {
     id: "impact",
-    label: "Impact",
+    label: "Results",
     icon: BarChart3,
-    title: "Measured Business Impact",
-    content: `Real outcomes from organizations that have undergone AI Test Transformation.`,
+    title: "Measurable Results for Your Team",
+    content: `Real outcomes from teams I've guided through the AI Test Automation shift. These numbers reflect what happens when AI is embedded into quality engineering, not bolted on top.`,
     bullets: [
-      "40-60% reduction in test authoring time through AI generation",
-      "80% decrease in flaky test rates via self-healing mechanisms",
-      "3x faster feedback loops from commit to quality signal",
-      "Test coverage expansion without proportional team growth",
+      "40-60% reduction in time spent authoring and maintaining test cases",
+      "Up to 80% reduction in flaky test failures through self-healing mechanisms",
+      "3x faster feedback loops: AI catches issues at commit time, not in staging",
+      "Expanded test coverage without expanding headcount or budget",
     ],
   },
   {
     id: "team",
-    label: "Team Upskill",
+    label: "Team Growth",
     icon: Users,
-    title: "Upskilling Your Quality Team",
-    content: `The most successful transformations invest equally in people and technology. We guide your team through practical AI adoption in their daily workflow.`,
+    title: "I Grow Your Team, Not Replace Them",
+    content: `The most successful AI transformations happen when the existing team becomes the driver. I provide intensive upskilling so your engineers lead the AI era, not watch it from the sidelines.`,
     bullets: [
-      "Prompt engineering for test generation and debugging",
-      "AI tool evaluation and integration into existing CI/CD",
-      "Building internal AI champions and centers of excellence",
-      "Continuous learning programs tuned to your tech stack",
+      "Hands-on workshops: prompt engineering for test generation, debugging, and maintenance",
+      "Tool evaluation and integration coaching for Playwright, GitHub Actions, Azure DevOps, and AI APIs",
+      "Building internal AI champions who train and support the rest of the team",
+      "Ongoing mentorship program tuned to your team's pace and tech stack",
     ],
   },
   {
     id: "roadmap",
-    label: "Roadmap",
+    label: "Engagement",
     icon: Target,
-    title: "Your Transformation Roadmap",
-    content: `A personalized 90-180 day plan tailored to your organization's maturity, tech stack, and quality goals.`,
+    title: "Engagement Roadmap",
+    content: `A focused, time-boxed engagement that delivers visible results within weeks. Designed for teams who want to lead the shift to AI-powered quality, not follow it.`,
     bullets: [
-      "Week 1-2: Current state analysis and AI opportunity mapping",
-      "Month 1: Quick wins with self-healing and visual testing pilots",
-      "Month 2-3: AI generation rollout and team training sprints",
-      "Month 4-6: Predictive quality dashboards and continuous optimization",
+      "Week 1-2: Assessment of current automation maturity and AI opportunity mapping",
+      "Month 1: Pilot rollout with self-healing automation on critical user journeys",
+      "Month 2-3: Full AI generation pipeline + team training and knowledge transfer",
+      "Month 4-6: Predictive quality dashboards, continuous optimization, and team autonomy",
     ],
   },
 ];
@@ -121,7 +121,7 @@ export default function AITransformation() {
             </a>
           </Button>
           <span className="font-bold text-lg tracking-tight hidden md:inline">
-            AI Test Transformation
+            AI Test Automation Transformation
           </span>
         </div>
       </nav>
@@ -132,17 +132,17 @@ export default function AITransformation() {
           <FadeIn>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-6">
               <Brain className="w-4 h-4" />
-              AI-Powered Quality Engineering
+              Service Offering
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-              AI Test <span className="text-primary">Transformation</span>
+              Shift to the <span className="text-primary">AI Era</span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Transform your quality engineering from manual maintenance to AI-augmented intelligence. A strategic program for teams ready to lead the next era of software testing.
+              I provide AI Test Automation transformation services that move your team from legacy testing practices into AI-powered quality engineering. A strategic, hands-on program for organizations ready to lead.
             </p>
           </FadeIn>
         </div>
@@ -210,13 +210,20 @@ export default function AITransformation() {
       <section className="py-16 px-6 bg-secondary/5 border-t">
         <div className="max-w-4xl mx-auto text-center">
           <FadeIn>
-            <h2 className="text-3xl font-bold mb-4">Ready to Transform?</h2>
+            <h2 className="text-3xl font-bold mb-4">Ready to Make the Shift?</h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Let's discuss where your organization is today and map the path to AI-augmented quality engineering.
+              Let's discuss where your team is today and map the path to AI-powered test automation.
             </p>
-            <Button size="lg" className="rounded-full font-bold px-8" asChild>
-              <a href="/">Back to Portfolio</a>
-            </Button>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button size="lg" className="rounded-full font-bold px-8" asChild>
+                <a href="/">Back to Portfolio</a>
+              </Button>
+              <Button size="lg" variant="outline" className="rounded-full font-bold px-8" asChild>
+                <a href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noreferrer">
+                  Contact on LinkedIn
+                </a>
+              </Button>
+            </div>
           </FadeIn>
         </div>
       </section>
