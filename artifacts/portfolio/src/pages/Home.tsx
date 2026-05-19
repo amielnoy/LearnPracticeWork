@@ -99,6 +99,12 @@ export default function Home() {
                   LinkedIn
                 </a>
               </Button>
+              <Button size="lg" variant="outline" className="rounded-full font-bold px-8 group" asChild>
+                <a href="https://www.test-shift.com/" target="_blank" rel="noreferrer">
+                  <Briefcase className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
+                  Test Shift
+                </a>
+              </Button>
             </FadeIn>
           </div>
           
@@ -292,24 +298,17 @@ export default function Home() {
               </div>
             </FadeIn>
 
-            <FadeIn>
-              <a
-                href="https://www.test-shift.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group"
-              >
-                <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-background bg-secondary text-secondary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                  <Briefcase className="w-5 h-5" />
+            <FadeIn className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-background bg-secondary text-secondary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                <Briefcase className="w-5 h-5" />
+              </div>
+              <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-bold text-xl">Automation TL & DevOps & Cloud Developer</h4>
+                  <span className="text-xs font-mono text-muted-foreground">Perception Point</span>
                 </div>
-                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm group-hover:border-primary/50 transition-colors cursor-pointer">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-bold text-xl">Automation TL & DevOps & Cloud Developer</h4>
-                    <span className="text-xs font-mono text-muted-foreground">Perception Point</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Planning, designing, and developing frontend and cloud infrastructure for test automation and DevOps workflows using Playwright, Python, JavaScript, Bash, Java, and C#. Built GitHub Actions and Azure Pipelines, Docker-based environments, AWS services, secure browser testing, and Terraform-managed Azure machines.</p>
-                </div>
-              </a>
+                <p className="text-sm text-muted-foreground">Planning, designing, and developing frontend and cloud infrastructure for test automation and DevOps workflows using Playwright, Python, JavaScript, Bash, Java, and C#. Built GitHub Actions and Azure Pipelines, Docker-based environments, AWS services, secure browser testing, and Terraform-managed Azure machines.</p>
+              </div>
             </FadeIn>
 
           </div>
