@@ -5,7 +5,8 @@ import {
   BookOpen, 
   Briefcase, 
   Award, 
-  Linkedin, 
+  Linkedin,
+  Github,
   Youtube, 
   Mail,
   ChevronRight,
@@ -97,6 +98,12 @@ export default function Home() {
                 <a href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noreferrer">
                   <Linkedin className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
                   LinkedIn
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" className="rounded-full font-bold px-8 group" asChild>
+                <a href="https://github.com/amielnoy" target="_blank" rel="noreferrer">
+                  <Github className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
+                  GitHub
                 </a>
               </Button>
               <Button size="lg" variant="outline" className="rounded-full font-bold px-8 group" asChild>
