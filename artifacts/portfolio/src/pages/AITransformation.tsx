@@ -115,9 +115,9 @@ export default function AITransformation() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Button variant="ghost" size="sm" className="rounded-full" asChild>
-            <a href="/">
+            <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Portfolio
+              AI Test Transformation
             </a>
           </Button>
           <span className="font-bold text-lg tracking-tight hidden md:inline">
@@ -216,7 +216,7 @@ export default function AITransformation() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" className="rounded-full font-bold px-8" asChild>
-                <a href="/">Back to Portfolio</a>
+                <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation">AI Test Transformation</a>
               </Button>
               <Button size="lg" variant="outline" className="rounded-full font-bold px-8" asChild>
                 <a href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noreferrer">
