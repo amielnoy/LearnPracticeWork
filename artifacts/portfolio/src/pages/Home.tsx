@@ -100,7 +100,7 @@ export default function Home() {
                 </a>
               </Button>
               <Button size="lg" variant="outline" className="rounded-full font-bold px-8 group" asChild>
-                <a href="https://www.test-shift.com/" target="_blank" rel="noreferrer">
+                <a href="/ai-test-transformation">
                   <Briefcase className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
                   AI TEST TRANSFORMATION
                 </a>
