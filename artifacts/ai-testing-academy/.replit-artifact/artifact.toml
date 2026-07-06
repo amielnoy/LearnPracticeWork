@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/ai-testing-academy/"
+title = "AI Testing Academy"
+version = "1.0.0"
+id = "artifacts/ai-testing-academy"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-academy/" ]
+localPort = 21292
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-academy run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-academy", "run", "build" ]
+publicDir = "artifacts/ai-testing-academy/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21292"
+BASE_PATH = "/ai-testing-academy/"
