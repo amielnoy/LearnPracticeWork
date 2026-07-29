@@ -1,1 +1,2 @@
 - [AI Testing Academy architecture](ai-testing-academy-arch.md) — i18n via locale objects; never serve a plaintext .env with AI keys to the browser, proxy through a backend instead.
+- [Slides artifact wouter catalog gap](slides-artifact-wouter-catalog.md) — new slides artifacts scaffold `wouter: catalog:` but the workspace pnpm catalog has no wouter entry, so `pnpm install` fails until pinned to a real version.
