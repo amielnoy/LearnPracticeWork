@@ -14,6 +14,7 @@ export const en = {
     <span class="nav-group">Community</span>
     <a class="link github-btn" href="https://www.youtube.com/@amielnoy" target="_blank" rel="noopener">▶ YouTube</a>
     <a class="link telegram-btn" href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noopener">💼 LinkedIn</a>
+    <a class="link whatsapp-btn" href="https://chat.whatsapp.com/Bwjb01CGfxqIE04lkz2us0?mode=gi_t" target="_blank" rel="noopener">💬 AI Automation & DevOps Community</a>
     <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
       <span id="themeIcon">🌙</span>
       <span id="themeLabel">Dark mode</span>

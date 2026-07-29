@@ -14,6 +14,7 @@ export const he = {
     <span class="nav-group">קהילה</span>
     <a class="link github-btn" href="https://www.youtube.com/@amielnoy" target="_blank" rel="noopener">▶ יוטיוב</a>
     <a class="link telegram-btn" href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noopener">💼 לינקדאין</a>
+    <a class="link whatsapp-btn" href="https://chat.whatsapp.com/Bwjb01CGfxqIE04lkz2us0?mode=gi_t" target="_blank" rel="noopener">💬 קהילת אוטומציה ו-DevOps מבוססת AI</a>
     <button type="button" id="themeToggle" class="theme-toggle" aria-label="החלף ערכת נושא">
       <span id="themeIcon">🌙</span>
       <span id="themeLabel">מצב לילה</span>
