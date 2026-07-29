@@ -97,9 +97,10 @@ const EN = {
           desc: 'Classifying and clustering malware samples with ML models, and the basics of static vs. behavioral analysis pipelines.'
         },
         {
-          num: 5, ready: false,
+          num: 5, ready: true,
           title: 'AI in Network Security Monitoring',
-          desc: 'Applying AI to traffic analysis and intrusion detection — spotting lateral movement and exfiltration patterns in network logs.'
+          desc: 'Applying AI to traffic analysis and intrusion detection — spotting lateral movement and exfiltration patterns in network logs.',
+          url: 'https://ml-gf56k78.gamma.site/'
         },
         {
           num: 6, ready: false,
@@ -222,9 +223,10 @@ const HE = {
           desc: 'סיווג וקיבוץ של דגימות תוכנה זדונית עם מודלי ML, ויסודות הניתוח הסטטי לעומת ההתנהגותי.'
         },
         {
-          num: 5, ready: false,
+          num: 5, ready: true,
           title: 'AI בניטור אבטחת רשת',
-          desc: 'הפעלת AI על ניתוח תעבורת רשת וזיהוי חדירות — איתור תבניות תנועה רוחבית והדלפת מידע ביומני רשת.'
+          desc: 'הפעלת AI על ניתוח תעבורת רשת וזיהוי חדירות — איתור תבניות תנועה רוחבית והדלפת מידע ביומני רשת.',
+          url: 'https://ml-gf56k78.gamma.site/'
         },
         {
           num: 6, ready: false,
