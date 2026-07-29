@@ -2,6 +2,20 @@ import { Router, type IRouter } from 'express';
 
 const router: IRouter = Router();
 
+// Prefer the Replit Secret (GEMINI_API_KEY) when present; otherwise fall back
+// to the base64-encoded copy committed in artifacts/api-server/.env
+// (GEMINI_API_KEY_B64), decoded here at runtime.
+function resolveGeminiKey(): string | undefined {
+  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
+  const encoded = process.env.GEMINI_API_KEY_B64;
+  if (!encoded) return undefined;
+  try {
+    return Buffer.from(encoded, 'base64').toString('utf8');
+  } catch {
+    return undefined;
+  }
+}
+
 // Models the "AI Testing Academy" client is allowed to request through the
 // server-held default Gemini key. Keep this list in sync with the models
 // offered in artifacts/ai-testing-academy/assets/js/providers.js.
@@ -14,14 +28,14 @@ const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 // show "use my own key" as required or optional.
 router.get('/ai/config', (_req, res) => {
   res.json({
-    gemini: { available: !!process.env.GEMINI_API_KEY, defaultModel: DEFAULT_MODEL },
+    gemini: { available: !!resolveGeminiKey(), defaultModel: DEFAULT_MODEL },
   });
 });
 
 // Proxies Gemini calls server-side so the API key never reaches the browser.
 // Used only when the visitor has not supplied their own key.
 router.post('/ai/generate', async (req, res) => {
-  const key = process.env.GEMINI_API_KEY;
+  const key = resolveGeminiKey();
   if (!key) {
     return res.status(503).json({ error: 'No server-side Gemini key is configured.' });
   }

@@ -3,6 +3,15 @@ import { getStripeSync } from "./stripeClient";
 import app from "./app";
 import { logger } from "./lib/logger";
 
+// Load artifacts/api-server/.env (holds GEMINI_API_KEY_B64, a base64-encoded
+// fallback used when the GEMINI_API_KEY Replit Secret isn't set). Safe to
+// skip if the file is missing.
+try {
+  process.loadEnvFile();
+} catch {
+  // no .env file present — fine, secrets/env vars may already be set
+}
+
 const rawPort = process.env["PORT"];
 
 if (!rawPort) {
