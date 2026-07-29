@@ -80,7 +80,7 @@ export const en = {
         </div>
         <p id="connStatus" class="notice" aria-live="polite" style="min-height:1.4em;"></p>
         <button type="button" class="ghost" onclick="resetSettings()" style="margin-top:4px;">🔄 Reset all settings</button>
-        <p class="notice" style="margin-top:8px;">Your key is stored only in your browser's localStorage — never sent to any server other than the provider's own API.</p>
+        <p class="notice" style="margin-top:8px;">If you enter your own key, it's stored only in your browser's localStorage and sent directly to the provider's API. If you use the default key, requests are proxied through our server — the key itself never reaches your browser.</p>
       </div>
     </section>
 
@@ -169,9 +169,9 @@ export const en = {
     errGeminiKeyHint: ' (Gemini keys start with AIza — get one free at aistudio.google.com)',
     errKeyNotAnthropic: 'This looks like an OpenAI key. Switch the provider dropdown to OpenAI.',
     errKeyNotOpenai: 'This looks like an Anthropic key. Switch the provider dropdown to Claude.',
-    placeholderEnvKey: '(using key from .env file)',
+    placeholderEnvKey: '(using server-configured default key)',
     labelSuffixLocal: ' Key',
-    labelSuffixEnv: ' Key (from .env)',
+    labelSuffixEnv: ' Key (server default)',
     statusTesting: '⏳ Testing connection…',
     statusOkPrefix: '✅ Connected (',
     pingSystem: 'You are a helpful assistant. Reply with exactly the word: OK',

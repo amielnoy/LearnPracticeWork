@@ -80,7 +80,7 @@ export const he = {
         </div>
         <p id="connStatus" class="notice" aria-live="polite" style="min-height:1.4em;"></p>
         <button type="button" class="ghost" onclick="resetSettings()" style="margin-top:4px;">🔄 אפס את כל ההגדרות</button>
-        <p class="notice" style="margin-top:8px;">המפתח שלך מאוחסן רק ב-localStorage של הדפדפן שלך — לא נשלח לשום שרת מלבד ה-API של הספק.</p>
+        <p class="notice" style="margin-top:8px;">אם תזין מפתח משלך, הוא יישמר רק ב-localStorage של הדפדפן שלך וישלח ישירות ל-API של הספק. אם תשתמש במפתח ברירת המחדל, הבקשות עוברות דרך השרת שלנו — המפתח עצמו לעולם לא מגיע לדפדפן שלך.</p>
       </div>
     </section>
 
@@ -169,9 +169,9 @@ export const he = {
     errGeminiKeyHint: ' (מפתחות Gemini מתחילים ב-AIza — קבל בחינם ב-aistudio.google.com)',
     errKeyNotAnthropic: 'זה נראה כמו מפתח OpenAI. שנה את ספק ה-provider ל-OpenAI.',
     errKeyNotOpenai: 'זה נראה כמו מפתח Anthropic. שנה את ספק ה-provider ל-Claude.',
-    placeholderEnvKey: '(משתמש במפתח מקובץ .env)',
+    placeholderEnvKey: '(משתמש במפתח ברירת המחדל של השרת)',
     labelSuffixLocal: ' Key',
-    labelSuffixEnv: ' Key (מ-.env)',
+    labelSuffixEnv: ' Key (ברירת מחדל של השרת)',
     statusTesting: '⏳ בודק חיבור…',
     statusOkPrefix: '✅ מחובר (',
     pingSystem: 'You are a helpful assistant. Reply with exactly the word: OK',

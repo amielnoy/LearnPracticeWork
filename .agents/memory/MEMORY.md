@@ -1,0 +1,1 @@
+- [AI Testing Academy architecture](ai-testing-academy-arch.md) — i18n via locale objects; never serve a plaintext .env with AI keys to the browser, proxy through a backend instead.

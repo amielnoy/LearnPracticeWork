@@ -126,6 +126,37 @@ If you edit a locale's `main` HTML, keep all of the following ids intact —
 The nav HTML must also keep `themeToggle`, `themeIcon`, `themeLabel`,
 `langToggle`, `langIcon`, `langLabel`.
 
+## AI provider keys: server-side default + bring-your-own-key
+
+The Connection Setup section lets a visitor either use a **default key** (no
+setup needed) or **their own key** (BYOK, stored only in their browser).
+
+- **Default key (Gemini only):** held server-side as a Replit Secret
+  (`GEMINI_API_KEY`) on `artifacts/api-server`, never sent to the browser.
+  The client calls `GET /api/ai/config` to check availability (and the
+  configured default model, `GEMINI_MODEL` — set via a non-secret env var)
+  and `POST /api/ai/generate` to run a completion; the server holds the key
+  and proxies the request to Gemini. See `artifacts/api-server/src/routes/ai.ts`.
+- **Own key (any provider):** entered by the visitor, stored only in their
+  `localStorage`, and sent directly from their browser to the provider's API
+  (Gemini, Anthropic, or OpenAI) — never touches our server. See
+  `assets/js/providers.js`.
+
+Only Gemini has a server-side default today. Anthropic and OpenAI always
+require the visitor's own key (the "Use my own API key" checkbox is
+force-enabled and can't be unchecked for those providers).
+
+To add a default key for another provider, add its secret name and a
+`generate`-style handler to `artifacts/api-server/src/routes/ai.ts`, extend
+`GET /api/ai/config` to report its availability, and update
+`hasServerDefault()` / `callClaude()` in `providers.js` to route through the
+proxy for that provider when no own key is set.
+
+**Do not** reintroduce the old pattern of serving a plaintext `.env` file to
+the browser (`fetch('../.env')`) — any key placed there is visible to every
+visitor via devtools/view-source. Server-side secrets belong in the backend
+only.
+
 ## Local development
 
 ```bash
