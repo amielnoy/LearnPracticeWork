@@ -1,0 +1,27 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-1/"
+title = "Introduction to AI Testing — Lecture 1"
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-1"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-1/" ]
+localPort = 23192
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-1 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-1", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-1/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23192"
+BASE_PATH = "/ai-testing-lecture-1/"

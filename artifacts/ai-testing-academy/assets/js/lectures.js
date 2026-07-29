@@ -19,9 +19,10 @@ const EN = {
       lead: 'From AI testing fundamentals to advanced evaluation techniques.',
       lectures: [
         {
-          num: 1, ready: false,
+          num: 1, ready: true,
           title: 'Introduction to AI Testing',
-          desc: 'What is AI testing, why it matters, and how it differs from traditional software testing. Covers LLMs, non-determinism, evaluation strategies, and the modern AI testing landscape.'
+          desc: 'What is AI testing, why it matters, and how it differs from traditional software testing. Covers LLMs, non-determinism, evaluation strategies, and the modern AI testing landscape.',
+          url: '/ai-testing-lecture-1/slide1'
         },
         {
           num: 2, ready: false,
@@ -143,9 +144,10 @@ const HE = {
       lead: 'מהיסודות של בדיקות AI ועד לטכניקות הערכה מתקדמות.',
       lectures: [
         {
-          num: 1, ready: false,
+          num: 1, ready: true,
           title: 'מבוא לבדיקות AI',
-          desc: 'מהן בדיקות AI, למה הן חשובות, וכיצד הן שונות מבדיקות תוכנה מסורתיות. מכסה LLMs, אי-דטרמיניזם, אסטרטגיות הערכה ונוף בדיקות ה-AI המודרני.'
+          desc: 'מהן בדיקות AI, למה הן חשובות, וכיצד הן שונות מבדיקות תוכנה מסורתיות. מכסה LLMs, אי-דטרמיניזם, אסטרטגיות הערכה ונוף בדיקות ה-AI המודרני.',
+          url: '/ai-testing-lecture-1/slide1'
         },
         {
           num: 2, ready: false,

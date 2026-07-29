@@ -1,0 +1,173 @@
+[
+  {
+    "id": "29782f1d-4f3f-4e01-b008-de9acaff8bb9",
+    "position": 1,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Introduction to AI Testing",
+    "description": "Title slide with course roadmap",
+    "speakerNotes": ""
+  },
+  {
+    "id": "cad3e02d-8d9a-4ae4-bc69-f849c116d9ed",
+    "position": 2,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "What You'll Be Able To Do",
+    "description": "Learning objectives for the lecture",
+    "speakerNotes": ""
+  },
+  {
+    "id": "607f66de-5134-4a5d-a9e2-7f2e93e3145e",
+    "position": 3,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhatIsAiTesting.tsx",
+    "title": "What AI Testing Actually Means",
+    "description": "Defining AI testing",
+    "speakerNotes": ""
+  },
+  {
+    "id": "9d878cdf-72b6-4f55-a50b-40e034d663eb",
+    "position": 4,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhyItMattersNow.tsx",
+    "title": "Three Signals You Can't Ignore",
+    "description": "Why AI testing matters now",
+    "speakerNotes": ""
+  },
+  {
+    "id": "81ee9cc6-2ade-44e4-ad6e-418dfa409bcc",
+    "position": 5,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TraditionalVsAiTesting.tsx",
+    "title": "Traditional Testing vs. AI Testing",
+    "description": "Comparison slide",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c6b89f7f-5f34-4ebf-acab-76d56e0a57bd",
+    "position": 6,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/LlmBasics.tsx",
+    "title": "How Large Language Models Work",
+    "description": "LLM basics",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c4b37c35-62c4-46b3-9d4f-df6f2958201b",
+    "position": 7,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/NonDeterminism.tsx",
+    "title": "The Core Challenge: Non-Determinism",
+    "description": "Emphasis slide on non-determinism",
+    "speakerNotes": ""
+  },
+  {
+    "id": "9b688696-1bfd-428f-bb4b-3db5f9f156aa",
+    "position": 8,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/RethinkingTestingPyramid.tsx",
+    "title": "Rethinking the Testing Pyramid",
+    "description": "New testing pyramid diagram",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ec386910-1187-4b12-ad70-eedf62e171f1",
+    "position": 9,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/EvaluationStrategiesOverview.tsx",
+    "title": "Three Ways to Grade an AI Answer",
+    "description": "Evaluation strategies overview",
+    "speakerNotes": ""
+  },
+  {
+    "id": "7ebf8115-0f41-4fed-a7db-8ce64ce8cae3",
+    "position": 10,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/GoldenDatasets.tsx",
+    "title": "Golden Datasets",
+    "description": "Golden dataset evaluation method",
+    "speakerNotes": ""
+  },
+  {
+    "id": "24686bfc-c59c-4e44-b9d8-5fe3b6f0d2e4",
+    "position": 11,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/LlmAsJudge.tsx",
+    "title": "LLM-as-Judge",
+    "description": "LLM-as-judge evaluation method",
+    "speakerNotes": ""
+  },
+  {
+    "id": "160fe525-0189-4f60-b498-065e4c44f439",
+    "position": 12,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/SemanticSimilarityChecks.tsx",
+    "title": "Similarity & Automated Checks",
+    "description": "Similarity and automated checks",
+    "speakerNotes": ""
+  },
+  {
+    "id": "033c119d-c95e-432e-ab7d-eb8bb8d87dec",
+    "position": 13,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/HallucinationDetection.tsx",
+    "title": "Detecting Hallucinated Answers",
+    "description": "Hallucination detection",
+    "speakerNotes": ""
+  },
+  {
+    "id": "3ecacba3-ce95-4229-828f-fe3001ab6ff2",
+    "position": 14,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/SecurityTestingTeaser.tsx",
+    "title": "Testing Isn't Just About Correctness",
+    "description": "Security testing teaser pointing to Lecture 7",
+    "speakerNotes": ""
+  },
+  {
+    "id": "36bfc50a-d356-4b07-834a-d5ecfd780646",
+    "position": 15,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ModernAiTestingToolbox.tsx",
+    "title": "The Modern AI Testing Toolbox",
+    "description": "Toolbox overview",
+    "speakerNotes": ""
+  },
+  {
+    "id": "4d235a9c-481b-48a5-929f-80d506f59218",
+    "position": 16,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/BuildingFirstTestSuite.tsx",
+    "title": "Building Your First AI Test Suite",
+    "description": "Hands-on steps to a first test suite",
+    "speakerNotes": ""
+  },
+  {
+    "id": "9893e019-ea1d-494d-a4a1-4ba5ea08cb77",
+    "position": 17,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CommonPitfalls.tsx",
+    "title": "Common Pitfalls to Avoid",
+    "description": "Common pitfalls",
+    "speakerNotes": ""
+  },
+  {
+    "id": "03822159-cad3-4c72-88ca-8ad148b6cb9d",
+    "position": 18,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Course recap",
+    "speakerNotes": ""
+  },
+  {
+    "id": "79f62da9-c60d-4511-9698-c7b2113d170f",
+    "position": 19,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhatsNextTeaser.tsx",
+    "title": "What's Next: Lecture 2",
+    "description": "Teaser for Lecture 2",
+    "speakerNotes": ""
+  }
+]
