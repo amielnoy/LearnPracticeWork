@@ -18,6 +18,10 @@ export const he = {
       <span id="themeIcon">🌙</span>
       <span id="themeLabel">מצב לילה</span>
     </button>
+    <button type="button" id="langToggle" class="theme-toggle" aria-label="החלף שפה">
+      <span id="langIcon">🌐</span>
+      <span id="langLabel">English</span>
+    </button>
   `,
   hero: `
     <h1><span>AI Testing Academy</span><br>הפלטפורמה המקצועית לקריירת QA שלך</h1>

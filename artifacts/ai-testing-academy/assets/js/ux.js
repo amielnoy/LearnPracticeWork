@@ -2,7 +2,7 @@
    scroll progress, back-to-top, mobile nav drawer, nav-number chips, copy buttons.
    All run after i18n has injected the regions (see main.ts). */
 import { $ } from './dom.js';
-import { S } from './i18n.js';
+import { S, activeLang } from './i18n.js';
 /* explainer videos: attach players, show a placeholder if the file is missing */
 function initVideos() {
     document.querySelectorAll('.video-card').forEach(card => {
@@ -67,6 +67,14 @@ function initChrome() {
         const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         localStorage.setItem('ata_theme', next);
         applyTheme(next);
+    });
+    /* language toggle — flip en/he, persist, reload so all injected content re-renders */
+    $('langToggle').addEventListener('click', () => {
+        const next = activeLang === 'he' ? 'en' : 'he';
+        localStorage.setItem('ata_lang', next);
+        const url = new URL(location.href);
+        url.searchParams.set('lang', next);
+        location.href = url.toString();
     });
     /* scroll progress + back-to-top */
     const bar = $('scrollProgress'), toTop = $('toTop');
