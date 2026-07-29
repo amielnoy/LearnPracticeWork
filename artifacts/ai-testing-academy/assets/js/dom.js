@@ -22,8 +22,8 @@ export function findLinks(text) {
     }
     return out;
 }
-/* HTML-escaped text with real <a> tags around URLs/emails — safe to assign to innerHTML. */
-export function linkifyHtml(text) {
+/* HTML-escaped text with real <a> tags around bare URLs/emails only (no Markdown). */
+function linkifyPlainSegment(text) {
     const s = String(text == null ? '' : text);
     const links = findLinks(s);
     let out = '', last = 0;
@@ -34,4 +34,56 @@ export function linkifyHtml(text) {
     }
     out += esc(s.slice(last));
     return out;
+}
+/* Matches Markdown `**bold**`, `**[label](url)**` and `[label](url)` tokens, so
+   raw Markdown coming back from the LLM (e.g. "[LinkedIn](https://...)") renders
+   as real formatting/links instead of literal asterisks and brackets. */
+const MD_RE = /\*\*\[(?<blLabel>[^\]]+)\]\((?<blHref>(?:https?:\/\/|mailto:)[^\s)]+)\)\*\*|\*\*(?<bold>.+?)\*\*|\[(?<lnLabel>[^\]]+)\]\((?<lnHref>(?:https?:\/\/|mailto:)[^\s)]+)\)/g;
+/* HTML-escaped text with Markdown bold/links rendered as real <strong>/<a> tags,
+   plus any remaining bare URL/email also turned into a real link. Safe for innerHTML. */
+export function linkifyHtml(text) {
+    const s = String(text == null ? '' : text);
+    let out = '', last = 0, m;
+    MD_RE.lastIndex = 0;
+    while ((m = MD_RE.exec(s))) {
+        out += linkifyPlainSegment(s.slice(last, m.index));
+        const g = m.groups;
+        if (g.blLabel !== undefined) {
+            out += `<strong><a href="${esc(g.blHref)}" target="_blank" rel="noopener">${esc(g.blLabel)}</a></strong>`;
+        }
+        else if (g.bold !== undefined) {
+            out += `<strong>${linkifyPlainSegment(g.bold)}</strong>`;
+        }
+        else {
+            out += `<a href="${esc(g.lnHref)}" target="_blank" rel="noopener">${esc(g.lnLabel)}</a>`;
+        }
+        last = m.index + m[0].length;
+    }
+    out += linkifyPlainSegment(s.slice(last));
+    return out;
+}
+/* Plain-text (Markdown stripped) version of a single line/segment, plus the
+   {label, href} pairs recovered from it — for consumers that lay out their own
+   text and can't use innerHTML (e.g. jsPDF's native text API). */
+export function markdownLineToPlain(rawLine) {
+    const s = String(rawLine == null ? '' : rawLine);
+    let plain = '', last = 0, m;
+    const links = [];
+    MD_RE.lastIndex = 0;
+    while ((m = MD_RE.exec(s))) {
+        plain += s.slice(last, m.index);
+        const g = m.groups;
+        const label = g.blLabel !== undefined ? g.blLabel : (g.bold !== undefined ? g.bold : g.lnLabel);
+        const href = g.blLabel !== undefined ? g.blHref : g.lnHref;
+        plain += label;
+        if (href)
+            links.push({ label, href });
+        last = m.index + m[0].length;
+    }
+    plain += s.slice(last);
+    for (const b of findLinks(plain)) {
+        if (!links.some(l => l.label === b.text && l.href === b.href))
+            links.push({ label: b.text, href: b.href });
+    }
+    return { plain, links };
 }

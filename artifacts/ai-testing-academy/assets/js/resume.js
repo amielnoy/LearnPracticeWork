@@ -1,4 +1,4 @@
-import { $, esc, isRtlText, findLinks, linkifyHtml } from './dom.js';
+import { $, esc, isRtlText, linkifyHtml, markdownLineToPlain } from './dom.js';
 import { L, S } from './i18n.js';
 import { callClaude, extractJSON } from './providers.js';
 /* ---------- lazy CDN loaders (PDF.js / Mammoth) ---------- */
@@ -180,9 +180,37 @@ export async function showImprovedResume() {
 function fileName(role) {
     return ('Resume - ' + role).replace(/[\\/:*?"<>|]+/g, '-').trim().slice(0, 80) + '.pdf';
 }
-/* English: real, selectable, ATS-parseable text via jsPDF's text API. Any URL or
-   email found in the text is drawn as a real clickable link (jsPDF textWithLink),
-   not just visible characters. */
+/* Draws one already-wrapped line, turning any of its remaining {label, href} link
+   matches into real jsPDF links (textWithLink) at their actual on-line position,
+   consuming each match at most once (greedy, left-to-right). */
+function drawLineWithLinks(pdf, line, x0, y, remainingLinks) {
+    let x = x0, cursor = 0;
+    for (;;) {
+        let best = null;
+        for (const l of remainingLinks) {
+            const pos = line.indexOf(l.label, cursor);
+            if (pos !== -1 && (!best || pos < best.pos))
+                best = { l, pos };
+        }
+        if (!best)
+            break;
+        if (best.pos > cursor) {
+            const seg = line.slice(cursor, best.pos);
+            pdf.text(seg, x, y);
+            x += pdf.getTextWidth(seg);
+        }
+        pdf.textWithLink(best.l.label, x, y, { url: best.l.href });
+        x += pdf.getTextWidth(best.l.label);
+        cursor = best.pos + best.l.label.length;
+        remainingLinks.splice(remainingLinks.indexOf(best.l), 1);
+    }
+    if (cursor < line.length)
+        pdf.text(line.slice(cursor), x, y);
+}
+/* English: real, selectable, ATS-parseable text via jsPDF's text API. Markdown
+   `[label](url)`/`**bold**` from the LLM is stripped to plain text first, and any
+   resulting label or bare URL/email is drawn as a real clickable link
+   (jsPDF textWithLink), not just visible characters. */
 function pdfFromText(text) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -191,35 +219,23 @@ function pdfFromText(text) {
     const pageH = pdf.internal.pageSize.getHeight();
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10.5);
-    const lines = pdf.splitTextToSize(text, pageW - margin * 2);
+    const maxWidth = pageW - margin * 2;
     let y = margin;
-    for (const line of lines) {
-        if (y + lineH > pageH - margin) {
-            pdf.addPage();
-            y = margin;
-        }
-        const links = findLinks(line);
-        if (!links.length) {
-            pdf.text(line, margin, y);
-        }
-        else {
-            // Draw the line piece by piece so the URL/email segments become real links,
-            // while the rest of the line still renders as plain text.
-            let cursor = 0, x = margin;
-            for (const l of links) {
-                if (l.start > cursor) {
-                    const seg = line.slice(cursor, l.start);
-                    pdf.text(seg, x, y);
-                    x += pdf.getTextWidth(seg);
-                }
-                pdf.textWithLink(l.text, x, y, { url: l.href });
-                x += pdf.getTextWidth(l.text);
-                cursor = l.end;
+    for (const rawLine of text.split('\n')) {
+        const { plain, links } = markdownLineToPlain(rawLine);
+        const wrapped = plain === '' ? [''] : pdf.splitTextToSize(plain, maxWidth);
+        const remainingLinks = links.slice();
+        for (const line of wrapped) {
+            if (y + lineH > pageH - margin) {
+                pdf.addPage();
+                y = margin;
             }
-            if (cursor < line.length)
-                pdf.text(line.slice(cursor), x, y);
+            if (remainingLinks.length)
+                drawLineWithLinks(pdf, line, margin, y, remainingLinks);
+            else
+                pdf.text(line, margin, y);
+            y += lineH;
         }
-        y += lineH;
     }
     return pdf;
 }
