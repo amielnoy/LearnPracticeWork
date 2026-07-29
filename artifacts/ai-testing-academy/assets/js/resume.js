@@ -163,8 +163,10 @@ export async function showImprovedResume() {
     btn.innerHTML = S.btnImproving;
     try {
         const text = await ensureImprovedResume();
+        const rtl = isRtlText(text);
         $('improvedText').textContent = text;
-        $('improvedText').dir = isRtlText(text) ? 'rtl' : 'ltr';
+        $('improvedText').dir = rtl ? 'rtl' : 'ltr';
+        $('improvedText').style.textAlign = rtl ? 'right' : 'left';
         $('improvedWrap').style.display = 'block';
         $('improvedWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
