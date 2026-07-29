@@ -1,134 +1,294 @@
-/* Lecture Series — a curated series of 10 in-depth lectures on AI Testing.
-   Lecture 1 links to the Gamma.app presentation on AI testing fundamentals.
-   Future lectures show as "coming soon" placeholders. */
+/* Lecture Series — two curated tracks of 10 in-depth lectures each:
+   1) AI Testing — testing strategies and tooling for AI-powered software.
+   2) AI-Powered Basic Cybersecurity — using AI for foundational security work.
+   The Gamma.app presentation lives on the Cybersecurity track's Lecture 1.
+   All other lectures show as "coming soon" placeholders. */
 import { $ } from './dom.js';
 import { activeLang } from './i18n.js';
 
 const EN = {
   nav: '🎓 Lecture Series',
-  groupLabel: 'Learning',
-  title: '🎓 Lecture Series — AI Testing Mastery',
-  lead: 'A structured series of 10 in-depth lectures taking you from AI testing fundamentals to advanced evaluation techniques. Work through them in order, or jump to what you need most.',
+  title: '🎓 Lecture Series',
+  lead: 'Two structured tracks of 10 in-depth lectures each — from AI testing fundamentals to advanced evaluation techniques, and from AI basics to foundational cybersecurity practice. Work through them in order, or jump to what you need most.',
   lectureLabel: 'Lecture',
   comingSoon: 'Coming soon',
   openLecture: 'Open lecture →',
-  lectures: [
+  tracks: [
     {
-      num: 1, ready: true,
-      title: 'Introduction to AI Testing',
-      desc: 'What is AI testing, why it matters, and how it differs from traditional software testing. Covers LLMs, non-determinism, evaluation strategies, and the modern AI testing landscape.',
-      url: 'https://gamma.app/docs/AI--e2m8rc9urhszuwb?mode=doc'
+      title: 'AI Testing',
+      lead: 'From AI testing fundamentals to advanced evaluation techniques.',
+      lectures: [
+        {
+          num: 1, ready: false,
+          title: 'Introduction to AI Testing',
+          desc: 'What is AI testing, why it matters, and how it differs from traditional software testing. Covers LLMs, non-determinism, evaluation strategies, and the modern AI testing landscape.'
+        },
+        {
+          num: 2, ready: false,
+          title: 'Prompt Engineering for Testers',
+          desc: 'How to write prompts that produce consistent, testable outputs. Covers prompt structure, system messages, temperature, and prompt injection basics.'
+        },
+        {
+          num: 3, ready: false,
+          title: 'Testing LLM Outputs',
+          desc: 'Evaluation frameworks for LLM responses — semantic similarity, factuality checks, toxicity detection, and JSON schema validation.'
+        },
+        {
+          num: 4, ready: false,
+          title: 'Playwright for AI Applications',
+          desc: 'End-to-end testing of AI-powered UIs with Playwright — handling dynamic content, testing streaming responses, and building resilient selectors.'
+        },
+        {
+          num: 5, ready: false,
+          title: 'API Testing with AI Features',
+          desc: 'Testing AI APIs with pytest and Requests — mocking LLM responses, testing edge cases, and validating structured outputs.'
+        },
+        {
+          num: 6, ready: false,
+          title: 'CI/CD for AI Test Suites',
+          desc: 'Running AI tests in GitHub Actions — parallelism, flakiness handling, cost management, and integrating LLM-as-judge into pipelines.'
+        },
+        {
+          num: 7, ready: false,
+          title: 'Security Testing for AI',
+          desc: 'Prompt injection attacks, data leakage, jailbreaking, and adversarial testing. How to write security tests for LLM-powered features.'
+        },
+        {
+          num: 8, ready: false,
+          title: 'Performance Testing AI Features',
+          desc: 'Latency benchmarking, throughput testing, and token-cost optimization. Load testing AI endpoints and establishing performance baselines.'
+        },
+        {
+          num: 9, ready: false,
+          title: 'AI-Assisted Test Generation',
+          desc: 'Using AI agents to generate test cases, identify edge cases, and triage failures. GitHub Copilot, Cursor, and custom test-generation pipelines.'
+        },
+        {
+          num: 10, ready: false,
+          title: 'Building an AI Testing Strategy',
+          desc: 'Putting it all together — designing a full AI testing strategy for your team, from unit to system level, with metrics, reporting, and continuous improvement.'
+        }
+      ]
     },
     {
-      num: 2, ready: false,
-      title: 'Prompt Engineering for Testers',
-      desc: 'How to write prompts that produce consistent, testable outputs. Covers prompt structure, system messages, temperature, and prompt injection basics.'
-    },
-    {
-      num: 3, ready: false,
-      title: 'Testing LLM Outputs',
-      desc: 'Evaluation frameworks for LLM responses — semantic similarity, factuality checks, toxicity detection, and JSON schema validation.'
-    },
-    {
-      num: 4, ready: false,
-      title: 'Playwright for AI Applications',
-      desc: 'End-to-end testing of AI-powered UIs with Playwright — handling dynamic content, testing streaming responses, and building resilient selectors.'
-    },
-    {
-      num: 5, ready: false,
-      title: 'API Testing with AI Features',
-      desc: 'Testing AI APIs with pytest and Requests — mocking LLM responses, testing edge cases, and validating structured outputs.'
-    },
-    {
-      num: 6, ready: false,
-      title: 'CI/CD for AI Test Suites',
-      desc: 'Running AI tests in GitHub Actions — parallelism, flakiness handling, cost management, and integrating LLM-as-judge into pipelines.'
-    },
-    {
-      num: 7, ready: false,
-      title: 'Security Testing for AI',
-      desc: 'Prompt injection attacks, data leakage, jailbreaking, and adversarial testing. How to write security tests for LLM-powered features.'
-    },
-    {
-      num: 8, ready: false,
-      title: 'Performance Testing AI Features',
-      desc: 'Latency benchmarking, throughput testing, and token-cost optimization. Load testing AI endpoints and establishing performance baselines.'
-    },
-    {
-      num: 9, ready: false,
-      title: 'AI-Assisted Test Generation',
-      desc: 'Using AI agents to generate test cases, identify edge cases, and triage failures. GitHub Copilot, Cursor, and custom test-generation pipelines.'
-    },
-    {
-      num: 10, ready: false,
-      title: 'Building an AI Testing Strategy',
-      desc: 'Putting it all together — designing a full AI testing strategy for your team, from unit to system level, with metrics, reporting, and continuous improvement.'
+      title: 'AI-Powered Basic Cybersecurity',
+      lead: 'Foundational cybersecurity concepts, powered and accelerated by AI tools.',
+      lectures: [
+        {
+          num: 1, ready: true,
+          title: 'Introduction to Cybersecurity with AI',
+          desc: 'The fundamentals of cybersecurity — threats, attack surfaces, and defense-in-depth — and how AI tools are reshaping how security teams work today.',
+          url: 'https://gamma.app/docs/AI--e2m8rc9urhszuwb?mode=doc'
+        },
+        {
+          num: 2, ready: false,
+          title: 'AI-Powered Threat Detection Basics',
+          desc: 'How machine learning models flag suspicious activity, from rule-based detection to anomaly scoring, and where AI adds real value over static rules.'
+        },
+        {
+          num: 3, ready: false,
+          title: 'Phishing & Social Engineering Detection with AI',
+          desc: 'Using AI to spot phishing emails, deepfake voice scams, and social engineering attempts before they reach end users.'
+        },
+        {
+          num: 4, ready: false,
+          title: 'Malware Analysis Using Machine Learning',
+          desc: 'Classifying and clustering malware samples with ML models, and the basics of static vs. behavioral analysis pipelines.'
+        },
+        {
+          num: 5, ready: false,
+          title: 'AI in Network Security Monitoring',
+          desc: 'Applying AI to traffic analysis and intrusion detection — spotting lateral movement and exfiltration patterns in network logs.'
+        },
+        {
+          num: 6, ready: false,
+          title: 'Automating Vulnerability Scanning with AI',
+          desc: 'How AI-assisted scanners prioritize and triage vulnerabilities, reducing noise and helping teams focus on what matters.'
+        },
+        {
+          num: 7, ready: false,
+          title: 'AI for Log Analysis & Anomaly Detection',
+          desc: 'Turning massive log volumes into actionable alerts with AI-driven anomaly detection and clustering techniques.'
+        },
+        {
+          num: 8, ready: false,
+          title: 'Securing AI Systems Themselves',
+          desc: 'The flip side — protecting your own AI systems from prompt injection, model theft, data poisoning, and supply-chain risks.'
+        },
+        {
+          num: 9, ready: false,
+          title: 'AI-Assisted Incident Response',
+          desc: 'Using AI copilots to speed up triage, root-cause analysis, and reporting during a live security incident.'
+        },
+        {
+          num: 10, ready: false,
+          title: 'Building a Cybersecurity AI Strategy',
+          desc: 'Putting it all together — a practical roadmap for adopting AI across detection, response, and prevention in your security program.'
+        }
+      ]
     }
   ]
 };
 
 const HE = {
   nav: '🎓 סדרת הרצאות',
-  groupLabel: 'למידה',
-  title: '🎓 סדרת הרצאות — שליטה בבדיקות AI',
-  lead: 'סדרה מובנית של 10 הרצאות מעמיקות שמובילות אתכם מהיסודות של בדיקות AI ועד לטכניקות הערכה מתקדמות. עבדו לפי הסדר, או קפצו למה שאתם הכי צריכים.',
+  title: '🎓 סדרת הרצאות',
+  lead: 'שני טראקים מובנים של 10 הרצאות כל אחד — מהיסודות של בדיקות AI ועד לטכניקות הערכה מתקדמות, ומיסודות הבינה המלאכותית ועד לתרגול אבטחת מידע בסיסי. עבדו לפי הסדר, או קפצו למה שאתם הכי צריכים.',
   lectureLabel: 'הרצאה',
   comingSoon: 'בקרוב',
   openLecture: 'פתח הרצאה ←',
-  lectures: [
+  tracks: [
     {
-      num: 1, ready: true,
-      title: 'מבוא לבדיקות AI',
-      desc: 'מהן בדיקות AI, למה הן חשובות, וכיצד הן שונות מבדיקות תוכנה מסורתיות. מכסה LLMs, אי-דטרמיניזם, אסטרטגיות הערכה ונוף בדיקות ה-AI המודרני.',
-      url: 'https://gamma.app/docs/AI--e2m8rc9urhszuwb?mode=doc'
+      title: 'בדיקות AI',
+      lead: 'מהיסודות של בדיקות AI ועד לטכניקות הערכה מתקדמות.',
+      lectures: [
+        {
+          num: 1, ready: false,
+          title: 'מבוא לבדיקות AI',
+          desc: 'מהן בדיקות AI, למה הן חשובות, וכיצד הן שונות מבדיקות תוכנה מסורתיות. מכסה LLMs, אי-דטרמיניזם, אסטרטגיות הערכה ונוף בדיקות ה-AI המודרני.'
+        },
+        {
+          num: 2, ready: false,
+          title: 'הנדסת Prompt לבודקים',
+          desc: 'כיצד לכתוב prompts שמייצרים תוצאות עקביות וניתנות לבדיקה. מכסה מבנה prompt, system messages, temperature ויסודות prompt injection.'
+        },
+        {
+          num: 3, ready: false,
+          title: 'בדיקת פלטי LLM',
+          desc: 'מסגרות הערכה לתגובות LLM — דמיון סמנטי, בדיקות עובדתיות, זיהוי רעילות ואימות JSON schema.'
+        },
+        {
+          num: 4, ready: false,
+          title: 'Playwright לאפליקציות AI',
+          desc: 'בדיקות end-to-end לממשקי AI עם Playwright — טיפול בתוכן דינמי, בדיקת תגובות streaming ובניית selectors עמידים.'
+        },
+        {
+          num: 5, ready: false,
+          title: 'בדיקות API עם פיצ\'רים של AI',
+          desc: 'בדיקת AI APIs עם pytest ו-Requests — הדמיית תגובות LLM, בדיקת מקרי קצה ואימות פלטים מובנים.'
+        },
+        {
+          num: 6, ready: false,
+          title: 'CI/CD לסוויטות בדיקות AI',
+          desc: 'הרצת בדיקות AI ב-GitHub Actions — מקביליות, טיפול ב-flakiness, ניהול עלויות ושילוב LLM-as-judge ב-pipelines.'
+        },
+        {
+          num: 7, ready: false,
+          title: 'בדיקות אבטחה ל-AI',
+          desc: 'התקפות prompt injection, דליפת נתונים, jailbreaking ובדיקות adversarial. כיצד לכתוב בדיקות אבטחה לפיצ\'רים מבוססי LLM.'
+        },
+        {
+          num: 8, ready: false,
+          title: 'בדיקות ביצועים לפיצ\'רים של AI',
+          desc: 'ניתוח latency, בדיקות throughput ואופטימיזציית עלות-token. בדיקות עומס על AI endpoints וקביעת baselines של ביצועים.'
+        },
+        {
+          num: 9, ready: false,
+          title: 'יצירת בדיקות בעזרת AI',
+          desc: 'שימוש בסוכני AI ליצירת test cases, זיהוי מקרי קצה וסיווג כשלים. GitHub Copilot, Cursor ו-pipelines מותאמים ליצירת בדיקות.'
+        },
+        {
+          num: 10, ready: false,
+          title: 'בניית אסטרטגיית בדיקות AI',
+          desc: 'הכל ביחד — עיצוב אסטרטגיית בדיקות AI מלאה לצוות שלכם, מיחידה לרמת מערכת, עם מדדים, דיווח ושיפור מתמיד.'
+        }
+      ]
     },
     {
-      num: 2, ready: false,
-      title: 'הנדסת Prompt לבודקים',
-      desc: 'כיצד לכתוב prompts שמייצרים תוצאות עקביות וניתנות לבדיקה. מכסה מבנה prompt, system messages, temperature ויסודות prompt injection.'
-    },
-    {
-      num: 3, ready: false,
-      title: 'בדיקת פלטי LLM',
-      desc: 'מסגרות הערכה לתגובות LLM — דמיון סמנטי, בדיקות עובדתיות, זיהוי רעילות ואימות JSON schema.'
-    },
-    {
-      num: 4, ready: false,
-      title: 'Playwright לאפליקציות AI',
-      desc: 'בדיקות end-to-end לממשקי AI עם Playwright — טיפול בתוכן דינמי, בדיקת תגובות streaming ובניית selectors עמידים.'
-    },
-    {
-      num: 5, ready: false,
-      title: 'בדיקות API עם פיצ\'רים של AI',
-      desc: 'בדיקת AI APIs עם pytest ו-Requests — הדמיית תגובות LLM, בדיקת מקרי קצה ואימות פלטים מובנים.'
-    },
-    {
-      num: 6, ready: false,
-      title: 'CI/CD לסוויטות בדיקות AI',
-      desc: 'הרצת בדיקות AI ב-GitHub Actions — מקביליות, טיפול ב-flakiness, ניהול עלויות ושילוב LLM-as-judge ב-pipelines.'
-    },
-    {
-      num: 7, ready: false,
-      title: 'בדיקות אבטחה ל-AI',
-      desc: 'התקפות prompt injection, דליפת נתונים, jailbreaking ובדיקות adversarial. כיצד לכתוב בדיקות אבטחה לפיצ\'רים מבוססי LLM.'
-    },
-    {
-      num: 8, ready: false,
-      title: 'בדיקות ביצועים לפיצ\'רים של AI',
-      desc: 'ניתוח latency, בדיקות throughput ואופטימיזציית עלות-token. בדיקות עומס על AI endpoints וקביעת baselines של ביצועים.'
-    },
-    {
-      num: 9, ready: false,
-      title: 'יצירת בדיקות בעזרת AI',
-      desc: 'שימוש בסוכני AI ליצירת test cases, זיהוי מקרי קצה וסיווג כשלים. GitHub Copilot, Cursor ו-pipelines מותאמים ליצירת בדיקות.'
-    },
-    {
-      num: 10, ready: false,
-      title: 'בניית אסטרטגיית בדיקות AI',
-      desc: 'הכל ביחד — עיצוב אסטרטגיית בדיקות AI מלאה לצוות שלכם, מיחידה לרמת מערכת, עם מדדים, דיווח ושיפור מתמיד.'
+      title: 'בדיקות סייבר בסיסי עם בינה מלאכותית',
+      lead: 'יסודות אבטחת מידע, מואצים ומופעלים באמצעות כלי בינה מלאכותית.',
+      lectures: [
+        {
+          num: 1, ready: true,
+          title: 'מבוא לאבטחת מידע עם בינה מלאכותית',
+          desc: 'יסודות אבטחת המידע — איומים, משטחי תקיפה והגנה מרובדת — וכיצד כלי AI משנים כיום את אופן העבודה של צוותי אבטחה.',
+          url: 'https://gamma.app/docs/AI--e2m8rc9urhszuwb?mode=doc'
+        },
+        {
+          num: 2, ready: false,
+          title: 'יסודות זיהוי איומים עם AI',
+          desc: 'כיצד מודלים של למידת מכונה מזהים פעילות חשודה, מזיהוי מבוסס חוקים ועד ניקוד אנומליות, והיכן AI מוסיף ערך אמיתי מעבר לחוקים סטטיים.'
+        },
+        {
+          num: 3, ready: false,
+          title: 'זיהוי פישינג והנדסה חברתית עם AI',
+          desc: 'שימוש ב-AI לזיהוי הודעות פישינג, הונאות קול מבוססות deepfake וניסיונות הנדסה חברתית לפני שהם מגיעים למשתמשי הקצה.'
+        },
+        {
+          num: 4, ready: false,
+          title: 'ניתוח תוכנות זדוניות באמצעות למידת מכונה',
+          desc: 'סיווג וקיבוץ של דגימות תוכנה זדונית עם מודלי ML, ויסודות הניתוח הסטטי לעומת ההתנהגותי.'
+        },
+        {
+          num: 5, ready: false,
+          title: 'AI בניטור אבטחת רשת',
+          desc: 'הפעלת AI על ניתוח תעבורת רשת וזיהוי חדירות — איתור תבניות תנועה רוחבית והדלפת מידע ביומני רשת.'
+        },
+        {
+          num: 6, ready: false,
+          title: 'אוטומציה של סריקת פגיעויות עם AI',
+          desc: 'כיצד סורקים מבוססי AI מתעדפים ומסננים פגיעויות, מפחיתים רעש ומאפשרים לצוותים להתמקד במה שחשוב.'
+        },
+        {
+          num: 7, ready: false,
+          title: 'AI לניתוח לוגים וזיהוי אנומליות',
+          desc: 'הפיכת כמויות עצומות של לוגים להתראות שניתן לפעול לפיהן, באמצעות זיהוי אנומליות וטכניקות clustering מבוססות AI.'
+        },
+        {
+          num: 8, ready: false,
+          title: 'אבטחת מערכות ה-AI עצמן',
+          desc: 'הצד השני של המטבע — הגנה על מערכות ה-AI שלכם מפני prompt injection, גניבת מודלים, הרעלת נתונים וסיכוני שרשרת אספקה.'
+        },
+        {
+          num: 9, ready: false,
+          title: 'תגובה לאירועי אבטחה בסיוע AI',
+          desc: 'שימוש בעוזרי AI כדי להאיץ טריאז\', ניתוח שורש הבעיה ודיווח במהלך אירוע אבטחה חי.'
+        },
+        {
+          num: 10, ready: false,
+          title: 'בניית אסטרטגיית AI לאבטחת מידע',
+          desc: 'הכל ביחד — מפת דרכים מעשית לאימוץ AI על פני זיהוי, תגובה ומניעה בתוכנית האבטחה שלכם.'
+        }
+      ]
     }
   ]
 };
+
+function renderCard(lec, bank) {
+  return `
+    <div class="card" style="${lec.ready ? '' : 'opacity:.6;'}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <span style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:8px;padding:3px 10px;font-family:monospace;font-size:.78rem;font-weight:700;white-space:nowrap;">${bank.lectureLabel} ${lec.num}</span>
+        ${lec.ready
+          ? '<span style="background:var(--green);color:#fff;border-radius:6px;padding:2px 8px;font-size:.7rem;font-weight:700;letter-spacing:.03em;">● Live</span>'
+          : `<span style="color:var(--muted);font-size:.75rem;font-style:italic;">${bank.comingSoon}</span>`
+        }
+      </div>
+      <h4 style="margin-bottom:8px;font-size:1rem;">${lec.title}</h4>
+      <p style="font-size:.88rem;">${lec.desc}</p>
+      ${lec.ready && lec.url
+        ? `<a href="${lec.url}" target="_blank" rel="noopener noreferrer"
+            style="display:inline-block;margin-top:16px;background:linear-gradient(90deg,var(--accent),var(--accent2));
+            color:#fff;border-radius:9px;padding:9px 18px;font-weight:700;font-size:.875rem;
+            text-decoration:none;transition:filter .2s,transform .2s;"
+            onmouseover="this.style.filter='brightness(1.08)';this.style.transform='translateY(-1px)'"
+            onmouseout="this.style.filter='';this.style.transform=''"
+          >${bank.openLecture}</a>`
+        : ''
+      }
+    </div>
+  `;
+}
+
+function renderTrack(track, bank, idx) {
+  return `
+    <h3 style="margin-top:${idx === 0 ? '0' : '48px'};margin-bottom:6px;font-size:1.15rem;">${track.title}</h3>
+    <p class="lead" style="margin-top:0;margin-bottom:20px;">${track.lead}</p>
+    <div class="grid">
+      ${track.lectures.map(lec => renderCard(lec, bank)).join('')}
+    </div>
+  `;
+}
 
 export function initLectures() {
   const bank = activeLang === 'he' ? HE : EN;
@@ -140,31 +300,7 @@ export function initLectures() {
   section.innerHTML = `
     <h2><span class="num">04</span> ${bank.title}</h2>
     <p class="lead">${bank.lead}</p>
-    <div class="grid">
-      ${bank.lectures.map(lec => `
-        <div class="card" style="${lec.ready ? '' : 'opacity:.6;'}">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-            <span style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:8px;padding:3px 10px;font-family:monospace;font-size:.78rem;font-weight:700;white-space:nowrap;">${bank.lectureLabel} ${lec.num}</span>
-            ${lec.ready
-              ? '<span style="background:var(--green);color:#fff;border-radius:6px;padding:2px 8px;font-size:.7rem;font-weight:700;letter-spacing:.03em;">● Live</span>'
-              : `<span style="color:var(--muted);font-size:.75rem;font-style:italic;">${bank.comingSoon}</span>`
-            }
-          </div>
-          <h4 style="margin-bottom:8px;font-size:1rem;">${lec.title}</h4>
-          <p style="font-size:.88rem;">${lec.desc}</p>
-          ${lec.ready && lec.url
-            ? `<a href="${lec.url}" target="_blank" rel="noopener noreferrer"
-                style="display:inline-block;margin-top:16px;background:linear-gradient(90deg,var(--accent),var(--accent2));
-                color:#fff;border-radius:9px;padding:9px 18px;font-weight:700;font-size:.875rem;
-                text-decoration:none;transition:filter .2s,transform .2s;"
-                onmouseover="this.style.filter='brightness(1.08)';this.style.transform='translateY(-1px)'"
-                onmouseout="this.style.filter='';this.style.transform=''"
-              >${bank.openLecture}</a>`
-            : ''
-          }
-        </div>
-      `).join('')}
-    </div>
+    ${bank.tracks.map((track, idx) => renderTrack(track, bank, idx)).join('')}
   `;
 
   // Insert the section: before #interview-talk if it exists, otherwise append
