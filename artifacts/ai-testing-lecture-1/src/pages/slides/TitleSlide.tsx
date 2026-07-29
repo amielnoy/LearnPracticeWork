@@ -1,3 +1,5 @@
+import { t, dir, isHe } from '@/lib/i18n';
+
 const wrap: React.CSSProperties = {
   width: '100vw',
   height: '100vh',
@@ -16,7 +18,7 @@ const wrap: React.CSSProperties = {
 
 export default function TitleSlide() {
   return (
-    <div style={wrap}>
+    <div style={wrap} dir={dir}>
       {/* Header */}
       <div
         style={{
@@ -33,30 +35,33 @@ export default function TitleSlide() {
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
         </div>
         <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
-          <div>COURSE OVERVIEW</div>
-          <div>LECTURE 01</div>
+          <div>{t('COURSE OVERVIEW', 'סקירת הקורס')}</div>
+          <div>{t('LECTURE 01', 'הרצאה 01')}</div>
         </div>
       </div>
 
       {/* Left column */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
         <div
           style={{
             fontSize: '1.2vw',
             fontWeight: 600,
             color: '#0D9488',
             marginBottom: '1vh',
-            textTransform: 'uppercase',
+            textTransform: isHe ? 'none' : 'uppercase',
             letterSpacing: '0.05em',
           }}
         >
-          Lecture Series &mdash; AI Testing Track
+          {t('Lecture Series \u2014 AI Testing Track', 'סדרת הרצאות \u2014 מסלול בדיקות AI')}
         </div>
         <h1 style={{ fontSize: '4.6vw', fontWeight: 800, margin: '0 0 2vh 0', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
-          Introduction to AI Testing
+          {t('Introduction to AI Testing', 'מבוא לבדיקות AI')}
         </h1>
         <p style={{ fontSize: '1.5vw', fontWeight: 400, color: '#475569', margin: '0 0 4vh 0', lineHeight: 1.5, maxWidth: '38vw' }}>
-          How do you test software that gives a different answer every time you ask it the same question?
+          {t(
+            'How do you test software that gives a different answer every time you ask it the same question?',
+            'כיצד בודקים תוכנה שנותנת תשובה שונה בכל פעם שמציגים לה את אותה שאלה?'
+          )}
         </p>
 
         {/* Info cards */}
@@ -71,8 +76,8 @@ export default function TitleSlide() {
               boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: 'uppercase' }}>
-              Lecture Number
+            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+              {t('Lecture Number', 'מספר הרצאה')}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '1vw' }}>
               <div style={{ fontSize: '3.5vw', fontWeight: 700, color: '#1E3A5F' }}>01</div>
@@ -86,7 +91,7 @@ export default function TitleSlide() {
                   borderRadius: '2vw',
                 }}
               >
-                of 10
+                {t('of 10', 'מתוך 10')}
               </div>
             </div>
           </div>
@@ -101,8 +106,8 @@ export default function TitleSlide() {
               boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: 'uppercase' }}>
-              Run Time
+            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+              {t('Run Time', 'משך זמן')}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '1vw' }}>
               <div style={{ fontSize: '3.5vw', fontWeight: 700, color: '#1E3A5F' }}>45</div>
@@ -116,7 +121,7 @@ export default function TitleSlide() {
                   borderRadius: '2vw',
                 }}
               >
-                minutes
+                {t('minutes', 'דקות')}
               </div>
             </div>
           </div>
@@ -140,7 +145,7 @@ export default function TitleSlide() {
             boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
           }}
         >
-          <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#1E3A5F' }}>Today&apos;s Roadmap</div>
+          <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#1E3A5F' }}>{t("Today\u2019s Roadmap", 'מפת הדרך להיום')}</div>
 
           <div
             style={{
@@ -155,19 +160,19 @@ export default function TitleSlide() {
           >
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1vh' }}>
               <div style={{ width: '100%', height: '7vh', backgroundColor: 'rgba(13, 148, 136, 0.2)', borderRadius: '0.4vw 0.4vw 0 0' }} />
-              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>Foundations</div>
+              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>{t('Foundations', 'יסודות')}</div>
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1vh' }}>
               <div style={{ width: '100%', height: '11vh', backgroundColor: 'rgba(13, 148, 136, 0.4)', borderRadius: '0.4vw 0.4vw 0 0' }} />
-              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>Core Challenge</div>
+              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>{t('Core Challenge', 'האתגר המרכזי')}</div>
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1vh' }}>
               <div style={{ width: '100%', height: '15vh', backgroundColor: 'rgba(13, 148, 136, 0.7)', borderRadius: '0.4vw 0.4vw 0 0' }} />
-              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>Evaluation</div>
+              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>{t('Evaluation', 'הערכה')}</div>
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1vh' }}>
               <div style={{ width: '100%', height: '19vh', backgroundColor: '#0D9488', borderRadius: '0.4vw 0.4vw 0 0' }} />
-              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>Practice</div>
+              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>{t('Practice', 'תרגול')}</div>
             </div>
           </div>
         </div>
@@ -187,11 +192,11 @@ export default function TitleSlide() {
           fontWeight: 500,
         }}
       >
-        <div>Introduction to AI Testing</div>
+        <div>{t('Introduction to AI Testing', 'מבוא לבדיקות AI')}</div>
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>Slide 1 of 19</span>
+          <span>{t('Slide 1 of 19', 'שקופית 1 מתוך 19')}</span>
         </div>
       </div>
     </div>
