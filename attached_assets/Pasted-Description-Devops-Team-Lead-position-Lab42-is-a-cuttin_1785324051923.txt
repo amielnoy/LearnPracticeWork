@@ -1,0 +1,102 @@
+Description
+Devops Team Lead position
+
+
+
+Lab42 is a cutting-edge cyber company developing advanced cyber intelligence and security
+
+solutions designed to meet complex and evolving technological challenges in the
+
+cybersecurity landscape.
+
+We are seeking a DevOps Team Lead to guide and grow our DevOps team.
+
+This is a collaborative leadership role that requires strong technical hands-on capabilities in
+
+DevOps practices, proven experience in mentoring engineers, and deep expertise in
+
+securing infrastructure and applications.
+
+As the main coordinator of DevSecOps responsibilities in the company, you will be directly
+
+responsible for designing and implementing robust security across all environments.
+
+Key Responsibilities:
+
+ Lead, mentor, and support the professional growth of DevOps engineers, fostering a
+
+collaborative and high-performance team environment.
+
+ Provide technical leadership while empowering team members to take ownership of
+
+implementation details.
+
+ Manage and work with subcontractors as needed to expand capacity, velocity and
+
+scale.
+
+ Architect, build, and maintain scalable and secure on-premise and cloud
+
+infrastructure.
+
+ Design, implement and maintain CI/CD pipelines that are resilient, auditable, and
+
+secure.
+
+ Fully own infrastructure and application security: assess risks, define policies,
+
+implement protections, and monitor for vulnerabilities or breaches.
+
+ Ensure high availability, performance, and cost-effectiveness of deployed systems.
+
+ Collaborate with product, research, development, and QA teams to support secure
+
+and efficient product delivery.
+
+Required Qualifications:
+
+ 5+ years of experience in DevOps or infrastructure engineering, including at least 2
+
+years in a technical leadership or team lead role.
+
+ Demonstrated experience mentoring team members, conducting code and
+
+architecture reviews, and driving team-wide improvement initiatives.
+
+ Excellent communication and interpersonal skills, with a growth mindset and passion
+
+for knowledge-sharing.
+
+ Deep understanding of cloud and on-prem infrastructure security, including:
+
+o Threat modeling and vulnerability management
+
+o Identity and access management (IAM)
+
+
+
+o Network security tools and concepts (e.g., VPNs, Firewalls, WAFs, Security
+
+Groups, ACLs)
+
+o Proficiency with containerization and orchestration tools, with a focus on
+
+security best practices (e.g. Docker, Kubernetes)
+
+ Strong scripting skills (Python, Bash, or PowerShell).
+
+ Experience with CI/CD tools and infrastructure-as-code (e.g. Jenkins, GitLab CI,
+
+ArgoCD, Terraform, Ansible).
+
+ Solid experience managing both Windows and Linux environments and virtualization
+
+solutions (e.g VMWare, Proxmox, Hyper-V etc.)
+
+Advantages:
+
+ Alumni of an IDF technological or cyber unit.
+
+ Experience implementing DevSecOps practices from the ground up.
+
+ Familiarity with compliance standards (e.g., ISO 27001, NIST, SOC 2).

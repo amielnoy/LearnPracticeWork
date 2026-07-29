@@ -1,4 +1,4 @@
-import { $, esc, isRtlText } from './dom.js';
+import { $, esc, isRtlText, findLinks, linkifyHtml } from './dom.js';
 import { L, S } from './i18n.js';
 import { callClaude, extractJSON } from './providers.js';
 /* ---------- lazy CDN loaders (PDF.js / Mammoth) ---------- */
@@ -164,7 +164,7 @@ export async function showImprovedResume() {
     try {
         const text = await ensureImprovedResume();
         const rtl = isRtlText(text);
-        $('improvedText').textContent = text;
+        $('improvedText').innerHTML = linkifyHtml(text); // real, clickable links for any URL/email in the résumé
         $('improvedText').dir = rtl ? 'rtl' : 'ltr';
         $('improvedText').style.textAlign = rtl ? 'right' : 'left';
         $('improvedWrap').style.display = 'block';
@@ -180,7 +180,9 @@ export async function showImprovedResume() {
 function fileName(role) {
     return ('Resume - ' + role).replace(/[\\/:*?"<>|]+/g, '-').trim().slice(0, 80) + '.pdf';
 }
-/* English: real, selectable, ATS-parseable text via jsPDF's text API. */
+/* English: real, selectable, ATS-parseable text via jsPDF's text API. Any URL or
+   email found in the text is drawn as a real clickable link (jsPDF textWithLink),
+   not just visible characters. */
 function pdfFromText(text) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -196,23 +198,53 @@ function pdfFromText(text) {
             pdf.addPage();
             y = margin;
         }
-        pdf.text(line, margin, y);
+        const links = findLinks(line);
+        if (!links.length) {
+            pdf.text(line, margin, y);
+        }
+        else {
+            // Draw the line piece by piece so the URL/email segments become real links,
+            // while the rest of the line still renders as plain text.
+            let cursor = 0, x = margin;
+            for (const l of links) {
+                if (l.start > cursor) {
+                    const seg = line.slice(cursor, l.start);
+                    pdf.text(seg, x, y);
+                    x += pdf.getTextWidth(seg);
+                }
+                pdf.textWithLink(l.text, x, y, { url: l.href });
+                x += pdf.getTextWidth(l.text);
+                cursor = l.end;
+            }
+            if (cursor < line.length)
+                pdf.text(line.slice(cursor), x, y);
+        }
         y += lineH;
     }
     return pdf;
 }
 /* Hebrew: jsPDF's built-in fonts have no Hebrew glyphs, so render the browser's
-   own RTL layout to a canvas and paginate it into the PDF. */
+   own RTL layout to a canvas and paginate it into the PDF as an image. A rasterized
+   image has no clickable text on its own, so any URL/email is additionally wrapped
+   in a real <a> tag, measured on-screen, and re-added as a jsPDF link annotation at
+   the matching position/page of the flattened image. */
+const HOLDER_WIDTH_PX = 794;
 async function pdfFromCanvas(text) {
     await loadFirst(HTML2CANVAS_URLS, 'html2canvas');
     const holder = document.createElement('div');
     holder.dir = 'rtl';
-    holder.textContent = text;
-    holder.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;color:#222;' +
+    holder.innerHTML = linkifyHtml(text);
+    holder.style.cssText = `position:fixed;left:-9999px;top:0;width:${HOLDER_WIDTH_PX}px;background:#fff;color:#222;` +
         "padding:48px;font-family:'Segoe UI','Heebo',Arial,sans-serif;font-size:14px;line-height:1.6;" +
         'white-space:pre-wrap;word-wrap:break-word;';
     document.body.appendChild(holder);
     try {
+        // Capture each link's position relative to the holder *before* it's rasterized away.
+        const holderRect = holder.getBoundingClientRect();
+        const linkRects = [...holder.querySelectorAll('a')].map(a => {
+            const r = a.getBoundingClientRect();
+            return { href: a.getAttribute('href'), x: r.left - holderRect.left, y: r.top - holderRect.top, w: r.width, h: r.height };
+        });
         const canvas = await html2canvas(holder, { scale: 2, backgroundColor: '#ffffff' });
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
@@ -220,7 +252,7 @@ async function pdfFromCanvas(text) {
         const pageH = pdf.internal.pageSize.getHeight();
         const imgH = canvas.height * pageW / canvas.width;
         const imgData = canvas.toDataURL('image/png');
-        let heightLeft = imgH, position = 0;
+        let heightLeft = imgH, position = 0, pageCount = 1;
         pdf.addImage(imgData, 'PNG', 0, position, pageW, imgH);
         heightLeft -= pageH;
         while (heightLeft > 0) {
@@ -228,6 +260,16 @@ async function pdfFromCanvas(text) {
             pdf.addPage();
             pdf.addImage(imgData, 'PNG', 0, position, pageW, imgH);
             heightLeft -= pageH;
+            pageCount++;
+        }
+        // mm-per-CSS-px is uniform on both axes: the full image is pageW mm wide for a
+        // HOLDER_WIDTH_PX-wide holder, regardless of the html2canvas capture scale.
+        const mmPerPx = pageW / HOLDER_WIDTH_PX;
+        for (const l of linkRects) {
+            const yAbs = l.y * mmPerPx;
+            const page = Math.min(pageCount - 1, Math.floor(yAbs / pageH));
+            pdf.setPage(page + 1);
+            pdf.link(l.x * mmPerPx, yAbs - page * pageH, l.w * mmPerPx, l.h * mmPerPx, { url: l.href });
         }
         return pdf;
     }
