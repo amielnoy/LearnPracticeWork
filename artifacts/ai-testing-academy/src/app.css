@@ -242,8 +242,12 @@ details.agent-box[open]>summary{margin-bottom:16px;}
   /* Transition is only enabled once JS marks the page ready (see .nav-ready).
      This prevents the drawer from animating on initial load or breakpoint-crossing. */
   body.nav-ready nav{transition:transform .26s ease;}
-  body.nav-open nav{transform:none;}
   html[dir="rtl"] nav{transform:translateX(108%);}
+  /* Must come AFTER the html[dir="rtl"] rule above: both have equal specificity
+     (class+type), so source order decides the winner when both apply at once
+     (RTL + drawer open). Declaring the open-state override last ensures it always
+     wins and the drawer actually becomes visible in Hebrew/RTL, not just in LTR. */
+  body.nav-open nav{transform:none;}
   .nav-scrim{position:fixed; inset:0; background:rgba(0,0,0,.45); opacity:0; pointer-events:none;
       transition:opacity .26s; z-index:205;}
   body.nav-open .nav-scrim{opacity:1; pointer-events:auto;}
