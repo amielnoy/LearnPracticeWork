@@ -91,6 +91,7 @@ function initChrome() {
     const setNav = (open) => {
         document.body.classList.toggle('nav-open', open);
         navToggle.setAttribute('aria-expanded', String(open));
+        navToggle.textContent = open ? '✕' : '☰';
     };
     navToggle.addEventListener('click', () => setNav(!document.body.classList.contains('nav-open')));
     scrim.addEventListener('click', () => setNav(false));
