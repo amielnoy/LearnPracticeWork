@@ -15,6 +15,7 @@ export const en = {
       { href: '#lecture-series', label: '🎓 Lecture Series' },
       { href: '#interview-talk', label: '🎙️ Mock Interview' },
       { href: '#interview-questions', label: '❓ Interview Questions' },
+      { href: '#coding-challenges', label: '🐍 Python Coding Challenges' },
     ],
     communityGroup: 'Community',
     community: [
@@ -169,6 +170,200 @@ export const en = {
     copyBtnDone: '✅ Copied!',
     copyBtnReset: 'Copy',
     copyBtnFail: '❌ Failed to copy',
+  },
+  codingChallenges: {
+    title: '🐍 Python Coding Challenges for Test Automation',
+    lead: '10 practical coding problems that come up in real QA-Automation interviews. Click once to reveal a hint, click again to reveal a short, efficient solution with time and space complexity.',
+    hintLabel: '💡 Hint',
+    complexityLabel: '⏱️ Complexity',
+    showHintBtn: 'Show hint',
+    showSolutionBtn: 'Show solution',
+    hideBtn: 'Hide',
+    items: [
+      {
+        title: '1. Retry decorator for flaky tests',
+        prompt: 'Write a `retry` decorator that retries a flaky test function up to N times with exponential backoff before finally letting the exception propagate.',
+        hint: 'Wrap the function with *args/**kwargs, catch the exception inside a loop, sleep with base_delay * 2**attempt, and only re-raise on the last attempt.',
+        code: `import time
+from functools import wraps
+
+def retry(times=3, base_delay=0.5, exceptions=(Exception,)):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            for attempt in range(times):
+                try:
+                    return fn(*args, **kwargs)
+                except exceptions:
+                    if attempt == times - 1:
+                        raise
+                    time.sleep(base_delay * (2 ** attempt))
+        return wrapper
+    return decorator`,
+        complexity: 'Time: O(1) wrapper overhead, up to `times` calls to fn in the worst case. Space: O(1) extra.',
+      },
+      {
+        title: '2. Poll until a condition is true',
+        prompt: 'Write `wait_until(condition, timeout=10, interval=0.5)` that polls a callable until it returns a truthy value, or raises `TimeoutError`.',
+        hint: 'Record the start time with time.monotonic(), loop while elapsed time < timeout, sleep `interval` between checks, and raise if the loop exits without success.',
+        code: `import time
+
+def wait_until(condition, timeout=10, interval=0.5):
+    start = time.monotonic()
+    while time.monotonic() - start < timeout:
+        result = condition()
+        if result:
+            return result
+        time.sleep(interval)
+    raise TimeoutError(f"Condition not met within {timeout}s")`,
+        complexity: 'Time: O(timeout / interval) polls (plus the cost of condition() each time). Space: O(1).',
+      },
+      {
+        title: '3. Deduplicate test IDs, preserving order',
+        prompt: 'Given a list of test case IDs that may contain duplicates, return a new list with duplicates removed, preserving first-seen order.',
+        hint: 'Use a set to track what has been seen while iterating once and appending only unseen items to the result list.',
+        code: `def dedupe(ids):
+    seen = set()
+    result = []
+    for i in ids:
+        if i not in seen:
+            seen.add(i)
+            result.append(i)
+    return result`,
+        complexity: 'Time: O(n) average (set lookups are O(1) amortized). Space: O(n) for the seen set and result.',
+      },
+      {
+        title: '4. Find the first duplicate test ID',
+        prompt: 'Given a large list of test IDs, return the first ID that appears more than once, or None if there are no duplicates.',
+        hint: 'Avoid the naive O(n^2) nested-loop check — a single pass with a set gets it done in one sweep.',
+        code: `def first_duplicate(ids):
+    seen = set()
+    for i in ids:
+        if i in seen:
+            return i
+        seen.add(i)
+    return None`,
+        complexity: 'Time: O(n). Space: O(n) for the seen set.',
+      },
+      {
+        title: '5. Merge overlapping CI job time ranges',
+        prompt: 'You have a list of (start, end) time ranges when CI test jobs are scheduled. Merge all overlapping ranges into the minimal set of non-overlapping ranges.',
+        hint: 'Sort the ranges by start time first, then walk through them, merging the current range into the last one whenever they overlap.',
+        code: `def merge_ranges(ranges):
+    if not ranges:
+        return []
+    ranges = sorted(ranges, key=lambda r: r[0])
+    merged = [ranges[0]]
+    for start, end in ranges[1:]:
+        last_start, last_end = merged[-1]
+        if start <= last_end:
+            merged[-1] = (last_start, max(last_end, end))
+        else:
+            merged.append((start, end))
+    return merged`,
+        complexity: 'Time: O(n log n), dominated by the sort. Space: O(n) for the output.',
+      },
+      {
+        title: '6. Rate-limit an API test helper',
+        prompt: 'Write a decorator that limits an API-calling test helper to at most `max_calls` per `period` seconds, sleeping as needed instead of failing.',
+        hint: 'Keep a deque of recent call timestamps; before each call, drop timestamps older than `period`, then sleep if the deque is already full.',
+        code: `import time
+from collections import deque
+from functools import wraps
+
+def rate_limited(max_calls, period):
+    def decorator(fn):
+        calls = deque()
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            now = time.monotonic()
+            while calls and now - calls[0] > period:
+                calls.popleft()
+            if len(calls) >= max_calls:
+                time.sleep(period - (now - calls[0]))
+            calls.append(time.monotonic())
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator`,
+        complexity: 'Time: O(1) amortized per call (deque push/pop). Space: O(max_calls) for the timestamp window.',
+      },
+      {
+        title: '7. Validate an API response shape',
+        prompt: 'Write a function that checks a parsed API response dict contains all `required_keys` with non-None values, returning the list of missing or invalid keys.',
+        hint: 'A single pass over `required_keys`, checking `key not in data or data[key] is None`, is all you need — no need to loop over `data` itself.',
+        code: `def validate_response(data, required_keys):
+    missing = []
+    for key in required_keys:
+        if key not in data or data[key] is None:
+            missing.append(key)
+    return missing`,
+        complexity: 'Time: O(k) where k = number of required keys (dict lookups are O(1) average). Space: O(k) for the output.',
+      },
+      {
+        title: '8. Cache an expensive test fixture (LRU)',
+        prompt: 'Avoid re-computing an expensive fixture (e.g. seeding a test database) for the same input by caching the last N results.',
+        hint: '`functools.lru_cache` gives you this for free; to implement it by hand, use an OrderedDict and move a key to the end on every access, evicting from the front when over capacity.',
+        code: `from functools import lru_cache
+
+@lru_cache(maxsize=32)
+def build_fixture(seed):
+    return heavy_setup(seed)  # expensive setup, e.g. seeding a test DB
+
+# Manual version:
+from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return None
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)`,
+        complexity: 'Time: O(1) per get/put (OrderedDict operations). Space: O(capacity).',
+      },
+      {
+        title: '9. Diff two test-run logs',
+        prompt: 'Given two ordered lists of step names from two test runs, find the length of the longest sequence of steps that appears in the same relative order in both (to highlight where the runs diverged).',
+        hint: 'This is the classic Longest Common Subsequence problem: build a 2D DP table where dp[i][j] is the LCS length of the first i steps of run A and the first j steps of run B.',
+        code: `def lcs(a, b):
+    n, m = len(a), len(b)
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if a[i - 1] == b[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    return dp[n][m]`,
+        complexity: 'Time: O(n*m). Space: O(n*m), can be reduced to O(min(n,m)) with a rolling array.',
+      },
+      {
+        title: '10. Flatten a nested test suite',
+        prompt: 'Test suites can nest suites inside suites arbitrarily deep (a tree of lists). Write a function that flattens this structure into a single list of leaf test names.',
+        hint: 'Recursion works naturally on a tree: if a node is a list, recurse into each child; if it is a plain value (a leaf test name), add it to the result.',
+        code: `def flatten_suite(node):
+    result = []
+    def walk(n):
+        if isinstance(n, (list, tuple)):
+            for child in n:
+                walk(child)
+        else:
+            result.append(n)
+    walk(node)
+    return result`,
+        complexity: 'Time: O(n) where n = total number of nodes in the tree. Space: O(d) recursion stack (d = tree depth) plus O(n) for the output.',
+      },
+    ],
   },
   prompts: {
     resume: `You are an expert QA/SDET career coach reviewing a resume for QA Automation roles.

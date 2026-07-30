@@ -17,6 +17,7 @@ export const he: Locale = {
       { href: '#lecture-series', label: '🎓 סדרת הרצאות' },
       { href: '#interview-talk', label: '🎙️ ראיון סימולציה' },
       { href: '#interview-questions', label: '❓ שאלות ראיון' },
+      { href: '#coding-challenges', label: '🐍 אתגרי קוד בפייתון' },
     ],
     communityGroup: 'קהילה',
     community: [
@@ -171,6 +172,200 @@ export const he: Locale = {
     copyBtnDone: '✅ הועתק!',
     copyBtnReset: 'העתק',
     copyBtnFail: '❌ ההעתקה נכשלה',
+  },
+  codingChallenges: {
+    title: '🐍 אתגרי קוד בפייתון לאוטומציית בדיקות',
+    lead: '10 בעיות קוד מעשיות שעולות בראיונות אמיתיים ל-QA Automation. לחיצה אחת חושפת רמז, לחיצה נוספת חושפת פתרון קצר ויעיל עם ניתוח סיבוכיות זמן ומקום.',
+    hintLabel: '💡 רמז',
+    complexityLabel: '⏱️ סיבוכיות',
+    showHintBtn: 'הצג רמז',
+    showSolutionBtn: 'הצג פתרון',
+    hideBtn: 'הסתר',
+    items: [
+      {
+        title: '1. דקורטור Retry לבדיקות מתנדנדות (flaky)',
+        prompt: 'כתבו דקורטור `retry` שמנסה שוב פונקציית בדיקה מתנדנדת עד N פעמים עם backoff מעריכי, ורק בניסיון האחרון זורק את החריגה הלאה.',
+        hint: 'עטפו את הפונקציה עם *args/**kwargs, תפסו את החריגה בתוך לולאה, ישנו עם base_delay * 2**attempt, וזרקו שוב רק בניסיון האחרון.',
+        code: `import time
+from functools import wraps
+
+def retry(times=3, base_delay=0.5, exceptions=(Exception,)):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            for attempt in range(times):
+                try:
+                    return fn(*args, **kwargs)
+                except exceptions:
+                    if attempt == times - 1:
+                        raise
+                    time.sleep(base_delay * (2 ** attempt))
+        return wrapper
+    return decorator`,
+        complexity: 'זמן: O(1) תקורת wrapper, עד `times` קריאות ל-fn במקרה הגרוע. מקום: O(1) נוסף.',
+      },
+      {
+        title: '2. Poll עד שתנאי מתקיים',
+        prompt: 'כתבו `wait_until(condition, timeout=10, interval=0.5)` שבודק שוב ושוב פונקציה עד שהיא מחזירה ערך אמיתי, או זורק `TimeoutError`.',
+        hint: 'שמרו את זמן ההתחלה עם time.monotonic(), רוצו כל עוד הזמן שחלף קטן מ-timeout, ישנו `interval` בין בדיקות, וזרקו חריגה אם הלולאה מסתיימת בלי הצלחה.',
+        code: `import time
+
+def wait_until(condition, timeout=10, interval=0.5):
+    start = time.monotonic()
+    while time.monotonic() - start < timeout:
+        result = condition()
+        if result:
+            return result
+        time.sleep(interval)
+    raise TimeoutError(f"Condition not met within {timeout}s")`,
+        complexity: 'זמן: O(timeout / interval) בדיקות (בתוספת עלות condition() בכל פעם). מקום: O(1).',
+      },
+      {
+        title: '3. הסרת כפילויות ממזהי בדיקות תוך שמירת סדר',
+        prompt: 'בהינתן רשימת מזהי מקרי בדיקה שעשויה להכיל כפילויות, החזירו רשימה חדשה ללא כפילויות, תוך שמירה על סדר ההופעה הראשון.',
+        hint: 'השתמשו ב-set כדי לעקוב אחרי מה שכבר נראה תוך כדי מעבר יחיד, והוסיפו לרשימת התוצאה רק פריטים שלא נראו.',
+        code: `def dedupe(ids):
+    seen = set()
+    result = []
+    for i in ids:
+        if i not in seen:
+            seen.add(i)
+            result.append(i)
+    return result`,
+        complexity: 'זמן: O(n) בממוצע (בדיקות ב-set הן O(1) בממוצע). מקום: O(n) עבור ה-set והתוצאה.',
+      },
+      {
+        title: '4. מציאת מזהה הבדיקה הכפול הראשון',
+        prompt: 'בהינתן רשימה גדולה של מזהי בדיקות, החזירו את המזהה הראשון שמופיע יותר מפעם אחת, או None אם אין כפילויות.',
+        hint: 'הימנעו מהגישה הנאיבית של לולאה מקוננת O(n^2) — מעבר יחיד עם set פותר את זה במעבר אחד.',
+        code: `def first_duplicate(ids):
+    seen = set()
+    for i in ids:
+        if i in seen:
+            return i
+        seen.add(i)
+    return None`,
+        complexity: 'זמן: O(n). מקום: O(n) עבור ה-set.',
+      },
+      {
+        title: '5. מיזוג טווחי זמן חופפים של הרצות CI',
+        prompt: 'יש לכם רשימת טווחי זמן (start, end) שבהם משימות בדיקה של CI מתוזמנות. מזגו את כל הטווחים החופפים לקבוצה מינימלית של טווחים שאינם חופפים.',
+        hint: 'מיינו את הטווחים לפי זמן ההתחלה, ולאחר מכן עברו עליהם ומזגו את הטווח הנוכחי לתוך האחרון בכל פעם שיש חפיפה.',
+        code: `def merge_ranges(ranges):
+    if not ranges:
+        return []
+    ranges = sorted(ranges, key=lambda r: r[0])
+    merged = [ranges[0]]
+    for start, end in ranges[1:]:
+        last_start, last_end = merged[-1]
+        if start <= last_end:
+            merged[-1] = (last_start, max(last_end, end))
+        else:
+            merged.append((start, end))
+    return merged`,
+        complexity: 'זמן: O(n log n), נשלט על ידי המיון. מקום: O(n) עבור הפלט.',
+      },
+      {
+        title: '6. הגבלת קצב (rate limit) לפונקציית בדיקה שקוראת ל-API',
+        prompt: 'כתבו דקורטור שמגביל פונקציית עזר שקוראת ל-API לכל היותר `max_calls` קריאות ב-`period` שניות, וישן כשצריך במקום להיכשל.',
+        hint: 'שמרו deque עם חותמות זמן של קריאות אחרונות; לפני כל קריאה, הסירו חותמות ישנות מ-`period`, וישנו אם ה-deque כבר מלא.',
+        code: `import time
+from collections import deque
+from functools import wraps
+
+def rate_limited(max_calls, period):
+    def decorator(fn):
+        calls = deque()
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            now = time.monotonic()
+            while calls and now - calls[0] > period:
+                calls.popleft()
+            if len(calls) >= max_calls:
+                time.sleep(period - (now - calls[0]))
+            calls.append(time.monotonic())
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator`,
+        complexity: 'זמן: O(1) חסום-הפחתה לכל קריאה (פעולות deque). מקום: O(max_calls) עבור חלון חותמות הזמן.',
+      },
+      {
+        title: '7. אימות מבנה תגובת API',
+        prompt: 'כתבו פונקציה שבודקת שמילון תגובת API מנותח מכיל את כל `required_keys` עם ערכים שאינם None, ומחזירה את רשימת המפתחות החסרים או הפגומים.',
+        hint: 'מעבר יחיד על `required_keys`, שבודק `key not in data or data[key] is None`, זה כל מה שצריך — אין צורך לעבור על `data` עצמו.',
+        code: `def validate_response(data, required_keys):
+    missing = []
+    for key in required_keys:
+        if key not in data or data[key] is None:
+            missing.append(key)
+    return missing`,
+        complexity: 'זמן: O(k) כאשר k = מספר המפתחות הנדרשים (בדיקות במילון הן O(1) בממוצע). מקום: O(k) עבור הפלט.',
+      },
+      {
+        title: '8. שמירה במטמון (LRU) של פיקסצ׳ר בדיקה יקר',
+        prompt: 'הימנעו מחישוב חוזר של פיקסצ׳ר יקר (למשל זריעת מסד נתוני בדיקה) עבור אותו קלט, על ידי שמירה במטמון של N התוצאות האחרונות.',
+        hint: '`functools.lru_cache` נותן לכם את זה בחינם; למימוש ידני, השתמשו ב-OrderedDict והזיזו מפתח לסוף בכל גישה, תוך פינוי מההתחלה כשחורגים מהקיבולת.',
+        code: `from functools import lru_cache
+
+@lru_cache(maxsize=32)
+def build_fixture(seed):
+    return heavy_setup(seed)  # expensive setup, e.g. seeding a test DB
+
+# Manual version:
+from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return None
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)`,
+        complexity: 'זמן: O(1) לכל get/put (פעולות OrderedDict). מקום: O(capacity).',
+      },
+      {
+        title: '9. השוואת שני יומני הרצת בדיקות',
+        prompt: 'בהינתן שתי רשימות מסודרות של שמות שלבים משתי הרצות בדיקה, מצאו את אורך רצף השלבים הארוך ביותר המופיע באותו סדר יחסי בשתיהן (כדי להדגיש איפה ההרצות התפצלו).',
+        hint: 'זו בעיית Longest Common Subsequence הקלאסית: בנו טבלת DP דו-ממדית שבה dp[i][j] הוא אורך ה-LCS של i השלבים הראשונים בהרצה A ו-j השלבים הראשונים בהרצה B.',
+        code: `def lcs(a, b):
+    n, m = len(a), len(b)
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if a[i - 1] == b[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    return dp[n][m]`,
+        complexity: 'זמן: O(n*m). מקום: O(n*m), ניתן לצמצם ל-O(min(n,m)) עם מערך מתגלגל.',
+      },
+      {
+        title: '10. שיטוח מבנה סוויטת בדיקות מקונן',
+        prompt: 'סוויטות בדיקה יכולות להיות מקוננות זו בזו לעומק שרירותי (עץ של רשימות). כתבו פונקציה ששוטחת את המבנה הזה לרשימה יחידה של שמות בדיקות עלים.',
+        hint: 'רקורסיה עובדת באופן טבעי על עץ: אם צומת הוא רשימה, בצעו רקורסיה על כל ילד; אם הוא ערך פשוט (שם בדיקת עלה), הוסיפו אותו לתוצאה.',
+        code: `def flatten_suite(node):
+    result = []
+    def walk(n):
+        if isinstance(n, (list, tuple)):
+            for child in n:
+                walk(child)
+        else:
+            result.append(n)
+    walk(node)
+    return result`,
+        complexity: 'זמן: O(n) כאשר n = מספר הצמתים הכולל בעץ. מקום: O(d) מחסנית רקורסיה (d = עומק העץ) בתוספת O(n) עבור הפלט.',
+      },
+    ],
   },
   prompts: {
     resume: `You are an expert QA/SDET career coach reviewing a resume for QA Automation roles. The candidate communicates in Hebrew, so write your summary and all text fields in Hebrew.

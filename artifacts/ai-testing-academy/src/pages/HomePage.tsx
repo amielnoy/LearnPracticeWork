@@ -10,6 +10,7 @@ import { ResumeAgent } from '../components/ResumeAgent';
 import { LectureSeries } from '../components/LectureSeries';
 import { InterviewAgent } from '../components/InterviewAgent';
 import { QuestionBank } from '../components/QuestionBank';
+import { CodingChallenges } from '../components/CodingChallenges';
 
 const THEME_KEY = 'ata_theme';
 
@@ -82,6 +83,7 @@ export function HomePage() {
         <LectureSeries />
         <InterviewAgent />
         <QuestionBank />
+        <CodingChallenges />
       </main>
 
       <Footer />
