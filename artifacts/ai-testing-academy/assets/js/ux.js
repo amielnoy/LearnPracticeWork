@@ -95,6 +95,10 @@ function initChrome() {
     };
     navToggle.addEventListener('click', () => setNav(!document.body.classList.contains('nav-open')));
     scrim.addEventListener('click', () => setNav(false));
+    // Enable the drawer's slide transition only after first paint (see .nav-ready in the
+    // stylesheet) so the drawer never visibly animates on initial load or while the window is
+    // live-resized across the mobile breakpoint — only on deliberate open/close clicks.
+    requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add('nav-ready')));
     document.querySelectorAll("nav a[href^='#']").forEach(a => a.addEventListener('click', () => setNav(false)));
     /* section-number chips in the nav */
     document.querySelectorAll("nav a.link[href^='#']").forEach(a => {

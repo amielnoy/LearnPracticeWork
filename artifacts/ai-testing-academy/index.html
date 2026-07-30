@@ -255,8 +255,13 @@
   @media(max-width:900px){
     .nav-toggle{display:flex; position:fixed; top:12px; inset-inline-start:12px; z-index:210;}
     nav{position:fixed; top:0; bottom:0; inset-inline-start:0; width:min(82vw,300px); flex-direction:column;
-        transform:translateX(-108%); transition:transform .26s ease; z-index:206; overflow-y:auto;
+        transform:translateX(-108%); z-index:206; overflow-y:auto;
         border-inline-end:1px solid var(--border); box-shadow:0 0 46px rgba(0,0,0,.35);}
+    /* Transition is only enabled once JS marks the page ready (see nav-ready class below). This
+       stops the drawer from visibly sliding/animating when it first matches this media query —
+       e.g. on initial load at a narrow width, or while live-resizing the window across the
+       900px breakpoint — which otherwise froze it in a half-open, clipped-looking state. */
+    body.nav-ready nav{transition:transform .26s ease;}
     body.nav-open nav{transform:none;}
     html[dir="rtl"] nav{transform:translateX(108%);}
     .nav-scrim{position:fixed; inset:0; background:rgba(0,0,0,.45); opacity:0; pointer-events:none;
