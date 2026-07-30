@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -108,6 +108,53 @@ const tabs = [
 export default function AITransformation() {
   const [activeTab, setActiveTab] = useState("vision");
   const active = tabs.find((t) => t.id === activeTab)!;
+
+  useEffect(() => {
+    const BASE = "https://free-tier-insights--amielpeled.replit.app";
+    const PAGE_URL = `${BASE}/ai-test-transformation`;
+    const PAGE_TITLE = "AI Test Transformation Services | Amiel Peled";
+    const PAGE_DESC =
+      "Hands-on AI test automation transformation — self-healing UI tests, AI-generated scenarios, CI/CD integration, and team upskilling for engineering teams.";
+
+    // Title
+    document.title = PAGE_TITLE;
+
+    const setMeta = (selector: string, attr: string, value: string) => {
+      let el = document.querySelector<HTMLMetaElement>(selector);
+      if (!el) {
+        el = document.createElement("meta");
+        const [attrName, attrValue] = selector
+          .replace(/[\[\]"]/g, "")
+          .split("=");
+        el.setAttribute(attrName, attrValue);
+        document.head.appendChild(el);
+      }
+      el.setAttribute(attr, value);
+    };
+
+    const setLink = (rel: string, href: string) => {
+      let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+      if (!el) {
+        el = document.createElement("link");
+        el.setAttribute("rel", rel);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("href", href);
+    };
+
+    setMeta('meta[name="description"]', "content", PAGE_DESC);
+    setMeta('meta[property="og:title"]', "content", PAGE_TITLE);
+    setMeta('meta[property="og:description"]', "content", PAGE_DESC);
+    setMeta('meta[property="og:url"]', "content", PAGE_URL);
+    setMeta('meta[property="twitter:title"]', "content", PAGE_TITLE);
+    setMeta('meta[property="twitter:description"]', "content", PAGE_DESC);
+    setLink("canonical", PAGE_URL);
+
+    return () => {
+      // Restore homepage defaults on unmount
+      document.title = "Amiel Peled - AI Test Automation & DevOps Tech Lead";
+    };
+  }, []);
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground overflow-x-hidden">
