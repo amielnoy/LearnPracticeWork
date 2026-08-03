@@ -173,15 +173,104 @@ export const en = {
   },
   codingChallenges: {
     title: '🐍 Python Coding Challenges for Test Automation',
-    lead: '10 practical coding problems that come up in real QA-Automation interviews. Click once to reveal a hint, click again to reveal a short, efficient solution with time and space complexity.',
+    lead: '15 practical coding problems that come up in real QA-Automation interviews, grouped into three levels. Click once to reveal a hint, click again to reveal a short, efficient solution with time and space complexity.',
     hintLabel: '💡 Hint',
     complexityLabel: '⏱️ Complexity',
     showHintBtn: 'Show hint',
     showSolutionBtn: 'Show solution',
     hideBtn: 'Hide',
-    items: [
+    levels: [
+    {
+      label: 'Level 1 — Fundamentals',
+      blurb: 'Lists, dicts and a little recursion. Nothing here needs a clever trick, only a clean single pass.',
+      items: [
       {
-        title: '1. Retry decorator for flaky tests',
+        title: '1. Deduplicate test IDs, preserving order',
+        prompt: 'Given a list of test case IDs that may contain duplicates, return a new list with duplicates removed, preserving first-seen order.',
+        hint: 'Use a set to track what has been seen while iterating once and appending only unseen items to the result list.',
+        code: `def dedupe(ids):
+    seen = set()
+    result = []
+    for i in ids:
+        if i not in seen:
+            seen.add(i)
+            result.append(i)
+    return result`,
+        complexity: 'Time: O(n) average (set lookups are O(1) amortized). Space: O(n) for the seen set and result.',
+      },
+      {
+        title: '2. Find the first duplicate test ID',
+        prompt: 'Given a large list of test IDs, return the first ID that appears more than once, or None if there are no duplicates.',
+        hint: 'Avoid the naive O(n^2) nested-loop check — a single pass with a set gets it done in one sweep.',
+        code: `def first_duplicate(ids):
+    seen = set()
+    for i in ids:
+        if i in seen:
+            return i
+        seen.add(i)
+    return None`,
+        complexity: 'Time: O(n). Space: O(n) for the seen set.',
+      },
+      {
+        title: '3. Flatten a nested test suite',
+        prompt: 'Test suites can nest suites inside suites arbitrarily deep (a tree of lists). Write a function that flattens this structure into a single list of leaf test names.',
+        hint: 'Recursion works naturally on a tree: if a node is a list, recurse into each child; if it is a plain value (a leaf test name), add it to the result.',
+        code: `def flatten_suite(node):
+    result = []
+    def walk(n):
+        if isinstance(n, (list, tuple)):
+            for child in n:
+                walk(child)
+        else:
+            result.append(n)
+    walk(node)
+    return result`,
+        complexity: 'Time: O(n) where n = total number of nodes in the tree. Space: O(d) recursion stack (d = tree depth) plus O(n) for the output.',
+      },
+      {
+        title: '4. Count test results by status',
+        prompt: 'Given a list of result dicts like `{"name": ..., "status": "passed"}`, return how many results there are per status.',
+        hint: 'One pass and a dict of counters is enough. collections.Counter does the bookkeeping for you.',
+        code: `from collections import Counter
+
+def count_by_status(results):
+    return Counter(r["status"] for r in results)`,
+        complexity: 'Time: O(n). Space: O(k), where k is the number of distinct statuses.',
+      },
+      {
+        title: '5. Find the N slowest tests',
+        prompt: 'Given a list of test dicts with a `duration` field, return the n slowest of them, slowest first.',
+        hint: 'Sorting the whole list is O(m log m) when you only need n items. heapq.nlargest keeps a heap of size n instead.',
+        code: `import heapq
+
+def slowest(tests, n):
+    return heapq.nlargest(n, tests, key=lambda t: t["duration"])`,
+        complexity: 'Time: O(m log n) for m tests. Space: O(n) for the heap and the result.',
+      },
+      ],
+    },
+    {
+      label: 'Level 2 — Interview standard',
+      blurb: 'The shape most QA-Automation interviews actually take: decorators, polling, schema validation and log diffing.',
+      items: [
+      {
+        title: '1. Poll until a condition is true',
+        prompt: 'Write `wait_until(condition, timeout=10, interval=0.5)` that polls a callable until it returns a truthy value, or raises `TimeoutError`.',
+        hint: 'Record the start time with time.monotonic(), loop while elapsed time < timeout, sleep `interval` between checks, and raise if the loop exits without success.',
+        code: `import time
+
+def wait_until(condition, timeout=10, interval=0.5):
+    start = time.monotonic()
+    while time.monotonic() - start < timeout:
+        result = condition()
+        if result:
+            return result
+        time.sleep(interval)
+    raise TimeoutError(f"Condition not met within {timeout}s")`,
+        complexity: 'Time: O(timeout / interval) polls (plus the cost of condition() each time). Space: O(1).',
+      },
+      {
+        title: '2. Retry decorator for flaky tests',
         prompt: 'Write a `retry` decorator that retries a flaky test function up to N times with exponential backoff before finally letting the exception propagate.',
         hint: 'Wrap the function with *args/**kwargs, catch the exception inside a loop, sleep with base_delay * 2**attempt, and only re-raise on the last attempt.',
         code: `import time
@@ -203,50 +292,58 @@ def retry(times=3, base_delay=0.5, exceptions=(Exception,)):
         complexity: 'Time: O(1) wrapper overhead, up to `times` calls to fn in the worst case. Space: O(1) extra.',
       },
       {
-        title: '2. Poll until a condition is true',
-        prompt: 'Write `wait_until(condition, timeout=10, interval=0.5)` that polls a callable until it returns a truthy value, or raises `TimeoutError`.',
-        hint: 'Record the start time with time.monotonic(), loop while elapsed time < timeout, sleep `interval` between checks, and raise if the loop exits without success.',
-        code: `import time
+        title: '3. Validate an API response shape',
+        prompt: 'Write a function that checks a parsed API response dict contains all `required_keys` with non-None values, returning the list of missing or invalid keys.',
+        hint: 'A single pass over `required_keys`, checking `key not in data or data[key] is None`, is all you need — no need to loop over `data` itself.',
+        code: `def validate_response(data, required_keys):
+    missing = []
+    for key in required_keys:
+        if key not in data or data[key] is None:
+            missing.append(key)
+    return missing`,
+        complexity: 'Time: O(k) where k = number of required keys (dict lookups are O(1) average). Space: O(k) for the output.',
+      },
+      {
+        title: '4. Diff two test-run logs',
+        prompt: 'Given two ordered lists of step names from two test runs, find the length of the longest sequence of steps that appears in the same relative order in both (to highlight where the runs diverged).',
+        hint: 'This is the classic Longest Common Subsequence problem: build a 2D DP table where dp[i][j] is the LCS length of the first i steps of run A and the first j steps of run B.',
+        code: `def lcs(a, b):
+    n, m = len(a), len(b)
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if a[i - 1] == b[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    return dp[n][m]`,
+        complexity: 'Time: O(n*m). Space: O(n*m), can be reduced to O(min(n,m)) with a rolling array.',
+      },
+      {
+        title: '5. Split tests into balanced CI shards',
+        prompt: 'Split a list of tests with known durations across n parallel CI shards, so the slowest shard finishes as early as possible.',
+        hint: 'Longest-processing-time-first: sort descending, then always drop the next test into the shard with the smallest running total. A min-heap keeps that lookup cheap.',
+        code: `import heapq
 
-def wait_until(condition, timeout=10, interval=0.5):
-    start = time.monotonic()
-    while time.monotonic() - start < timeout:
-        result = condition()
-        if result:
-            return result
-        time.sleep(interval)
-    raise TimeoutError(f"Condition not met within {timeout}s")`,
-        complexity: 'Time: O(timeout / interval) polls (plus the cost of condition() each time). Space: O(1).',
+def shard_tests(tests, n):
+    shards = [[] for _ in range(n)]
+    totals = [(0, i) for i in range(n)]
+    heapq.heapify(totals)
+    for test in sorted(tests, key=lambda t: t["duration"], reverse=True):
+        total, i = heapq.heappop(totals)
+        shards[i].append(test)
+        heapq.heappush(totals, (total + test["duration"], i))
+    return shards`,
+        complexity: 'Time: O(m log m) for the sort plus O(m log n) for the heap. Space: O(m) for the shards.',
       },
+      ],
+    },
+    {
+      label: 'Level 3 — Advanced',
+      blurb: 'Where candidates get separated: intervals, caching, graphs and concurrency.',
+      items: [
       {
-        title: '3. Deduplicate test IDs, preserving order',
-        prompt: 'Given a list of test case IDs that may contain duplicates, return a new list with duplicates removed, preserving first-seen order.',
-        hint: 'Use a set to track what has been seen while iterating once and appending only unseen items to the result list.',
-        code: `def dedupe(ids):
-    seen = set()
-    result = []
-    for i in ids:
-        if i not in seen:
-            seen.add(i)
-            result.append(i)
-    return result`,
-        complexity: 'Time: O(n) average (set lookups are O(1) amortized). Space: O(n) for the seen set and result.',
-      },
-      {
-        title: '4. Find the first duplicate test ID',
-        prompt: 'Given a large list of test IDs, return the first ID that appears more than once, or None if there are no duplicates.',
-        hint: 'Avoid the naive O(n^2) nested-loop check — a single pass with a set gets it done in one sweep.',
-        code: `def first_duplicate(ids):
-    seen = set()
-    for i in ids:
-        if i in seen:
-            return i
-        seen.add(i)
-    return None`,
-        complexity: 'Time: O(n). Space: O(n) for the seen set.',
-      },
-      {
-        title: '5. Merge overlapping CI job time ranges',
+        title: '1. Merge overlapping CI job time ranges',
         prompt: 'You have a list of (start, end) time ranges when CI test jobs are scheduled. Merge all overlapping ranges into the minimal set of non-overlapping ranges.',
         hint: 'Sort the ranges by start time first, then walk through them, merging the current range into the last one whenever they overlap.',
         code: `def merge_ranges(ranges):
@@ -264,7 +361,7 @@ def wait_until(condition, timeout=10, interval=0.5):
         complexity: 'Time: O(n log n), dominated by the sort. Space: O(n) for the output.',
       },
       {
-        title: '6. Rate-limit an API test helper',
+        title: '2. Rate-limit an API test helper',
         prompt: 'Write a decorator that limits an API-calling test helper to at most `max_calls` per `period` seconds, sleeping as needed instead of failing.',
         hint: 'Keep a deque of recent call timestamps; before each call, drop timestamps older than `period`, then sleep if the deque is already full.',
         code: `import time
@@ -288,19 +385,7 @@ def rate_limited(max_calls, period):
         complexity: 'Time: O(1) amortized per call (deque push/pop). Space: O(max_calls) for the timestamp window.',
       },
       {
-        title: '7. Validate an API response shape',
-        prompt: 'Write a function that checks a parsed API response dict contains all `required_keys` with non-None values, returning the list of missing or invalid keys.',
-        hint: 'A single pass over `required_keys`, checking `key not in data or data[key] is None`, is all you need — no need to loop over `data` itself.',
-        code: `def validate_response(data, required_keys):
-    missing = []
-    for key in required_keys:
-        if key not in data or data[key] is None:
-            missing.append(key)
-    return missing`,
-        complexity: 'Time: O(k) where k = number of required keys (dict lookups are O(1) average). Space: O(k) for the output.',
-      },
-      {
-        title: '8. Cache an expensive test fixture (LRU)',
+        title: '3. Cache an expensive test fixture (LRU)',
         prompt: 'Avoid re-computing an expensive fixture (e.g. seeding a test database) for the same input by caching the last N results.',
         hint: '`functools.lru_cache` gives you this for free; to implement it by hand, use an OrderedDict and move a key to the end on every access, evicting from the front when over capacity.',
         code: `from functools import lru_cache
@@ -332,37 +417,51 @@ class LRUCache:
         complexity: 'Time: O(1) per get/put (OrderedDict operations). Space: O(capacity).',
       },
       {
-        title: '9. Diff two test-run logs',
-        prompt: 'Given two ordered lists of step names from two test runs, find the length of the longest sequence of steps that appears in the same relative order in both (to highlight where the runs diverged).',
-        hint: 'This is the classic Longest Common Subsequence problem: build a 2D DP table where dp[i][j] is the LCS length of the first i steps of run A and the first j steps of run B.',
-        code: `def lcs(a, b):
-    n, m = len(a), len(b)
-    dp = [[0] * (m + 1) for _ in range(n + 1)]
-    for i in range(1, n + 1):
-        for j in range(1, m + 1):
-            if a[i - 1] == b[j - 1]:
-                dp[i][j] = dp[i - 1][j - 1] + 1
-            else:
-                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-    return dp[n][m]`,
-        complexity: 'Time: O(n*m). Space: O(n*m), can be reduced to O(min(n,m)) with a rolling array.',
+        title: '4. Detect a cycle in fixture dependencies',
+        prompt: 'Fixtures depend on other fixtures, given as a dict of name to list of dependency names. Report whether any dependency cycle exists.',
+        hint: 'Three-colour DFS. Grey means "on the current path", so meeting a grey node again is the cycle. Black nodes are already proven clean and can be skipped.',
+        code: `WHITE, GREY, BLACK = 0, 1, 2
+
+def has_cycle(deps):
+    colour = {}
+
+    def visit(node):
+        state = colour.get(node, WHITE)
+        if state == GREY:
+            return True
+        if state == BLACK:
+            return False
+        colour[node] = GREY
+        for dep in deps.get(node, ()):
+            if visit(dep):
+                return True
+        colour[node] = BLACK
+        return False
+
+    return any(visit(node) for node in deps)`,
+        complexity: 'Time: O(V + E) over fixtures and dependency edges. Space: O(V) for the colours and the recursion stack.',
       },
       {
-        title: '10. Flatten a nested test suite',
-        prompt: 'Test suites can nest suites inside suites arbitrarily deep (a tree of lists). Write a function that flattens this structure into a single list of leaf test names.',
-        hint: 'Recursion works naturally on a tree: if a node is a list, recurse into each child; if it is a plain value (a leaf test name), add it to the result.',
-        code: `def flatten_suite(node):
-    result = []
-    def walk(n):
-        if isinstance(n, (list, tuple)):
-            for child in n:
-                walk(child)
-        else:
-            result.append(n)
-    walk(node)
-    return result`,
-        complexity: 'Time: O(n) where n = total number of nodes in the tree. Space: O(d) recursion stack (d = tree depth) plus O(n) for the output.',
+        title: '5. Run async tests with a concurrency limit',
+        prompt: 'Run a list of async test coroutines concurrently, but never more than `limit` at a time, and collect every result even if some fail.',
+        hint: 'asyncio.gather starts everything at once, so wrap each coroutine in a Semaphore to cap what runs. return_exceptions keeps one failure from cancelling the batch.',
+        code: `import asyncio
+
+async def run_all(tests, limit=5):
+    semaphore = asyncio.Semaphore(limit)
+
+    async def run_one(test):
+        async with semaphore:
+            return await test()
+
+    return await asyncio.gather(
+        *(run_one(test) for test in tests),
+        return_exceptions=True,
+    )`,
+        complexity: 'Time: O(m) tasks with at most `limit` in flight, so wall clock is roughly total_work / limit. Space: O(m) for the results.',
       },
+      ],
+    },
     ],
   },
   prompts: {
