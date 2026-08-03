@@ -63,6 +63,18 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
+    // In production Replit serves this site and the API from one origin, so the
+    // client's relative /api/ai/config call just works. In dev there is no such
+    // router, and Vite's SPA fallback answers /api/* with index.html at HTTP
+    // 200 — so `res.ok` passes, `res.json()` chokes on HTML, and the site
+    // concludes no server-side key exists and greys out the whole panel.
+    // Forward /api to the local api-server instead.
+    proxy: {
+      "/api": {
+        target: `http://localhost:${process.env.API_PORT ?? "8787"}`,
+        changeOrigin: true,
+      },
+    },
     fs: {
       strict: true,
     },

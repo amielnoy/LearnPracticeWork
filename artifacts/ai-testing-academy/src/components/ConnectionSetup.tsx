@@ -81,18 +81,23 @@ export function ConnectionSetup() {
             </button>
           </div>
         </div>
-        <div id="ownKeyRow" style={{ marginTop: '14px', opacity: hasDefault ? 1 : 0.5 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: '0 0 10px' }}>
-            <input
-              type="checkbox"
-              id="useOwnKey"
-              style={{ width: 'auto', margin: 0 }}
-              checked={useOwnKey}
-              disabled={!hasDefault}
-              onChange={e => setUseOwnKey(e.target.checked)}
-            />
-            {t.useOwnKeyLabel}
-          </label>
+        <div id="ownKeyRow" style={{ marginTop: '14px' }}>
+          {/* With no server-side key there is nothing to toggle between — your
+              own key is the only mode. Rendering the checkbox ticked-and-
+              disabled (and dimming the field under it) made the one control
+              that still works look broken. */}
+          {hasDefault && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: '0 0 10px' }}>
+              <input
+                type="checkbox"
+                id="useOwnKey"
+                style={{ width: 'auto', margin: 0 }}
+                checked={useOwnKey}
+                onChange={e => setUseOwnKey(e.target.checked)}
+              />
+              {t.useOwnKeyLabel}
+            </label>
+          )}
           <label
             id="apiKeyLabel"
             htmlFor="apiKey"
