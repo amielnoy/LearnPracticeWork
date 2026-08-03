@@ -51,7 +51,9 @@
       "mcp__playwright__browser_console_messages",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git commit -q -m 'chore: allow git fetch in Claude settings *)"
     ]
   }
 }
