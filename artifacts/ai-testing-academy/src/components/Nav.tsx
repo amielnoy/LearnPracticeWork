@@ -137,10 +137,30 @@ export function NavToggle({
   onToggle: () => void;
 }) {
   const { locale } = useLocale();
+  // The toggle floats over the content on phones, so it retracts while the
+  // reader scrolls down into a section and comes back on any upward scroll —
+  // the same reflex as a mobile app bar. It always stays put near the top of
+  // the page and whenever the drawer is open.
+  const [tucked, setTucked] = useState(false);
+
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - last;
+      if (Math.abs(delta) > 6) {
+        setTucked(y > 160 && delta > 0);
+        last = y;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <button
       type="button"
-      className="fab nav-toggle"
+      className={`fab nav-toggle${tucked && !navOpen ? ' tucked' : ''}`}
       id="navToggle"
       aria-label={locale.ui.navOpen}
       aria-expanded={navOpen}

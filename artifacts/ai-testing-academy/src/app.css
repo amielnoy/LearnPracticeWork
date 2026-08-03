@@ -300,6 +300,27 @@ details.agent-box[open]>summary{margin-bottom:16px;}
   nav{padding-top:calc(70px + env(safe-area-inset-top));}
   header{padding-top:calc(56px + env(safe-area-inset-top));}
   body{padding-inline-start:0;}
+  /* viewport-fit=cover lets the page paint into the notch/rounded corners, so
+     content wrappers take the larger of their own gutter and the device inset.
+     max() of both insets keeps this correct in RTL, where inline start/end flip. */
+  header,main,footer{padding-inline:max(clamp(16px,4.5vw,24px), env(safe-area-inset-left), env(safe-area-inset-right));}
+  /* Scroll lock while the drawer is open. <html> is the scrolling element here,
+     so the :has() rule is the one that actually bites; the body rule is the
+     fallback for engines without :has(). */
+  html:has(body.nav-open){overflow:hidden;}
+  body.nav-open{overflow:hidden;}
+  /* Rows sized for thumbs, gaps tightened to compensate — the whole drawer
+     still has to fit a phone screen without the language toggle falling off
+     the bottom edge. */
+  nav{gap:3px;}
+  nav a.link{padding:11px 14px;}
+  nav .nav-group{padding:12px 14px 4px;}
+  nav .theme-toggle{padding:11px 9px; margin-top:6px;}
+  /* Retracts out of the top edge while scrolling down (see NavToggle). */
+  .nav-toggle.tucked{opacity:0; pointer-events:none; transform:translateY(-160%);}
+  /* The nav-toggle FAB is pinned to the top-left, so anchored sections must
+     clear it instead of landing underneath. */
+  section{scroll-margin-top:68px;}
 }
 
 /* Lecture card CTA — was inline styles + JS mouseover handlers, which latch on
