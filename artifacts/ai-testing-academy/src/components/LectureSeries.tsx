@@ -136,23 +136,10 @@ function LectureCard({ lec, bank }: { lec: LectureData; bank: BankData }) {
       <p style={{ fontSize: '.88rem' }}>{lec.desc}</p>
       {lec.ready && lec.url && (
         <a
+          className="lecture-cta"
           href={lec.url}
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            display: 'inline-block',
-            marginTop: '16px',
-            background: 'linear-gradient(90deg,var(--accent),var(--accent2))',
-            color: '#fff',
-            borderRadius: '9px',
-            padding: '9px 18px',
-            fontWeight: 700,
-            fontSize: '.875rem',
-            textDecoration: 'none',
-            transition: 'filter .2s,transform .2s',
-          }}
-          onMouseOver={e => { (e.currentTarget as HTMLAnchorElement).style.filter = 'brightness(1.08)'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)'; }}
-          onMouseOut={e => { (e.currentTarget as HTMLAnchorElement).style.filter = ''; (e.currentTarget as HTMLAnchorElement).style.transform = ''; }}
         >
           {bank.openLecture}
         </a>

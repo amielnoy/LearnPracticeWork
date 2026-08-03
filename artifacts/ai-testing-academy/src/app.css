@@ -146,7 +146,7 @@ footer{text-align:center; color:var(--muted); font-size:.82rem; padding:30px; bo
 .video-card .no-video{margin-top:10px; padding:22px 12px; border:2px dashed var(--border);
     border-radius:10px; text-align:center; color:var(--muted); font-size:.82rem;}
 a.job-card{display:block; color:inherit; transition:transform .15s, box-shadow .15s;}
-a.job-card:hover{transform:translateY(-3px); box-shadow:0 6px 18px rgba(120,80,50,.15);}
+@media (hover:hover){a.job-card:hover{transform:translateY(-3px); box-shadow:0 6px 18px rgba(120,80,50,.15);}}
 a.job-card h4{color:var(--accent);}
 
 nav a.github-btn{background:#24292f; color:#fff !important; font-weight:700; text-align:center;}
@@ -166,7 +166,10 @@ nav a.whatsapp-btn:hover{opacity:.9; box-shadow:0 4px 14px rgba(37,211,102,.35);
 
 .upload-zone{border:2px dashed var(--border); border-radius:12px; padding:20px; text-align:center;
     color:var(--muted); font-size:.9rem; cursor:pointer; transition:border-color .2s, background .2s;}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--accent); background:rgba(224,123,40,.08); color:var(--text);}
+.upload-zone.drag{border-color:var(--accent); background:rgba(224,123,40,.08); color:var(--text);}
+@media (hover:hover){
+  .upload-zone:hover{border-color:var(--accent); background:rgba(224,123,40,.08); color:var(--text);}
+}
 
 ::selection{background:rgba(224,123,40,.25);}
 html{scrollbar-width:thin; scrollbar-color:#d9c6b0 transparent;}
@@ -179,13 +182,27 @@ h2 .num{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#
     border-radius:10px; padding:2px 12px; font-size:1.05rem; margin:0;}
 
 .card,.agent-box,pre,button.primary,button.ghost,.badge,nav a.link{transition:all .22s ease;}
-.card:hover{transform:translateY(-3px); box-shadow:0 10px 24px rgba(120,80,50,.14);}
 .badge{background:var(--card); box-shadow:var(--shadow);}
-.badge:hover{border-color:var(--accent2); color:var(--text); transform:translateY(-2px);}
 pre{box-shadow:var(--shadow); border:none; border-top:3px solid var(--accent2);}
-button.primary:hover:not(:disabled){filter:brightness(1.08); box-shadow:0 6px 18px rgba(192,57,43,.30); transform:translateY(-1px);}
-button.ghost:hover{border-color:var(--accent2); color:var(--text);}
 .agent-box:focus-within{border-color:var(--accent2); box-shadow:0 6px 22px rgba(224,123,40,.16);}
+
+/* Lift-on-hover only where a real pointer exists. On touch, :hover latches after
+   a tap and leaves cards/buttons stuck in the raised state until you tap
+   elsewhere; :active gives touch users the feedback instead. */
+@media (hover:hover){
+  .card:hover{transform:translateY(-3px); box-shadow:0 10px 24px rgba(120,80,50,.14);}
+  .badge:hover{border-color:var(--accent2); color:var(--text); transform:translateY(-2px);}
+  button.primary:hover:not(:disabled){filter:brightness(1.08); box-shadow:0 6px 18px rgba(192,57,43,.30); transform:translateY(-1px);}
+  button.ghost:hover{border-color:var(--accent2); color:var(--text);}
+  .fab:hover{border-color:var(--accent2); transform:translateY(-2px);}
+}
+@media (hover:none){
+  button.primary:active:not(:disabled),button.ghost:active,.hero-cta a:active,a.job-card:active,.fab:active{
+      transform:scale(.97); filter:brightness(.96);}
+  .card:active{box-shadow:0 10px 24px rgba(120,80,50,.14);}
+  /* No hover to reveal it, so the copy affordance is always visible. */
+  .pre-wrap .copy-btn{opacity:1;}
+}
 table{box-shadow:var(--shadow); border-radius:12px; overflow:hidden; border-collapse:separate; border-spacing:0;}
 tr:nth-child(even) td{background:rgba(224,123,40,.04);}
 
@@ -245,7 +262,7 @@ details.agent-box[open]>summary{margin-bottom:16px;}
     border:1px solid var(--border); transition:transform .18s, box-shadow .18s, filter .18s;}
 .hero-cta a.primary{background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; border:none;}
 .hero-cta a.ghost{background:var(--card); color:var(--text);}
-.hero-cta a:hover{transform:translateY(-2px); box-shadow:var(--shadow);}
+@media (hover:hover){.hero-cta a:hover{transform:translateY(-2px); box-shadow:var(--shadow);}}
 .tldr{max-width:660px; margin:24px auto 0; text-align:start; background:var(--card);
     border:1px solid var(--border); border-radius:12px; padding:16px 22px; box-shadow:var(--shadow);}
 .tldr b{color:var(--accent);}
@@ -274,6 +291,14 @@ details.agent-box[open]>summary{margin-bottom:16px;}
   header{padding-top:56px;}
   body{padding-inline-start:0;}
 }
+
+/* Lecture card CTA — was inline styles + JS mouseover handlers, which latch on
+   after a tap on touch devices because React synthesises mouseover from touch. */
+.lecture-cta{display:inline-block; margin-top:16px; border-radius:9px; padding:11px 20px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff !important;
+    font-weight:700; font-size:.875rem; text-decoration:none; transition:filter .2s, transform .2s;}
+@media (hover:hover){.lecture-cta:hover{filter:brightness(1.08); transform:translateY(-1px);}}
+@media (hover:none){.lecture-cta:active{transform:scale(.97); filter:brightness(.96);}}
 
 /* ── Phones ──────────────────────────────────────────────────────────────── */
 @media(max-width:640px){
