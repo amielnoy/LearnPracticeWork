@@ -4,7 +4,11 @@
   --bg:#fbf7f2; --bg2:#f8efe6; --card:#ffffff; --border:#e9dccf;
   --text:#2e2933; --muted:#5a5460; --accent:#c0392b; --accent2:#e07b28;
   --green:#3e8e57; --yellow:#b07c1f; --red:#c0392b;
+  /* The code surface is dark in BOTH themes, so its foreground tokens are light
+     in both — never inherit --text here or light mode paints ink on ink. */
   --code-bg:#332f3f;
+  --code-text:#e9e4f4;
+  --code-tag:#e0b455;
   --field-bg:#ffffff;
   --track:#f1e4d6;
   --shadow:0 2px 10px rgba(120,80,50,.08);
@@ -61,11 +65,12 @@ li{margin-bottom:6px;}
 .card h4{margin-bottom:8px; font-size:1rem;}
 .card p{color:var(--muted); font-size:.9rem; margin:0;}
 .tag{display:inline-block; font-size:.72rem; font-family:monospace; background:var(--code-bg);
-    border:1px solid var(--border); border-radius:6px; padding:1px 8px; margin-inline-end:6px; color:var(--yellow);}
+    border:1px solid var(--border); border-radius:6px; padding:1px 8px; margin-inline-end:6px; color:var(--code-tag);}
 
 /* overscroll-behavior-x: a code block wide enough to scroll sideways must not
    hand the gesture back to the browser's swipe-to-go-back on touch devices. */
-pre{direction:ltr; text-align:left; background:var(--code-bg); border:1px solid var(--border);
+pre{direction:ltr; text-align:left; background:var(--code-bg); color:var(--code-text);
+    border:1px solid var(--border);
     border-radius:10px; padding:16px; overflow-x:auto; overscroll-behavior-x:contain;
     font-size:clamp(.76rem,2.9vw,.83rem); line-height:1.55;
     font-family:"JetBrains Mono",Consolas,monospace; margin:12px 0 20px;}
