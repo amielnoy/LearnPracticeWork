@@ -18,7 +18,7 @@ body{font-family:"Heebo","Segoe UI",Arial,sans-serif; background:var(--bg); colo
 a{color:var(--accent); text-decoration:none;}
 
 nav{position:fixed; top:0; inset-inline-start:0; bottom:0; width:280px; z-index:50;
-    background:rgba(250,248,245,.97); backdrop-filter:blur(8px);
+    background:rgba(250,248,245,.97); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
     border-right:1px solid var(--border); display:flex; flex-direction:column;
     gap:6px; align-items:stretch; padding:22px 14px; overflow-y:auto;}
 nav .logo{font-weight:800; font-size:1rem; white-space:nowrap; background:linear-gradient(90deg,var(--accent),var(--accent2));
@@ -226,11 +226,18 @@ html[data-theme="dark"] .badge,html[data-theme="dark"] pre{background:var(--code
 .scroll-progress{position:fixed; top:0; inset-inline-start:0; height:3px; width:0; z-index:200;
     background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .08s linear;}
 
-.fab{position:fixed; z-index:120; width:44px; height:44px; border-radius:50%; border:1px solid var(--border);
-    background:var(--card); color:var(--text); box-shadow:var(--shadow); cursor:pointer; font-size:1.15rem;
+/* FABs float over body copy, so they carry their own blur + ring to stay legible
+   against whatever scrolls underneath them. */
+.fab{position:fixed; z-index:120; width:46px; height:46px; border-radius:50%; border:1px solid var(--border);
+    background:color-mix(in srgb, var(--card) 88%, transparent); color:var(--text);
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    box-shadow:0 4px 16px rgba(120,80,50,.18); cursor:pointer; font-size:1.15rem;
     display:flex; align-items:center; justify-content:center; transition:opacity .25s, transform .2s, border-color .2s;}
-.fab:hover{border-color:var(--accent2); transform:translateY(-2px);}
-.to-top{bottom:20px; inset-inline-end:20px; opacity:0; pointer-events:none;}
+/* max() of both horizontal insets: inset-inline-end flips side under RTL, so the
+   notch/rounded-corner allowance has to cover either edge. */
+.to-top{bottom:calc(20px + env(safe-area-inset-bottom));
+    inset-inline-end:calc(16px + max(env(safe-area-inset-right), env(safe-area-inset-left)));
+    opacity:0; pointer-events:none;}
 .to-top.show{opacity:1; pointer-events:auto;}
 .nav-toggle{display:none;}
 
@@ -270,9 +277,12 @@ details.agent-box[open]>summary{margin-bottom:16px;}
 .tldr li{color:var(--muted); font-size:.9rem; margin-bottom:4px;}
 
 @media(max-width:900px){
-  .nav-toggle{display:flex; position:fixed; top:12px; inset-inline-start:12px; z-index:210;}
+  .nav-toggle{display:flex; top:calc(12px + env(safe-area-inset-top));
+      inset-inline-start:calc(12px + max(env(safe-area-inset-left), env(safe-area-inset-right)));
+      z-index:210;}
   nav{position:fixed; top:0; bottom:0; inset-inline-start:0; width:min(82vw,300px); flex-direction:column;
-      transform:translateX(-108%); z-index:206; overflow-y:auto;
+      transform:translateX(-108%); z-index:206; overflow-y:auto; overscroll-behavior:contain;
+      padding-bottom:calc(22px + env(safe-area-inset-bottom));
       border-inline-end:1px solid var(--border); box-shadow:0 0 46px rgba(0,0,0,.35);}
   /* Transition is only enabled once JS marks the page ready (see .nav-ready).
      This prevents the drawer from animating on initial load or breakpoint-crossing. */
@@ -287,8 +297,8 @@ details.agent-box[open]>summary{margin-bottom:16px;}
       transition:opacity .26s; z-index:205;}
   body.nav-open .nav-scrim{opacity:1; pointer-events:auto;}
   nav .nav-group{display:block;}
-  nav{padding-top:70px;}
-  header{padding-top:56px;}
+  nav{padding-top:calc(70px + env(safe-area-inset-top));}
+  header{padding-top:calc(56px + env(safe-area-inset-top));}
   body{padding-inline-start:0;}
 }
 
