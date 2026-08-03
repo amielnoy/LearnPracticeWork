@@ -63,8 +63,11 @@ li{margin-bottom:6px;}
 .tag{display:inline-block; font-size:.72rem; font-family:monospace; background:var(--code-bg);
     border:1px solid var(--border); border-radius:6px; padding:1px 8px; margin-inline-end:6px; color:var(--yellow);}
 
+/* overscroll-behavior-x: a code block wide enough to scroll sideways must not
+   hand the gesture back to the browser's swipe-to-go-back on touch devices. */
 pre{direction:ltr; text-align:left; background:var(--code-bg); border:1px solid var(--border);
-    border-radius:10px; padding:16px; overflow-x:auto; font-size:.83rem; line-height:1.55;
+    border-radius:10px; padding:16px; overflow-x:auto; overscroll-behavior-x:contain;
+    font-size:clamp(.76rem,2.9vw,.83rem); line-height:1.55;
     font-family:"JetBrains Mono",Consolas,monospace; margin:12px 0 20px;}
 code.inline{background:var(--code-bg); border:1px solid var(--border);
     border-radius:6px; padding:1px 6px; font-size:.85em; font-family:Consolas,monospace; color:#ffd28e;}
@@ -83,6 +86,7 @@ textarea,input[type=password],input[type=text],select{
     width:100%; background:var(--field-bg); color:var(--text); border:1px solid var(--border);
     border-radius:10px; padding:12px; font-size:.92rem; font-family:inherit; resize:vertical;}
 textarea:focus,input:focus,select:focus{outline:none; border-color:var(--accent);}
+input[type=checkbox]{min-width:20px; min-height:20px; accent-color:var(--accent);}
 label{display:block; font-size:.85rem; color:var(--muted); margin:12px 0 6px;}
 button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; border:none;
     border-radius:10px; padding:11px 26px; font-size:.95rem; font-weight:700; cursor:pointer; margin-top:14px;}
@@ -269,6 +273,51 @@ details.agent-box[open]>summary{margin-bottom:16px;}
   nav{padding-top:70px;}
   header{padding-top:56px;}
   body{padding-inline-start:0;}
+}
+
+/* ── Phones ──────────────────────────────────────────────────────────────── */
+@media(max-width:640px){
+  /* Any field under 16px makes iOS Safari zoom the whole page on focus, and it
+     never zooms back out. This is the single most disruptive mobile bug here. */
+  textarea,input[type=password],input[type=text],select{font-size:16px; padding:12px 14px;}
+  header h1{margin-bottom:10px;}
+  header p{margin-bottom:20px;}
+  .badges{gap:8px;}
+  .badge{font-size:.78rem; padding:6px 12px;}
+  .hero-cta{gap:10px; margin-top:20px;}
+  .hero-cta a{flex:1 1 140px; text-align:center; padding:13px 16px;}
+  .tldr{padding:14px 16px; margin-top:20px;}
+  h2{gap:10px; padding-bottom:12px;}
+  h2 .num{font-size:.95rem; padding:2px 10px;}
+  h2::after{width:56px;}
+  .lead{margin-bottom:18px;}
+  .grid{gap:12px; margin:14px 0;}
+  .card{padding:16px;}
+  .agent-box{margin:18px 0;}
+  .chat{padding:12px;}
+  .msg{max-width:92%;}
+  .score-wrap{flex-direction:column; align-items:center; text-align:center; gap:12px;}
+  /* A table scrolls in its own box rather than crushing its columns. */
+  table{display:block; overflow-x:auto; overscroll-behavior-x:contain; white-space:nowrap;}
+  .video-embed{margin-inline:-4px;}
+  /* padding-block only — the inline sides carry the safe-area gutter set above. */
+  footer{padding-block:26px calc(26px + env(safe-area-inset-bottom));}
+}
+
+/* ── Touch targets ───────────────────────────────────────────────────────────
+   Phones by width, plus any coarse-pointer device (tablets, touch laptops). */
+@media (max-width:640px), (pointer:coarse){
+  /* ~44px is the smallest comfortably tappable target. */
+  button.primary,button.ghost,.hero-cta a,.lecture-cta{min-height:46px;}
+  .mic-btn{min-width:56px;}
+  details.agent-box>summary{min-height:44px; padding:5px 0;}
+  nav a.logo{padding:9px 0;}
+  /* Inline link in a sentence: padding, not min-height, so it stays on the line. */
+  footer a{display:inline-block; padding:8px 4px;}
+  .upload-zone{padding:26px 20px;}
+  /* Reachability: the copy button sits in the corner of a code block a thumb
+     has to stretch for, so give it a real hit area. */
+  .pre-wrap .copy-btn{padding:7px 12px; font-size:.76rem;}
 }
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
