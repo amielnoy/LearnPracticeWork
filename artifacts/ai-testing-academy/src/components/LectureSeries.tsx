@@ -53,7 +53,7 @@ const EN: BankData = {
       title: 'AI-Powered Basic Cybersecurity',
       lead: 'Foundational cybersecurity concepts, powered and accelerated by AI tools.',
       lectures: [
-        { num: 1, ready: true, title: 'Introduction to Cybersecurity with AI', desc: 'The fundamentals of cybersecurity — threats, attack surfaces, and defense-in-depth — and how AI tools are reshaping how security teams work today.', url: 'https://gamma.app/docs/AI--e2m8rc9urhszuwb?mode=doc' },
+        { num: 1, ready: true, title: 'Introduction to Cybersecurity with AI', desc: 'The fundamentals of cybersecurity — threats, attack surfaces, and defense-in-depth — and how AI tools are reshaping how security teams work today.', url: 'https://ai--hktwaey.gamma.site/' },
         { num: 2, ready: false, title: 'AI-Powered Threat Detection Basics', desc: 'How machine learning models flag suspicious activity, from rule-based detection to anomaly scoring, and where AI adds real value over static rules.' },
         { num: 3, ready: false, title: 'Phishing & Social Engineering Detection with AI', desc: 'Using AI to spot phishing emails, deepfake voice scams, and social engineering attempts before they reach end users.' },
         { num: 4, ready: false, title: 'Malware Analysis Using Machine Learning', desc: 'Classifying and clustering malware samples with ML models, and the basics of static vs. behavioral analysis pipelines.' },
@@ -96,7 +96,7 @@ const HE: BankData = {
       title: 'בדיקות סייבר בסיסי עם בינה מלאכותית',
       lead: 'יסודות אבטחת מידע, מואצים ומופעלים באמצעות כלי בינה מלאכותית.',
       lectures: [
-        { num: 1, ready: true, title: 'מבוא לאבטחת מידע עם בינה מלאכותית', desc: 'יסודות אבטחת המידע — איומים, משטחי תקיפה והגנה מרובדת — וכיצד כלי AI משנים כיום את אופן העבודה של צוותי אבטחה.', url: 'https://gamma.app/docs/AI--e2m8rc9urhszuwb?mode=doc' },
+        { num: 1, ready: true, title: 'מבוא לאבטחת מידע עם בינה מלאכותית', desc: 'יסודות אבטחת המידע — איומים, משטחי תקיפה והגנה מרובדת — וכיצד כלי AI משנים כיום את אופן העבודה של צוותי אבטחה.', url: 'https://ai--hktwaey.gamma.site/' },
         { num: 2, ready: false, title: 'יסודות זיהוי איומים עם AI', desc: 'כיצד מודלים של למידת מכונה מזהים פעילות חשודה, מזיהוי מבוסס חוקים ועד ניקוד אנומליות, והיכן AI מוסיף ערך אמיתי מעבר לחוקים סטטיים.' },
         { num: 3, ready: false, title: 'זיהוי פישינג והנדסה חברתית עם AI', desc: 'שימוש ב-AI לזיהוי הודעות פישינג, הונאות קול מבוססות deepfake וניסיונות הנדסה חברתית לפני שהם מגיעים למשתמשי הקצה.' },
         { num: 4, ready: false, title: 'ניתוח תוכנות זדוניות באמצעות למידת מכונה', desc: 'סיווג וקיבוץ של דגימות תוכנה זדונית עם מודלי ML, ויסודות הניתוח הסטטי לעומת ההתנהגותי.' },
