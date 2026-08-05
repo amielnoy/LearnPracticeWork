@@ -89,7 +89,7 @@ pnpm run report:allure:serve   # generate and open it
 Allure 3 is a plain Node CLI — no JVM. The e2e config keeps a screenshot, a video and a trace
 on failure, and Allure picks those up as attachments. CI generates the report, uploads it
 alongside the raw results and the Playwright HTML report, and the `publish-allure` job pushes
-it to a **separate reports repository's** `gh-pages` (via the `ALLURE_PAGES_TOKEN` secret and
+it to a **separate reports repository's** `main` branch (via the `ALLURE_PAGES_TOKEN` secret and
 the `ALLURE_PAGES_REPO` variable), so the report gets its own Pages URL and never lands on the
 portfolio site.
 
