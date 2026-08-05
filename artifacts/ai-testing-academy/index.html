@@ -50,9 +50,23 @@
   ]
 }
 </script>
+<!-- Fonts load without blocking the first paint: the browser fetches the CSS at
+     high priority via preload, but `media="print"` keeps it out of the render
+     path until onload flips it to "all". `display=swap` means text paints in
+     the fallback immediately rather than waiting on the webfont.
+     Weights are exactly the ones rendered (audited in the browser): 500 was
+     requested but never used, so it is gone. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="style"
+  href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap">
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap"
+  media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap">
+</noscript>
 </head>
 <body>
 <div id="root"></div>

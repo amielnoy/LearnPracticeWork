@@ -94,7 +94,16 @@
       "Bash(node -e ' *)",
       "Bash(pkill -f \"playwright.*show-report\")",
       "Bash(pkill -f \"9323\")",
-      "Bash(grep -n \"html', { open: 'never' }\" playwright.config.mts tests/playwright-ct.config.ts tests/playwright-e2e.config.ts)"
+      "Bash(grep -n \"html', { open: 'never' }\" playwright.config.mts tests/playwright-ct.config.ts tests/playwright-e2e.config.ts)",
+      "Bash(node --experimental-strip-types -e ' *)",
+      "Bash(pkill -f \"vite --config vite.config.ts\")",
+      "Bash(curl -sL \"https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/assets/index-yl6UvtS0.js\" -o live-bundle.js)",
+      "Bash(curl -sL \"https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/\")",
+      "Bash(./node_modules/.bin/tsc -p artifacts/ai-testing-academy/tsconfig.json --noEmit)",
+      "Bash(echo \"=== academy typecheck exit: $? ===\")",
+      "Bash(grep -n \"^code\\\\|[^-]code{\\\\| code{\\\\|code,\" src/app.css src/index.css)",
+      "Bash(grep -o '`[^`]*`' src/lib/questionBank.ts)",
+      "Bash(grep -on '\\\\*[^*]\\\\{1,20\\\\}\\\\*' src/lib/questionBank.ts)"
     ]
   }
 }
