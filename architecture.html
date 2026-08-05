@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Testing Academy — Architecture</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --panel:#ffffff; --sunk:#eef0f4;
+    --fg:#161a20; --muted:#5d6673; --line:#dde1e8;
+    --accent:#2f5fe0; --accent2:#8a4fd8; --ok:#1d7a4c; --warn:#a76a12; --err:#bf3126;
+    --code:#f1f3f7;
+    --shadow:0 1px 2px rgba(16,20,28,.05), 0 14px 34px -24px rgba(16,20,28,.5);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0d1015; --panel:#151a21; --sunk:#1b212a;
+      --fg:#e6eaf1; --muted:#97a2b1; --line:#252d38;
+      --accent:#7aa2ff; --accent2:#c093ff; --ok:#4fc98a; --warn:#e2b155; --err:#f2705f;
+      --code:#11161d;
+      --shadow:0 1px 2px rgba(0,0,0,.5), 0 16px 36px -24px rgba(0,0,0,.9);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font:15.5px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:36px 20px 90px}
+
+  header .eyebrow{
+    font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 12px;
+  }
+  header h1{font-size:clamp(1.8rem,4.6vw,2.5rem);line-height:1.1;letter-spacing:-.02em;margin:0 0 10px}
+  header .stand{color:var(--muted);max-width:70ch;margin:0 0 18px;font-size:1.03rem}
+  .pill{
+    display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:20px;
+    background:var(--sunk);border:1px solid var(--line);color:var(--muted);margin:0 6px 6px 0;
+  }
+  .pill.on{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+
+  h2{font-size:1.32rem;letter-spacing:-.015em;margin:52px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  h3{font-size:1.02rem;margin:26px 0 6px}
+  h4{font-size:.94rem;margin:0 0 4px}
+  p{margin:0 0 12px}
+  .lead{color:var(--muted)}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}
+  .toc a{font-size:13px;padding:5px 12px;border:1px solid var(--line);border-radius:20px;background:var(--panel);color:var(--muted)}
+  .toc a:hover{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));text-decoration:none}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0;box-shadow:var(--shadow)}
+  .card.tight{padding:13px 15px}
+
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.87em;background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.55;margin:10px 0}
+  pre code{background:none;border:0;padding:0;font-size:inherit}
+
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;min-width:520px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font:600 11.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  td code{white-space:nowrap}
+
+  /* horizontal pipeline */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:14px 0}
+  .stage{flex:1 1 170px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px;box-shadow:var(--shadow)}
+  .stage .k{font:600 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);display:block;margin-bottom:7px}
+  .stage p{margin:0;color:var(--muted);font-size:12.8px}
+  .arrow{align-self:center;padding:0 9px;color:var(--accent);font-size:20px;font-weight:700}
+  @media (max-width:760px){.flow{flex-direction:column}.arrow{transform:rotate(90deg);padding:5px 0;align-self:flex-start;margin-left:22px}}
+
+  /* nested provider stack */
+  .stack{margin:14px 0}
+  .lvl{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:11px 13px;background:var(--panel);margin-bottom:0}
+  .lvl + .lvl{margin-top:8px}
+  .lvl .nm{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;font-weight:600}
+  .lvl .why{color:var(--muted);font-size:12.8px}
+  .stack .depth1{margin-left:0}
+  .stack .depth2{margin-left:18px}
+  .stack .depth3{margin-left:36px}
+  .stack .depth4{margin-left:54px}
+  .stack .depth5{margin-left:72px}
+  .stack .depth6{margin-left:90px}
+  @media (max-width:620px){.stack [class^=depth]{margin-left:0}}
+
+  /* two-column grids */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:14px 0}
+  .box{border:1px solid var(--line);border-radius:11px;padding:13px 15px;background:var(--panel)}
+  .box .tag{font:600 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--accent2)}
+  .box b{display:block;margin:6px 0 3px;font-size:14.5px}
+  .box span{color:var(--muted);font-size:13px}
+
+  ul.notes{margin:8px 0 12px;padding-left:20px}
+  ul.notes li{margin-bottom:7px}
+  ul.notes li::marker{color:var(--accent)}
+
+  .callout{border-left:3px solid var(--warn);background:var(--sunk);border-radius:0 10px 10px 0;padding:12px 15px;margin:14px 0;font-size:14px}
+  .callout b{color:var(--warn)}
+  .callout.good{border-left-color:var(--ok)} .callout.good b{color:var(--ok)}
+
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13.6px;margin:6px 0}
+  .kv dt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent)}
+  .kv dd{margin:0;color:var(--muted)}
+
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Architecture · ai-testing-academy</p>
+  <h1>AI Testing Academy — how the whole thing is put together</h1>
+  <p class="stand">
+    A single-page React site that teaches QA automation and runs three AI-backed tools
+    (resume review, mock interview, question-bank enrichment) <b>entirely from the browser</b>.
+    There is no backend of its own: the user brings an API key, or an optional shared
+    proxy in the monorepo answers for them. This page walks the runtime shape, the
+    provider abstraction, the content model, and where to extend each one.
+  </p>
+  <p>
+    <span class="pill on">React 18 + TypeScript</span>
+    <span class="pill on">Vite</span>
+    <span class="pill">wouter</span>
+    <span class="pill">TanStack Query</span>
+    <span class="pill">Tailwind + Radix (shadcn/ui)</span>
+    <span class="pill">EN / HE with RTL</span>
+    <span class="pill">Static SPA</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="#overview">1 · What it is</a>
+  <a href="#runtime">2 · Runtime shape</a>
+  <a href="#composition">3 · Composition</a>
+  <a href="#ai">4 · The AI layer</a>
+  <a href="#content">5 · Content &amp; i18n</a>
+  <a href="#features">6 · Feature modules</a>
+  <a href="#state">7 · State &amp; persistence</a>
+  <a href="#ui">8 · UI mechanics</a>
+  <a href="#security">9 · Trust boundaries</a>
+  <a href="#build">10 · Build &amp; deploy</a>
+  <a href="#extend">11 · Extension points</a>
+</nav>
+
+<!-- ───────────────────────── 1 ───────────────────────── -->
+<h2 id="overview">1 · What it is</h2>
+
+<p class="lead">
+  One page, six sections, stacked in reading order. Three are static teaching content;
+  three call a language model. Everything below exists to serve that split.
+</p>
+
+<div class="grid">
+  <div class="box">
+    <span class="tag">static</span>
+    <b>⚙️ Connection Setup</b>
+    <span>Pick a provider and model, paste a key or lean on the server default, and test the round trip before anything else runs.</span>
+  </div>
+  <div class="box">
+    <span class="tag">AI · JSON</span>
+    <b>📄 Resume &amp; CV Agent</b>
+    <span>Parses an uploaded PDF/DOCX in-browser, scores it as structured JSON, rewrites it, and exports the result back to PDF.</span>
+  </div>
+  <div class="box">
+    <span class="tag">static</span>
+    <b>🎓 Lecture Series</b>
+    <span>Course tracks and lecture links. Content lives in the component itself, not the locale files.</span>
+  </div>
+  <div class="box">
+    <span class="tag">AI · chat</span>
+    <b>🎙️ Mock Interview</b>
+    <span>A five-stage interviewer driven by one long system prompt, ending in a scored verdict on a sentinel token.</span>
+  </div>
+  <div class="box">
+    <span class="tag">AI · grounded</span>
+    <b>❓ Interview Questions</b>
+    <span>A curated bank, plus a “enrich with fresh questions” action that runs a web-grounded Gemini call.</span>
+  </div>
+  <div class="box">
+    <span class="tag">static</span>
+    <b>🐍 Coding Challenges</b>
+    <span>40 Python problems across three levels — each a prompt, then a hint, then a solution with complexity.</span>
+  </div>
+</div>
+
+<!-- ───────────────────────── 2 ───────────────────────── -->
+<h2 id="runtime">2 · Runtime shape</h2>
+
+<p>
+  The build output is static files. At runtime the browser is the whole application:
+  it holds the key, it formats the request, it talks to the model vendor directly.
+  The optional <code>/api</code> hop exists only so first-time visitors get a working
+  demo without owning a key.
+</p>
+
+<div class="flow">
+  <div class="stage">
+    <span class="k">1 · Static host</span>
+    <p><code>dist/public</code> served under a base path. No server rendering, no session, no database.</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="stage">
+    <span class="k">2 · Browser SPA</span>
+    <p>React mounts, resolves language and theme from <code>localStorage</code>, renders one route.</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="stage">
+    <span class="k">3 · Provider layer</span>
+    <p><code>callAI()</code> picks a transport: the user key straight to the vendor, or the shared proxy.</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="stage">
+    <span class="k">4 · Model vendor</span>
+    <p>Gemini, Anthropic or OpenAI. The response is normalised to a plain string before it leaves the layer.</p>
+  </div>
+</div>
+
+<h3>The two transports</h3>
+
+<div class="grid">
+  <div class="box">
+    <span class="tag">default path</span>
+    <b>Bring your own key</b>
+    <span>
+      The key stays in <code>localStorage</code> and is attached to a <code>fetch()</code> made
+      from the page itself. Anthropic requires
+      <code>anthropic-dangerous-direct-browser-access</code> for this to be allowed at all —
+      that header is what makes browser-origin calls legal, and it is set deliberately.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">fallback path</span>
+    <b>Shared server proxy</b>
+    <span>
+      On mount the app probes <code>GET /api/ai/config</code>. If it reports Gemini as available
+      and the user has not opted into their own key, calls route through
+      <code>POST /api/ai/generate</code> instead, and no key ever reaches the client.
+      A failed or missing probe simply returns <code>{}</code> — the site then insists on a user key
+      rather than breaking.
+    </span>
+  </div>
+</div>
+
+<div class="callout">
+  <b>Why the dev proxy exists.</b> Vite's SPA fallback answers <code>/api/*</code> with
+  <code>index.html</code> at HTTP 200, so <code>res.ok</code> passes and <code>res.json()</code>
+  chokes on HTML — the site would silently conclude no server key exists and grey out the panel.
+  <code>vite.config.ts</code> therefore proxies <code>/api</code> to the sibling
+  <code>api-server</code> package (<code>API_PORT</code>, default <code>8787</code>) in development.
+  In production one origin serves both, so the relative path just works.
+</div>
+
+<!-- ───────────────────────── 3 ───────────────────────── -->
+<h2 id="composition">3 · Composition</h2>
+
+<p>
+  <code>App.tsx</code> is a provider stack and nothing else. Each layer is there for a
+  reason, and the order matters in exactly one place: <code>ProviderContextProvider</code>
+  reads translated error strings, so it has to sit inside <code>LocaleProvider</code>.
+</p>
+
+<div class="stack">
+  <div class="lvl depth1"><span class="nm">QueryClientProvider</span> — <span class="why">TanStack Query client; present for future server state, not yet on the hot path.</span></div>
+  <div class="lvl depth2"><span class="nm">TooltipProvider</span> — <span class="why">Radix tooltip root for the shadcn/ui primitives.</span></div>
+  <div class="lvl depth3"><span class="nm">LocaleProvider</span> — <span class="why">Resolves the language once, exposes <code>locale</code> / <code>S</code>, stamps <code>lang</code> and <code>dir</code> on <code>&lt;html&gt;</code>.</span></div>
+  <div class="lvl depth4"><span class="nm">ProviderContextProvider</span> — <span class="why">Owns provider/model/key state and the <code>callClaude</code> / <code>callGrounded</code> functions every AI feature uses.</span></div>
+  <div class="lvl depth5"><span class="nm">WouterRouter</span> — <span class="why">Base path taken from <code>import.meta.env.BASE_URL</code>, so the app works under a sub-path deploy.</span></div>
+  <div class="lvl depth6"><span class="nm">Switch → HomePage | NotFound</span> — <span class="why">One real route. The router is here for the sub-path handling and the 404, not for navigation.</span></div>
+</div>
+
+<h3>Below the router</h3>
+<p>
+  <code>HomePage</code> owns two pieces of page-level chrome — the theme and the nav drawer —
+  and then renders the six sections in order. Everything else a section needs, it pulls
+  from context itself. That is the reason the page component stays under 100 lines while
+  the sections it renders are hundreds.
+</p>
+
+<pre><code>HomePage
+├── skip link · ScrollProgress · NavToggle · NavScrim · BackToTop
+├── Nav          ← theme toggle, language toggle, scroll-spy
+├── Hero
+└── main
+    ├── ConnectionSetup     → useProviderContext()
+    ├── ResumeAgent         → callClaude() + extractJSON()
+    ├── LectureSeries       → self-contained content
+    ├── InterviewAgent      → callClaude() with a rolling message array
+    ├── QuestionBank        → callGrounded() + extractJSON()
+    └── CodingChallenges    → locale content only, no network
+        └── ChallengeCard × 40   → useDisclosure(3)</code></pre>
+
+<div class="callout good">
+  <b>The shape to notice.</b> No component imports a vendor SDK, a URL, or a key.
+  They import <code>useProviderContext()</code> and call a function. Swapping a vendor,
+  adding a proxy, or changing a header touches <code>lib/providers.ts</code> alone.
+</div>
+
+<!-- ───────────────────────── 4 ───────────────────────── -->
+<h2 id="ai">4 · The AI layer</h2>
+
+<p>
+  <code>lib/providers.ts</code> is the only file that knows any vendor exists.
+  <code>PROVIDERS</code> is a registry of strategy objects — one per vendor — behind a
+  uniform interface, so the call site never branches on which one is selected.
+</p>
+
+<pre><code>interface ProviderDef {
+  label:        (S) =&gt; string;           // translated field label
+  placeholder:  string;                   // key format hint, e.g. 'sk-ant-...'
+  models:       string[];                 // first entry is the default
+  validateKey?: (key, S) =&gt; void;         // fail fast on an obviously wrong key
+  build:        (key, model, system, messages, maxTokens)
+                  =&gt; { url, headers, body };   // vendor request shape
+  parse:        (d) =&gt; string;            // vendor response → plain text
+  keyHint?:     (key, status, S) =&gt; string;    // extra help on a 4xx
+}</code></pre>
+
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th>Vendor</th><th>Endpoint</th><th>Auth</th><th>Models offered</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Gemini</b></td>
+      <td><code>generativelanguage.googleapis.com/v1beta</code></td>
+      <td><code>x-goog-api-key</code></td>
+      <td>2.5-flash · 2.5-flash-lite · 2.5-pro</td>
+      <td>Flash models get <code>thinkingBudget: 0</code>; the only vendor with a proxy path and the only one with web grounding.</td>
+    </tr>
+    <tr>
+      <td><b>Anthropic</b></td>
+      <td><code>api.anthropic.com/v1/messages</code></td>
+      <td><code>x-api-key</code></td>
+      <td>Claude Sonnet 5 · Claude Haiku 4.5</td>
+      <td>Needs <code>anthropic-version</code> plus the direct-browser-access opt-in header.</td>
+    </tr>
+    <tr>
+      <td><b>OpenAI</b></td>
+      <td><code>api.openai.com/v1/chat/completions</code></td>
+      <td><code>Authorization: Bearer</code></td>
+      <td>GPT-5-mini · 5.4-mini · 5.4</td>
+      <td>System prompt is prepended as a message rather than sent as its own field.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Three exported entry points</h3>
+<dl class="kv">
+  <dt>callAI()</dt>
+  <dd>The general path. Chooses proxy vs direct, validates the key, builds, sends, and parses — returning a plain string.</dd>
+  <dt>callGeminiGrounded()</dt>
+  <dd>Adds the <code>google_search</code> tool so answers cite live sources. Used only by the question-bank enrichment.</dd>
+  <dt>extractJSON()</dt>
+  <dd>Pulls a JSON object out of a model reply — strips a <code>```json</code> fence if present, then takes the outermost braces. This is what makes “return only JSON” prompts survive a chatty model.</dd>
+</dl>
+
+<h3>Failure handling is part of the contract</h3>
+<ul class="notes">
+  <li>A <b>thrown <code>fetch</code></b> (CORS, offline, blocked host) is translated into an explanatory message naming the host that was refused — not a bare <code>TypeError</code>.</li>
+  <li>A <b>non-2xx</b> response carries the status plus the first 300 characters of the body, so the user sees the vendor's own complaint.</li>
+  <li>A <b>wrong-shaped key</b> is rejected before any request is made, via <code>validateKey</code> — pasting an <code>sk-ant-</code> key into the OpenAI slot fails locally.</li>
+  <li>Every error string comes from the active locale, so the failure path is translated as carefully as the happy path.</li>
+</ul>
+
+<!-- ───────────────────────── 5 ───────────────────────── -->
+<h2 id="content">5 · Content &amp; i18n</h2>
+
+<p>
+  <code>en.ts</code> is the source of truth for structure; <code>he.ts</code> is declared as
+  <code>const he: Locale</code> where <code>Locale = typeof en</code>. That single annotation
+  means the compiler rejects a Hebrew file that drops a key, misspells one, or falls behind
+  a new section. Translation drift is a build error, not a runtime blank.
+</p>
+
+<div class="grid">
+  <div class="box">
+    <span class="tag">resolution order</span>
+    <b>Which language wins</b>
+    <span>
+      <code>?lang=</code> query param → <code>localStorage.ata_lang</code> →
+      <code>navigator.language</code> starting with <code>he</code> → <code>en</code>.
+      The result is written back to storage, so a link with <code>?lang=he</code> is sticky.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">direction</span>
+    <b>RTL is data, not a branch</b>
+    <span>
+      Each locale carries its own <code>dir</code>. <code>applyHtmlAttrs()</code> stamps
+      <code>lang</code> and <code>dir</code> onto <code>&lt;html&gt;</code> and CSS logical
+      properties do the rest — no component checks the language.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">switching</span>
+    <b>Full reload, on purpose</b>
+    <span>
+      <code>switchLang()</code> writes the choice and reloads with the new query param.
+      A reload guarantees direction, fonts and third-party widgets all re-lay out cleanly,
+      which a re-render does not.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">prompts</span>
+    <b>Prompts live in the locale</b>
+    <span>
+      The resume, rewrite and interview system prompts sit under <code>locale.prompts</code>,
+      so tuning model behaviour is a content edit — and each language can steer the model
+      in its own words.
+    </span>
+  </div>
+</div>
+
+<h3>The challenge content model</h3>
+<p>
+  <code>lib/challenges.ts</code> declares types only — no data. The UI depends on the shape,
+  and the shape is currently satisfied by the locale files; an API or CMS could satisfy it
+  later without touching a component.
+</p>
+
+<pre><code>Challenge      { title, prompt, hint, code, complexity }
+ChallengeLevel { label, blurb, items: readonly Challenge[] }
+ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Level</th><th>Focus</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td><b>1 — Fundamentals</b></td><td>Lists, dicts, strings, a little recursion. Single clean passes, no tricks.</td><td>20</td></tr>
+    <tr><td><b>2 — Interview standard</b></td><td>Decorators, polling, schema validation, log diffing, generators.</td><td>10</td></tr>
+    <tr><td><b>3 — Advanced</b></td><td>Intervals, caching, graphs, concurrency, streaming and bisection.</td><td>10</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ───────────────────────── 6 ───────────────────────── -->
+<h2 id="features">6 · Feature modules</h2>
+
+<h3>📄 Resume Agent — the heavyweight</h3>
+<p>
+  At ~540 lines it is the largest component, because it is really a small document pipeline:
+  read a file, extract text, score it, rewrite it, export it. All of it client-side.
+</p>
+<div class="flow">
+  <div class="stage"><span class="k">extract</span><p><b>pdf.js</b> or <b>mammoth</b> turns an uploaded PDF/DOCX into plain text in the browser.</p></div>
+  <div class="arrow">→</div>
+  <div class="stage"><span class="k">score</span><p><code>callClaude()</code> with the resume prompt, then <code>extractJSON()</code> into scores, strengths, gaps.</p></div>
+  <div class="arrow">→</div>
+  <div class="stage"><span class="k">rewrite</span><p>A second call with the improve prompt returns ATS-friendly prose, not JSON.</p></div>
+  <div class="arrow">→</div>
+  <div class="stage"><span class="k">export</span><p><b>jsPDF</b> + <b>html2canvas</b> render the result back out as a downloadable PDF.</p></div>
+</div>
+<p>
+  Those four libraries are <b>not bundled</b>. They are injected at runtime by
+  <code>loadFirst()</code>, which walks cdnjs → jsDelivr → unpkg and stops at the first host
+  that actually defines the expected global. The two parsers are also warmed on first
+  interaction, so the upload does not stall on a cold CDN. It keeps the main bundle small,
+  at the cost of a hard dependency on public CDN reachability.
+</p>
+
+<h3>🎙️ Interview Agent</h3>
+<p>
+  A rolling <code>Message[]</code> is kept in a ref and resent whole on every turn — the model
+  holds the conversation, the client holds no session. The five-stage structure lives entirely
+  in <code>locale.prompts.interview</code>. Ending the interview sends the sentinel
+  <code>___VERDICT___</code>, which the prompt binds to “stop and produce a scored verdict”.
+</p>
+
+<h3>❓ Question Bank</h3>
+<p>
+  Static stages render immediately. The enrich action feeds the user's role and a fixed
+  keyword seed into <code>callGrounded()</code>, then <code>extractJSON()</code> lifts a
+  <code>questions</code> array out of the reply. Grounding is why this one path is Gemini-only.
+</p>
+
+<h3>🐍 Coding Challenges</h3>
+<p>
+  The section maps levels to <code>ChallengeCard</code>s and knows nothing else. Each card owns
+  its own <code>useDisclosure(3)</code> — prompt → hint → solution → collapsed — so the list
+  never tracks a stage per index and adding challenges cannot regress the reveal logic.
+</p>
+
+<!-- ───────────────────────── 7 ───────────────────────── -->
+<h2 id="state">7 · State &amp; persistence</h2>
+
+<p>
+  There is no store. State is React state in two contexts plus local component state,
+  and the only thing that survives a reload is what is deliberately written to
+  <code>localStorage</code> under the <code>ata_</code> prefix.
+</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Key</th><th>Written by</th><th>Holds</th></tr></thead>
+  <tbody>
+    <tr><td><code>ata_theme</code></td><td>HomePage</td><td><code>light</code> / <code>dark</code>; first visit falls back to <code>prefers-color-scheme</code>.</td></tr>
+    <tr><td><code>ata_lang</code></td><td>i18n</td><td>Resolved language, re-written on every resolve so it stays sticky.</td></tr>
+    <tr><td><code>ata_provider</code></td><td>ProviderContext</td><td>Selected vendor; defaults to <code>gemini</code>.</td></tr>
+    <tr><td><code>ata_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>The user's own API key, one slot per vendor, saved only while “use my key” is on.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  <code>resetSettings()</code> clears every <code>ata_</code> key and reloads — that prefix is
+  the reason it can be a one-line sweep rather than a maintained list.
+</p>
+
+<h3>The key-mode decision</h3>
+<p>
+  One subtlety worth naming: <code>ownKeyTouched</code>. Until the user explicitly toggles the
+  switch, the app re-derives the mode whenever the provider changes or the server config
+  arrives — a stored key or the absence of a server default turns own-key mode on.
+  Once the user touches it, their choice is respected and never recomputed.
+</p>
+
+<!-- ───────────────────────── 8 ───────────────────────── -->
+<h2 id="ui">8 · UI mechanics</h2>
+
+<div class="grid">
+  <div class="box">
+    <span class="tag">hooks/useDisclosure</span>
+    <b>Stepped reveal</b>
+    <span>A modulo counter over N stages. It knows nothing about hints or solutions, which is why the same hook drives any progressive-reveal card.</span>
+  </div>
+  <div class="box">
+    <span class="tag">hooks/useReveal</span>
+    <b>Scroll-in animation</b>
+    <span>One <code>IntersectionObserver</code> per section adds <code>.in</code> and then unobserves, so each element animates exactly once and the observer disconnects on unmount.</span>
+  </div>
+  <div class="box">
+    <span class="tag">Nav</span>
+    <b>Scroll-spy</b>
+    <span>A second observer with a <code>-25% / -65%</code> root margin highlights whichever section is in the reading band, not merely on screen.</span>
+  </div>
+  <div class="box">
+    <span class="tag">HomePage</span>
+    <b>Drawer without a flash</b>
+    <span>The <code>nav-ready</code> class lands after a double <code>requestAnimationFrame</code>, so CSS transitions are only enabled after the first paint and the drawer cannot animate on load.</span>
+  </div>
+  <div class="box">
+    <span class="tag">lib/domUtils</span>
+    <b>Safe rendering of model text</b>
+    <span><code>esc()</code>, <code>linkifyHtml()</code> and <code>findLinks()</code> escape first and only then insert <code>&lt;strong&gt;</code>/<code>&lt;a&gt;</code> — markdown from a model is rendered without handing it an HTML injection.</span>
+  </div>
+  <div class="box">
+    <span class="tag">lib/domUtils</span>
+    <b>Mixed-direction output</b>
+    <span><code>isRtlText()</code> detects Hebrew per block, so a model reply can be aligned correctly even when it does not match the page language.</span>
+  </div>
+</div>
+
+<h3>Accessibility affordances already in place</h3>
+<ul class="notes">
+  <li>A skip link to <code>#main-content</code>, translated like everything else.</li>
+  <li><code>aria-expanded</code> on every disclosure button, and <code>aria-label</code> on the icon-only nav and language toggles.</li>
+  <li>Theme is an attribute on <code>&lt;html&gt;</code> (<code>data-theme</code>), so CSS — not JS — resolves colour, and the first paint is already correct.</li>
+  <li>Both <code>lang</code> and <code>dir</code> are set on the document element, which is what screen readers and the bidi algorithm actually read.</li>
+</ul>
+
+<!-- ───────────────────────── 9 ───────────────────────── -->
+<h2 id="security">9 · Trust boundaries</h2>
+
+<div class="callout">
+  <b>Be explicit about the key.</b> In own-key mode the API key lives in
+  <code>localStorage</code> and is sent from the page to the vendor. That is the accepted
+  trade for a backend-free teaching site — any script running on this origin could read it,
+  and the key is exposed to the browser's network log. The proxy path exists precisely so a
+  casual visitor never has to make that trade.
+</div>
+
+<ul class="notes">
+  <li><b>Untrusted input is model output.</b> Everything a model returns is escaped before it reaches the DOM; the markdown renderer builds its tags from parsed groups, never by interpolating raw text.</li>
+  <li><b>No secret is bundled.</b> Server-side keys stay in <code>api-server</code>; the client only ever learns the boolean <code>available</code> and a default model name.</li>
+  <li><b>Error bodies are truncated</b> to 300 characters before display, which keeps a verbose upstream error from dumping a wall of text into the UI.</li>
+  <li><b>Third-party script injection is real surface.</b> The resume tools are pulled from public CDNs at runtime; a compromised CDN would execute on this origin. Pinned versions and a fixed host list limit, but do not remove, that exposure.</li>
+</ul>
+
+<!-- ───────────────────────── 10 ───────────────────────── -->
+<h2 id="build">10 · Build &amp; deploy</h2>
+
+<p>
+  The package is one workspace inside a pnpm monorepo
+  (<code>artifacts/ai-testing-academy</code>), alongside <code>api-server</code>,
+  <code>portfolio</code> and the lecture sites. Shared dependency versions come from the
+  workspace catalog, which is why so many entries read <code>catalog:</code>.
+</p>
+
+<dl class="kv">
+  <dt>pnpm dev</dt><dd>Vite dev server, host <code>0.0.0.0</code>, with <code>/api</code> proxied to the local API server.</dd>
+  <dt>pnpm build</dt><dd>Emits to <code>dist/public</code> with <code>emptyOutDir</code>.</dd>
+  <dt>pnpm serve</dt><dd>Previews the built output on the same port contract.</dd>
+  <dt>pnpm typecheck</dt><dd><code>tsc --noEmit</code> — the gate that keeps <code>he.ts</code> aligned with <code>en.ts</code>.</dd>
+</dl>
+
+<div class="callout good">
+  <b>Config fails loudly.</b> <code>vite.config.ts</code> throws if <code>PORT</code> or
+  <code>BASE_PATH</code> is missing or malformed, rather than defaulting. Under a sub-path
+  deploy a silently wrong base produces a blank page with 404s on every asset — a startup
+  error is far cheaper to diagnose.
+</div>
+
+<p>
+  <code>BASE_PATH</code> flows all the way through: Vite uses it for asset URLs, and
+  <code>App.tsx</code> feeds <code>import.meta.env.BASE_URL</code> to the router so client-side
+  routing agrees with the host. Deploy path is configured once, in one variable.
+</p>
+
+<!-- ───────────────────────── 11 ───────────────────────── -->
+<h2 id="extend">11 · Extension points</h2>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>To add…</th><th>Touch</th><th>And nothing else, because…</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>A coding challenge or a whole level</td>
+      <td><code>lib/locales/en.ts</code> + <code>he.ts</code></td>
+      <td><code>CodingChallenges</code> maps over whatever the locale provides; it never counts levels or items.</td>
+    </tr>
+    <tr>
+      <td>A model vendor</td>
+      <td><code>lib/providers.ts</code> — one <code>ProviderDef</code></td>
+      <td>The picker renders <code>Object.keys(PROVIDERS)</code> and <code>callAI</code> only ever calls <code>build</code>/<code>parse</code>.</td>
+    </tr>
+    <tr>
+      <td>A model to an existing vendor</td>
+      <td>That vendor's <code>models</code> array</td>
+      <td>The dropdown is generated from it; the first entry is the default.</td>
+    </tr>
+    <tr>
+      <td>A language</td>
+      <td>A new locale file + the <code>CATALOG</code> map</td>
+      <td>Typing it as <code>Locale</code> makes the compiler enumerate everything still missing.</td>
+    </tr>
+    <tr>
+      <td>A page section</td>
+      <td>A component + one line in <code>HomePage</code> + a <code>nav.links</code> entry</td>
+      <td>Scroll-spy and reveal both derive from the DOM and the nav list, so neither needs editing.</td>
+    </tr>
+    <tr>
+      <td>A progressive-reveal UI elsewhere</td>
+      <td><code>useDisclosure(n)</code></td>
+      <td>It is stage arithmetic only — it has no opinion about what a stage contains.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Where the edges are</h3>
+<ul class="notes">
+  <li><b>Lecture content is hardcoded</b> inside <code>LectureSeries.tsx</code> as <code>EN</code>/<code>HE</code> objects rather than living in the locale files — the one section that breaks the content/UI split.</li>
+  <li><b>Grounded search is Gemini-only</b>, so the enrich action degrades if the user is on Anthropic or OpenAI without a Gemini key.</li>
+  <li><b>The proxy path covers Gemini only.</b> The other two vendors are own-key or nothing.</li>
+  <li><b>Resume tooling needs the public internet</b> beyond the model call; behind a strict CSP or an offline network, extraction and PDF export are the first things to fail.</li>
+</ul>
+
+<footer>
+  Generated from the source at <code>artifacts/ai-testing-academy</code> — App shell, contexts,
+  hooks, provider layer and locale content. Update this page when the provider registry or the
+  section list changes; the rest is derived from types the compiler already enforces.
+</footer>
+
+</div>
+</body>
+</html>
