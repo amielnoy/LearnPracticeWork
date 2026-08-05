@@ -297,8 +297,8 @@ jobs:
     #     fine-grained token with Contents: write on the target repo) that can
     #     push to the reports repository.
     #   • The target repo itself, created with Pages enabled on `gh-pages`.
-    #     Defaults to <owner>/allure-reports; override with the repository
-    #     variable ALLURE_PAGES_REPO (e.g. amielnoy/allure-reports).
+    #     Defaults to <owner>/allure-report-learn-practice-deploy; override with
+    #     the repository variable ALLURE_PAGES_REPO if you rename it.
     needs: [gate, test]
     if: ${{ !cancelled() && needs.gate.outputs.run == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
@@ -326,7 +326,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ env.ALLURE_PAGES_TOKEN }}
-          external_repository: ${{ vars.ALLURE_PAGES_REPO || format('{0}/allure-reports', github.repository_owner) }}
+          external_repository: ${{ vars.ALLURE_PAGES_REPO || format('{0}/allure-report-learn-practice-deploy', github.repository_owner) }}
           publish_branch: gh-pages
           publish_dir: ./allure-report
           keep_files: false
