@@ -41,8 +41,14 @@ const read = (file: string) => readFileSync(file, 'utf8');
 /** `<noscript>` legitimately holds a blocking link — it only runs without JS. */
 const withoutNoscript = (html: string) => html.replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
 
-/** Every `<link …>` tag in the markup, as raw strings. */
-const linkTags = (html: string) => html.match(/<link\b[^>]*>/gi) ?? [];
+/**
+ * Every `<link …>` tag in the markup, as raw strings.
+ *
+ * The return type is annotated: without it `match() ?? []` infers
+ * `RegExpMatchArray | never[]`, and calling `.filter` on that union types the
+ * callback parameter as `never`.
+ */
+const linkTags = (html: string): string[] => html.match(/<link\b[^>]*>/gi) ?? [];
 
 const isFontStylesheet = (tag: string) =>
   /rel\s*=\s*["']?stylesheet/i.test(tag) && tag.includes('fonts.googleapis.com');
