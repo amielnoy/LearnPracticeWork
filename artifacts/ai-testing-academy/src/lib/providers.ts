@@ -1,3 +1,4 @@
+import { jsonrepair } from 'jsonrepair';
 import type { Locale } from './locales';
 
 export interface Message {
@@ -199,72 +200,18 @@ export async function callGeminiGrounded(
 }
 
 /**
- * Best-effort repair of the JSON a model *almost* returned. Runs only after a
- * strict `JSON.parse` has already failed, so it never touches valid input. It
- * is string-aware — nothing inside a quoted string is ever rewritten — and
- * fixes the two defects models actually produce: a missing comma between two
- * array elements or object members, and a trailing comma before `}` or `]`.
+ * The first balanced JSON value — object or array — in `s`, or the empty string
+ * if there is none. String-aware, so braces inside a string are ignored, and it
+ * stops at the matching close rather than the last brace in the text, so trailing
+ * prose or grounding citations after the JSON don't drag in garbage. A truncated
+ * value (no matching close) is returned whole for the repair pass to attempt.
  */
-function repairJson(json: string): string {
-  const isValueStart = (c: string) =>
-    c === '"' || c === '{' || c === '[' || c === '-' ||
-    (c >= '0' && c <= '9') || c === 't' || c === 'f' || c === 'n';
-  // A value-start immediately after one of these (only whitespace between) means
-  // a separating comma went missing.
-  const isValueEnd = (c: string) =>
-    c === '"' || c === '}' || c === ']' || (c >= '0' && c <= '9');
-
-  let out = '';
-  let last = ''; // last significant char emitted outside a string ('"' = a closed string)
-  let i = 0;
-  while (i < json.length) {
-    const ch = json[i]!;
-
-    if (/\s/.test(ch)) { out += ch; i++; continue; }
-
-    if (ch === '"') {
-      if (isValueEnd(last)) out += ','; // missing comma before this string
-      out += ch; i++;
-      for (let esc = false; i < json.length; i++) {
-        const c = json[i]!;
-        out += c;
-        if (esc) esc = false;
-        else if (c === '\\') esc = true;
-        else if (c === '"') { i++; break; }
-      }
-      last = '"';
-      continue;
-    }
-
-    if (ch === ',') {
-      let j = i + 1;
-      while (j < json.length && /\s/.test(json[j]!)) j++;
-      if (json[j] === '}' || json[j] === ']') { i++; continue; } // drop trailing comma
-      out += ch; last = ','; i++;
-      continue;
-    }
-
-    if (isValueStart(ch) && isValueEnd(last)) out += ','; // missing comma before this value
-    out += ch;
-    last = ch;
-    i++;
-  }
-  return out;
-}
-
-/**
- * The first balanced JSON value — object or array — in `s`, or null if there is
- * none. String-aware, so braces inside a string are ignored, and it stops at the
- * matching close rather than the last brace in the text, so trailing prose or
- * grounding citations after the JSON don't drag in garbage. A truncated value
- * (no matching close) is returned whole for the repair pass to attempt.
- */
-function findJson(s: string): string | null {
+function findJson(s: string): string {
   const objAt = s.indexOf('{');
   const arrAt = s.indexOf('[');
   const open =
     objAt === -1 ? arrAt : arrAt === -1 ? objAt : Math.min(objAt, arrAt);
-  if (open === -1) return null;
+  if (open === -1) return '';
 
   let depth = 0;
   let inStr = false;
@@ -293,20 +240,38 @@ export function extractJSON(text: string, S: Locale['s']): unknown {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   const candidates = fenced ? [fenced[1]!, text] : [text];
 
+  // The model is always asked for an object or an array; anything else (a bare
+  // string, a number) means jsonrepair over-reached on a line of prose, so it is
+  // rejected rather than returned.
+  const isContainer = (v: unknown): boolean => typeof v === 'object' && v !== null;
+
   for (const raw of candidates) {
-    const slice = findJson(raw);
-    if (slice === null) continue;
-    try {
-      return JSON.parse(slice);
-    } catch {
-      // A model occasionally drops a comma or leaves a trailing one; repair and
-      // retry before moving on, so a near-miss response is not thrown away.
-      try {
-        return JSON.parse(repairJson(slice));
-      } catch {
-        // fall through to the next candidate
+    // Try the tight, balanced slice first, then the whole candidate — the slice
+    // can be thrown off if the model left an unescaped quote inside a string.
+    for (const source of [findJson(raw), raw]) {
+      if (!/[{[]/.test(source)) continue; // nothing JSON-shaped here
+      // Models drop commas, leave trailing ones, forget to escape quotes and
+      // occasionally truncate. jsonrepair fixes all of those; try a strict parse
+      // first so a clean reply never goes through it.
+      for (const attempt of [source, jsonrepairSafe(source)]) {
+        if (attempt === null) continue;
+        try {
+          const parsed = JSON.parse(attempt);
+          if (isContainer(parsed)) return parsed;
+        } catch {
+          // next attempt / source / candidate
+        }
       }
     }
   }
   throw new Error(S.errNoJson);
+}
+
+/** jsonrepair, but returns null instead of throwing on input it cannot mend. */
+function jsonrepairSafe(s: string): string | null {
+  try {
+    return jsonrepair(s);
+  } catch {
+    return null;
+  }
 }

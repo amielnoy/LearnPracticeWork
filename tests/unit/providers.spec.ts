@@ -269,6 +269,19 @@ test.describe('extractJSON', () => {
       tpl: 'a {placeholder} b',
     });
   });
+
+  test('recovers unescaped quotes inside a string value', () => {
+    // The likely real culprit: a model writes "POM" inside an answer without
+    // escaping the quotes, which breaks a strict parse mid-array.
+    expect(extractJSON('{"a": "use the "POM" pattern"}', S)).toEqual({
+      a: 'use the "POM" pattern',
+    });
+  });
+
+  test('closes a reply that was truncated before the JSON finished', () => {
+    const cut = '{"questions": [{"q": "one"}, {"q": "two"}';
+    expect(extractJSON(cut, S)).toEqual({ questions: [{ q: 'one' }, { q: 'two' }] });
+  });
 });
 
 test.describe('loadServerConfig', () => {
