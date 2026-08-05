@@ -39,7 +39,7 @@ export const en = {
       heading: 'What you get:',
       items: [
         { b: 'Agent 1', text: ' — AI resume scorer and rewriter for QA roles' },
-        { b: 'Agent 2', text: ' — Live mock interview with voice mode, 5 stages' },
+        { b: 'Agent 2', text: ' — Live mock interview, 5 stages' },
         { b: 'Lecture Series', text: ' — 10 in-depth lectures on AI Testing' },
         { b: 'Question Bank', text: ' — 25+ real interview questions + AI enrichment' },
       ],
@@ -90,7 +90,7 @@ export const en = {
   interview: {
     num: '05',
     title: 'Agent 2 — Mock Interview',
-    lead: 'Run a realistic QA-Automation interview with an AI interviewer — five stages, from HR to AI testing. Voice mode lets you practice completely hands-free.',
+    lead: 'Run a realistic QA-Automation interview with an AI interviewer — five stages, from HR to AI testing.',
     boxTitle: '🎙️ Start your mock interview',
     notice: 'Make sure the connection is configured above. The agent uses the same API key.',
     chatAriaLabel: 'Interview chat',
@@ -157,10 +157,6 @@ export const en = {
     interviewOpener: 'Please start the interview. I am ready.',
     interviewOpenerMsg: "Ready — let's go!",
     btnRestartInterview: '🔄 Restart interview',
-    voiceModeOn: '🔊 Voice ON',
-    voiceModeOff: '🔇 Voice OFF',
-    micTitle: 'Click to speak your answer',
-    micListening: 'Listening… click to stop',
     videoLoading: 'Loading video…',
     videoMissingPrefix: 'Video file not found: ',
     videoMissingSuffix: '',

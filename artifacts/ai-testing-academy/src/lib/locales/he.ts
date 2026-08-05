@@ -41,7 +41,7 @@ export const he: Locale = {
       heading: 'מה תקבל:',
       items: [
         { b: 'סוכן 1', text: ' — ניתוח וכתיבה מחדש של קורות חיים לתפקידי QA' },
-        { b: 'סוכן 2', text: ' — ראיון סימולציה חי עם מצב קול, 5 שלבים' },
+        { b: 'סוכן 2', text: ' — ראיון סימולציה חי, 5 שלבים' },
         { b: 'סדרת הרצאות', text: ' — 10 הרצאות מעמיקות על בדיקות AI' },
         { b: 'בנק שאלות', text: ' — 25+ שאלות ראיון אמיתיות + העשרה עם AI' },
       ],
@@ -92,7 +92,7 @@ export const he: Locale = {
   interview: {
     num: '05',
     title: 'סוכן 2 — ראיון סימולציה',
-    lead: 'הריצו ראיון QA Automation ריאליסטי עם מראיין AI — חמישה שלבים, מ-HR ועד לבדיקות AI. מצב קול מאפשר תרגול ללא ידיים.',
+    lead: 'הריצו ראיון QA Automation ריאליסטי עם מראיין AI — חמישה שלבים, מ-HR ועד לבדיקות AI.',
     boxTitle: '🎙️ התחל ראיון סימולציה',
     notice: 'ודאו שהחיבור מוגדר למעלה. הסוכן משתמש באותו מפתח API.',
     chatAriaLabel: 'שיחת ראיון',
@@ -159,10 +159,6 @@ export const he: Locale = {
     interviewOpener: 'אנא התחל את הראיון. אני מוכן.',
     interviewOpenerMsg: 'מוכן — בואו נתחיל!',
     btnRestartInterview: '🔄 הפעל ראיון מחדש',
-    voiceModeOn: '🔊 קול פעיל',
-    voiceModeOff: '🔇 קול כבוי',
-    micTitle: 'לחץ כדי לדבר את תשובתך',
-    micListening: 'מאזין… לחץ לעצירה',
     videoLoading: 'טוען וידאו…',
     videoMissingPrefix: 'קובץ וידאו לא נמצא: ',
     videoMissingSuffix: '',

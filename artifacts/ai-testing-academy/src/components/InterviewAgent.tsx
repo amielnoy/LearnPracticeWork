@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useLocale } from '../context/LocaleContext';
 import { useProviderContext } from '../context/ProviderContext';
-import { speak, stopSpeaking, toggleRecognition, ttsSupported, sttSupported, setVoiceLang } from '../lib/voice';
 import { useReveal } from '../hooks/useReveal';
 import type { Message } from '../lib/providers';
 
@@ -14,7 +13,7 @@ interface ChatMsg {
 let msgIdCounter = 0;
 
 export function InterviewAgent() {
-  const { locale, S, lang } = useLocale();
+  const { locale, S } = useLocale();
   const t = locale.interview;
   const { callClaude, apiKey, useOwnKey } = useProviderContext();
   const sectionRef = useReveal();
@@ -28,22 +27,13 @@ export function InterviewAgent() {
   const [sendDisabled, setSendDisabled] = useState(true);
   const [verdictDisabled, setVerdictDisabled] = useState(true);
   const [startLabel, setStartLabel] = useState(t.startBtn);
-  const [voiceOn, setVoiceOn] = useState(() => !!localStorage.getItem('ata_voice'));
-  const [micListening, setMicListening] = useState(false);
 
   // Use refs for values needed in async callbacks to avoid stale closures
   const chatRef = useRef<Message[]>([]);
   const chatBoxRef = useRef<HTMLDivElement>(null);
-  const voiceOnRef = useRef(voiceOn);
   const interviewOnRef = useRef(interviewOn);
 
-  useEffect(() => { voiceOnRef.current = voiceOn; }, [voiceOn]);
   useEffect(() => { interviewOnRef.current = interviewOn; }, [interviewOn]);
-
-  // Keep voice lang in sync
-  useEffect(() => {
-    setVoiceLang(lang);
-  }, [lang]);
 
   // Scroll chat to bottom when messages change
   useEffect(() => {
@@ -58,10 +48,7 @@ export function InterviewAgent() {
     return msg;
   }, []);
 
-  // agentTurn uses a ref to beginListening to avoid circular deps
-  const beginListeningRef = useRef<() => void>(() => {});
-
-  const agentTurn = useCallback(async (autoListen = true) => {
+  const agentTurn = useCallback(async () => {
     const sysId = msgIdCounter++;
     setMessages(prev => [...prev, { cls: 'sys', text: S.statusInterviewerThinking, id: sysId }]);
     try {
@@ -69,9 +56,6 @@ export function InterviewAgent() {
       setMessages(prev => prev.filter(m => m.id !== sysId));
       chatRef.current.push({ role: 'assistant', content: reply });
       addMsg('ai', reply);
-      if (voiceOnRef.current) {
-        speak(reply, autoListen && sttSupported ? () => beginListeningRef.current() : undefined);
-      }
     } catch (e) {
       setMessages(prev => prev.filter(m => m.id !== sysId));
       setChatErr((e as Error).message);
@@ -93,21 +77,6 @@ export function InterviewAgent() {
     await agentTurnRef.current();
     setSendDisabled(false);
   }, []);
-
-  const beginListening = useCallback(() => {
-    if (!interviewOnRef.current) return;
-    toggleRecognition(
-      (text) => {
-        if (text.trim()) {
-          sendText(text);
-        }
-      },
-      setMicListening
-    );
-  }, [sendText]);
-
-  // Keep the ref in sync
-  useEffect(() => { beginListeningRef.current = beginListening; }, [beginListening]);
 
   const startInterview = useCallback(async () => {
     setChatErr('');
@@ -139,7 +108,7 @@ export function InterviewAgent() {
     setMessages(prev => [...prev, { cls: 'sys', text: S.statusGeneratingVerdict, id: msgIdCounter++ }]);
     setSendDisabled(true);
     setVerdictDisabled(true);
-    await agentTurnRef.current(false);
+    await agentTurnRef.current();
     setVerdictDisabled(false);
     setSendDisabled(false);
   }, [interviewOn, S]);
@@ -150,14 +119,6 @@ export function InterviewAgent() {
       sendAnswer();
     }
   }, [sendAnswer]);
-
-  const toggleVoice = useCallback(() => {
-    const next = !voiceOn;
-    setVoiceOn(next);
-    voiceOnRef.current = next;
-    localStorage.setItem('ata_voice', next ? '1' : '');
-    if (!next) stopSpeaking();
-  }, [voiceOn]);
 
   return (
     <section id="interview-talk" ref={sectionRef}>
@@ -183,19 +144,6 @@ export function InterviewAgent() {
           ))}
         </div>
         <div className="chat-input" style={{ marginTop: '10px' }}>
-          {sttSupported && (
-            <button
-              type="button"
-              className={`primary mic-btn${micListening ? ' listening' : ''}`}
-              id="micBtn"
-              title={micListening ? S.micListening : S.micTitle}
-              aria-label={micListening ? S.micListening : S.micTitle}
-              disabled={!interviewOn}
-              onClick={beginListening}
-            >
-              {micListening ? '⏹️' : '🎙️'}
-            </button>
-          )}
           <textarea
             id="chatInput"
             rows={2}
@@ -234,18 +182,6 @@ export function InterviewAgent() {
           >
             {t.verdictBtn}
           </button>
-          {ttsSupported && (
-            <button
-              type="button"
-              className="ghost"
-              id="voiceBtn"
-              aria-pressed={voiceOn}
-              onClick={toggleVoice}
-              style={{ marginInlineStart: '8px' }}
-            >
-              {voiceOn ? S.voiceModeOn : S.voiceModeOff}
-            </button>
-          )}
         </div>
       </div>
     </section>
