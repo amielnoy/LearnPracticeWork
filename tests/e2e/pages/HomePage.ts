@@ -47,6 +47,11 @@ export class HomePage extends BasePage {
     return this.page.getByRole('link', { name: 'Skip to main content' });
   }
 
+  /** The `<html>` root — theme (`data-theme`) and locale (`lang`/`dir`) land here. */
+  get html(): Locator {
+    return this.page.locator('html');
+  }
+
   /** The theme the app persisted to localStorage, or null if it never has. */
   async storedTheme(): Promise<string | null> {
     return this.page.evaluate(key => localStorage.getItem(key), THEME_KEY);

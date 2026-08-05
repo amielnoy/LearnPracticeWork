@@ -11,10 +11,11 @@ export class NavComponent {
   readonly root: Locator;
   /** The floating hamburger that opens the drawer — mobile layout only. */
   readonly toggle: Locator;
+  /** The theme (light/dark) and language (en/he) toggles inside the nav. */
   readonly themeToggle: Locator;
   readonly langToggle: Locator;
 
-  constructor(private readonly page: Page) {
+  constructor(page: Page) {
     this.root = page.locator('nav#nav');
     this.toggle = page.locator('#navToggle');
     this.themeToggle = page.locator('#themeToggle');
