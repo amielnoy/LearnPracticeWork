@@ -128,4 +128,11 @@ Two targets from the same build:
   goes red, so a failure is never hidden; note that this also means a red build publishes the
   site, not just the report.
 
-Pages must be enabled once in the repository settings with **Source: GitHub Actions**.
+The workflow enables Pages itself: `actions/configure-pages` runs with `enablement: true` and
+the `pages: write` permission, so the first run on `main` turns it on. Without that step the
+whole pipeline goes green and only the final deploy fails, with a bare `404` from the Pages
+API. The base path also comes from that step rather than being assumed, so a custom domain or
+a user/org site — both served from the root — does not break every asset URL.
+
+If automatic enablement is refused (some org policies disallow it), set it once by hand under
+repository **Settings → Pages → Source: GitHub Actions**.
