@@ -341,3 +341,23 @@ jobs:
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Allure report from ${{ github.repository }}@${{ github.sha }}'
+
+      # Put the report's OWN Pages URL in the run summary, so the correct link is
+      # one click away here — the portfolio's Pages URL shown on the "Publish to
+      # GitHub Pages" job is a different site and is easy to click by mistake.
+      - name: Link the published report in the run summary
+        if: ${{ env.ALLURE_PAGES_TOKEN != '' && hashFiles('allure-report/index.html') != '' }}
+        env:
+          REPORT_REPO: ${{ vars.ALLURE_PAGES_REPO || format('{0}/allure-report-learn-practice-deploy', github.repository_owner) }}
+        run: |
+          owner="${REPORT_REPO%%/*}"
+          name="${REPORT_REPO##*/}"
+          url="https://${owner}.github.io/${name}/"
+          {
+            echo "## 📊 Allure test report"
+            echo ""
+            echo "**➡️ [${url}](${url})**"
+            echo ""
+            echo "_Published to the \`${REPORT_REPO}\` repo — a separate site from the portfolio._"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Allure report URL: $url"
