@@ -216,6 +216,34 @@ test.describe('extractJSON', () => {
   test('throws a readable error when there is no object at all', () => {
     expect(() => extractJSON('no json here', S)).toThrow(S.errNoJson);
   });
+
+  test('recovers a missing comma between array elements', () => {
+    // The exact defect the enrichment call hit: "Expected ',' or ']' after
+    // array element" — a comma dropped between two strings.
+    expect(extractJSON('{"tags": ["a" "b" "c"]}', S)).toEqual({ tags: ['a', 'b', 'c'] });
+  });
+
+  test('recovers a missing comma between objects in an array', () => {
+    const reply = '```json\n{"questions": [{"q": "one"} {"q": "two"}]}\n```';
+    expect(extractJSON(reply, S)).toEqual({ questions: [{ q: 'one' }, { q: 'two' }] });
+  });
+
+  test('recovers a missing comma between object members', () => {
+    expect(extractJSON('{"a": 1 "b": 2}', S)).toEqual({ a: 1, b: 2 });
+  });
+
+  test('drops trailing commas before a closing bracket or brace', () => {
+    expect(extractJSON('{"tags": ["a", "b",], "n": 2,}', S)).toEqual({ tags: ['a', 'b'], n: 2 });
+  });
+
+  test('never rewrites commas that live inside a string value', () => {
+    // A repaired string must not gain punctuation: the space-separated words
+    // here look like a missing comma but are ordinary prose.
+    expect(extractJSON('{"note": "flaky in CI" "ok": true}', S)).toEqual({
+      note: 'flaky in CI',
+      ok: true,
+    });
+  });
 });
 
 test.describe('loadServerConfig', () => {

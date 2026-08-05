@@ -198,10 +198,71 @@ export async function callGeminiGrounded(
   return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('\n');
 }
 
+/**
+ * Best-effort repair of the JSON a model *almost* returned. Runs only after a
+ * strict `JSON.parse` has already failed, so it never touches valid input. It
+ * is string-aware — nothing inside a quoted string is ever rewritten — and
+ * fixes the two defects models actually produce: a missing comma between two
+ * array elements or object members, and a trailing comma before `}` or `]`.
+ */
+function repairJson(json: string): string {
+  const isValueStart = (c: string) =>
+    c === '"' || c === '{' || c === '[' || c === '-' ||
+    (c >= '0' && c <= '9') || c === 't' || c === 'f' || c === 'n';
+  // A value-start immediately after one of these (only whitespace between) means
+  // a separating comma went missing.
+  const isValueEnd = (c: string) =>
+    c === '"' || c === '}' || c === ']' || (c >= '0' && c <= '9');
+
+  let out = '';
+  let last = ''; // last significant char emitted outside a string ('"' = a closed string)
+  let i = 0;
+  while (i < json.length) {
+    const ch = json[i]!;
+
+    if (/\s/.test(ch)) { out += ch; i++; continue; }
+
+    if (ch === '"') {
+      if (isValueEnd(last)) out += ','; // missing comma before this string
+      out += ch; i++;
+      for (let esc = false; i < json.length; i++) {
+        const c = json[i]!;
+        out += c;
+        if (esc) esc = false;
+        else if (c === '\\') esc = true;
+        else if (c === '"') { i++; break; }
+      }
+      last = '"';
+      continue;
+    }
+
+    if (ch === ',') {
+      let j = i + 1;
+      while (j < json.length && /\s/.test(json[j]!)) j++;
+      if (json[j] === '}' || json[j] === ']') { i++; continue; } // drop trailing comma
+      out += ch; last = ','; i++;
+      continue;
+    }
+
+    if (isValueStart(ch) && isValueEnd(last)) out += ','; // missing comma before this value
+    out += ch;
+    last = ch;
+    i++;
+  }
+  return out;
+}
+
 export function extractJSON(text: string, S: Locale['s']): unknown {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   const raw = fenced ? fenced[1] : text;
   const start = raw.indexOf('{'), end = raw.lastIndexOf('}');
   if (start === -1 || end === -1) throw new Error(S.errNoJson);
-  return JSON.parse(raw.slice(start, end + 1));
+  const slice = raw.slice(start, end + 1);
+  try {
+    return JSON.parse(slice);
+  } catch {
+    // A model occasionally drops a comma or leaves a trailing one; repair and
+    // retry before giving up, so a near-miss response is not thrown away.
+    return JSON.parse(repairJson(slice));
+  }
 }
