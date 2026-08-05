@@ -361,7 +361,7 @@
   <dt>callGeminiGrounded()</dt>
   <dd>Adds the <code>google_search</code> tool so answers cite live sources. Used only by the question-bank enrichment.</dd>
   <dt>extractJSON()</dt>
-  <dd>Pulls a JSON object out of a model reply — strips a <code>```json</code> fence if present, then takes the outermost braces. This is what makes “return only JSON” prompts survive a chatty model.</dd>
+  <dd>Pulls a JSON object <em>or</em> array out of a model reply — strips a <code>```json</code> fence, scans for the first balanced value (string-aware, so trailing citations don’t leak in), and repairs a near-miss reply with <code>jsonrepair</code> (missing or trailing commas, unescaped quotes, a truncated tail) before parsing. This is what makes “return only JSON” prompts survive a chatty, imperfect model.</dd>
 </dl>
 
 <h3>Failure handling is part of the contract</h3>
@@ -484,10 +484,10 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   use, so both sections of the site behave identically and neither owns stage logic.
 </p>
 <p>
-  Content — 27 questions per language, each with a hint and a multi-paragraph answer — lives in
-  <code>lib/questionBank.ts</code> rather than in the component, which would otherwise be
-  mostly prose. The section renders whatever the bank contains and never counts stages or
-  items.
+  Content — 75 questions per language (fifteen per stage, 150 in all), each with a hint and a
+  multi-paragraph answer — lives in <code>lib/questionBank.ts</code> rather than in the
+  component, which would otherwise be mostly prose. The section renders whatever the bank
+  contains and never counts stages or items.
 </p>
 <p>
   The enrich action feeds the user's role and a fixed keyword seed into
@@ -653,9 +653,10 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers five layers — 222 cases at the time of
-  writing. Playwright is used as the runner throughout, not just as a browser driver: the unit
-  project never launches a browser, it executes the same TypeScript modules the app imports.
+  One Playwright package at <code>tests/</code> covers five layers — around 245 cases at the
+  time of writing. Playwright is used as the runner throughout, not just as a browser driver:
+  the unit project never launches a browser, it executes the same TypeScript modules the app
+  imports.
 </p>
 
 <div class="scroll">
