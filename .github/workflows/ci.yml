@@ -98,9 +98,12 @@ jobs:
             --filter "./tests" \
             run typecheck
 
-      # Split into four steps so a failure names the layer that broke, and
-      # `!cancelled()` lets the later layers report even after an early failure.
+      # Split per layer so a failure names the layer that broke, and
+      # `!cancelled()` lets every later layer still run — including after the
+      # typecheck fails, which otherwise silently drops a whole layer out of the
+      # Allure report.
       - name: Unit tests
+        if: ${{ !cancelled() }}
         run: pnpm run test:unit
 
       - name: Component tests
@@ -245,6 +248,14 @@ jobs:
   deploy-pages:
     name: Publish to GitHub Pages
     needs: build-pages
+    # Explicit rather than relying on the default "run if every dependency
+    # succeeded": `build-pages` itself runs through a failed `test` job, and the
+    # only thing that should stop the deployment is `build-pages` not producing
+    # an artifact. The whole point is that the Allure report is published when
+    # tests fail — that is when someone actually needs to read it.
+    # (Index syntax, not `needs.build-pages.result`: the expression parser reads
+    # the hyphen as subtraction.)
+    if: ${{ !cancelled() && needs['build-pages'].result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       pages: write

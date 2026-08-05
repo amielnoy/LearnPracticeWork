@@ -122,4 +122,10 @@ Two targets from the same build:
   alongside, and the Allure report at `allure/`. Static only, so the academy's AI panel falls
   back to bring-your-own-key.
 
+  Publishing runs **even when the test job fails** — that is when the Allure report is most
+  worth reading. The site job overrides the skip-on-failed-dependency default with
+  `!cancelled()`, and the deploy job gates only on the site having built. The run itself still
+  goes red, so a failure is never hidden; note that this also means a red build publishes the
+  site, not just the report.
+
 Pages must be enabled once in the repository settings with **Source: GitHub Actions**.

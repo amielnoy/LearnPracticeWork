@@ -36,6 +36,13 @@ layer() {
   fi
 }
 
+# CI typechecks before it runs anything, and Playwright transpiles specs without
+# checking them — so a type error in a spec passes here and fails the pipeline.
+# Running it first closes that gap. Like every other layer it does not abort the
+# run; the exit status still reflects it.
+layer "typecheck (tests)" \
+  bash -c "cd tests && ./node_modules/.bin/tsc -p tsconfig.json --noEmit"
+
 layer "unit / api / contract" \
   "$PW_ROOT" test --config=playwright.config.mts
 layer "component (desktop + mobile)" \
