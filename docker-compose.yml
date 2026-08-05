@@ -1,0 +1,27 @@
+# Run the whole test suite in a container and drop the reports on the host:
+#
+#   docker compose run --rm tests
+#
+# Results land in ./allure-report (single-file HTML), ./allure-results and
+# ./test-results. Every Playwright config starts its own servers, so this one
+# service is self-contained.
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # The lockfile only carries linux-x64-gnu natives (see Dockerfile); pin the
+    # runtime platform to match so it works the same on x64 CI and ARM Macs.
+    platform: linux/amd64
+    init: true
+    # Chromium crashes with the default 64MB /dev/shm.
+    shm_size: 1gb
+    environment:
+      CI: 'true'
+    # Surface the generated reports on the host. run-all-tests.sh clears the
+    # contents of these dirs (not the mounts) at the start of each run.
+    volumes:
+      - ./allure-report:/app/allure-report
+      - ./allure-results:/app/allure-results
+      - ./test-results:/app/test-results
+    command: ['bash', 'run-all-tests.sh']

@@ -69,9 +69,26 @@
     </script>
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- The page renders in Plus Jakarta Sans and Space Mono. Inter used to be
+         requested here and was never rendered — a render-blocking round trip
+         for a font the site does not use — so it is gone.
+
+         These two were previously pulled in by an `@import` at the top of
+         src/index.css, which is worse than a <link>: the browser only finds it
+         after the app stylesheet has downloaded and parsed, serialising
+         HTML → app CSS → Google CSS → font files. Hoisting it here and loading
+         it with the print-media swap keeps it off the render path entirely,
+         while `display=swap` paints text in the fallback straight away.
+
+         Axes are exactly what the source uses (audited in the browser and
+         across every route): no italic on either family, Jakarta 400–700 only
+         (it was fetching 300–800 plus a whole second italic file), and Space
+         Mono roman 400/700 (it was fetching two unused italic files). -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style"
+
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"

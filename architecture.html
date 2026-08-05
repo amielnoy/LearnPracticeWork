@@ -125,7 +125,7 @@
     provider abstraction, the content model, and where to extend each one.
   </p>
   <p>
-    <span class="pill on">React 18 + TypeScript</span>
+    <span class="pill on">React 19 + TypeScript</span>
     <span class="pill on">Vite</span>
     <span class="pill">wouter</span>
     <span class="pill">TanStack Query</span>
@@ -146,7 +146,8 @@
   <a href="#ui">8 · UI mechanics</a>
   <a href="#security">9 · Trust boundaries</a>
   <a href="#build">10 · Build &amp; deploy</a>
-  <a href="#extend">11 · Extension points</a>
+  <a href="#testing">11 · Testing</a>
+  <a href="#extend">12 · Extension points</a>
 </nav>
 
 <!-- ───────────────────────── 1 ───────────────────────── -->
@@ -477,9 +478,21 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <h3>❓ Question Bank</h3>
 <p>
-  Static stages render immediately. The enrich action feeds the user's role and a fixed
-  keyword seed into <code>callGrounded()</code>, then <code>extractJSON()</code> lifts a
-  <code>questions</code> array out of the reply. Grounding is why this one path is Gemini-only.
+  Five collapsed stages, each holding questions that are themselves the control: one click
+  reveals a hint, a second reveals the full answer, a third collapses. That is
+  <code>QuestionCard</code> over the same <code>useDisclosure(3)</code> the coding challenges
+  use, so both sections of the site behave identically and neither owns stage logic.
+</p>
+<p>
+  Content — 27 questions per language, each with a hint and a multi-paragraph answer — lives in
+  <code>lib/questionBank.ts</code> rather than in the component, which would otherwise be
+  mostly prose. The section renders whatever the bank contains and never counts stages or
+  items.
+</p>
+<p>
+  The enrich action feeds the user's role and a fixed keyword seed into
+  <code>callGrounded()</code>, then <code>extractJSON()</code> lifts a <code>questions</code>
+  array out of the reply. Grounding is why this one path is Gemini-only.
 </p>
 
 <h3>🐍 Coding Challenges</h3>
@@ -615,8 +628,157 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   routing agrees with the host. Deploy path is configured once, in one variable.
 </p>
 
+<h3>Two deploy targets, one build</h3>
+
+<p>
+  Replit serves the site and <code>api-server</code> from a single origin, which is what makes
+  the relative <code>/api</code> calls work. GitHub Pages serves the static output only, under
+  <code>/&lt;repo&gt;/</code>, with no API behind it — so the AI panel there falls back to
+  bring-your-own-key, exactly as it does when the proxy is unreachable.
+</p>
+
+<dl class="kv">
+  <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, <code>/api</code> routed on the same origin.</dd>
+  <dt>GitHub Pages</dt><dd><code>.github/workflows/ci.yml</code> — <code>BASE_PATH=/&lt;repo&gt;/ai-testing-academy/</code>, built and published on every push to <code>main</code>.</dd>
+</dl>
+
+<p>
+  The Pages job builds the portfolio at the site root, mounts this site and the lecture deck
+  underneath it, copies this page in as <code>architecture.html</code>, publishes the run's
+  Allure report at <code>/allure/</code>, and drops a <code>404.html</code> copy of the shell so
+  client-side routes survive a hard refresh.
+</p>
+
 <!-- ───────────────────────── 11 ───────────────────────── -->
-<h2 id="extend">11 · Extension points</h2>
+<h2 id="testing">11 · Testing</h2>
+
+<p>
+  One Playwright package at <code>tests/</code> covers five layers — 222 cases at the time of
+  writing. Playwright is used as the runner throughout, not just as a browser driver: the unit
+  project never launches a browser, it executes the same TypeScript modules the app imports.
+</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Layer</th><th>Runs in</th><th>Covers</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>tests/unit</code></td>
+      <td>Node</td>
+      <td><code>domUtils</code> escaping and linkifying, language resolution, the whole provider registry — request building, key validation, error mapping, proxy-vs-direct routing.</td>
+    </tr>
+    <tr>
+      <td><code>tests/component</code></td>
+      <td>Chromium (Playwright CT + Vite)</td>
+      <td>The real components, mounted: the disclosure cycle, the locale chain, the scroll affordance, and the key-mode decisions in <code>ConnectionSetup</code>.</td>
+    </tr>
+    <tr>
+      <td><code>tests/api</code></td>
+      <td>Node → live server</td>
+      <td>Status codes, CORS, malformed bodies, the webhook signature gate, and the raw-body registration order in <code>app.ts</code>.</td>
+    </tr>
+    <tr>
+      <td><code>tests/contract</code></td>
+      <td>Node → live server</td>
+      <td><code>openapi.yaml</code> ↔ the generated Zod schemas ↔ what the server actually returns, plus the shared <code>customFetch</code> wrapper against real responses.</td>
+    </tr>
+    <tr>
+      <td><code>tests/e2e</code></td>
+      <td>Chromium, desktop + Pixel 5</td>
+      <td>The whole app on its own Vite server: hero and section rendering, in-page navigation, the theme and language toggles, the interview-question reveal, and the mobile nav drawer.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  Component and e2e both run twice, at a desktop viewport and as an emulated phone, so a layout
+  that only holds together on a wide window fails here rather than on someone's handset. The
+  one genuinely layout-specific test — the off-canvas drawer — is guarded by the
+  <code>isMobile</code> fixture instead of being duplicated.
+</p>
+
+<h3>The e2e layer uses page objects</h3>
+
+<p>
+  Selectors live in classes under <code>tests/e2e/pages</code> and
+  <code>tests/e2e/components</code>, never in a spec. <code>BasePage</code> holds the page
+  handle and the document-level things (the <code>&lt;html&gt;</code> element, the current
+  hash); <code>HomePage</code> adds the section lookups; the nav and hero are component objects
+  because they are fragments reused across flows rather than routes.
+</p>
+
+<div class="callout good">
+  <b>One method hides the viewport difference.</b> <code>NavComponent.reveal()</code> opens the
+  drawer when the hamburger is visible and does nothing on desktop, so the same navigation test
+  runs unchanged on both projects. Without it every nav assertion would need a mobile twin.
+</div>
+
+<div class="callout good">
+  <b>No test can reach a model vendor.</b> The unit suite stubs <code>fetch</code>; the API
+  suite runs one server with a throwaway Gemini key that only ever receives invalid requests,
+  and one with no key at all. Both instances are started with <code>DATABASE_URL</code> and the
+  Replit connector variables blanked, so a developer's shell cannot make the suite pass or fail
+  by accident.
+</div>
+
+<p>
+  The two instances exist because <code>routes/ai.ts</code> answers <code>503</code> for a
+  missing key <em>before</em> it validates the body — on a keyless server the
+  <code>400 messages is required</code> branch is unreachable.
+  <code>tests/support/start-api-servers.mjs</code> builds the server once and starts both.
+</p>
+
+<p>
+  The e2e layer needs no API server at all: it boots the academy's own Vite dev server, whose
+  <code>/api</code> proxy has nothing behind it, so Connection Setup lands in exactly the
+  bring-your-own-key state these flows exercise.
+</p>
+
+<dl class="kv">
+  <dt>./run-all-tests.sh</dt><dd>Every layer plus both reports. Does <b>not</b> fail fast, so one broken layer still leaves a complete report — and still exits non-zero.</dd>
+  <dt>pnpm test</dt><dd>Every layer in order, stopping at the first failure.</dd>
+  <dt>pnpm test:unit</dt><dd>Node only — no server, no browser, sub-second.</dd>
+  <dt>pnpm test:component</dt><dd>Needs <code>pnpm --filter @workspace/tests run test:browsers</code> once.</dd>
+  <dt>pnpm test:api</dt><dd>Boots both api-server instances automatically.</dd>
+  <dt>pnpm test:contract</dt><dd>Same servers; fails when the spec, the codegen and the routes disagree.</dd>
+  <dt>pnpm test:e2e</dt><dd>Boots the academy on port 5273.</dd>
+  <dt>docker compose run --rm tests</dt><dd>The lot, in the pinned Playwright image; reports land on the host.</dd>
+</dl>
+
+<h3>Reports</h3>
+
+<p>
+  Every config appends to one <code>allure-results/</code> at the repo root, so a single Allure
+  report covers the whole run. Locally the configs also emit Playwright <em>blobs</em>, which
+  <code>run-all-tests.sh</code> merges into one HTML report; under <code>CI=true</code> they
+  write HTML directly and the merge is skipped. Screenshots, video and traces are kept on
+  failure and attached to both reports.
+</p>
+
+<div class="callout">
+  <b>The merge has two sharp edges.</b> Each config writes its blob to its own subdirectory —
+  the blob reporter wipes its output directory on start and would otherwise eat the previous
+  layer's archive — and all three archives are named <code>report.zip</code>, so flattening
+  them for <code>merge-reports</code> must rename as it goes or the merge quietly reports a
+  single layer. It also needs <code>-c playwright-merge.config.mts</code>, because the suites
+  record different <code>testDir</code> roots and Playwright will not merge across them.
+</div>
+
+<h3>CI</h3>
+
+<p>
+  Every layer runs as its own step on each push and pull request, and again nightly at 05:00
+  Israel time. GitHub cron is UTC-only and Israel shifts between UTC+2 and UTC+3, so both
+  candidate hours are scheduled and a gate job discards the one that is not 05:00 locally.
+  The Docker image is pinned to <code>linux/amd64</code> for a related reason: the workspace
+  <code>overrides</code> strip every platform-native optional dependency except the
+  linux-x64-gnu ones, so an arm64 image would be missing the rollup binary and the e2e layer's
+  Vite server would never boot.
+</p>
+
+<!-- ───────────────────────── 12 ───────────────────────── -->
+<h2 id="extend">12 · Extension points</h2>
 
 <div class="scroll">
 <table>
@@ -626,6 +788,11 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
       <td>A coding challenge or a whole level</td>
       <td><code>lib/locales/en.ts</code> + <code>he.ts</code></td>
       <td><code>CodingChallenges</code> maps over whatever the locale provides; it never counts levels or items.</td>
+    </tr>
+    <tr>
+      <td>An interview question, or a whole stage</td>
+      <td><code>lib/questionBank.ts</code> — <code>EN_BANK</code> + <code>HE_BANK</code></td>
+      <td>Each entry carries its own <code>hint</code> and <code>answer</code>; <code>QuestionBank</code> maps over the stages and <code>QuestionCard</code> owns the reveal. A test asserts every question has both.</td>
     </tr>
     <tr>
       <td>A model vendor</td>
@@ -658,16 +825,18 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <h3>Where the edges are</h3>
 <ul class="notes">
-  <li><b>Lecture content is hardcoded</b> inside <code>LectureSeries.tsx</code> as <code>EN</code>/<code>HE</code> objects rather than living in the locale files — the one section that breaks the content/UI split.</li>
+  <li><b>Lecture content is hardcoded</b> inside <code>LectureSeries.tsx</code> as <code>EN</code>/<code>HE</code> objects rather than living in the locale files — the last section that breaks the content/UI split. The question bank used to do the same and now sits in <code>lib/questionBank.ts</code>; the same move is available here.</li>
   <li><b>Grounded search is Gemini-only</b>, so the enrich action degrades if the user is on Anthropic or OpenAI without a Gemini key.</li>
   <li><b>The proxy path covers Gemini only.</b> The other two vendors are own-key or nothing.</li>
   <li><b>Resume tooling needs the public internet</b> beyond the model call; behind a strict CSP or an offline network, extraction and PDF export are the first things to fail.</li>
 </ul>
 
 <footer>
-  Generated from the source at <code>artifacts/ai-testing-academy</code> — App shell, contexts,
-  hooks, provider layer and locale content. Update this page when the provider registry or the
-  section list changes; the rest is derived from types the compiler already enforces.
+  Written from the source at <code>artifacts/ai-testing-academy</code> — App shell, contexts,
+  hooks, provider layer and locale content — plus the suites under <code>tests/</code> and the
+  pipeline in <code>.github/workflows/ci.yml</code>. Update this page when the provider registry
+  or the section list changes; the rest is derived from types the compiler already enforces, or
+  asserted by a test that will fail before this page goes stale.
 </footer>
 
 </div>

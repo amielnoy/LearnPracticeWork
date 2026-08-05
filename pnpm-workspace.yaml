@@ -3,6 +3,13 @@ packages:
   - lib/*
   - lib/integrations/*
   - scripts
+  - tests
+
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+  msw: true
+  unrs-resolver: true
 
 autoInstallPeers: false
 

@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+/* Google Fonts are loaded from index.html, not from here. A remote `@import`
+   inside the app stylesheet is discovered only after this file has been
+   downloaded and parsed, which serialises the requests
+   (HTML → app CSS → Google CSS → font files) and delays first paint. */
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
