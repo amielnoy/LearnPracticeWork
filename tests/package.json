@@ -1,0 +1,35 @@
+{
+  "name": "@workspace/tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:api && pnpm run test:contract && pnpm run test:e2e",
+    "test:unit": "playwright test --config=../playwright.config.mts --project=unit",
+    "test:api": "playwright test --config=../playwright.config.mts --project=api",
+    "test:contract": "playwright test --config=../playwright.config.mts --project=contract",
+    "test:component": "playwright test --config=playwright-ct.config.ts",
+    "test:e2e": "playwright test --config=playwright-e2e.config.ts",
+    "test:browsers": "playwright install chromium",
+    "report:allure": "allure awesome ../allure-results --single-file --output ../allure-report",
+    "report:allure:serve": "allure serve ../allure-results",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/experimental-ct-react": "^1.62.1",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@workspace/api-zod": "workspace:*",
+    "allure": "^3.14.3",
+    "allure-playwright": "^3.10.2",
+    "clsx": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwind-merge": "catalog:",
+    "typescript": "~5.9.2",
+    "yaml": "^2.8.3",
+    "zod": "catalog:"
+  }
+}

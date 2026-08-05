@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.base.json",
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../playwright.config.mts",
+    "../playwright-merge.config.mts"
+  ],
+  "exclude": ["node_modules", "test-results", "playwright-report"],
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "paths": {
+      "@academy/*": ["../artifacts/ai-testing-academy/src/*"],
+      "@lib/*": ["../lib/*"]
+    }
+  }
+}

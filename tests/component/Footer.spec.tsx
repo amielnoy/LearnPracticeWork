@@ -1,0 +1,48 @@
+import { test, expect } from '@playwright/experimental-ct-react';
+import { LocaleProvider } from '@academy/context/LocaleContext';
+import { Footer } from '@academy/components/Footer';
+import { en } from '@academy/lib/locales';
+
+/**
+ * The footer is the smallest thing that goes through the whole locale stack —
+ * resolve the language, read the catalog, render it — so it is a cheap guard
+ * against the provider chain breaking.
+ */
+
+test('renders the footer text from the active locale', async ({ mount }) => {
+  const component = await mount(
+    <LocaleProvider>
+      <Footer />
+    </LocaleProvider>,
+  );
+
+  await expect(component).toContainText(en.footer.text);
+  await expect(component).toContainText(en.footer.suffix);
+  await expect(component).toContainText(String(en.footer.year));
+});
+
+test('links to the author with an external link that cannot reach back', async ({ mount }) => {
+  const component = await mount(
+    <LocaleProvider>
+      <Footer />
+    </LocaleProvider>,
+  );
+
+  const link = component.getByRole('link', { name: en.footer.authorName });
+
+  await expect(link).toHaveAttribute('href', en.footer.authorHref);
+  await expect(link).toHaveAttribute('target', '_blank');
+  // Without noopener the opened tab can navigate this one via window.opener.
+  await expect(link).toHaveAttribute('rel', /noopener/);
+});
+
+test('sets the document language and direction while rendering', async ({ mount, page }) => {
+  await mount(
+    <LocaleProvider>
+      <Footer />
+    </LocaleProvider>,
+  );
+
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+});
