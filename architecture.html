@@ -644,9 +644,10 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <p>
   The Pages job builds the portfolio at the site root, mounts this site and the lecture deck
-  underneath it, copies this page in as <code>architecture.html</code>, publishes the run's
-  Allure report at <code>/allure/</code>, and drops a <code>404.html</code> copy of the shell so
-  client-side routes survive a hard refresh.
+  underneath it, copies this page in as <code>architecture.html</code>, and drops a
+  <code>404.html</code> copy of the shell so client-side routes survive a hard refresh. The
+  run's Allure report is published separately, to its own reports repository’s Pages, so the
+  test results keep their own URL and never land on the portfolio site.
 </p>
 
 <!-- ───────────────────────── 11 ───────────────────────── -->
