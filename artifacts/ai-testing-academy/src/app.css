@@ -329,6 +329,37 @@ details.agent-box[open]>summary{margin-bottom:16px;}
 .level-blurb{color:var(--muted); font-size:.92rem; margin:0 0 16px; padding-inline-start:16px;}
 .agent-box h4{margin:0 0 8px; font-size:1.08rem; font-weight:700; color:var(--accent);}
 
+/* Interview questions. The question itself is the control, so it renders as a
+   full-width button rather than a list item — `text-align:start` and the
+   logical margins keep it correct in RTL without a second rule. */
+.q-list{list-style:none; margin:14px 0 0; padding:0;}
+.q-item + .q-item{margin-top:12px;}
+.q-btn{display:flex; align-items:baseline; gap:12px; width:100%; text-align:start;
+    background:var(--card); color:var(--text); border:1px solid var(--border);
+    border-radius:12px; padding:13px 16px; margin:0; cursor:pointer;
+    font-family:inherit; font-size:.96rem; font-weight:600; line-height:1.5;}
+.q-btn .q-text{flex:1 1 auto;}
+/* The cue tells you what the next click does, so the control is not a mystery
+   box. It is inside the button, so screen readers announce it with the label. */
+.q-btn .q-cue{flex:0 0 auto; font-size:.74rem; font-weight:700; letter-spacing:.03em;
+    text-transform:uppercase; color:var(--accent); white-space:nowrap; opacity:.85;}
+.q-btn[aria-expanded="true"]{border-color:var(--accent2);}
+.q-btn:focus-visible{outline:2px solid var(--accent2); outline-offset:2px;}
+@media (hover:hover){.q-btn:hover{border-color:var(--accent2);}}
+@media (hover:none){.q-btn:active{transform:scale(.995);}}
+
+.q-hint{margin:8px 0 0; padding:11px 16px; border-radius:10px;
+    background:var(--field-bg); border:1px dashed var(--border);
+    color:var(--text); font-size:.9rem; line-height:1.6;}
+.q-hint b{color:var(--accent2);}
+.q-answer{margin:8px 0 0; padding:13px 16px; border-radius:10px;
+    background:var(--field-bg); border:1px solid var(--border);
+    border-inline-start:3px solid var(--accent);}
+.q-answer-label{display:block; margin-bottom:8px; color:var(--accent);
+    font-size:.82rem; letter-spacing:.03em; text-transform:uppercase;}
+.q-answer p{margin:0 0 10px; font-size:.92rem; line-height:1.7; color:var(--text);}
+.q-answer p:last-child{margin-bottom:0;}
+
 /* Lecture card CTA — was inline styles + JS mouseover handlers, which latch on
    after a tap on touch devices because React synthesises mouseover from touch. */
 .lecture-cta{display:inline-block; margin-top:16px; border-radius:9px; padding:11px 20px;
@@ -370,7 +401,11 @@ details.agent-box[open]>summary{margin-bottom:16px;}
    Phones by width, plus any coarse-pointer device (tablets, touch laptops). */
 @media (max-width:640px), (pointer:coarse){
   /* ~44px is the smallest comfortably tappable target. */
-  button.primary,button.ghost,.hero-cta a,.lecture-cta{min-height:46px;}
+  button.primary,button.ghost,.hero-cta a,.lecture-cta,.q-btn{min-height:46px;}
+  /* On a phone the cue would squeeze a long question into a column of one-word
+     lines, so let it drop onto its own row instead. */
+  .q-btn{flex-wrap:wrap; gap:6px;}
+  .q-btn .q-text{flex:1 1 100%;}
   details.agent-box>summary{min-height:44px; padding:5px 0;}
   nav a.logo{padding:9px 0;}
   /* Inline link in a sentence: padding, not min-height, so it stays on the line. */

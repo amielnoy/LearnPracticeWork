@@ -2,6 +2,7 @@ import type { Page, Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
 import { NavComponent } from '../components/NavComponent';
 import { HeroComponent } from '../components/HeroComponent';
+import { QuestionsComponent } from '../components/QuestionsComponent';
 
 /** The six in-page sections the nav and hero jump to, in document order. */
 export const SECTION_IDS = [
@@ -24,11 +25,13 @@ export class HomePage extends BasePage {
 
   readonly nav: NavComponent;
   readonly hero: HeroComponent;
+  readonly questions: QuestionsComponent;
 
   constructor(page: Page) {
     super(page);
     this.nav = new NavComponent(page);
     this.hero = new HeroComponent(page);
+    this.questions = new QuestionsComponent(page);
   }
 
   /** A main section by id, e.g. `setup` or `coding-challenges`. */
