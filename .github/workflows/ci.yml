@@ -140,6 +140,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload the Playwright report
+        id: pw-report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
@@ -150,6 +151,21 @@ jobs:
             test-results
           retention-days: 7
           if-no-files-found: ignore
+
+      # Link the Playwright HTML report from the run summary. It ships as a
+      # downloadable artifact (GitHub does not host artifact HTML), so the link
+      # goes to the artifact; unzip and open index.html, or `npx playwright
+      # show-report <dir>`.
+      - name: Link the Playwright HTML report in the run summary
+        if: ${{ !cancelled() && steps.pw-report.outputs.artifact-url != '' }}
+        run: |
+          {
+            echo "## 🎭 Playwright HTML report"
+            echo ""
+            echo "**➡️ [Download the playwright-report artifact](${{ steps.pw-report.outputs.artifact-url }})**"
+            echo ""
+            echo "_Unzip and open \`index.html\` (or \`npx playwright show-report <dir>\`)._"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # Raw Allure results from all four layers land in one directory; the HTML
       # report is generated from them with `pnpm run report:allure`.
