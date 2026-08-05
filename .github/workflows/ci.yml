@@ -170,6 +170,12 @@ jobs:
     needs: [gate, test]
     if: ${{ !cancelled() && needs.gate.outputs.run == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
+    # `pages: write` is what lets the configure step below turn Pages on; the
+    # deploy job needs its own copy of these for the deployment itself.
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -195,12 +201,36 @@ jobs:
           name: allure-report
           path: allure-report
 
+      # Turns Pages on if it is not already. Without this the whole pipeline
+      # runs green and only the final deploy fails, with a 404 from the Pages
+      # API — the symptom that "Ensure GitHub Pages has been enabled" describes.
+      # `enablement: true` needs `pages: write`, granted on this job above.
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       # Pages serves a project site from /<repo>/, so every artifact's Vite
-      # `base` has to carry that prefix or the hashed asset URLs 404. The repo
-      # name is read from the event so a rename does not silently break links.
+      # `base` has to carry that prefix or the hashed asset URLs 404. Prefer the
+      # path Pages itself reports — a custom domain or a user/org site is served
+      # from the root, where a hardcoded /<repo> would break every asset URL.
+      # Falls back to the repo name so a rename cannot silently break links.
       - name: Work out the base path
         id: base
-        run: echo "prefix=/${{ github.event.repository.name }}" >> "$GITHUB_OUTPUT"
+        run: |
+          set -euo pipefail
+          reported='${{ steps.pages.outputs.base_path }}'
+          if [ -z "$reported" ]; then
+            # Pages reported nothing — assume the usual project-site layout.
+            prefix="/${{ github.event.repository.name }}"
+          else
+            # "/" (root site) becomes "", "/repo" stays "/repo". Test the raw
+            # value before stripping, or a root site looks like an empty one.
+            prefix="${reported%/}"
+          fi
+          echo "Pages reported '${reported}'; using base '${prefix}/'"
+          echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
 
       - name: Build the portfolio (site root)
         env:
