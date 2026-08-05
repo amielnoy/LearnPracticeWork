@@ -478,9 +478,21 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <h3>❓ Question Bank</h3>
 <p>
-  Static stages render immediately. The enrich action feeds the user's role and a fixed
-  keyword seed into <code>callGrounded()</code>, then <code>extractJSON()</code> lifts a
-  <code>questions</code> array out of the reply. Grounding is why this one path is Gemini-only.
+  Five collapsed stages, each holding questions that are themselves the control: one click
+  reveals a hint, a second reveals the full answer, a third collapses. That is
+  <code>QuestionCard</code> over the same <code>useDisclosure(3)</code> the coding challenges
+  use, so both sections of the site behave identically and neither owns stage logic.
+</p>
+<p>
+  Content — 27 questions per language, each with a hint and a multi-paragraph answer — lives in
+  <code>lib/questionBank.ts</code> rather than in the component, which would otherwise be
+  mostly prose. The section renders whatever the bank contains and never counts stages or
+  items.
+</p>
+<p>
+  The enrich action feeds the user's role and a fixed keyword seed into
+  <code>callGrounded()</code>, then <code>extractJSON()</code> lifts a <code>questions</code>
+  array out of the reply. Grounding is why this one path is Gemini-only.
 </p>
 
 <h3>🐍 Coding Challenges</h3>
@@ -641,7 +653,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers five layers — 192 cases at the time of
+  One Playwright package at <code>tests/</code> covers five layers — 222 cases at the time of
   writing. Playwright is used as the runner throughout, not just as a browser driver: the unit
   project never launches a browser, it executes the same TypeScript modules the app imports.
 </p>
@@ -673,7 +685,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr>
       <td><code>tests/e2e</code></td>
       <td>Chromium, desktop + Pixel 5</td>
-      <td>The whole app on its own Vite server: hero and section rendering, in-page navigation, the theme and language toggles, and the mobile nav drawer.</td>
+      <td>The whole app on its own Vite server: hero and section rendering, in-page navigation, the theme and language toggles, the interview-question reveal, and the mobile nav drawer.</td>
     </tr>
   </tbody>
 </table>
@@ -778,6 +790,11 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
       <td><code>CodingChallenges</code> maps over whatever the locale provides; it never counts levels or items.</td>
     </tr>
     <tr>
+      <td>An interview question, or a whole stage</td>
+      <td><code>lib/questionBank.ts</code> — <code>EN_BANK</code> + <code>HE_BANK</code></td>
+      <td>Each entry carries its own <code>hint</code> and <code>answer</code>; <code>QuestionBank</code> maps over the stages and <code>QuestionCard</code> owns the reveal. A test asserts every question has both.</td>
+    </tr>
+    <tr>
       <td>A model vendor</td>
       <td><code>lib/providers.ts</code> — one <code>ProviderDef</code></td>
       <td>The picker renders <code>Object.keys(PROVIDERS)</code> and <code>callAI</code> only ever calls <code>build</code>/<code>parse</code>.</td>
@@ -808,7 +825,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <h3>Where the edges are</h3>
 <ul class="notes">
-  <li><b>Lecture content is hardcoded</b> inside <code>LectureSeries.tsx</code> as <code>EN</code>/<code>HE</code> objects rather than living in the locale files — the one section that breaks the content/UI split.</li>
+  <li><b>Lecture content is hardcoded</b> inside <code>LectureSeries.tsx</code> as <code>EN</code>/<code>HE</code> objects rather than living in the locale files — the last section that breaks the content/UI split. The question bank used to do the same and now sits in <code>lib/questionBank.ts</code>; the same move is available here.</li>
   <li><b>Grounded search is Gemini-only</b>, so the enrich action degrades if the user is on Anthropic or OpenAI without a Gemini key.</li>
   <li><b>The proxy path covers Gemini only.</b> The other two vendors are own-key or nothing.</li>
   <li><b>Resume tooling needs the public internet</b> beyond the model call; behind a strict CSP or an offline network, extraction and PDF export are the first things to fail.</li>

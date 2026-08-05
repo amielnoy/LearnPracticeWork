@@ -24,12 +24,32 @@ src/
     ├── i18n.ts               language resolution, switching, <html lang/dir>
     ├── providers.ts          the provider registry and callAI
     ├── domUtils.ts           escaping, linkifying, markdown → plain text
-    └── challenges.ts         the challenge content model (types only)
+    ├── challenges.ts         the challenge content model (types only)
+    └── questionBank.ts       interview questions, EN + HE, with hints and answers
 ```
 
 Sections render in the order `HomePage.tsx` lists them. Adding one means writing a component,
 adding a line there, and adding a `nav.links` entry to both locales — scroll-spy and the reveal
 animation both derive from the DOM, so neither needs editing.
+
+## Progressive reveal
+
+Two sections hide their payload behind a stepped disclosure, and both run on the same
+`useDisclosure(3)` hook — which is stage arithmetic only and has no opinion about what a stage
+contains:
+
+| Section | Click 1 | Click 2 | Click 3 |
+| --- | --- | --- | --- |
+| Coding challenges (`ChallengeCard`) | hint | solution + complexity | collapse |
+| Interview questions (`QuestionCard`) | hint | full answer | collapse |
+
+In the question bank the question *is* the button, and a cue inside it (`Show hint` → `Show
+full answer` → `Hide`) says what the next click does, so the control is not a mystery box.
+`aria-expanded` tracks the state for assistive tech.
+
+To add a question, add an entry to `lib/questionBank.ts` in **both** `EN_BANK` and `HE_BANK`.
+Each needs `q`, a one-line `hint`, and an `answer` array (one string per paragraph); a test
+fails if any question ships without both.
 
 ## Multi-language
 
@@ -95,7 +115,8 @@ layers point at this package:
 
 ```bash
 pnpm test:unit         # lib/domUtils, lib/i18n, lib/providers
-pnpm test:component    # ChallengeCard, CodingChallenges, ConnectionSetup, Footer, BackToTop
+pnpm test:component    # ChallengeCard, CodingChallenges, QuestionCard, QuestionBank,
+                       # ConnectionSetup, Footer, BackToTop
 pnpm test:e2e          # this app end to end, desktop + mobile
 ./run-all-tests.sh     # everything, plus the Allure and Playwright reports
 ```
