@@ -68,7 +68,9 @@
       "Bash(GEMINI_API_KEY=local-dev-placeholder PORT=8787 node ./dist/index.mjs)",
       "Bash(curl -s http://localhost:8787/api/ai/config)",
       "Bash(curl -s http://localhost:5199/api/ai/config)",
-      "Bash(python3 /private/tmp/claude-501/-Users-amielpeled-WebstormProjects-LearnPracticeWork/4352bcb8-9823-4f65-ba8f-816090697b0e/scratchpad/levels.py)"
+      "Bash(python3 /private/tmp/claude-501/-Users-amielpeled-WebstormProjects-LearnPracticeWork/4352bcb8-9823-4f65-ba8f-816090697b0e/scratchpad/levels.py)",
+      "Bash(git rebase *)",
+      "Bash(git stash *)"
     ]
   }
 }

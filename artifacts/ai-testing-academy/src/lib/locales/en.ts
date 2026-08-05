@@ -169,7 +169,7 @@ export const en = {
   },
   codingChallenges: {
     title: '🐍 Python Coding Challenges for Test Automation',
-    lead: '15 practical coding problems that come up in real QA-Automation interviews, grouped into three levels. Click once to reveal a hint, click again to reveal a short, efficient solution with time and space complexity.',
+    lead: '40 practical coding problems that come up in real QA-Automation interviews, grouped into three levels. Click once to reveal a hint, click again to reveal a short, efficient solution with time and space complexity.',
     hintLabel: '💡 Hint',
     complexityLabel: '⏱️ Complexity',
     showHintBtn: 'Show hint',
@@ -242,6 +242,172 @@ def count_by_status(results):
 def slowest(tests, n):
     return heapq.nlargest(n, tests, key=lambda t: t["duration"])`,
         complexity: 'Time: O(m log n) for m tests. Space: O(n) for the heap and the result.',
+      },
+      {
+        title: '6. Group tests by tag',
+        prompt: 'Given a list of test dicts like `{"name": ..., "tags": ["smoke", "api"]}`, return a dict mapping each tag to the list of test names carrying it.',
+        hint: 'A plain dict forces you to check "is this key here yet?" on every insert. collections.defaultdict(list) creates the empty list for you on first touch.',
+        code: `from collections import defaultdict
+
+def group_by_tag(tests):
+    groups = defaultdict(list)
+    for test in tests:
+        for tag in test.get("tags", ()):
+            groups[tag].append(test["name"])
+    return dict(groups)`,
+        complexity: 'Time: O(n*t) for n tests with t tags each. Space: O(n*t) for the grouped output.',
+      },
+      {
+        title: '7. Chunk test IDs into batches',
+        prompt: 'Split a flat list of test IDs into consecutive batches of at most `size` items, so each batch can be handed to a separate CI runner.',
+        hint: 'Slice with a stride: range(0, len(ids), size) gives you every batch start, and a slice past the end simply returns a shorter list — no special case for the remainder.',
+        code: `def chunk(ids, size):
+    if size <= 0:
+        raise ValueError("size must be positive")
+    return [ids[i:i + size] for i in range(0, len(ids), size)]`,
+        complexity: 'Time: O(n). Space: O(n) for the batches.',
+      },
+      {
+        title: '8. Parse a duration string into seconds',
+        prompt: 'Test reports print durations as strings like `"1h 2m 30s"`, `"90s"` or `"2m"`. Convert one into a total number of seconds.',
+        hint: 'Split on whitespace and read each token as a number plus a unit suffix. A units dict keyed by the suffix letter turns the whole thing into one multiply-and-add.',
+        code: `UNITS = {"h": 3600, "m": 60, "s": 1}
+
+def parse_duration(text):
+    total = 0
+    for token in text.split():
+        unit = token[-1]
+        if unit not in UNITS:
+            raise ValueError(f"Unknown unit in {token!r}")
+        total += float(token[:-1]) * UNITS[unit]
+    return total`,
+        complexity: 'Time: O(n) in the length of the string. Space: O(n) for the split tokens.',
+      },
+      {
+        title: '9. Diff two config dicts',
+        prompt: 'Compare a baseline config against a new one and report which keys were added, which were removed, and which changed value.',
+        hint: 'Treat the two key sets as sets: new - old is added, old - new is removed, and the intersection only needs a value comparison.',
+        code: `def diff_config(old, new):
+    old_keys, new_keys = set(old), set(new)
+    return {
+        "added": sorted(new_keys - old_keys),
+        "removed": sorted(old_keys - new_keys),
+        "changed": sorted(
+            k for k in old_keys & new_keys if old[k] != new[k]
+        ),
+    }`,
+        complexity: 'Time: O(n + m) for the two configs. Space: O(n + m) for the key sets.',
+      },
+      {
+        title: '10. Which tests ran yesterday but not today?',
+        prompt: 'Given the ordered list of test names from run A and from run B, return the names present in A but missing from B, keeping the order they had in A.',
+        hint: 'Build a set from B first so each membership check is O(1), then filter A in order. Using a plain list for the lookup silently makes this O(n*m).',
+        code: `def missing_from(run_a, run_b):
+    present = set(run_b)
+    return [name for name in run_a if name not in present]`,
+        complexity: 'Time: O(n + m). Space: O(m) for the lookup set, plus O(n) worst case for the output.',
+      },
+      {
+        title: '11. Find the longest test name',
+        prompt: 'Given a list of test names, return the longest one. If several tie, return the one that appears first.',
+        hint: 'max() takes a key function, so max(names, key=len) does the whole scan for you — and it already returns the first of any tie. Handle the empty list explicitly.',
+        code: `def longest_name(names):
+    if not names:
+        return None
+    return max(names, key=len)`,
+        complexity: 'Time: O(n) over the names. Space: O(1).',
+      },
+      {
+        title: '12. Total and average suite duration',
+        prompt: 'Given a list of test dicts with a `duration` field, return the total runtime and the average runtime of the suite.',
+        hint: 'sum() over a generator avoids building an intermediate list. The only trap is dividing by zero when the suite is empty — decide what an empty suite should report before you divide.',
+        code: `def suite_timing(tests):
+    total = sum(t["duration"] for t in tests)
+    average = total / len(tests) if tests else 0.0
+    return total, average`,
+        complexity: 'Time: O(n). Space: O(1) — the generator holds one value at a time.',
+      },
+      {
+        title: '13. Compute the pass rate',
+        prompt: 'Given a list of result dicts with a `status` field, return the percentage that passed, rounded to one decimal place.',
+        hint: 'A boolean is an int in Python, so sum(r["status"] == "passed" for r in results) counts matches directly. Guard the empty case before dividing.',
+        code: `def pass_rate(results):
+    if not results:
+        return 0.0
+    passed = sum(r["status"] == "passed" for r in results)
+    return round(passed / len(results) * 100, 1)`,
+        complexity: 'Time: O(n). Space: O(1).',
+      },
+      {
+        title: '14. Turn a test title into a valid identifier',
+        prompt: 'Convert a human title like `"Login  with VALID user!"` into a snake_case test function name: `login_with_valid_user`.',
+        hint: 'Lowercase, then replace every run of non-alphanumeric characters with a single underscore, then trim the underscores off the ends. One regex substitution handles the runs.',
+        code: `import re
+
+def slugify(title):
+    slug = re.sub(r"[^a-z0-9]+", "_", title.lower())
+    return slug.strip("_")`,
+        complexity: 'Time: O(n) in the length of the title. Space: O(n) for the new string.',
+      },
+      {
+        title: '15. Zip names and statuses into a dict',
+        prompt: 'A legacy report gives you test names and their statuses as two parallel lists. Build a single dict mapping each name to its status.',
+        hint: 'dict(zip(names, statuses)) is the idiomatic one-liner. Note that zip stops at the shorter list, so check the lengths first if a mismatch is a real error.',
+        code: `def to_report(names, statuses):
+    if len(names) != len(statuses):
+        raise ValueError("Mismatched report columns")
+    return dict(zip(names, statuses))`,
+        complexity: 'Time: O(n). Space: O(n) for the resulting dict.',
+      },
+      {
+        title: '16. Tests that failed in every run',
+        prompt: 'Given several runs, each a list of the test names that failed in it, return the names that failed in every single run — the consistently broken ones.',
+        hint: 'That is a set intersection. set.intersection(*rest) folds them all together, and an empty input needs its own answer.',
+        code: `def always_failing(runs):
+    if not runs:
+        return set()
+    first, *rest = (set(run) for run in runs)
+    return first.intersection(*rest)`,
+        complexity: 'Time: O(total names across runs). Space: O(size of the smallest run).',
+      },
+      {
+        title: '17. Sort tests by status, then by duration',
+        prompt: 'Order a list of test dicts so failures come first, and within each status the slowest tests come first.',
+        hint: 'Return a tuple from the sort key: Python compares tuples element by element. Negating the duration flips just that field to descending without a second sort.',
+        code: `def triage_order(tests):
+    return sorted(
+        tests,
+        key=lambda t: (t["status"] != "failed", -t["duration"]),
+    )`,
+        complexity: 'Time: O(n log n). Space: O(n) for the sorted copy.',
+      },
+      {
+        title: '18. Drop empty query parameters',
+        prompt: 'Before sending a request, remove every key from a params dict whose value is None or an empty string, so the URL stays clean.',
+        hint: 'A dict comprehension rebuilds the dict in one pass. Test against None explicitly — `if value` would also throw away 0 and False, which are legitimate values.',
+        code: `def clean_params(params):
+    return {
+        k: v for k, v in params.items()
+        if v is not None and v != ""
+    }`,
+        complexity: 'Time: O(n). Space: O(n) for the filtered dict.',
+      },
+      {
+        title: '19. Find gaps in a numbered test sequence',
+        prompt: 'Test cases are numbered 1..n. Given the numbers that actually ran, return the missing ones in ascending order.',
+        hint: 'Build the full expected range as a set and subtract what ran. Sorting the difference at the end is cheaper than scanning the list once per candidate.',
+        code: `def missing_ids(ran, n):
+    return sorted(set(range(1, n + 1)) - set(ran))`,
+        complexity: 'Time: O(n + m) plus O(k log k) to sort k missing IDs. Space: O(n).',
+      },
+      {
+        title: '20. Case-insensitive search over test names',
+        prompt: 'Return every test name that contains a given search term, ignoring differences in case.',
+        hint: 'Lowercase the term once outside the loop rather than on every comparison, then check `term in name.lower()`.',
+        code: `def search(names, term):
+    needle = term.lower()
+    return [name for name in names if needle in name.lower()]`,
+        complexity: 'Time: O(n*L) for n names of average length L. Space: O(n) worst case for the matches.',
       },
       ],
     },
@@ -331,6 +497,77 @@ def shard_tests(tests, n):
         heapq.heappush(totals, (total + test["duration"], i))
     return shards`,
         complexity: 'Time: O(m log m) for the sort plus O(m log n) for the heap. Space: O(m) for the shards.',
+      },
+      {
+        title: '6. Detect flaky tests across runs',
+        prompt: 'Given several test runs, each a dict of test name to "passed" or "failed", return the names of tests that did not always produce the same result.',
+        hint: 'A test is flaky when the set of statuses it produced has more than one member. Collect statuses per name in one pass, then filter.',
+        code: `from collections import defaultdict
+
+def find_flaky(runs):
+    statuses = defaultdict(set)
+    for run in runs:
+        for name, status in run.items():
+            statuses[name].add(status)
+    return sorted(n for n, s in statuses.items() if len(s) > 1)`,
+        complexity: 'Time: O(r*n) for r runs of n tests. Space: O(n) — each test holds at most a couple of distinct statuses.',
+      },
+      {
+        title: '7. Deep-merge config with environment overrides',
+        prompt: 'Merge a base config dict with an environment override dict. Nested dicts must merge key by key rather than the override replacing the whole branch.',
+        hint: 'Recurse only when both sides hold a dict; in every other case the override wins. Copy as you go so the base config is never mutated.',
+        code: `def deep_merge(base, override):
+    result = dict(base)
+    for key, value in override.items():
+        if isinstance(result.get(key), dict) and isinstance(value, dict):
+            result[key] = deep_merge(result[key], value)
+        else:
+            result[key] = value
+    return result`,
+        complexity: 'Time: O(n) over the total number of keys in both trees. Space: O(n) for the merged copy plus O(d) recursion depth.',
+      },
+      {
+        title: '8. Redact secrets from log lines',
+        prompt: 'Before attaching test logs to a report, replace the value of any `token`, `password` or `api_key` assignment with `***`, keeping the rest of the line intact.',
+        hint: 'One regex with an alternation over the key names, a capture group for the key-and-separator, and a backreference in the replacement so only the value is swapped.',
+        code: `import re
+
+SECRET = re.compile(
+    r"(?i)\\b(token|password|api_key|secret)(\\s*[=:]\\s*)(\\S+)"
+)
+
+def redact(line):
+    return SECRET.sub(r"\\1\\2***", line)`,
+        complexity: 'Time: O(n) in the length of the line. Space: O(n) for the redacted copy.',
+      },
+      {
+        title: '9. Assert an API response contains an expected subset',
+        prompt: 'Write `matches_subset(actual, expected)` that returns True when every key in `expected` is present in `actual` with an equal value, recursively, while extra keys in `actual` are allowed.',
+        hint: 'Recurse when both sides are dicts, compare directly otherwise. This is exactly how a partial-match assertion in an API test framework works.',
+        code: `def matches_subset(actual, expected):
+    if isinstance(expected, dict):
+        if not isinstance(actual, dict):
+            return False
+        return all(
+            key in actual and matches_subset(actual[key], value)
+            for key, value in expected.items()
+        )
+    return actual == expected`,
+        complexity: 'Time: O(e) in the size of the expected subset. Space: O(d) recursion depth.',
+      },
+      {
+        title: '10. Walk a paginated API endpoint',
+        prompt: 'An endpoint returns `{"items": [...], "next": <cursor or None>}`. Yield every item across all pages without loading the whole result set into memory.',
+        hint: 'A generator lets the caller start processing page one while later pages are still being fetched. Loop on the cursor and `yield from` each page of items.',
+        code: `def iter_all(fetch_page):
+    cursor = None
+    while True:
+        page = fetch_page(cursor)
+        yield from page["items"]
+        cursor = page.get("next")
+        if not cursor:
+            return`,
+        complexity: 'Time: O(total items) with one request per page. Space: O(page size) — only one page is held at a time.',
       },
       ],
     },
@@ -455,6 +692,114 @@ async def run_all(tests, limit=5):
         return_exceptions=True,
     )`,
         complexity: 'Time: O(m) tasks with at most `limit` in flight, so wall clock is roughly total_work / limit. Space: O(m) for the results.',
+      },
+      {
+        title: '6. Order fixture setup by dependency',
+        prompt: 'Given fixtures as a dict of name to its dependency names, produce a setup order in which every fixture appears after everything it depends on. Raise if that is impossible.',
+        hint: 'Kahn topological sort: count incoming edges, start from the fixtures with none, and decrement as you emit. If you emit fewer nodes than exist, the leftovers form a cycle.',
+        code: `from collections import deque
+
+def setup_order(deps):
+    nodes = set(deps) | {d for ds in deps.values() for d in ds}
+    indegree = {n: 0 for n in nodes}
+    dependents = {n: [] for n in nodes}
+    for node, requires in deps.items():
+        for dep in requires:
+            dependents[dep].append(node)
+            indegree[node] += 1
+
+    queue = deque(sorted(n for n in nodes if indegree[n] == 0))
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for dependent in dependents[node]:
+            indegree[dependent] -= 1
+            if indegree[dependent] == 0:
+                queue.append(dependent)
+
+    if len(order) != len(nodes):
+        raise ValueError("Cyclic fixture dependencies")
+    return order`,
+        complexity: 'Time: O(V + E) over fixtures and dependency edges. Space: O(V + E) for the indegree and dependents maps.',
+      },
+      {
+        title: '7. Run blocking health checks in a thread pool',
+        prompt: 'Call a blocking `check(url)` against many URLs concurrently, pair every result with its URL, and record a failure instead of aborting the batch when one check raises.',
+        hint: 'ThreadPoolExecutor suits blocking I/O. Submit into a future-to-url dict so as_completed can tell you which URL each finished future belongs to, and call result() inside a try.',
+        code: `from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def check_all(urls, check, workers=10, timeout=30):
+    results = {}
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(check, url): url for url in urls}
+        for future in as_completed(futures, timeout=timeout):
+            url = futures[future]
+            try:
+                results[url] = ("ok", future.result())
+            except Exception as exc:
+                results[url] = ("error", repr(exc))
+    return results`,
+        complexity: 'Time: roughly total_io / workers wall clock for n URLs. Space: O(n) for the futures and results.',
+      },
+      {
+        title: '8. A context manager with guaranteed cleanup',
+        prompt: 'Write a context manager that provisions a test resource, hands it to the body, and always tears it down — even when the body raises — while letting that exception propagate.',
+        hint: 'With @contextmanager, put the teardown in a finally around the yield. Returning nothing (falsy) from __exit__ is what lets the original exception keep travelling.',
+        code: `from contextlib import contextmanager
+
+@contextmanager
+def temp_environment(provision, destroy):
+    env = provision()
+    try:
+        yield env
+    finally:
+        destroy(env)
+
+# Equivalent class form:
+class TempEnvironment:
+    def __init__(self, provision, destroy):
+        self._provision, self._destroy = provision, destroy
+
+    def __enter__(self):
+        self.env = self._provision()
+        return self.env
+
+    def __exit__(self, exc_type, exc, tb):
+        self._destroy(self.env)
+        return False  # never swallow the test failure`,
+        complexity: 'Time: O(1) plus the provision and destroy costs. Space: O(1).',
+      },
+      {
+        title: '9. Bisect the build that broke a test',
+        prompt: 'You have an ordered list of builds where the test passed at the start and fails at the end. Find the first failing build using as few test runs as possible.',
+        hint: 'The pass/fail sequence is monotonic, so binary search applies: keep the invariant that lo is known-good territory and hi is known-bad, and halve the window each run.',
+        code: `def first_bad_build(builds, is_bad):
+    lo, hi = 0, len(builds) - 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if is_bad(builds[mid]):
+            hi = mid
+        else:
+            lo = mid + 1
+    return builds[lo]`,
+        complexity: 'Time: O(log n) test runs for n builds. Space: O(1).',
+      },
+      {
+        title: '10. Top-K error messages in a huge log',
+        prompt: 'A CI log is far larger than memory. Report the k most frequent error messages, reading the file only once.',
+        hint: 'Stream the file line by line instead of read().splitlines(), count into a Counter, and use heapq.nlargest so the ranking never sorts the whole vocabulary.',
+        code: `import heapq
+from collections import Counter
+
+def top_errors(path, k=10, prefix="ERROR"):
+    counts = Counter()
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for line in fh:                     # streams, never loads the file
+            if line.startswith(prefix):
+                counts[line.strip()] += 1
+    return heapq.nlargest(k, counts.items(), key=lambda kv: kv[1])`,
+        complexity: 'Time: O(n + u log k) for n lines and u distinct messages. Space: O(u) — bounded by distinct messages, not file size.',
       },
       ],
     },
