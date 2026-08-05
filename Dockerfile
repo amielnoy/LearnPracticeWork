@@ -14,7 +14,7 @@ WORKDIR /app
 
 # pnpm drives the monorepo. corepack works fine in this image (unlike the dev
 # Mac), but a pinned global pnpm is the most portable path.
-RUN npm install -g pnpm@10
+RUN npm install -g pnpm@11.20.0
 
 # node_modules is excluded via .dockerignore, so this resolves the Linux-native
 # binaries (rollup, esbuild, lightningcss…) instead of inheriting the host's
