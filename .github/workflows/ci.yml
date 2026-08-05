@@ -191,16 +191,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Pull the single-file Allure report the `test` job produced so it can ride
-      # along to Pages at /<repo>/allure/. `continue-on-error` keeps a site
-      # deploy possible even if the test job skipped report generation.
-      - name: Download the Allure report
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: allure-report
-          path: allure-report
-
       # Turns Pages on if it is not already. Without this the whole pipeline
       # runs green and only the final deploy fails, with a 404 from the Pages
       # API — the symptom that "Ensure GitHub Pages has been enabled" describes.
@@ -259,11 +249,9 @@ jobs:
           cp -R artifacts/ai-testing-academy/dist/public/. _site/ai-testing-academy/
           cp -R artifacts/ai-testing-lecture-1/dist/public/. _site/ai-testing-lecture-1/
           cp architecture.html _site/architecture.html
-          # Publish the Allure report at /<repo>/allure/ when the test job left one.
-          if [ -f allure-report/index.html ]; then
-            mkdir -p _site/allure
-            cp -R allure-report/. _site/allure/
-          fi
+          # The Allure report is deliberately NOT copied here — it is published to
+          # a separate repository's Pages by the `publish-allure` job, so it never
+          # lands on the portfolio site.
           # Client-side routing: Pages has no rewrite rules, so an unknown path
           # has to fall back to the portfolio shell the way Replit's rewrite does.
           cp _site/index.html _site/404.html
@@ -296,3 +284,52 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  publish-allure:
+    name: Publish the Allure report
+    # Publishes the report to a SEPARATE repository's gh-pages branch, so the
+    # test results get their own Pages URL and never touch the portfolio site.
+    # Runs on a main push even when the test job failed — a red run is exactly
+    # when someone needs to read the report.
+    #
+    # Requires two one-time setup items in this repo's settings:
+    #   • Secret ALLURE_PAGES_TOKEN — a token (classic PAT with `repo`, or a
+    #     fine-grained token with Contents: write on the target repo) that can
+    #     push to the reports repository.
+    #   • The target repo itself, created with Pages enabled on `gh-pages`.
+    #     Defaults to <owner>/allure-reports; override with the repository
+    #     variable ALLURE_PAGES_REPO (e.g. amielnoy/allure-reports).
+    needs: [gate, test]
+    if: ${{ !cancelled() && needs.gate.outputs.run == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    # Lift the secret to a job env so a step `if` can test whether it is set —
+    # secrets cannot be referenced in `if` directly, env can.
+    env:
+      ALLURE_PAGES_TOKEN: ${{ secrets.ALLURE_PAGES_TOKEN }}
+    steps:
+      - name: Download the Allure report
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: Note when the token is not configured yet
+        if: ${{ env.ALLURE_PAGES_TOKEN == '' }}
+        run: echo "ALLURE_PAGES_TOKEN is not set — skipping the Allure publish. Add the secret to enable it." >> "$GITHUB_STEP_SUMMARY"
+
+      # Publish only when the token exists and the test job actually produced a
+      # report, so a missing secret or a run that died early skips cleanly
+      # instead of failing red.
+      - name: Publish to the reports repo (gh-pages)
+        if: ${{ env.ALLURE_PAGES_TOKEN != '' && hashFiles('allure-report/index.html') != '' }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ env.ALLURE_PAGES_TOKEN }}
+          external_repository: ${{ vars.ALLURE_PAGES_REPO || format('{0}/allure-reports', github.repository_owner) }}
+          publish_branch: gh-pages
+          publish_dir: ./allure-report
+          keep_files: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Allure report from ${{ github.repository }}@${{ github.sha }}'
