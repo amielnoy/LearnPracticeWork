@@ -1,0 +1,254 @@
+name: CI
+
+# Runs on every push and pull request, plus a nightly check at 05:00 Israel
+# time. GitHub cron only understands UTC and Israel switches between UTC+2 and
+# UTC+3, so both candidate hours are scheduled and the `gate` job drops the one
+# that is not actually 05:00 in Asia/Jerusalem.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  schedule:
+    - cron: '0 2 * * *' # 05:00 IDT (UTC+3, summer)
+    - cron: '0 3 * * *' # 05:00 IST (UTC+2, winter)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '10'
+
+jobs:
+  gate:
+    name: Should this run?
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          hour=$(TZ=Asia/Jerusalem date +%H)
+          echo "Asia/Jerusalem hour is $hour"
+          if [ "$hour" = "05" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Not 05:00 in Israel — this is the off-season cron, skipping." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  test:
+    name: Tests
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve the Playwright version
+        id: playwright
+        run: |
+          version=$(pnpm --filter @workspace/tests exec playwright --version | awk '{print $2}')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the browser download
+        id: browser-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Install Chromium
+        run: pnpm --filter @workspace/tests exec playwright install --with-deps chromium
+
+      # api-server and scripts do not compile today, for reasons that predate
+      # this pipeline: noImplicitReturns in the Express handlers, `unknown`
+      # response bodies from the Gemini and Replit connector fetches, and a
+      # MigrationConfig mismatch in stripe-replit-sync. Everything else is
+      # clean, so the gate covers everything else. Drop the exclusions — or
+      # switch back to plain `pnpm run typecheck` — once those two compile.
+      - name: Typecheck
+        run: |
+          pnpm run typecheck:libs
+          pnpm -r --if-present \
+            --filter "./artifacts/**" \
+            --filter "!@workspace/api-server" \
+            --filter "./tests" \
+            run typecheck
+
+      # Split into four steps so a failure names the layer that broke, and
+      # `!cancelled()` lets the later layers report even after an early failure.
+      - name: Unit tests
+        run: pnpm run test:unit
+
+      - name: Component tests
+        if: ${{ !cancelled() }}
+        run: pnpm run test:component
+
+      - name: API tests
+        if: ${{ !cancelled() }}
+        run: pnpm run test:api
+
+      - name: Contract tests
+        if: ${{ !cancelled() }}
+        run: pnpm run test:contract
+
+      # Drives the real academy app in desktop + mobile Chrome; Playwright boots
+      # the app's own Vite server via the e2e config's `webServer`.
+      - name: E2E tests
+        if: ${{ !cancelled() }}
+        run: pnpm run test:e2e
+
+      # Every suite above wrote into the shared repo-root `allure-results`, so a
+      # single generate covers the whole run.
+      - name: Generate the Allure report
+        if: ${{ !cancelled() }}
+        run: pnpm run report:allure
+
+      - name: Upload the Allure report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload the Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/playwright-report
+            playwright-report
+            test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+      # Raw Allure results from all four layers land in one directory; the HTML
+      # report is generated from them with `pnpm run report:allure`.
+      - name: Upload the Allure results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  build-pages:
+    name: Build the site
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Pull the single-file Allure report the `test` job produced so it can ride
+      # along to Pages at /<repo>/allure/. `continue-on-error` keeps a site
+      # deploy possible even if the test job skipped report generation.
+      - name: Download the Allure report
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: allure-report
+          path: allure-report
+
+      # Pages serves a project site from /<repo>/, so every artifact's Vite
+      # `base` has to carry that prefix or the hashed asset URLs 404. The repo
+      # name is read from the event so a rename does not silently break links.
+      - name: Work out the base path
+        id: base
+        run: echo "prefix=/${{ github.event.repository.name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the portfolio (site root)
+        env:
+          PORT: '5173'
+          BASE_PATH: ${{ steps.base.outputs.prefix }}/
+        run: pnpm --filter @workspace/portfolio run build
+
+      - name: Build the AI Testing Academy
+        env:
+          PORT: '5174'
+          BASE_PATH: ${{ steps.base.outputs.prefix }}/ai-testing-academy/
+        run: pnpm --filter @workspace/ai-testing-academy run build
+
+      - name: Build lecture 1
+        env:
+          PORT: '5175'
+          BASE_PATH: ${{ steps.base.outputs.prefix }}/ai-testing-lecture-1/
+        run: pnpm --filter @workspace/ai-testing-lecture-1 run build
+
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp -R artifacts/portfolio/dist/public/. _site/
+          mkdir -p _site/ai-testing-academy _site/ai-testing-lecture-1
+          cp -R artifacts/ai-testing-academy/dist/public/. _site/ai-testing-academy/
+          cp -R artifacts/ai-testing-lecture-1/dist/public/. _site/ai-testing-lecture-1/
+          cp architecture.html _site/architecture.html
+          # Publish the Allure report at /<repo>/allure/ when the test job left one.
+          if [ -f allure-report/index.html ]; then
+            mkdir -p _site/allure
+            cp -R allure-report/. _site/allure/
+          fi
+          # Client-side routing: Pages has no rewrite rules, so an unknown path
+          # has to fall back to the portfolio shell the way Replit's rewrite does.
+          cp _site/index.html _site/404.html
+          # Stops Pages from running the output through Jekyll, which would drop
+          # any file or directory beginning with an underscore.
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy-pages:
+    name: Publish to GitHub Pages
+    needs: build-pages
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
