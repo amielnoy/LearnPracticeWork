@@ -161,8 +161,11 @@ jobs:
 
   build-pages:
     name: Build the site
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    # Publish even when the test job failed — `!cancelled()` overrides the
+    # skip-on-failed-dependency default, while `gate` still governs whether the
+    # run happens at all and the ref/event conditions keep this to a main push.
+    needs: [gate, test]
+    if: ${{ !cancelled() && needs.gate.outputs.run == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
