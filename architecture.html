@@ -771,6 +771,11 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   Every layer runs as its own step on each push and pull request, and again nightly at 05:00
   Israel time. GitHub cron is UTC-only and Israel shifts between UTC+2 and UTC+3, so both
   candidate hours are scheduled and a gate job discards the one that is not 05:00 locally.
+  Each step carries <code>if: !cancelled()</code>, so one failing layer — or a failing
+  typecheck — never stops the rest from reporting into the shared Allure results.
+  <b>Publishing does not depend on the tests passing.</b> The site job runs through a failed
+  test job and the deploy job asks only whether the site built, because a report nobody can
+  read when the build is red is a report that is missing exactly when it is needed.
   The Docker image is pinned to <code>linux/amd64</code> for a related reason: the workspace
   <code>overrides</code> strip every platform-native optional dependency except the
   linux-x64-gnu ones, so an arm64 image would be missing the rollup binary and the e2e layer's

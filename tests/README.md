@@ -29,7 +29,8 @@ pnpm test:e2e
 
 `run-all-tests.sh` is the one to reach for when you want a report: unlike `pnpm test` it does
 **not** fail fast, so every layer contributes to the Allure output even after one fails, and it
-still exits non-zero if anything did. It calls the Playwright binaries directly out of
+still exits non-zero if anything did. It typechecks first, because Playwright transpiles specs
+without type-checking them — a type error in a spec runs fine locally and then fails CI. It calls the Playwright binaries directly out of
 `node_modules`, so it behaves the same on a dev Mac (where corepack's pnpm is broken) and
 inside the Docker image.
 
@@ -90,7 +91,9 @@ Under `CI=true` the configs write HTML directly and the merge step is skipped.
 
 Both suites keep a screenshot, a video and a trace on failure; Allure attaches them to the
 failing test. CI uploads the Allure report, the raw results and the Playwright HTML report as
-artifacts, and publishes the Allure report to Pages at `/<repo>/allure/`.
+artifacts, and publishes the Allure report to Pages at `/<repo>/allure/` — **including when the
+tests fail**, which is when someone actually needs to read it. Every step in the test job
+carries `if: !cancelled()` so a failure in one layer still leaves the others in the report.
 
 ## How the servers are set up
 
