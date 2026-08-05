@@ -44,7 +44,10 @@ export function QuestionBank() {
         'Return ONLY JSON: {"questions":[{"stage":"...","question":"...","answer":"...","keywords":["..."]}]}. ' +
         `Write every question and answer in ${bank.langName}.`;
       const reply = await callGrounded(QA_SYSTEM, user, 3000);
-      const items = ((extractJSON(reply) as { questions?: EnrichedQA[] }).questions || []);
+      // Accept either the requested {"questions":[…]} wrapper or a bare […]
+      // array, since the model sometimes drops the wrapper.
+      const parsed = extractJSON(reply) as { questions?: EnrichedQA[] } | EnrichedQA[];
+      const items = Array.isArray(parsed) ? parsed : parsed.questions ?? [];
       setEnrichedItems(items);
       setEnrichedRole(role);
       setEnrichedHeading(bank.enrichHeading);

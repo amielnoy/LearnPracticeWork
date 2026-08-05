@@ -252,17 +252,61 @@ function repairJson(json: string): string {
   return out;
 }
 
-export function extractJSON(text: string, S: Locale['s']): unknown {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const raw = fenced ? fenced[1] : text;
-  const start = raw.indexOf('{'), end = raw.lastIndexOf('}');
-  if (start === -1 || end === -1) throw new Error(S.errNoJson);
-  const slice = raw.slice(start, end + 1);
-  try {
-    return JSON.parse(slice);
-  } catch {
-    // A model occasionally drops a comma or leaves a trailing one; repair and
-    // retry before giving up, so a near-miss response is not thrown away.
-    return JSON.parse(repairJson(slice));
+/**
+ * The first balanced JSON value — object or array — in `s`, or null if there is
+ * none. String-aware, so braces inside a string are ignored, and it stops at the
+ * matching close rather than the last brace in the text, so trailing prose or
+ * grounding citations after the JSON don't drag in garbage. A truncated value
+ * (no matching close) is returned whole for the repair pass to attempt.
+ */
+function findJson(s: string): string | null {
+  const objAt = s.indexOf('{');
+  const arrAt = s.indexOf('[');
+  const open =
+    objAt === -1 ? arrAt : arrAt === -1 ? objAt : Math.min(objAt, arrAt);
+  if (open === -1) return null;
+
+  let depth = 0;
+  let inStr = false;
+  let esc = false;
+  for (let i = open; i < s.length; i++) {
+    const c = s[i]!;
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') inStr = true;
+    else if (c === '{' || c === '[') depth++;
+    else if (c === '}' || c === ']') {
+      depth--;
+      if (depth === 0) return s.slice(open, i + 1);
+    }
   }
+  return s.slice(open); // unbalanced/truncated — let repair try
+}
+
+export function extractJSON(text: string, S: Locale['s']): unknown {
+  // Prefer a fenced block, but fall back to the whole reply if the fence held no
+  // JSON (grounded replies sometimes fence prose and leave the JSON outside it).
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const candidates = fenced ? [fenced[1]!, text] : [text];
+
+  for (const raw of candidates) {
+    const slice = findJson(raw);
+    if (slice === null) continue;
+    try {
+      return JSON.parse(slice);
+    } catch {
+      // A model occasionally drops a comma or leaves a trailing one; repair and
+      // retry before moving on, so a near-miss response is not thrown away.
+      try {
+        return JSON.parse(repairJson(slice));
+      } catch {
+        // fall through to the next candidate
+      }
+    }
+  }
+  throw new Error(S.errNoJson);
 }

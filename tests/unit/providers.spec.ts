@@ -244,6 +244,31 @@ test.describe('extractJSON', () => {
       ok: true,
     });
   });
+
+  test('reads a top-level array, not only an object', () => {
+    expect(extractJSON('```json\n[{"q": "one"}, {"q": "two"}]\n```', S)).toEqual([
+      { q: 'one' },
+      { q: 'two' },
+    ]);
+  });
+
+  test('stops at the matching brace, ignoring trailing prose and citations', () => {
+    // A grounded reply often appends sources after the JSON, sometimes with
+    // their own braces — `lastIndexOf('}')` used to drag those in.
+    const reply = '{"score": 7} \n\nSources: {see [1]} and more text';
+    expect(extractJSON(reply, S)).toEqual({ score: 7 });
+  });
+
+  test('falls back to the whole reply when the fence holds no JSON', () => {
+    const reply = 'Reasoning:\n```\nno json in here\n```\nResult: {"score": 7}';
+    expect(extractJSON(reply, S)).toEqual({ score: 7 });
+  });
+
+  test('does not treat a brace inside a string as structure', () => {
+    expect(extractJSON('{"tpl": "a {placeholder} b"}', S)).toEqual({
+      tpl: 'a {placeholder} b',
+    });
+  });
 });
 
 test.describe('loadServerConfig', () => {
