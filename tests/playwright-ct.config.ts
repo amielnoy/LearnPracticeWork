@@ -27,7 +27,9 @@ export default defineConfig({
     ['list'],
     ['allure-playwright', { resultsDir: allureResultsDir }],
     ...(process.env.CI
-      ? [['html', { open: 'never' }] as const]
+      // Own folder: the e2e config resolves its default to the same
+      // tests/playwright-report and would overwrite this one.
+      ? [['html', { open: 'never', outputFolder: '../playwright-report/component' }] as const]
       : [['blob', { outputDir: blobDir }] as const]),
   ],
   // Keep the last screenshot, a video and a trace whenever a component test

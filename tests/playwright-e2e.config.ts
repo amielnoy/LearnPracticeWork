@@ -31,7 +31,9 @@ export default defineConfig({
     ['list'],
     ['allure-playwright', { resultsDir: allureResultsDir }],
     ...(process.env.CI
-      ? [['html', { open: 'never' }] as const]
+      // Own folder: the component config resolves its default to the same
+      // tests/playwright-report and would overwrite this one.
+      ? [['html', { open: 'never', outputFolder: '../playwright-report/e2e' }] as const]
       : [['blob', { outputDir: blobDir }] as const]),
   ],
   // On a failure keep the evidence: the last screenshot, a video of the run and

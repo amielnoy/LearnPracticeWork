@@ -90,15 +90,28 @@ AI panel decides no server key exists and offers bring-your-own-key only.
 
 ## Tests
 
-Covered by the workspace suite in `tests/`, not by a per-package runner:
+Covered by the workspace suite in `tests/`, not by a per-package runner. Three of the five
+layers point at this package:
 
 ```bash
 pnpm test:unit         # lib/domUtils, lib/i18n, lib/providers
 pnpm test:component    # ChallengeCard, CodingChallenges, ConnectionSetup, Footer, BackToTop
+pnpm test:e2e          # this app end to end, desktop + mobile
+./run-all-tests.sh     # everything, plus the Allure and Playwright reports
 ```
 
 Component tests mount the real components with Playwright CT, so `@academy/*` resolves to
-`src/` in both `tests/tsconfig.json` and the CT Vite config. See `tests/README.md`.
+`src/` in both `tests/tsconfig.json` and the CT Vite config.
+
+E2E boots this package's own Vite dev server on port 5273 with `BASE_PATH=/`, drives it in
+desktop and mobile Chromium, and reaches the UI through page objects in `tests/e2e/pages` and
+`tests/e2e/components` — so a markup change breaks one class, not a dozen specs. Nothing there
+talks to an API server, which is why those flows see the bring-your-own-key state.
+
+Two ids that tests depend on: `#nav` / `#navToggle` / `#themeToggle` / `#langToggle` on the
+nav, and `#setup`, `#resume`, `#lecture-series`, `#interview-talk`, `#interview-questions`,
+`#coding-challenges` on the sections. Renaming one means updating `NavComponent` or
+`SECTION_IDS`. See `tests/README.md`.
 
 ## Deployment
 

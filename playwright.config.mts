@@ -50,7 +50,9 @@ export default defineConfig({
     ['list'],
     ['allure-playwright', { resultsDir: allureResultsDir }],
     ...(process.env.CI
-      ? [['html', { open: 'never' }] as const]
+      // Own folder, matching the component and e2e configs, so CI uploads one
+      // artifact holding all three rather than whichever suite finished last.
+      ? [['html', { open: 'never', outputFolder: 'playwright-report/node' }] as const]
       : [['blob', { outputDir: blobDir }] as const]),
   ],
 
