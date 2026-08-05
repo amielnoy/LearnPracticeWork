@@ -92,7 +92,7 @@ Under `CI=true` the configs write HTML directly and the merge step is skipped.
 Both suites keep a screenshot, a video and a trace on failure; Allure attaches them to the
 failing test. CI uploads the Allure report, the raw results and the Playwright HTML report as
 artifacts, and the `publish-allure` job pushes the Allure report to a **separate reports
-repository's** `gh-pages` — **including when the tests fail**, which is when someone actually
+repository's** `main` branch — **including when the tests fail**, which is when someone actually
 needs to read it — so it gets its own Pages URL and never touches the portfolio site. Every step in the test job
 carries `if: !cancelled()` so a failure in one layer still leaves the others in the report.
 

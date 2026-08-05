@@ -296,7 +296,8 @@ jobs:
     #   • Secret ALLURE_PAGES_TOKEN — a token (classic PAT with `repo`, or a
     #     fine-grained token with Contents: write on the target repo) that can
     #     push to the reports repository.
-    #   • The target repo itself, created with Pages enabled on `gh-pages`.
+    #   • The target repo itself, with Pages set to "Deploy from a branch" on
+    #     `main` / (root) — which is where this job force-pushes the report.
     #     Defaults to <owner>/allure-report-learn-practice-deploy; override with
     #     the repository variable ALLURE_PAGES_REPO if you rename it.
     needs: [gate, test]
@@ -327,7 +328,7 @@ jobs:
         with:
           personal_token: ${{ env.ALLURE_PAGES_TOKEN }}
           external_repository: ${{ vars.ALLURE_PAGES_REPO || format('{0}/allure-report-learn-practice-deploy', github.repository_owner) }}
-          publish_branch: gh-pages
+          publish_branch: main
           publish_dir: ./allure-report
           keep_files: false
           user_name: 'github-actions[bot]'
