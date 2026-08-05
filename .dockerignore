@@ -1,0 +1,22 @@
+# Never ship host node_modules into the image — the Mac tree has darwin-arm64
+# natives that break under Linux. The image does its own `pnpm install`.
+node_modules
+**/node_modules
+
+# Build + test outputs are regenerated inside the container.
+dist
+**/dist
+allure-results
+allure-report
+test-results
+playwright-report
+tests/playwright-report
+blob-report
+
+# VCS / editor / local noise.
+.git
+.github
+.idea
+.vscode
+*.log
+.DS_Store
