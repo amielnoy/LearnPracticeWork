@@ -315,9 +315,16 @@ jobs:
           name: allure-report
           path: allure-report
 
-      - name: Note when the token is not configured yet
-        if: ${{ env.ALLURE_PAGES_TOKEN == '' }}
-        run: echo "ALLURE_PAGES_TOKEN is not set — skipping the Allure publish. Add the secret to enable it." >> "$GITHUB_STEP_SUMMARY"
+      # Diagnostic: always report whether the workflow can see the secret, never
+      # its value (only the character count), so the run summary makes it obvious
+      # when the secret is missing or pasted empty.
+      - name: Report ALLURE_PAGES_TOKEN status
+        run: |
+          if [ -n "$ALLURE_PAGES_TOKEN" ]; then
+            echo "✅ ALLURE_PAGES_TOKEN is **set** (${#ALLURE_PAGES_TOKEN} chars) — the Allure publish will run." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ ALLURE_PAGES_TOKEN is **empty / not set** — the Allure publish is skipped. Add it under Settings → Secrets and variables → Actions → Repository secrets in this repo." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       # Publish only when the token exists and the test job actually produced a
       # report, so a missing secret or a run that died early skips cleanly
