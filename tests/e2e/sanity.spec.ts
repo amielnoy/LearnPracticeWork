@@ -24,14 +24,13 @@ test('loads without any uncaught page errors', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('renders the footer with a safe external author link', async ({ home }) => {
-  await expect(home.footer).toBeVisible();
+test('renders the footer with a safe external author link', async ({ footer }) => {
+  await expect(footer.root).toBeVisible();
 
-  const author = home.footer.getByRole('link').first();
-  await expect(author).toHaveAttribute('href', /^https?:\/\//);
-  await expect(author).toHaveAttribute('target', '_blank');
+  await expect(footer.authorLink).toHaveAttribute('href', /^https?:\/\//);
+  await expect(footer.authorLink).toHaveAttribute('target', '_blank');
   // Without noopener the opened tab could navigate this one via window.opener.
-  await expect(author).toHaveAttribute('rel', /noopener/);
+  await expect(footer.authorLink).toHaveAttribute('rel', /noopener/);
 });
 
 test('a coding challenge reveals its solution on the second click', async ({ challenges }) => {
