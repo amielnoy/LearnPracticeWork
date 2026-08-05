@@ -3,6 +3,7 @@ import { HomePage } from './pages/HomePage';
 import type { NavComponent } from './components/NavComponent';
 import type { HeroComponent } from './components/HeroComponent';
 import type { QuestionsComponent } from './components/QuestionsComponent';
+import type { ChallengesComponent } from './components/ChallengesComponent';
 
 /**
  * E2E fixtures. `home` hands every test an already-open HomePage — no
@@ -16,6 +17,7 @@ type AcademyFixtures = {
   nav: NavComponent;
   hero: HeroComponent;
   questions: QuestionsComponent;
+  challenges: ChallengesComponent;
 };
 
 export const test = base.extend<AcademyFixtures>({
@@ -30,6 +32,9 @@ export const test = base.extend<AcademyFixtures>({
   },
   questions: async ({ home }, use) => {
     await use(home.questions);
+  },
+  challenges: async ({ home }, use) => {
+    await use(home.challenges);
   },
 });
 
