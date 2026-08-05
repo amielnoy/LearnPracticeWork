@@ -8,7 +8,7 @@ import type { Page, Locator } from '@playwright/test';
 export class QuestionsComponent {
   readonly section: Locator;
 
-  constructor(private readonly page: Page) {
+  constructor(page: Page) {
     this.section = page.locator('#interview-questions');
   }
 

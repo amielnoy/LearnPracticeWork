@@ -9,7 +9,7 @@ export class HeroComponent {
   readonly root: Locator;
   readonly heading: Locator;
 
-  constructor(private readonly page: Page) {
+  constructor(page: Page) {
     this.root = page.locator('header#hero');
     this.heading = this.root.getByRole('heading', { level: 1 });
   }
