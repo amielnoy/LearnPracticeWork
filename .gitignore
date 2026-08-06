@@ -20,6 +20,7 @@ playwright/.cache
 # Allure (results are generated per-run; report is generated from them)
 allure-results
 allure-report
+allure-report-single
 
 # IDEs and editors
 /.idea

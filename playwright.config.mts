@@ -48,7 +48,11 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [
     ['list'],
-    ['allure-playwright', { resultsDir: allureResultsDir }],
+    // `detail: false` drops Playwright's own auto-generated steps — one per
+    // `expect` and one per API call, which bury the steps the tests actually
+    // name. What is left is the test's own structure plus the request and
+    // response attachments, which is the report someone can read.
+    ['allure-playwright', { resultsDir: allureResultsDir, detail: false }],
     ...(process.env.CI
       // Own folder, matching the component and e2e configs, so CI uploads one
       // artifact holding all three rather than whichever suite finished last.

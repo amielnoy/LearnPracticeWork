@@ -11,7 +11,8 @@
     "test:component": "playwright test --config=playwright-ct.config.ts",
     "test:e2e": "playwright test --config=playwright-e2e.config.ts",
     "test:browsers": "playwright install chromium",
-    "report:allure": "allure awesome ../allure-results --single-file --output ../allure-report",
+    "report:allure": "allure awesome ../allure-results --output ../allure-report",
+    "report:allure:single": "allure awesome ../allure-results --single-file --output ../allure-report-single",
     "report:allure:serve": "allure serve ../allure-results",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

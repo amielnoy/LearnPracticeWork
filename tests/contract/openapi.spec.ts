@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { test, expect } from '@playwright/test';
+import { test, expect, labelApiSuite } from '../support/apiFixtures';
 import { parse as parseYaml } from 'yaml';
 import * as apiZod from '@workspace/api-zod';
 
@@ -71,6 +71,10 @@ function isZodObject(value: unknown): value is {
   return typeof value === 'object' && value !== null && 'shape' in value;
 }
 
+test.beforeEach(async () => {
+  await labelApiSuite('OpenAPI contract');
+});
+
 test.describe('the spec itself', () => {
   test('documents at least one operation', () => {
     expect(documented.length).toBeGreaterThan(0);
@@ -106,10 +110,8 @@ test.describe('spec ↔ generated Zod schemas', () => {
 
 test.describe('spec ↔ running server', () => {
   for (const { method, route, url, operation } of documented) {
-    test(`${method.toUpperCase()} ${route} answers with a documented status`, async ({
-      request,
-    }) => {
-      const response = await request.fetch(url, { method: method.toUpperCase() });
+    test(`${method.toUpperCase()} ${route} answers with a documented status`, async ({ api }) => {
+      const response = await api.fetch(url, { method: method.toUpperCase() });
 
       expect(
         Object.keys(operation.responses),
@@ -117,10 +119,8 @@ test.describe('spec ↔ running server', () => {
       ).toContain(String(response.status()));
     });
 
-    test(`${method.toUpperCase()} ${route} answers with a documented media type`, async ({
-      request,
-    }) => {
-      const response = await request.fetch(url, { method: method.toUpperCase() });
+    test(`${method.toUpperCase()} ${route} answers with a documented media type`, async ({ api }) => {
+      const response = await api.fetch(url, { method: method.toUpperCase() });
       const documentedTypes = Object.keys(
         operation.responses[String(response.status())]?.content ?? {},
       );
@@ -131,13 +131,11 @@ test.describe('spec ↔ running server', () => {
       );
     });
 
-    test(`${method.toUpperCase()} ${route} returns a body its schema accepts`, async ({
-      request,
-    }) => {
+    test(`${method.toUpperCase()} ${route} returns a body its schema accepts`, async ({ api }) => {
       const schema = generatedSchemaFor(operation.operationId);
       test.skip(!isZodObject(schema), 'no generated object schema for this operation');
 
-      const response = await request.fetch(url, { method: method.toUpperCase() });
+      const response = await api.fetch(url, { method: method.toUpperCase() });
       const body = await response.json();
 
       // Strict: an undocumented extra field is drift too, and clients that
@@ -175,8 +173,8 @@ test.describe('undocumented routes', () => {
   });
 
   for (const entry of UNDOCUMENTED_ROUTES.filter(r => r.probe !== false)) {
-    test(`${entry.method} ${entry.route} is implemented`, async ({ request }) => {
-      const response = await request.fetch(`${basePath}${entry.route}`, {
+    test(`${entry.method} ${entry.route} is implemented`, async ({ api }) => {
+      const response = await api.fetch(`${basePath}${entry.route}`, {
         method: entry.method,
         ...(entry.method === 'POST' ? { data: {} } : {}),
       });
