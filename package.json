@@ -14,6 +14,7 @@
     "test:contract": "pnpm --filter @workspace/tests run test:contract",
     "test:e2e": "pnpm --filter @workspace/tests run test:e2e",
     "report:allure": "pnpm --filter @workspace/tests run report:allure",
+    "report:allure:single": "pnpm --filter @workspace/tests run report:allure:single",
     "report:allure:serve": "pnpm --filter @workspace/tests run report:allure:serve"
   },
   "private": true,

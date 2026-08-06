@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, allure, labelApiSuite } from '../support/apiFixtures';
 import { KEYED_URL, LIMITED_URL, DUMMY_GEMINI_KEY } from '../support/servers';
 
 /**
@@ -7,11 +7,18 @@ import { KEYED_URL, LIMITED_URL, DUMMY_GEMINI_KEY } from '../support/servers';
  * The default `baseURL` is the instance with no Gemini key. The keyed instance
  * is addressed absolutely and is only ever sent invalid requests, so nothing
  * here can reach Gemini.
+ *
+ * Calls go through the `api` fixture rather than Playwright's `request`, so the
+ * report carries the request and the response for every one of them.
  */
 
+test.beforeEach(async () => {
+  await labelApiSuite('AI proxy');
+});
+
 test.describe('no server-side key configured', () => {
-  test('tells the client no default key exists', async ({ request }) => {
-    const response = await request.get('/api/ai/config');
+  test('tells the client no default key exists', async ({ api }) => {
+    const response = await api.get('/api/ai/config');
 
     expect(response.status()).toBe(200);
     expect(await response.json()).toEqual({
@@ -23,8 +30,8 @@ test.describe('no server-side key configured', () => {
     });
   });
 
-  test('refuses to generate, with a status that says "not configured"', async ({ request }) => {
-    const response = await request.post('/api/ai/generate', {
+  test('refuses to generate, with a status that says "not configured"', async ({ api }) => {
+    const response = await api.post('/api/ai/generate', {
       data: { messages: [{ role: 'user', content: 'hi' }] },
     });
 
@@ -32,17 +39,15 @@ test.describe('no server-side key configured', () => {
     expect(await response.json()).toHaveProperty('error');
   });
 
-  test('rejects before reading the body, so no upstream call is attempted', async ({
-    request,
-  }) => {
-    const response = await request.post('/api/ai/generate', { data: {} });
+  test('rejects before reading the body, so no upstream call is attempted', async ({ api }) => {
+    const response = await api.post('/api/ai/generate', { data: {} });
     expect(response.status()).toBe(503);
   });
 });
 
 test.describe('server-side key configured', () => {
-  test('advertises the default key without revealing it', async ({ request }) => {
-    const response = await request.get(`${KEYED_URL}/api/ai/config`);
+  test('advertises the default key without revealing it', async ({ api }) => {
+    const response = await api.get(`${KEYED_URL}/api/ai/config`);
     const body = await response.json();
 
     expect(body).toEqual({
@@ -55,8 +60,8 @@ test.describe('server-side key configured', () => {
     expect(JSON.stringify(body)).not.toContain(DUMMY_GEMINI_KEY);
   });
 
-  test('requires a messages array', async ({ request }) => {
-    const response = await request.post(`${KEYED_URL}/api/ai/generate`, { data: {} });
+  test('requires a messages array', async ({ api }) => {
+    const response = await api.post(`${KEYED_URL}/api/ai/generate`, { data: {} });
 
     expect(response.status()).toBe(400);
     const body = await response.json();
@@ -64,46 +69,51 @@ test.describe('server-side key configured', () => {
     expect(body.issues[0].path).toContain('messages');
   });
 
-  test('rejects an empty conversation', async ({ request }) => {
-    const response = await request.post(`${KEYED_URL}/api/ai/generate`, {
+  test('rejects an empty conversation', async ({ api }) => {
+    const response = await api.post(`${KEYED_URL}/api/ai/generate`, {
       data: { messages: [] },
     });
 
     expect(response.status()).toBe(400);
   });
 
-  test('rejects a messages field that is not an array', async ({ request }) => {
-    const response = await request.post(`${KEYED_URL}/api/ai/generate`, {
+  test('rejects a messages field that is not an array', async ({ api }) => {
+    const response = await api.post(`${KEYED_URL}/api/ai/generate`, {
       data: { messages: 'hello' },
     });
 
     expect(response.status()).toBe(400);
   });
 
-  test('never echoes the server key in an error', async ({ request }) => {
-    const response = await request.post(`${KEYED_URL}/api/ai/generate`, {
+  test('never echoes the server key in an error', async ({ api }) => {
+    const response = await api.post(`${KEYED_URL}/api/ai/generate`, {
       data: { model: 'gemini-2.5-pro' },
     });
 
     expect(await response.text()).not.toContain(DUMMY_GEMINI_KEY);
   });
 
-  test('strictly validates roles, token bounds, and unknown fields', async ({ request }) => {
-    const invalidBodies = [
-      { messages: [{ role: 'system', content: 'not allowed' }] },
-      { messages: [{ role: 'user', content: 'hello' }], maxTokens: 4_001 },
-      { messages: [{ role: 'user', content: 'hello' }], unexpected: true },
+  test('strictly validates roles, token bounds, and unknown fields', async ({ api }) => {
+    // Named cases rather than a bare loop: in the report each one is its own
+    // step, so a failure says which rule stopped being enforced instead of
+    // pointing at an index.
+    const cases = [
+      { rule: 'the system role is not accepted', data: { messages: [{ role: 'system', content: 'not allowed' }] } },
+      { rule: 'maxTokens above the ceiling', data: { messages: [{ role: 'user', content: 'hello' }], maxTokens: 4_001 } },
+      { rule: 'unknown top-level fields', data: { messages: [{ role: 'user', content: 'hello' }], unexpected: true } },
     ];
 
-    for (const data of invalidBodies) {
-      const response = await request.post(`${KEYED_URL}/api/ai/generate`, { data });
-      expect(response.status()).toBe(400);
-      expect((await response.json()).error).toBe('Invalid request body');
+    for (const { rule, data } of cases) {
+      await allure.step(`rejects ${rule}`, async () => {
+        const response = await api.post(`${KEYED_URL}/api/ai/generate`, { data });
+        expect(response.status()).toBe(400);
+        expect((await response.json()).error).toBe('Invalid request body');
+      });
     }
   });
 
-  test('rejects request bodies above the configured parser limit', async ({ request }) => {
-    const response = await request.post(`${KEYED_URL}/api/ai/generate`, {
+  test('rejects request bodies above the configured parser limit', async ({ api }) => {
+    const response = await api.post(`${KEYED_URL}/api/ai/generate`, {
       data: { messages: [{ role: 'user', content: 'x'.repeat(100_000) }] },
     });
 
@@ -111,11 +121,13 @@ test.describe('server-side key configured', () => {
     expect(await response.json()).toEqual({ error: 'Request body is too large' });
   });
 
-  test('only returns CORS permission for an allowlisted production origin', async ({ request }) => {
-    const allowed = await request.get(`${KEYED_URL}/api/ai/config`, {
+  test('only returns CORS permission for an allowlisted production origin', async ({ api }) => {
+    // The call itself is already a named step, so the origin under test is
+    // spelled out in the step name rather than wrapped in another layer.
+    const allowed = await api.get(`${KEYED_URL}/api/ai/config`, {
       headers: { Origin: 'https://academy.example' },
     });
-    const rejected = await request.get(`${KEYED_URL}/api/ai/config`, {
+    const rejected = await api.get(`${KEYED_URL}/api/ai/config`, {
       headers: { Origin: 'https://attacker.example' },
     });
 
@@ -125,14 +137,18 @@ test.describe('server-side key configured', () => {
 });
 
 test.describe('per-IP quota', () => {
-  test('returns 429 after the configured daily allowance', async ({ request }) => {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const response = await request.post(`${LIMITED_URL}/api/ai/generate`, { data: {} });
-      expect(response.status()).toBe(400);
-    }
+  test('returns 429 after the configured daily allowance', async ({ api }) => {
+    await allure.step('spend the daily allowance', async () => {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const response = await api.post(`${LIMITED_URL}/api/ai/generate`, { data: {} });
+        expect(response.status()).toBe(400);
+      }
+    });
 
-    const blocked = await request.post(`${LIMITED_URL}/api/ai/generate`, { data: {} });
-    expect(blocked.status()).toBe(429);
-    expect((await blocked.json()).error).toContain('Daily');
+    await allure.step('the next call is refused', async () => {
+      const blocked = await api.post(`${LIMITED_URL}/api/ai/generate`, { data: {} });
+      expect(blocked.status()).toBe(429);
+      expect((await blocked.json()).error).toContain('Daily');
+    });
   });
 });
