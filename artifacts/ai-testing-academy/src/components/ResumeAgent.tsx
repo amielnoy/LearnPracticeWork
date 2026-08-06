@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useLocale } from '../context/LocaleContext';
 import { useProviderContext } from '../context/ProviderContext';
-import { isRtlText, linkifyHtml } from '../lib/domUtils';
+import { isRtlText, linkifyHtml, pdfItemsToText } from '../lib/domUtils';
 import { pdfFromText, pdfFromRtlText, type JsPdfInstance } from '../lib/resumePdf';
 import { useReveal } from '../hooks/useReveal';
 import { useProgress } from '../context/ProgressContext';
@@ -25,7 +25,7 @@ async function extractPdf(file: File): Promise<string> {
   const out: string[] = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const content = await (await pdf.getPage(i)).getTextContent();
-    out.push(content.items.map(item => 'str' in item ? item.str : '').join(' '));
+    out.push(pdfItemsToText(content.items.filter(item => 'str' in item)));
   }
   return out.join('\n\n');
 }

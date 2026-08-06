@@ -161,17 +161,44 @@ export async function pdfFromText(text: string): Promise<JsPdfInstance> {
 }
 
 /**
+ * Places one clickable region per link, over the words the reader sees.
+ *
+ * A résumé's contact line is a row of several links — LinkedIn, YouTube,
+ * GitHub, an email address — separated by pipes. Attaching a single region to
+ * the whole line, as this used to, meant every one of them went wherever the
+ * first one pointed.
+ *
+ * Each label is measured in the reordered line rather than the logical one,
+ * because that is where it actually sits on the page. A label whose reordered
+ * form cannot be located gets no region at all: a link in the wrong place sends
+ * the reader somewhere they did not intend to go, which is worse than a word
+ * that simply is not clickable.
+ */
+function drawRtlLinkRegions(
+  pdf: JsPdfInstance,
+  visualLine: string,
+  rightEdge: number,
+  y: number,
+  links: LinkInfo[],
+) {
+  const lineLeft = rightEdge - pdf.getTextWidth(visualLine);
+  for (const link of links) {
+    const visualLabel = toVisualOrder(link.label);
+    const at = visualLine.indexOf(visualLabel);
+    if (at === -1) continue;
+    const x = lineLeft + pdf.getTextWidth(visualLine.slice(0, at));
+    const width = pdf.getTextWidth(visualLabel);
+    pdf.link(x, y - LINE_HEIGHT_MM + 1, width, LINE_HEIGHT_MM, { url: link.href });
+  }
+}
+
+/**
  * Right-to-left résumé, as selectable text.
  *
  * The previous implementation rasterised the Hebrew résumé with html2canvas and
  * embedded the picture, which looked identical on screen and was unreadable to
  * every CV parser — the Hebrew user got a file that silently failed the first
  * automated sift while the English user got real text.
- *
- * Links are attached as clickable regions over the whole line rather than
- * around the exact words: glyph-level positioning under bidi reordering is not
- * something jsPDF exposes. The rasterised version had no text at all, so this
- * is still strictly more than before.
  *
  * Lines are reordered by `toVisualOrder` rather than by jsPDF's `setR2L`, which
  * reverses the whole string and so prints every embedded Latin word backwards —
@@ -202,15 +229,9 @@ export async function pdfFromRtlText(text: string, fontUrl?: string): Promise<Js
         pdf.addPage();
         y = MARGIN_MM;
       }
-      pdf.text(toVisualOrder(line), rightEdge, y, { align: 'right' });
-
-      const link = links.find(l => line.includes(l.label));
-      if (link) {
-        const width = pdf.getTextWidth(line);
-        pdf.link(rightEdge - width, y - LINE_HEIGHT_MM + 1, width, LINE_HEIGHT_MM, {
-          url: link.href,
-        });
-      }
+      const visual = toVisualOrder(line);
+      pdf.text(visual, rightEdge, y, { align: 'right' });
+      drawRtlLinkRegions(pdf, visual, rightEdge, y, links);
       y += LINE_HEIGHT_MM;
     }
   }
