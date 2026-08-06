@@ -9,13 +9,14 @@ const STAGE_COUNT = 3;
 interface ChallengeCardProps {
   challenge: Challenge;
   labels: ChallengeLabels;
+  onComplete?: () => void;
 }
 
 /**
  * One challenge and its reveal button. The card owns its own disclosure state,
  * so the section rendering the list never has to track a stage per index.
  */
-export function ChallengeCard({ challenge, labels }: ChallengeCardProps) {
+export function ChallengeCard({ challenge, labels, onComplete }: ChallengeCardProps) {
   const { stage, next, isRevealed } = useDisclosure(STAGE_COUNT);
 
   const buttonLabel =
@@ -51,7 +52,10 @@ export function ChallengeCard({ challenge, labels }: ChallengeCardProps) {
         type="button"
         className="ghost"
         aria-expanded={stage > 0}
-        onClick={next}
+        onClick={() => {
+          if (stage === HINT) onComplete?.();
+          next();
+        }}
       >
         {buttonLabel}
       </button>

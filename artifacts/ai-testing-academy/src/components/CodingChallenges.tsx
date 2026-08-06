@@ -3,6 +3,7 @@ import { useLocale } from '../context/LocaleContext';
 import { useReveal } from '../hooks/useReveal';
 import { ChallengeCard } from './ChallengeCard';
 import type { ChallengeLabels } from '../lib/challenges';
+import { useProgress } from '../context/ProgressContext';
 
 /**
  * The challenge section: three levels of increasing difficulty, each a list of
@@ -10,9 +11,10 @@ import type { ChallengeLabels } from '../lib/challenges';
  * — nothing here needs to know how many of either there are.
  */
 export function CodingChallenges() {
-  const { locale } = useLocale();
+  const { locale, lang } = useLocale();
   const t = locale.codingChallenges;
   const sectionRef = useReveal();
+  const { completePracticeItem } = useProgress();
 
   const labels = useMemo<ChallengeLabels>(
     () => ({
@@ -30,16 +32,17 @@ export function CodingChallenges() {
       <h2>{t.title}</h2>
       <p className="lead reveal">{t.lead}</p>
 
-      {t.levels.map(level => (
+      {t.levels.map((level, levelIndex) => (
         <div className="challenge-level" key={level.label}>
           <h3 className="level-head">{level.label}</h3>
           <p className="level-blurb">{level.blurb}</p>
 
-          {level.items.map(challenge => (
+          {level.items.map((challenge, challengeIndex) => (
             <ChallengeCard
               key={challenge.title}
               challenge={challenge}
               labels={labels}
+              onComplete={() => completePracticeItem(`${lang}:challenge:${levelIndex}:${challengeIndex}`)}
             />
           ))}
         </div>

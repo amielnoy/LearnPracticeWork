@@ -40,6 +40,7 @@ function renderInline(text: string): ReactNode {
 interface QuestionCardProps {
   item: QuestionItem;
   labels: QuestionLabels;
+  onComplete?: () => void;
 }
 
 /**
@@ -51,7 +52,7 @@ interface QuestionCardProps {
  * Same three-stage cycle as `ChallengeCard`, and the same hook behind it, so
  * the two sections of the site behave identically.
  */
-export function QuestionCard({ item, labels }: QuestionCardProps) {
+export function QuestionCard({ item, labels, onComplete }: QuestionCardProps) {
   const { stage, next, isRevealed } = useDisclosure(STAGE_COUNT);
 
   const cue =
@@ -63,7 +64,10 @@ export function QuestionCard({ item, labels }: QuestionCardProps) {
         type="button"
         className="q-btn"
         aria-expanded={stage > 0}
-        onClick={next}
+        onClick={() => {
+          if (stage === HINT) onComplete?.();
+          next();
+        }}
       >
         <span className="q-text">{item.q}</span>
         <span className="q-cue">{cue}</span>

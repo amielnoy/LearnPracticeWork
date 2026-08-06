@@ -21,7 +21,15 @@ export function Hero() {
       </div>
       <div className="hero-cta">
         {hero.cta.map((c, i) => (
-          <a key={i} className={c.cls} href={c.href}>
+          <a
+            key={i}
+            className={c.cls}
+            href={c.href}
+            onClick={() => {
+              if (c.sampleResume) window.dispatchEvent(new CustomEvent('ata:sample-resume'));
+              if (c.sampleInterview) window.dispatchEvent(new CustomEvent('ata:start-sample-interview'));
+            }}
+          >
             {c.label}
           </a>
         ))}

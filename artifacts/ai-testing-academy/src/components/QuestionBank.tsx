@@ -4,6 +4,7 @@ import { useProviderContext } from '../context/ProviderContext';
 import { useReveal } from '../hooks/useReveal';
 import { QuestionCard } from './QuestionCard';
 import { EN_BANK, HE_BANK } from '../lib/questionBank';
+import { useProgress } from '../context/ProgressContext';
 
 const SEED_KEYWORDS = 'AI dev, AI test automation, Playwright, pytest, Page Object Model, flaky tests, CI/CD, Docker, API testing, SDET, AI/LLM testing';
 const INTERVIEW_VIDEO_ID = 'gl2TVA4JLpc';
@@ -21,6 +22,7 @@ export function QuestionBank() {
   const { lang } = useLocale();
   const bank = lang === 'he' ? HE_BANK : EN_BANK;
   const { callGrounded, extractJSON } = useProviderContext();
+  const { completePracticeItem } = useProgress();
   const sectionRef = useReveal();
 
   const [keywords, setKeywords] = useState('');
@@ -129,14 +131,19 @@ export function QuestionBank() {
       {/* Curated stages — every question is a card that reveals a hint, then a
           full answer. Stages stay collapsed by default so the section is
           skimmable before it is studied. */}
-      {bank.stages.map((stage, i) => (
-        <details key={i} className="agent-box reveal">
+      {bank.stages.map((stage, stageIndex) => (
+        <details key={stageIndex} className="agent-box reveal">
           <summary>
             <h3 style={{ display: 'inline', margin: 0 }}>{stage.icon} {stage.title}</h3>
           </summary>
           <ul className="q-list">
-            {stage.items.map(item => (
-              <QuestionCard key={item.q} item={item} labels={bank.labels} />
+            {stage.items.map((item, itemIndex) => (
+              <QuestionCard
+                key={item.q}
+                item={item}
+                labels={bank.labels}
+                onComplete={() => completePracticeItem(`${lang}:question:${stageIndex}:${itemIndex}`)}
+              />
             ))}
           </ul>
         </details>
