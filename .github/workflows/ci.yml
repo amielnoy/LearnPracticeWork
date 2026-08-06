@@ -217,6 +217,34 @@ jobs:
         with:
           enablement: true
 
+      # `configure-pages` enables Pages when it is missing, but it will not
+      # convert a site that is already enabled. A repo left on "Deploy from a
+      # branch" therefore keeps that setting, and GitHub's own
+      # pages-build-deployment publishes the branch root instead of `_site` —
+      # while every job here, deploy-pages included, still reports success.
+      #
+      # That is not hypothetical. It is how this site spent its time serving its
+      # own source tree (`/package.json` 200, `/` 404) across green runs. Failing
+      # loudly is the whole point: a deployment nobody serves is worse than one
+      # that does not run.
+      - name: Require Pages to build from this workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          read_type() { gh api "repos/${{ github.repository }}/pages" --jq .build_type; }
+          current=$(read_type)
+          if [ "$current" != "workflow" ]; then
+            echo "Pages build_type is '$current' — setting it to 'workflow'."
+            gh api -X PUT "repos/${{ github.repository }}/pages" -f build_type=workflow
+            current=$(read_type)
+          fi
+          if [ "$current" != "workflow" ]; then
+            echo "::error::Pages build_type is '$current', not 'workflow'. The artifact uploaded below would never be served. Set Settings → Pages → Source to 'GitHub Actions'."
+            exit 1
+          fi
+          echo "Pages build_type is 'workflow'."
+
       # Pages serves a project site from /<repo>/, so every artifact's Vite
       # `base` has to carry that prefix or the hashed asset URLs 404. Prefer the
       # path Pages itself reports — a custom domain or a user/org site is served
