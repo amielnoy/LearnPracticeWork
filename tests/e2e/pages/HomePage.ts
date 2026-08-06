@@ -6,7 +6,7 @@ import { QuestionsComponent } from '../components/QuestionsComponent';
 import { ChallengesComponent } from '../components/ChallengesComponent';
 import { FooterComponent } from '../components/FooterComponent';
 
-/** The six in-page sections the nav and hero jump to, in document order. */
+/** The six in-page destinations exposed by the nav and hero. */
 export const SECTION_IDS = [
   'setup',
   'resume',

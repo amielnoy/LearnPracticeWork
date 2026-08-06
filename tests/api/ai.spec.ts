@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { KEYED_URL, DUMMY_GEMINI_KEY } from '../support/servers';
+import { KEYED_URL, LIMITED_URL, DUMMY_GEMINI_KEY } from '../support/servers';
 
 /**
  * The AI proxy, tested against both server configurations.
@@ -15,7 +15,11 @@ test.describe('no server-side key configured', () => {
 
     expect(response.status()).toBe(200);
     expect(await response.json()).toEqual({
-      gemini: { available: false, defaultModel: 'gemini-2.5-flash' },
+      gemini: {
+        available: false,
+        defaultModel: 'gemini-2.5-flash',
+        anonymousDailyQuota: 1000,
+      },
     });
   });
 
@@ -42,7 +46,11 @@ test.describe('server-side key configured', () => {
     const body = await response.json();
 
     expect(body).toEqual({
-      gemini: { available: true, defaultModel: 'gemini-2.5-flash' },
+      gemini: {
+        available: true,
+        defaultModel: 'gemini-2.5-flash',
+        anonymousDailyQuota: 1000,
+      },
     });
     expect(JSON.stringify(body)).not.toContain(DUMMY_GEMINI_KEY);
   });
@@ -51,7 +59,9 @@ test.describe('server-side key configured', () => {
     const response = await request.post(`${KEYED_URL}/api/ai/generate`, { data: {} });
 
     expect(response.status()).toBe(400);
-    expect((await response.json()).error).toContain('messages');
+    const body = await response.json();
+    expect(body.error).toBe('Invalid request body');
+    expect(body.issues[0].path).toContain('messages');
   });
 
   test('rejects an empty conversation', async ({ request }) => {
@@ -76,5 +86,53 @@ test.describe('server-side key configured', () => {
     });
 
     expect(await response.text()).not.toContain(DUMMY_GEMINI_KEY);
+  });
+
+  test('strictly validates roles, token bounds, and unknown fields', async ({ request }) => {
+    const invalidBodies = [
+      { messages: [{ role: 'system', content: 'not allowed' }] },
+      { messages: [{ role: 'user', content: 'hello' }], maxTokens: 4_001 },
+      { messages: [{ role: 'user', content: 'hello' }], unexpected: true },
+    ];
+
+    for (const data of invalidBodies) {
+      const response = await request.post(`${KEYED_URL}/api/ai/generate`, { data });
+      expect(response.status()).toBe(400);
+      expect((await response.json()).error).toBe('Invalid request body');
+    }
+  });
+
+  test('rejects request bodies above the configured parser limit', async ({ request }) => {
+    const response = await request.post(`${KEYED_URL}/api/ai/generate`, {
+      data: { messages: [{ role: 'user', content: 'x'.repeat(100_000) }] },
+    });
+
+    expect(response.status()).toBe(413);
+    expect(await response.json()).toEqual({ error: 'Request body is too large' });
+  });
+
+  test('only returns CORS permission for an allowlisted production origin', async ({ request }) => {
+    const allowed = await request.get(`${KEYED_URL}/api/ai/config`, {
+      headers: { Origin: 'https://academy.example' },
+    });
+    const rejected = await request.get(`${KEYED_URL}/api/ai/config`, {
+      headers: { Origin: 'https://attacker.example' },
+    });
+
+    expect(allowed.headers()['access-control-allow-origin']).toBe('https://academy.example');
+    expect(rejected.headers()['access-control-allow-origin']).toBeUndefined();
+  });
+});
+
+test.describe('per-IP quota', () => {
+  test('returns 429 after the configured daily allowance', async ({ request }) => {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const response = await request.post(`${LIMITED_URL}/api/ai/generate`, { data: {} });
+      expect(response.status()).toBe(400);
+    }
+
+    const blocked = await request.post(`${LIMITED_URL}/api/ai/generate`, { data: {} });
+    expect(blocked.status()).toBe(429);
+    expect((await blocked.json()).error).toContain('Daily');
   });
 });

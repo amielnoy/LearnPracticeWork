@@ -11,11 +11,14 @@ import { LectureSeries } from '../components/LectureSeries';
 import { InterviewAgent } from '../components/InterviewAgent';
 import { QuestionBank } from '../components/QuestionBank';
 import { CodingChallenges } from '../components/CodingChallenges';
+import { ToolLauncher } from '../components/ToolLauncher';
+import { useProviderContext } from '../context/ProviderContext';
 
 const THEME_KEY = 'ata_theme';
 
 export function HomePage() {
   const { locale } = useLocale();
+  const { quotaExhausted, serverConfigLoaded, hasServerDefault } = useProviderContext();
 
   // Theme
   const [theme, setTheme] = useState<string>(() => {
@@ -78,12 +81,16 @@ export function HomePage() {
       <Hero />
 
       <main id="main-content">
-        <ConnectionSetup />
+        <ToolLauncher />
         <ResumeAgent />
-        <LectureSeries />
         <InterviewAgent />
         <QuestionBank />
         <CodingChallenges />
+        <LectureSeries />
+        <ConnectionSetup
+          collapsed
+          forceOpen={quotaExhausted || (serverConfigLoaded && !hasServerDefault('gemini'))}
+        />
       </main>
 
       <Footer />

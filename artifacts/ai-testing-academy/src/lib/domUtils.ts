@@ -20,6 +20,26 @@ export interface LinkMatch {
   href: string;
 }
 
+/** One text run as pdf.js reports it. */
+export interface PdfTextItem {
+  str: string;
+  hasEOL?: boolean;
+}
+
+/**
+ * Joins the text runs of one PDF page.
+ *
+ * Concatenated, never joined with a space. pdf.js has already decided where the
+ * words are from the glyph positions and put those spaces inside `str`; a
+ * separate item marks a change of font or the end of a line, not a word
+ * boundary. Joining with a space broke every word whose styling changed part
+ * way through — a "DevOps" with a bold "Ops" arrived as "Dev Ops", and a URL
+ * styled the same way arrived unusable.
+ */
+export function pdfItemsToText(items: readonly PdfTextItem[]): string {
+  return items.map(item => item.str + (item.hasEOL ? '\n' : '')).join('');
+}
+
 /** Find bare URL/email matches in plain text */
 export function findLinks(text: string): LinkMatch[] {
   const s = String(text == null ? '' : text);
@@ -46,7 +66,24 @@ function linkifyPlainSegment(text: string): string {
   return out;
 }
 
-const MD_RE = /\*\*\[(?<blLabel>[^\]]+)\]\((?<blHref>(?:https?:\/\/|mailto:)[^\s)]+)\)\*\*|\*\*(?<bold>.+?)\*\*|\[(?<lnLabel>[^\]]+)\]\((?<lnHref>(?:https?:\/\/|mailto:)[^\s)]+)\)/g;
+/**
+ * The href pattern accepts whitespace, which a URL may never legitimately
+ * contain, because uploaded résumés routinely arrive with it.
+ *
+ * pdf.js decides where the words are by measuring the gaps between glyphs, so a
+ * PDF that was kerned or justified — which is to say, one made by a word
+ * processor — yields `.../in/ami e l - pele d/` for a link that is perfectly
+ * intact on the page. Refusing to match that leaves the reader with raw
+ * `[label](url)` syntax and no link at all, so it is matched here and repaired
+ * in `normalizeHref` instead.
+ */
+const MD_RE = /\*\*\[(?<blLabel>[^\]]+)\]\((?<blHref>(?:https?:\/\/|mailto:)[^)]+)\)\*\*|\*\*(?<bold>.+?)\*\*|\[(?<lnLabel>[^\]]+)\]\((?<lnHref>(?:https?:\/\/|mailto:)[^)]+)\)/g;
+
+/**
+ * Strips the whitespace a text extractor injected. Safe unconditionally: a
+ * space inside a URL is always damage, since a real one arrives percent-encoded.
+ */
+const normalizeHref = (href: string): string => href.replace(/\s+/g, '');
 
 /** HTML with Markdown bold/links rendered as real <strong>/<a> tags */
 export function linkifyHtml(text: string): string {
@@ -57,11 +94,11 @@ export function linkifyHtml(text: string): string {
     out += linkifyPlainSegment(s.slice(last, m.index));
     const g = m.groups as Record<string, string | undefined>;
     if (g.blLabel !== undefined) {
-      out += `<strong><a href="${esc(g.blHref!)}" target="_blank" rel="noopener">${esc(g.blLabel)}</a></strong>`;
+      out += `<strong><a href="${esc(normalizeHref(g.blHref!))}" target="_blank" rel="noopener">${esc(g.blLabel)}</a></strong>`;
     } else if (g.bold !== undefined) {
       out += `<strong>${linkifyPlainSegment(g.bold)}</strong>`;
     } else {
-      out += `<a href="${esc(g.lnHref!)}" target="_blank" rel="noopener">${esc(g.lnLabel!)}</a>`;
+      out += `<a href="${esc(normalizeHref(g.lnHref!))}" target="_blank" rel="noopener">${esc(g.lnLabel!)}</a>`;
     }
     last = m.index + m[0].length;
   }
@@ -86,7 +123,7 @@ export function markdownLineToPlain(rawLine: string): PlainLine {
     const label = g.blLabel !== undefined ? g.blLabel : (g.bold !== undefined ? g.bold : g.lnLabel!);
     const href = g.blLabel !== undefined ? g.blHref : g.lnHref;
     plain += label;
-    if (href) links.push({ label, href });
+    if (href) links.push({ label, href: normalizeHref(href) });
     last = m.index + m[0].length;
   }
   plain += s.slice(last);

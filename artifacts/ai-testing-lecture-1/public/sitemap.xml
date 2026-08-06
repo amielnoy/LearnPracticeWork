@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The deck is bilingual on `?lang=`, so each variant is its own URL and each
+  repeats the full set of alternates including itself. A partial annotation is
+  treated as unconfirmed and the whole cluster is ignored.
+
+  These point at /slide1, not at the deck root: at "/" the app renders the deck
+  inside an iframe, so the root is an empty shell to a crawler and its iframe
+  drops ?lang. /slide1?lang=he is the URL that actually renders Hebrew.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=he"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=he"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=he"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>

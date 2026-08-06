@@ -5,7 +5,7 @@ import { PROVIDERS } from '@academy/lib/providers';
 /**
  * Connection Setup is the one screen where a visitor's own API key is handled,
  * so these tests care about two things: which key mode the UI lands in, and
- * that a typed key stays in localStorage. The `mountSetup` fixture intercepts
+ * that a typed key is session-only unless persistence is explicit. The `mountSetup` fixture intercepts
  * `/api/ai/config` and mounts the component, so each test just picks the server
  * config it wants to exercise.
  */
@@ -57,16 +57,30 @@ test.describe('when the server has no default key', () => {
     await expect(component.getByText(t.useOwnKeyLabel)).toBeHidden();
   });
 
-  test('keeps a typed key in localStorage and out of the DOM', async ({ mountSetup, page }) => {
+  test('keeps a typed key in sessionStorage by default and out of the DOM', async ({ mountSetup, page }) => {
     const component = await mountSetup(WITHOUT_SERVER_KEY);
 
     await component.locator('#apiKey').fill('AIzaMyOwnKey');
 
     await expect
-      .poll(() => page.evaluate(() => window.localStorage.getItem('ata_key_gemini')))
+      .poll(() => page.evaluate(() => window.sessionStorage.getItem('ata_session_key_gemini')))
       .toBe('AIzaMyOwnKey');
+    expect(await page.evaluate(() => window.localStorage.getItem('ata_key_gemini'))).toBeNull();
     // Rendered as a password field so the key is never shown in plain text.
     await expect(component.locator('#apiKey')).toHaveAttribute('type', 'password');
+  });
+
+  test('persists a key only after explicit opt-in and displays a warning', async ({ mountSetup, page }) => {
+    const component = await mountSetup(WITHOUT_SERVER_KEY);
+    await component.locator('#apiKey').fill('AIzaRememberMe');
+
+    await component.getByLabel(t.rememberKeyLabel).check();
+
+    await expect(component.getByText(t.rememberKeyWarning)).toBeVisible();
+    expect(await page.evaluate(() => window.localStorage.getItem('ata_key_gemini')))
+      .toBe('AIzaRememberMe');
+    expect(await page.evaluate(() => window.sessionStorage.getItem('ata_session_key_gemini')))
+      .toBeNull();
   });
 });
 

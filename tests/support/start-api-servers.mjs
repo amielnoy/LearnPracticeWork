@@ -24,6 +24,7 @@ const apiServerDir = path.resolve(here, '..', '..', 'artifacts', 'api-server');
 
 const KEYLESS_PORT = process.env.TEST_API_PORT ?? '8788';
 const KEYED_PORT = process.env.TEST_API_PORT_KEYED ?? '8789';
+const LIMITED_PORT = process.env.TEST_API_PORT_LIMITED ?? '8790';
 const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
 
 /** Env that must look the same on every machine for the assertions to hold. */
@@ -39,6 +40,9 @@ const PINNED = {
   GEMINI_MODEL: 'gemini-2.5-flash',
   // Quieter output; the servers' logs are only interesting when a test fails.
   LOG_LEVEL: 'warn',
+  ALLOWED_ORIGINS: 'https://academy.example',
+  AI_RATE_LIMIT_MAX: '1000',
+  AI_DAILY_QUOTA: '1000',
 };
 
 const children = [];
@@ -96,6 +100,14 @@ await new Promise((resolve, reject) => {
 
 startServer(KEYED_PORT, { GEMINI_API_KEY: DUMMY_GEMINI_KEY, GEMINI_API_KEY_B64: '' });
 await waitForHealth(KEYED_PORT);
+
+startServer(LIMITED_PORT, {
+  GEMINI_API_KEY: DUMMY_GEMINI_KEY,
+  GEMINI_API_KEY_B64: '',
+  AI_RATE_LIMIT_MAX: '1000',
+  AI_DAILY_QUOTA: '2',
+});
+await waitForHealth(LIMITED_PORT);
 
 startServer(KEYLESS_PORT, { GEMINI_API_KEY: '', GEMINI_API_KEY_B64: '' });
 await waitForHealth(KEYLESS_PORT);

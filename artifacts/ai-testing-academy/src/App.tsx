@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { LocaleProvider } from "./context/LocaleContext";
 import { ProviderContextProvider } from "./context/ProviderContext";
+import { ProgressProvider } from "./context/ProgressContext";
 import { HomePage } from "./pages/HomePage";
 
 const queryClient = new QueryClient();
@@ -22,11 +23,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LocaleProvider>
-          <ProviderContextProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-          </ProviderContextProvider>
+          <ProgressProvider>
+            <ProviderContextProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+            </ProviderContextProvider>
+          </ProgressProvider>
         </LocaleProvider>
       </TooltipProvider>
     </QueryClientProvider>

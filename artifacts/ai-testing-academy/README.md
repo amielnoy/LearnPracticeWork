@@ -83,9 +83,18 @@ Connection Setup lets a visitor use a **server-side default key** or **their own
   `artifacts/api-server` and never sent to the browser. The client calls `GET /api/ai/config`
   for a boolean and a default model name, and `POST /api/ai/generate` to run a completion.
   See `artifacts/api-server/src/routes/ai.ts`.
-- **Own key (any provider)** — entered by the visitor, kept only in their `localStorage`, and
+- **Own key (any provider)** — entered by the visitor, kept in `sessionStorage` by default, and
   sent straight from the browser to Gemini, Anthropic or OpenAI. It never touches our server.
-  See `src/lib/providers.ts`.
+  A clearly labelled opt-in can persist it in `localStorage` on a private device. Keys saved by
+  older versions are migrated out of persistent storage automatically. See
+  `src/context/ProviderContext.tsx` and `src/lib/providers.ts`.
+
+The proxy enforces a short burst limit and a small 10-request daily per-IP quota by default, strict prompt validation, bounded
+output tokens, request-body limits, and an upstream timeout. Production cross-origin access is
+deny-by-default: set `ALLOWED_ORIGINS` to a comma-separated list when an additional frontend
+origin must call the API. `REPLIT_DOMAINS` is included automatically. The quota and timeout
+defaults can be overridden with `AI_RATE_LIMIT_WINDOW_MS`, `AI_RATE_LIMIT_MAX`,
+`AI_DAILY_QUOTA`, and `AI_UPSTREAM_TIMEOUT_MS`.
 
 Only Gemini has a server-side default. Anthropic and OpenAI are own-key or nothing, and when no
 default exists the "use my own key" checkbox is dropped entirely rather than rendered ticked

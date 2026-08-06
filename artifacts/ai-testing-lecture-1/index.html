@@ -16,6 +16,7 @@
     <meta property="og:url" content="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/" />
     <meta property="og:site_name" content="AI Testing Academy" />
     <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="he_IL" />
     <meta property="og:image" content="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/og-lecture-1.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -24,6 +25,65 @@
     <meta name="twitter:description" content="Lecture 1: Introduction to AI Testing — hands-on exploration of AI-powered test automation concepts and tools." />
     <meta name="twitter:image" content="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/og-lecture-1.jpg" />
     <link rel="canonical" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/" />
+
+    <!-- The deck is bilingual too — `src/lib/i18n.ts` reads `?lang=` — but the
+         alternates point at `/slide1`, not at the bare URL. At `/` the app
+         renders the deck inside an `<iframe src="/slide1">`, so the bare URL is
+         a ~300-byte shell as far as a crawler is concerned, and the iframe drops
+         the `?lang` parameter, which makes `/?lang=he` show English. Declaring
+         the bare URL as a language variant would point Google at three pages
+         that do not differ. `/slide1?lang=he` genuinely renders Hebrew. -->
+    <link rel="alternate" hreflang="en" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=en" />
+    <link rel="alternate" hreflang="he" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=he" />
+    <link rel="alternate" hreflang="x-default" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1" />
+
+    <!-- Localises the head before React mounts. The deck's `detectLang()` only
+         reads `?lang=` and defaults to English, so this mirrors exactly that —
+         no localStorage, no browser sniffing. -->
+    <script>
+      (function () {
+        try {
+          var META = {
+            en: {
+              dir: 'ltr',
+              title: 'Introduction to AI Testing — Lecture 1',
+              description: 'Lecture 1: Introduction to AI Testing — explore why AI changes test automation, key concepts, tools, and hands-on examples. Part of the AI Testing Academy curriculum.'
+            },
+            he: {
+              dir: 'rtl',
+              title: 'מבוא לבדיקות AI — הרצאה 1',
+              description: 'הרצאה 1: מבוא לבדיקות AI — למה AI משנה את אוטומציית הבדיקות, מושגי יסוד, כלים ודוגמאות מעשיות. חלק מתוכנית הלימודים של האקדמיה לבדיקות AI.'
+            }
+          };
+
+          var param = new URLSearchParams(window.location.search).get('lang');
+          var lang = param === 'he' ? 'he' : 'en';
+          var meta = META[lang];
+
+          var root = document.documentElement;
+          root.lang = lang;
+          root.dir = meta.dir;
+          document.title = meta.title;
+
+          var description = document.querySelector('meta[name="description"]');
+          if (description) description.setAttribute('content', meta.description);
+
+          // One HTML shell serves every slide route, so the declared canonical
+          // is only the deck root. Carry the current slide across, taken from
+          // the path rather than from the declared URL — the deck is served
+          // under a different prefix on each host, but the slug is the same.
+          var canonical = document.querySelector('link[rel="canonical"]');
+          if (canonical) {
+            var base = canonical.href.split('?')[0].split('#')[0];
+            var slide = (window.location.pathname.match(/(slide\d+)\/?$/) || [])[1];
+            var href = base + (slide || 'slide1');
+            canonical.href = param ? href + '?lang=' + lang : href;
+          }
+        } catch (e) {
+          /* SEO niceties must never break the page */
+        }
+      })();
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

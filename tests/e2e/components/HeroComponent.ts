@@ -18,7 +18,7 @@ export class HeroComponent {
     return this.root.getByText(text);
   }
 
-  /** A hero CTA by its label, e.g. `Get Started →` or `Watch Lectures`. */
+  /** A hero CTA by its label, e.g. `Try a sample interview →` or `Watch Lectures`. */
   cta(label: string): Locator {
     return this.root.getByRole('link', { name: label });
   }

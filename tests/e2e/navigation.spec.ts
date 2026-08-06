@@ -5,10 +5,10 @@ import { test, expect } from './fixtures';
  * viewport), so they are the cleanest way to prove in-page anchor navigation
  * without wrestling the mobile drawer first.
  */
-test('the hero "Get Started" CTA jumps to the setup section', async ({ home, hero, page }) => {
-  await hero.cta('Get Started →').click();
-  await expect(page).toHaveURL(/#setup$/);
-  await expect(home.section('setup')).toBeInViewport();
+test('the hero sample-interview CTA jumps to the mock interview', async ({ home, hero, page }) => {
+  await hero.cta('Try a sample interview →').click();
+  await expect(page).toHaveURL(/#interview-talk$/);
+  await expect(home.section('interview-talk')).toBeInViewport();
 });
 
 test('the hero "Watch Lectures" CTA jumps to the lecture series', async ({ home, hero, page }) => {

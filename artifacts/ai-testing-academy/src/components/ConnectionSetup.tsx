@@ -4,7 +4,13 @@ import { useProviderContext } from '../context/ProviderContext';
 import { PROVIDERS } from '../lib/providers';
 import { useReveal } from '../hooks/useReveal';
 
-export function ConnectionSetup() {
+export function ConnectionSetup({
+  collapsed = false,
+  forceOpen = false,
+}: {
+  collapsed?: boolean;
+  forceOpen?: boolean;
+}) {
   const { locale, S } = useLocale();
   const t = locale.setup;
   const {
@@ -14,6 +20,8 @@ export function ConnectionSetup() {
     setModel,
     apiKey,
     setApiKey,
+    rememberKey,
+    setRememberKey,
     useOwnKey,
     setUseOwnKey,
     hasServerDefault,
@@ -35,8 +43,16 @@ export function ConnectionSetup() {
 
   return (
     <section id="setup" ref={sectionRef}>
+      <details
+        className={`settings-panel${collapsed ? '' : ' always-open'}`}
+        open={!collapsed || forceOpen}
+      >
+      <summary>
+        <span>⚙️ {t.settingsTitle}</span>
+        <small>{forceOpen ? t.settingsQuotaHint : t.settingsHint}</small>
+      </summary>
       <h2>
-        <span className="num">{t.num}</span> {t.title}
+        {!collapsed && <span className="num">{t.num}</span>} {t.title}
       </h2>
       <p className="lead reveal">{t.lead}</p>
       <div className="agent-box reveal">
@@ -115,6 +131,20 @@ export function ConnectionSetup() {
             disabled={!useOwnKey}
             onChange={e => setApiKey(e.target.value)}
           />
+          {useOwnKey && (
+            <>
+              <label className="remember-key" htmlFor="rememberKey">
+                <input
+                  type="checkbox"
+                  id="rememberKey"
+                  checked={rememberKey}
+                  onChange={e => setRememberKey(e.target.checked)}
+                />
+                {t.rememberKeyLabel}
+              </label>
+              {rememberKey && <p className="notice key-warning">{t.rememberKeyWarning}</p>}
+            </>
+          )}
         </div>
         <p
           id="connStatus"
@@ -136,6 +166,7 @@ export function ConnectionSetup() {
           {t.notice}
         </p>
       </div>
+      </details>
     </section>
   );
 }
