@@ -24,11 +24,16 @@ interface ProviderContextValue {
   setModel: (m: string) => void;
   apiKey: string;
   setApiKey: (k: string) => void;
+  rememberKey: boolean;
+  setRememberKey: (v: boolean) => void;
   useOwnKey: boolean;
   setUseOwnKey: (v: boolean) => void;
   ownKeyTouched: boolean;
   setOwnKeyTouched: (v: boolean) => void;
   serverDefaults: ServerDefaults;
+  serverConfigLoaded: boolean;
+  anonymousQuota: { limit: number; remaining: number | null } | null;
+  quotaExhausted: boolean;
   hasServerDefault: (p: string) => boolean;
   connStatus: string;
   connStatusColor: string;
@@ -44,7 +49,29 @@ interface ProviderContextValue {
 const ProviderContext = createContext<ProviderContextValue | null>(null);
 
 const PROVIDER_KEY_PREFIX = 'ata_key_';
+const PROVIDER_SESSION_KEY_PREFIX = 'ata_session_key_';
+const PROVIDER_REMEMBER_PREFIX = 'ata_remember_key_';
 const PROVIDER_STORE_KEY = 'ata_provider';
+
+function loadStoredKey(provider: string): { key: string; remember: boolean } {
+  const remember = localStorage.getItem(PROVIDER_REMEMBER_PREFIX + provider) === 'true';
+  let persistentKey = localStorage.getItem(PROVIDER_KEY_PREFIX + provider) || '';
+
+  // One-time migration: keys saved by older versions become session-only and
+  // are removed from persistent storage unless the user explicitly opts in.
+  if (persistentKey && !remember) {
+    sessionStorage.setItem(PROVIDER_SESSION_KEY_PREFIX + provider, persistentKey);
+    localStorage.removeItem(PROVIDER_KEY_PREFIX + provider);
+    persistentKey = '';
+  }
+
+  return {
+    remember,
+    key: remember
+      ? persistentKey
+      : sessionStorage.getItem(PROVIDER_SESSION_KEY_PREFIX + provider) || '',
+  };
+}
 
 export function ProviderContextProvider({ children }: { children: React.ReactNode }) {
   const { S } = useLocale();
@@ -54,9 +81,12 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
   );
   const [model, setModelState] = useState<string>(() => PROVIDERS['gemini'].models[0]);
   const [apiKey, setApiKeyState] = useState<string>('');
+  const [rememberKey, setRememberKeyState] = useState<boolean>(false);
   const [useOwnKey, setUseOwnKeyState] = useState<boolean>(false);
   const [ownKeyTouched, setOwnKeyTouchedState] = useState<boolean>(false);
   const [serverDefaults, setServerDefaults] = useState<ServerDefaults>({});
+  const [serverConfigLoaded, setServerConfigLoaded] = useState(false);
+  const [anonymousQuota, setAnonymousQuota] = useState<{ limit: number; remaining: number | null } | null>(null);
   const [connStatus, setConnStatusText] = useState<string>('');
   const [connStatusColor, setConnStatusColor] = useState<string>('var(--muted)');
 
@@ -81,7 +111,7 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
     ) => {
       const prov = PROVIDERS[currentProvider];
       const hasDefault = !!currentServerDefaults[currentProvider]?.available;
-      const storedKey = localStorage.getItem(PROVIDER_KEY_PREFIX + currentProvider) || '';
+      const storedKey = loadStoredKey(currentProvider).key;
 
       let shouldUseOwn = currentUseOwnKey;
       if (!touchedByUser) {
@@ -99,9 +129,28 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
 
   // Load server config on mount
   useEffect(() => {
-    loadServerConfig().then(defaults => {
-      setServerDefaults(defaults);
-    });
+    loadServerConfig()
+      .then(defaults => {
+        setServerDefaults(defaults);
+        const limit = defaults.gemini?.anonymousDailyQuota;
+        if (defaults.gemini?.available && limit) {
+          // Config exposes the allowance, not this IP's current usage. Keep the
+          // remainder unknown until a proxied response supplies its headers.
+          setAnonymousQuota({ limit, remaining: null });
+        }
+      })
+      .finally(() => setServerConfigLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    const updateQuota = (event: Event) => {
+      const detail = (event as CustomEvent<{ limit: number; remaining: number }>).detail;
+      if (detail && Number.isFinite(detail.limit) && Number.isFinite(detail.remaining)) {
+        setAnonymousQuota(detail);
+      }
+    };
+    window.addEventListener('ata:quota', updateQuota);
+    return () => window.removeEventListener('ata:quota', updateQuota);
   }, []);
 
   // When provider changes, update model and key state
@@ -118,7 +167,9 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
     const prov = PROVIDERS[provider];
     if (!prov) return;
     const hasDefault = !!serverDefaults[provider]?.available;
-    const storedKey = localStorage.getItem(PROVIDER_KEY_PREFIX + provider) || '';
+    const stored = loadStoredKey(provider);
+    const storedKey = stored.key;
+    setRememberKeyState(stored.remember);
 
     // Use function-form to get current ownKeyTouched without depending on it
     setUseOwnKeyState(currentUseOwn => {
@@ -146,8 +197,7 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
       setUseOwnKeyState(v);
       const prov = PROVIDERS[provider];
       if (v) {
-        const storedKey = localStorage.getItem(PROVIDER_KEY_PREFIX + provider) || '';
-        setApiKeyState(storedKey);
+        setApiKeyState(loadStoredKey(provider).key);
       } else {
         setApiKeyState('');
       }
@@ -160,17 +210,34 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
     (k: string) => {
       setApiKeyState(k);
       if (useOwnKey) {
-        localStorage.setItem(PROVIDER_KEY_PREFIX + provider, k.trim());
+        const key = k.trim();
+        const destination = rememberKey ? localStorage : sessionStorage;
+        const destinationPrefix = rememberKey ? PROVIDER_KEY_PREFIX : PROVIDER_SESSION_KEY_PREFIX;
+        destination.setItem(destinationPrefix + provider, key);
       }
     },
-    [provider, useOwnKey]
+    [provider, rememberKey, useOwnKey]
   );
+
+  const setRememberKey = useCallback((remember: boolean) => {
+    setRememberKeyState(remember);
+    const key = apiKey.trim();
+    if (remember) {
+      localStorage.setItem(PROVIDER_REMEMBER_PREFIX + provider, 'true');
+      if (key) localStorage.setItem(PROVIDER_KEY_PREFIX + provider, key);
+      sessionStorage.removeItem(PROVIDER_SESSION_KEY_PREFIX + provider);
+    } else {
+      localStorage.removeItem(PROVIDER_REMEMBER_PREFIX + provider);
+      localStorage.removeItem(PROVIDER_KEY_PREFIX + provider);
+      if (key) sessionStorage.setItem(PROVIDER_SESSION_KEY_PREFIX + provider, key);
+    }
+  }, [apiKey, provider]);
 
   const setModel = useCallback((m: string) => setModelState(m), []);
 
   const ownGeminiKey = useMemo(() => {
     return (
-      localStorage.getItem(PROVIDER_KEY_PREFIX + 'gemini') ||
+      loadStoredKey('gemini').key ||
       (provider === 'gemini' && useOwnKey ? apiKey.trim() : '')
     );
   }, [provider, useOwnKey, apiKey]);
@@ -203,9 +270,16 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
   }, [callClaude, model, S, setConnStatus]);
 
   const resetSettings = useCallback(() => {
+    // Resetting provider preferences must not erase progress, interview
+    // history, or resume drafts.
     Object.keys(localStorage)
-      .filter(k => k.startsWith('ata_'))
+      .filter(k => k === PROVIDER_STORE_KEY
+        || k.startsWith(PROVIDER_KEY_PREFIX)
+        || k.startsWith(PROVIDER_REMEMBER_PREFIX))
       .forEach(k => localStorage.removeItem(k));
+    Object.keys(sessionStorage)
+      .filter(k => k.startsWith(PROVIDER_SESSION_KEY_PREFIX))
+      .forEach(k => sessionStorage.removeItem(k));
     window.location.reload();
   }, []);
 
@@ -219,11 +293,16 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
       setModel,
       apiKey,
       setApiKey,
+      rememberKey,
+      setRememberKey,
       useOwnKey,
       setUseOwnKey,
       ownKeyTouched,
       setOwnKeyTouched: setOwnKeyTouchedState,
       serverDefaults,
+      serverConfigLoaded,
+      anonymousQuota,
+      quotaExhausted: anonymousQuota?.remaining === 0,
       hasServerDefault,
       connStatus,
       connStatusColor,
@@ -236,8 +315,8 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
       ownGeminiKey,
     }),
     [
-      provider, setProvider, model, setModel, apiKey, setApiKey,
-      useOwnKey, setUseOwnKey, ownKeyTouched, serverDefaults, hasServerDefault,
+      provider, setProvider, model, setModel, apiKey, setApiKey, rememberKey, setRememberKey,
+      useOwnKey, setUseOwnKey, ownKeyTouched, serverDefaults, serverConfigLoaded, anonymousQuota, hasServerDefault,
       connStatus, connStatusColor, setConnStatus, testConnection, resetSettings,
       callClaude, callGrounded, extractJSONCb, ownGeminiKey,
     ]

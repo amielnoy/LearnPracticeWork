@@ -3,6 +3,7 @@ import type { Locator } from '@playwright/test';
 import type { ReactNode } from 'react';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProviderContextProvider } from '@academy/context/ProviderContext';
+import { ProgressProvider } from '@academy/context/ProgressContext';
 import { ConnectionSetup } from '@academy/components/ConnectionSetup';
 import { QuestionBank } from '@academy/components/QuestionBank';
 
@@ -30,7 +31,9 @@ type ComponentFixtures = {
 
 const withProviders = (node: ReactNode) => (
   <LocaleProvider>
-    <ProviderContextProvider>{node}</ProviderContextProvider>
+    <ProgressProvider>
+      <ProviderContextProvider>{node}</ProviderContextProvider>
+    </ProgressProvider>
   </LocaleProvider>
 );
 

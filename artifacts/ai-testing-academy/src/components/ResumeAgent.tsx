@@ -1,83 +1,37 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useLocale } from '../context/LocaleContext';
 import { useProviderContext } from '../context/ProviderContext';
-import { isRtlText, linkifyHtml, markdownLineToPlain } from '../lib/domUtils';
+import { isRtlText, linkifyHtml } from '../lib/domUtils';
+import { pdfFromText, pdfFromRtlText, type JsPdfInstance } from '../lib/resumePdf';
 import { useReveal } from '../hooks/useReveal';
+import { useProgress } from '../context/ProgressContext';
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-/* ── CDN dynamic loaders ── */
-function loadScript(src: string): Promise<string> {
-  return new Promise((ok, bad) => {
-    const existing = document.querySelector(`script[src="${src}"]`);
-    if (existing) existing.remove();
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = () => ok(src);
-    s.onerror = () => { s.remove(); bad(new Error(src)); };
-    document.head.appendChild(s);
-  });
-}
-
-async function loadFirst(urls: string[], globalName: string): Promise<string | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any)[globalName]) return null;
-  const errors: string[] = [];
-  for (const u of urls) {
-    try {
-      await loadScript(u);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((window as any)[globalName]) return u;
-    } catch (e) {
-      errors.push((e as Error).message);
-    }
-  }
-  throw new Error('Could not load the parser library:\n' + errors.join('\n'));
-}
-
-const PDFJS_V = '3.11.174', MAMMOTH_V = '1.8.0';
-const PDFJS_URLS = [
-  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_V}/pdf.min.js`,
-  `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_V}/build/pdf.min.js`,
-  `https://unpkg.com/pdfjs-dist@${PDFJS_V}/build/pdf.min.js`,
-];
-const MAMMOTH_URLS = [
-  `https://cdnjs.cloudflare.com/ajax/libs/mammoth/${MAMMOTH_V}/mammoth.browser.min.js`,
-  `https://cdn.jsdelivr.net/npm/mammoth@${MAMMOTH_V}/mammoth.browser.min.js`,
-  `https://unpkg.com/mammoth@${MAMMOTH_V}/mammoth.browser.min.js`,
-];
-const JSPDF_V = '2.5.2', HTML2CANVAS_V = '1.4.1';
-const JSPDF_URLS = [
-  `https://cdnjs.cloudflare.com/ajax/libs/jspdf/${JSPDF_V}/jspdf.umd.min.js`,
-  `https://cdn.jsdelivr.net/npm/jspdf@${JSPDF_V}/dist/jspdf.umd.min.js`,
-  `https://unpkg.com/jspdf@${JSPDF_V}/dist/jspdf.umd.min.js`,
-];
-const HTML2CANVAS_URLS = [
-  `https://cdnjs.cloudflare.com/ajax/libs/html2canvas/${HTML2CANVAS_V}/html2canvas.min.js`,
-  `https://cdn.jsdelivr.net/npm/html2canvas@${HTML2CANVAS_V}/dist/html2canvas.min.js`,
-  `https://unpkg.com/html2canvas@${HTML2CANVAS_V}/dist/html2canvas.min.js`,
-];
-
-declare const pdfjsLib: {
-  GlobalWorkerOptions: { workerSrc: string };
-  getDocument: (opts: { data: ArrayBuffer }) => { promise: Promise<{ numPages: number; getPage: (i: number) => Promise<{ getTextContent: () => Promise<{ items: Array<{ str: string }> }> }> }> };
+const SAMPLE_RESUMES = {
+  en: {
+    role: 'QA Automation Engineer',
+    text: `Alex Morgan\nQA Engineer\nalex@example.com\n\nSUMMARY\nQA engineer with three years of experience testing web applications.\n\nEXPERIENCE\nQA Engineer — Example Software\n- Executed regression and smoke testing for weekly releases.\n- Wrote Selenium tests in Python and maintained CI jobs.\n- Reported defects and worked with developers to verify fixes.\n\nSKILLS\nPython, Selenium, REST APIs, Git, Jenkins, SQL`,
+  },
+  he: {
+    role: 'מהנדס/ת אוטומציה QA',
+    text: `אלכס מורגן\nמהנדס/ת QA\nalex@example.com\n\nתקציר\nמהנדס/ת בדיקות עם שלוש שנות ניסיון בבדיקת יישומי Web.\n\nניסיון\nמהנדס/ת QA — Example Software\n- ביצוע בדיקות רגרסיה ו-Smoke לגרסאות שבועיות.\n- כתיבת בדיקות Selenium ב-Python ותחזוקת תהליכי CI.\n- דיווח תקלות ועבודה עם מפתחים לאימות תיקונים.\n\nמיומנויות\nPython, Selenium, REST APIs, Git, Jenkins, SQL`,
+  },
 };
-declare const mammoth: { extractRawText: (opts: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }> };
 
 async function extractPdf(file: File): Promise<string> {
-  const loadedFrom = await loadFirst(PDFJS_URLS, 'pdfjsLib');
-  if (loadedFrom) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = loadedFrom.replace('pdf.min.js', 'pdf.worker.min.js');
-  }
+  const pdfjsLib = await import('pdfjs-dist');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
   const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
   const out: string[] = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const content = await (await pdf.getPage(i)).getTextContent();
-    out.push(content.items.map(it => it.str).join(' '));
+    out.push(content.items.map(item => 'str' in item ? item.str : '').join(' '));
   }
   return out.join('\n\n');
 }
 
 async function extractDocx(file: File): Promise<string> {
-  await loadFirst(MAMMOTH_URLS, 'mammoth');
+  const mammoth = await import('mammoth');
   const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
   return result.value;
 }
@@ -97,75 +51,29 @@ interface LastEval {
   evaluation: EvalResult;
 }
 
-/* ── jsPDF helpers ── */
-interface LinkInfo { label: string; href: string; }
+/* ── PDF helpers ── */
+// The text builders live in lib/resumePdf.ts. Only the rasterising fallback
+// stays here because it renders a temporary DOM node.
 
-interface JsPdfInstance {
-  internal: { pageSize: { getWidth: () => number; getHeight: () => number } };
-  setFont: (f: string, s: string) => void;
-  setFontSize: (n: number) => void;
-  splitTextToSize: (text: string, maxW: number) => string[];
-  text: (text: string, x: number, y: number) => void;
-  textWithLink: (text: string, x: number, y: number, opts: { url: string }) => void;
-  getTextWidth: (text: string) => number;
-  addPage: () => void;
-  addImage: (data: string, format: string, x: number, y: number, w: number, h: number) => void;
-  link: (x: number, y: number, w: number, h: number, opts: { url: string | null }) => void;
-  setPage: (n: number) => void;
-  save: (filename: string) => void;
-}
-
-function drawLineWithLinks(pdf: JsPdfInstance, line: string, x0: number, y: number, remainingLinks: LinkInfo[]) {
-  let x = x0, cursor = 0;
-  for (;;) {
-    let best: { l: LinkInfo; pos: number } | null = null;
-    for (const l of remainingLinks) {
-      const pos = line.indexOf(l.label, cursor);
-      if (pos !== -1 && (!best || pos < best.pos)) best = { l, pos };
-    }
-    if (!best) break;
-    if (best.pos > cursor) {
-      const seg = line.slice(cursor, best.pos);
-      pdf.text(seg, x, y);
-      x += pdf.getTextWidth(seg);
-    }
-    pdf.textWithLink(best.l.label, x, y, { url: best.l.href });
-    x += pdf.getTextWidth(best.l.label);
-    cursor = best.pos + best.l.label.length;
-    remainingLinks.splice(remainingLinks.indexOf(best.l), 1);
+/**
+ * Picks the builder for the text's direction. Hebrew goes through the embedded
+ * font so the PDF carries selectable text an ATS can read; if that font cannot
+ * be fetched we fall back to rasterising rather than emitting a PDF with no
+ * Hebrew glyphs in it at all.
+ */
+async function buildResumePdf(text: string): Promise<JsPdfInstance> {
+  if (!isRtlText(text)) return await pdfFromText(text);
+  try {
+    return await pdfFromRtlText(text);
+  } catch {
+    return pdfFromCanvas(text);
   }
-  if (cursor < line.length) pdf.text(line.slice(cursor), x, y);
-}
-
-function pdfFromText(text: string): JsPdfInstance {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { jsPDF } = (window as any).jspdf;
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const margin = 15, lineH = 5;
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10.5);
-  const maxWidth = pageW - margin * 2;
-  let y = margin;
-  for (const rawLine of text.split('\n')) {
-    const { plain, links } = markdownLineToPlain(rawLine);
-    const wrapped = plain === '' ? [''] : pdf.splitTextToSize(plain, maxWidth);
-    const remainingLinks = links.slice();
-    for (const line of wrapped) {
-      if (y + lineH > pageH - margin) { pdf.addPage(); y = margin; }
-      if (remainingLinks.length) drawLineWithLinks(pdf, line, margin, y, remainingLinks);
-      else pdf.text(line, margin, y);
-      y += lineH;
-    }
-  }
-  return pdf;
 }
 
 const HOLDER_WIDTH_PX = 794;
 
 async function pdfFromCanvas(text: string): Promise<JsPdfInstance> {
-  await loadFirst(HTML2CANVAS_URLS, 'html2canvas');
+  const { default: html2canvas } = await import('html2canvas');
   const holder = document.createElement('div');
   holder.dir = 'rtl';
   holder.innerHTML = linkifyHtml(text);
@@ -180,11 +88,8 @@ async function pdfFromCanvas(text: string): Promise<JsPdfInstance> {
       const r = a.getBoundingClientRect();
       return { href: a.getAttribute('href'), x: r.left - holderRect.left, y: r.top - holderRect.top, w: r.width, h: r.height };
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window as any;
-    const canvas = await w.html2canvas(holder, { scale: 2, backgroundColor: '#ffffff' });
-    const { jsPDF } = w.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    const canvas = await html2canvas(holder, { scale: 2, backgroundColor: '#ffffff' });
+    const pdf = await pdfFromText('');
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
     const imgH = canvas.height * pageW / canvas.width;
@@ -216,11 +121,13 @@ export function ResumeAgent() {
   const { locale, S } = useLocale();
   const t = locale.resume;
   const { callClaude, extractJSON } = useProviderContext();
+  const { startTool, completeResume } = useProgress();
   const sectionRef = useReveal();
 
-  const [resumeText, setResumeText] = useState('');
-  const [targetRole, setTargetRole] = useState('');
-  const [jobDesc, setJobDesc] = useState('');
+  const draftPrefix = `ata_resume_draft_${locale.lang}_`;
+  const [resumeText, setResumeText] = useState(() => sessionStorage.getItem(draftPrefix + 'resume') || '');
+  const [targetRole, setTargetRole] = useState(() => sessionStorage.getItem(draftPrefix + 'role') || '');
+  const [jobDesc, setJobDesc] = useState(() => sessionStorage.getItem(draftPrefix + 'job') || '');
   const [uploadLabel, setUploadLabel] = useState(t.uploadPrompt);
   const [isDragging, setIsDragging] = useState(false);
   const [resumeErr, setResumeErr] = useState('');
@@ -249,15 +156,9 @@ export function ResumeAgent() {
     setImprovedHtml('');
   }, [jobDesc]);
 
-  // Preload PDF/DOCX parsers on window load
-  useEffect(() => {
-    const preload = () => {
-      loadFirst(PDFJS_URLS, 'pdfjsLib').catch(() => {});
-      loadFirst(MAMMOTH_URLS, 'mammoth').catch(() => {});
-    };
-    window.addEventListener('load', preload);
-    return () => window.removeEventListener('load', preload);
-  }, []);
+  useEffect(() => { sessionStorage.setItem(draftPrefix + 'resume', resumeText); }, [draftPrefix, resumeText]);
+  useEffect(() => { sessionStorage.setItem(draftPrefix + 'role', targetRole); }, [draftPrefix, targetRole]);
+  useEffect(() => { sessionStorage.setItem(draftPrefix + 'job', jobDesc); }, [draftPrefix, jobDesc]);
 
   const processFile = useCallback(async (file: File | undefined | null) => {
     if (!file) return;
@@ -280,13 +181,14 @@ export function ResumeAgent() {
     }
   }, [S]);
 
-  const evaluateResume = useCallback(async () => {
-    const txt = resumeText.trim();
+  const evaluateResume = useCallback(async (textOverride?: string, roleOverride?: string) => {
+    const txt = (textOverride ?? resumeText).trim();
     setResumeErr('');
     if (txt.length < 80) { setResumeErr(S.errResumeEmpty); return; }
+    startTool('resume');
     setEvaluating(true);
     try {
-      const role = targetRole.trim() || 'QA Automation Engineer';
+      const role = (roleOverride ?? targetRole).trim() || 'QA Automation Engineer';
       const reply = await callClaude(locale.prompts.resume, [
         { role: 'user', content: S.promptRolePrefix + role + S.promptResumeLabel + txt },
       ]);
@@ -296,11 +198,23 @@ export function ResumeAgent() {
       improvedResumeRef.current = null;
       setImprovedVisible(false);
       setImprovedHtml('');
+      completeResume();
     } catch (e) {
       setResumeErr((e as Error).message);
     }
     setEvaluating(false);
-  }, [resumeText, targetRole, S, callClaude, extractJSON, locale.prompts.resume]);
+  }, [resumeText, targetRole, S, callClaude, extractJSON, locale.prompts.resume, startTool, completeResume]);
+
+  useEffect(() => {
+    const analyzeSample = () => {
+      const sample = SAMPLE_RESUMES[locale.lang === 'he' ? 'he' : 'en'];
+      setResumeText(sample.text);
+      setTargetRole(sample.role);
+      void evaluateResume(sample.text, sample.role);
+    };
+    window.addEventListener('ata:sample-resume', analyzeSample);
+    return () => window.removeEventListener('ata:sample-resume', analyzeSample);
+  }, [evaluateResume, locale.lang]);
 
   const ensureImprovedResume = useCallback(async (): Promise<string> => {
     if (improvedResumeRef.current) return improvedResumeRef.current;
@@ -340,10 +254,9 @@ export function ResumeAgent() {
     setDownloadingPdf(true);
     try {
       const text = await ensureImprovedResume();
-      await loadFirst(JSPDF_URLS, 'jspdf');
       const role = lastEval?.role || 'Resume';
       const filename = ('Resume - ' + role).replace(/[\\/:*?"<>|]+/g, '-').trim().slice(0, 80) + '.pdf';
-      const pdf = isRtlText(text) ? await pdfFromCanvas(text) : pdfFromText(text);
+      const pdf = await buildResumePdf(text);
       pdf.save(filename);
     } catch (e) {
       setImprovedErr((e as Error).message);
@@ -431,7 +344,7 @@ export function ResumeAgent() {
           className="primary"
           id="resumeBtn"
           disabled={evaluating}
-          onClick={evaluateResume}
+          onClick={() => evaluateResume()}
         >
           {evaluating ? S.btnEvaluating : t.evaluateBtn}
         </button>

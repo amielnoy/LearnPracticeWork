@@ -96,7 +96,15 @@ export const PROVIDERS: Record<string, ProviderDef> = {
 };
 
 export interface ServerDefaults {
-  [provider: string]: { available: boolean; defaultModel?: string };
+  [provider: string]: { available: boolean; defaultModel?: string; anonymousDailyQuota?: number };
+}
+
+function publishAnonymousQuota(response: Response): void {
+  const limit = Number(response.headers.get('x-ai-quota-limit'));
+  const remaining = Number(response.headers.get('x-ai-quota-remaining'));
+  if (typeof window !== 'undefined' && Number.isFinite(limit) && Number.isFinite(remaining)) {
+    window.dispatchEvent(new CustomEvent('ata:quota', { detail: { limit, remaining } }));
+  }
 }
 
 export async function loadServerConfig(): Promise<ServerDefaults> {
@@ -121,6 +129,7 @@ async function callServerProxy(
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ model, system, messages, maxTokens, grounded }),
   });
+  publishAnonymousQuota(res);
   const data = (await res.json()) as { text?: string; error?: string };
   if (!res.ok) throw new Error(`API error (${res.status}): ${(data.error || '').slice(0, 300)}`);
   return data.text || '';

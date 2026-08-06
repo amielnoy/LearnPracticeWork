@@ -23,26 +23,26 @@ test.describe('GET /api/healthz', () => {
 });
 
 test.describe('CORS', () => {
-  test('allows a cross-origin read', async ({ request }) => {
+  test('allows a cross-origin read from the configured production origin', async ({ request }) => {
     const response = await request.get('/api/healthz', {
-      headers: { Origin: 'https://amielnoy.github.io' },
+      headers: { Origin: 'https://academy.example' },
     });
 
-    expect(response.headers()['access-control-allow-origin']).toBe('*');
+    expect(response.headers()['access-control-allow-origin']).toBe('https://academy.example');
   });
 
   test('answers a preflight without invoking the route', async ({ request }) => {
     const response = await request.fetch('/api/ai/generate', {
       method: 'OPTIONS',
       headers: {
-        Origin: 'https://amielnoy.github.io',
+        Origin: 'https://academy.example',
         'Access-Control-Request-Method': 'POST',
         'Access-Control-Request-Headers': 'content-type',
       },
     });
 
     expect(response.status()).toBe(204);
-    expect(response.headers()['access-control-allow-origin']).toBe('*');
+    expect(response.headers()['access-control-allow-origin']).toBe('https://academy.example');
   });
 });
 

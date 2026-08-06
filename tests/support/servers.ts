@@ -16,8 +16,12 @@ export const KEYLESS_PORT = Number(process.env.TEST_API_PORT ?? 8788);
 /** api-server started with a syntactically valid but useless Gemini key. */
 export const KEYED_PORT = Number(process.env.TEST_API_PORT_KEYED ?? 8789);
 
+/** api-server with a deliberately tiny quota, used only by the quota spec. */
+export const LIMITED_PORT = Number(process.env.TEST_API_PORT_LIMITED ?? 8790);
+
 export const KEYLESS_URL = `http://127.0.0.1:${KEYLESS_PORT}`;
 export const KEYED_URL = `http://127.0.0.1:${KEYED_PORT}`;
+export const LIMITED_URL = `http://127.0.0.1:${LIMITED_PORT}`;
 
 /**
  * Not a real credential. It only has to be non-empty and start with `AIza` so
