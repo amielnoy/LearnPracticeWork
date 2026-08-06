@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { loadHebrewFont, pdfFromRtlText, pdfFromText } from '@academy/lib/resumePdf';
 
 /**
@@ -15,7 +16,11 @@ import { loadHebrewFont, pdfFromRtlText, pdfFromText } from '@academy/lib/resume
  * that printed every English word backwards.
  */
 
-const ACADEMY_ROOT = path.resolve('artifacts/ai-testing-academy');
+// Resolve from this file, not process.cwd(): `pnpm --filter @workspace/tests`
+// runs with `tests/` as the working directory in CI, while direct Playwright
+// invocations commonly run from the repository root.
+const here = path.dirname(fileURLToPath(import.meta.url));
+const ACADEMY_ROOT = path.resolve(here, '../../artifacts/ai-testing-academy');
 const FONT_PATH = path.join(ACADEMY_ROOT, 'public/fonts/Heebo-Regular.ttf');
 const PDFJS_PATH = path.join(ACADEMY_ROOT, 'node_modules/pdfjs-dist/legacy/build/pdf.mjs');
 // Only needed to keep pdf.js quiet about the built-in Helvetica of the LTR path.
@@ -83,10 +88,10 @@ test.describe('pdfFromText — the left-to-right résumé', () => {
 test.describe('pdfFromRtlText — the Hebrew résumé', () => {
   // Each test uses its own URL because the loader caches per URL for the
   // lifetime of the module.
-  let font: ReturnType<typeof stubFontFetch>;
+  let font: ReturnType<typeof stubFontFetch> | undefined;
 
   test.beforeEach(() => { font = stubFontFetch(); });
-  test.afterEach(() => { font.restore(); });
+  test.afterEach(() => { font?.restore(); });
 
   test('produces a text layer rather than a picture of one', async () => {
     const pdf = await pdfFromRtlText('מהנדס אוטומציה', 'http://stub/a.ttf');
@@ -123,7 +128,7 @@ test.describe('pdfFromRtlText — the Hebrew résumé', () => {
   test('fetches the font once even across several exports', async () => {
     await pdfFromRtlText('מהנדס', 'http://stub/e.ttf');
     await pdfFromRtlText('אוטומציה', 'http://stub/e.ttf');
-    expect(font.calls.filter(url => url === 'http://stub/e.ttf')).toHaveLength(1);
+    expect(font?.calls.filter(url => url === 'http://stub/e.ttf')).toHaveLength(1);
   });
 });
 
