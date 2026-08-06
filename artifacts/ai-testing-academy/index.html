@@ -14,6 +14,7 @@
 <meta property="og:url" content="https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/" />
 <meta property="og:site_name" content="AI Testing Academy" />
 <meta property="og:locale" content="en_US" />
+<meta property="og:locale:alternate" content="he_IL" />
 <meta property="og:image" content="https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/opengraph.jpg" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
@@ -22,7 +23,73 @@
 <meta name="twitter:description" content="Learn Test Automation, DevOps & AI Testing with hands-on courses and AI-powered tools." />
 <meta name="twitter:image" content="https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/opengraph.jpg" />
 <link rel="canonical" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/" />
+
+<!-- The site is bilingual on one set of URLs: `?lang=` selects the language and
+     is the first thing `src/lib/i18n.ts` reads. Without these, every Hebrew
+     visitor arrives through a page Google only ever saw in English.
+     The three declarations are identical on all three variants, which is what
+     makes them reciprocal — a one-way hreflang is ignored. -->
+<link rel="alternate" hreflang="en" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/?lang=en" />
+<link rel="alternate" hreflang="he" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/?lang=he" />
+<link rel="alternate" hreflang="x-default" href="https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/" />
+
 <link rel="icon" type="image/svg+xml" href="logo-mark.svg" />
+
+<!-- Localises the head before React mounts, so the tab title, `lang`/`dir` and
+     the canonical all describe the language actually on screen. Two reasons it
+     lives here rather than in a component: a crawler that renders the page sees
+     a consistent document, and there is no flash of English/LTR on a Hebrew
+     load.
+
+     The language priority mirrors `resolveLang()` in src/lib/i18n.ts — query,
+     stored choice, browser — and has to stay in step with it; a test asserts
+     both agree. Unlike `resolveLang()` this only reads, never persists. -->
+<script>
+(function () {
+  try {
+    var META = {
+      en: {
+        dir: 'ltr',
+        title: 'AI Testing Academy — Learn Test Automation, DevOps & AI Testing',
+        description: 'AI Testing Academy — Learn Test Automation, DevOps & AI Testing with hands-on courses and AI-powered tools.'
+      },
+      he: {
+        dir: 'rtl',
+        title: 'האקדמיה לבדיקות AI — אוטומציית בדיקות, DevOps ובדיקות AI',
+        description: 'האקדמיה לבדיקות AI — ללמוד אוטומציית בדיקות, DevOps ובדיקות מבוססות AI עם קורסים מעשיים, סוכני AI ותרגול לראיונות.'
+      }
+    };
+
+    var param = new URLSearchParams(window.location.search).get('lang');
+    var stored = null;
+    try { stored = localStorage.getItem('ata_lang'); } catch (e) { /* storage blocked */ }
+    var browser = (navigator.language || 'en').toLowerCase().indexOf('he') === 0 ? 'he' : 'en';
+    var lang = param || stored || browser;
+    if (!META[lang]) lang = 'en';
+    var meta = META[lang];
+
+    var root = document.documentElement;
+    root.lang = lang;
+    root.dir = meta.dir;
+    document.title = meta.title;
+
+    var description = document.querySelector('meta[name="description"]');
+    if (description) description.setAttribute('content', meta.description);
+
+    // Each language variant has to point at itself, or hreflang contradicts the
+    // canonical and Google drops the alternates. Only the query is rewritten —
+    // the origin stays whatever the document declares, because the site is
+    // served from two hosts and only one of them is the canonical home.
+    var canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      var base = canonical.href.split('?')[0].split('#')[0];
+      canonical.href = param ? base + '?lang=' + lang : base;
+    }
+  } catch (e) {
+    /* SEO niceties must never break the page */
+  }
+})();
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

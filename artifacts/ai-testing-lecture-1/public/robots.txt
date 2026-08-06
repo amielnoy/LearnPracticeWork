@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/sitemap.xml
