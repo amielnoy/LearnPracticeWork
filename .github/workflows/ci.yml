@@ -346,6 +346,10 @@ jobs:
     # the hyphen as subtraction.)
     if: ${{ !cancelled() && needs['build-pages'].result == 'success' }}
     runs-on: ubuntu-latest
+    # GitHub's Pages backend has recently taken slightly longer than the
+    # deploy action's 10-minute default even though the artifact was accepted.
+    # Keep the wait bounded, but leave enough room for a slow Pages publish.
+    timeout-minutes: 25
     permissions:
       pages: write
       id-token: write
@@ -355,6 +359,8 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: '1200000'
 
   publish-allure:
     name: Publish the Allure report
