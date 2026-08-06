@@ -26,6 +26,10 @@ const PDFJS_PATH = path.join(ACADEMY_ROOT, 'node_modules/pdfjs-dist/legacy/build
 // Only needed to keep pdf.js quiet about the built-in Helvetica of the LTR path.
 const STANDARD_FONTS = `${path.join(ACADEMY_ROOT, 'node_modules/pdfjs-dist/standard_fonts')}/`;
 
+// A4, and the margin the builders lay out to.
+const PAGE_WIDTH_MM = 210;
+const MARGIN_MM = 15;
+
 interface PdfOutput {
   output: (type: 'arraybuffer') => ArrayBuffer;
 }
@@ -68,6 +72,31 @@ async function extractPages(pdf: unknown): Promise<string[]> {
 
 async function extractText(pdf: unknown): Promise<string> {
   return (await extractPages(pdf)).join('\n');
+}
+
+/**
+ * The clickable regions of page one, in the order they were added, with their
+ * horizontal extent converted from PDF points to the millimetres the builder
+ * works in.
+ */
+async function extractLinkRegions(
+  pdf: unknown,
+): Promise<Array<{ url: string; left: number; right: number }>> {
+  const bytes = (pdf as PdfOutput).output('arraybuffer');
+  const pdfjs = await import(PDFJS_PATH);
+  const doc = await pdfjs.getDocument({
+    data: new Uint8Array(bytes),
+    standardFontDataUrl: STANDARD_FONTS,
+  }).promise;
+  const annotations = await (await doc.getPage(1)).getAnnotations();
+  const toMm = (points: number) => (points / 72) * 25.4;
+  return annotations
+    .filter((a: { url?: string }) => Boolean(a.url))
+    .map((a: { url: string; rect: number[] }) => ({
+      url: a.url,
+      left: toMm(a.rect[0]!),
+      right: toMm(a.rect[2]!),
+    }));
 }
 
 test.describe('pdfFromText — the left-to-right résumé', () => {
@@ -123,6 +152,49 @@ test.describe('pdfFromRtlText — the Hebrew résumé', () => {
     const pages = await extractPages(await pdfFromRtlText(long, 'http://stub/d.ttf'));
     expect(pages.length).toBeGreaterThan(1);
     expect(pages[pages.length - 1]!.trim()).not.toBe('');
+  });
+
+  test('gives every link on a contact line its own clickable region', async () => {
+    // A résumé's contact row is several links on one line. This used to attach
+    // a single region spanning the whole line to whichever link came first, so
+    // clicking "יוטיוב" opened LinkedIn.
+    const pdf = await pdfFromRtlText(
+      '[לינקדאין](https://www.linkedin.com/in/amiel-peled/) | ' +
+        '[יוטיוב](https://www.youtube.com/@amielnoy) | amielnoy@gmail.com',
+      'http://stub/links.ttf',
+    );
+    const regions = await extractLinkRegions(pdf);
+
+    expect(regions.map(r => r.url)).toEqual([
+      'https://www.linkedin.com/in/amiel-peled/',
+      'https://www.youtube.com/@amielnoy',
+      'mailto:amielnoy@gmail.com',
+    ]);
+    // Distinct, non-overlapping areas of the page — not three copies of the line.
+    for (let i = 1; i < regions.length; i++) {
+      expect(regions[i]!.right).toBeLessThanOrEqual(regions[i - 1]!.left);
+    }
+  });
+
+  test('places the first link of an RTL line at the right margin', async () => {
+    // Right-to-left: the first thing read is the right-most thing drawn. A
+    // region that landed on the left would be sitting on a different word.
+    const pdf = await pdfFromRtlText(
+      '[לינקדאין](https://www.linkedin.com/in/amiel-peled/) | יוטיוב',
+      'http://stub/rtlpos.ttf',
+    );
+    const [first] = await extractLinkRegions(pdf);
+    expect(first!.right).toBeCloseTo(PAGE_WIDTH_MM - MARGIN_MM, 0);
+  });
+
+  test('leaves text with no URL unclickable rather than guessing one', async () => {
+    // "גיטהאב" is written without a link in the source, so it must not inherit
+    // the neighbouring one.
+    const pdf = await pdfFromRtlText(
+      '[לינקדאין](https://www.linkedin.com/in/amiel-peled/) | גיטהאב',
+      'http://stub/nolink.ttf',
+    );
+    expect(await extractLinkRegions(pdf)).toHaveLength(1);
   });
 
   test('fetches the font once even across several exports', async () => {
