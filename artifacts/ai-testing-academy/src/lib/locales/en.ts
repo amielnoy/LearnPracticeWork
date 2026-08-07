@@ -847,7 +847,9 @@ Evaluate the resume thoroughly and return ONLY valid JSON — no prose, no markd
 - Highlight test automation, CI/CD, and AI/LLM testing experience prominently
 - Tailor wording to the provided job description if given
 - Keep the same factual information — do not invent experience
-Return ONLY the rewritten resume text — no JSON, no markdown headers, no commentary before or after.`,
+- Keep every contact detail of the original — name, phone, email and every URL — and never invent or alter one
+- Write each URL as a [Label](https://full-url) link, e.g. [LinkedIn](https://www.linkedin.com/in/name); leave a bare email address as plain text
+Return ONLY the rewritten resume text — no JSON, no markdown headings, no commentary before or after. Inline [label](url) links are the one exception: they are expected, and they are what makes the exported PDF clickable.`,
     interview: `You are a senior QA Automation interviewer conducting a structured technical interview for a QA/SDET/DevOps role. 
 Progress through these 5 stages in order, spending 2-3 questions on each before moving to the next:
 
