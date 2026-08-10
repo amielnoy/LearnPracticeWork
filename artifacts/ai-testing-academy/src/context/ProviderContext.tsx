@@ -1,11 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   PROVIDERS,
   loadServerConfig,
@@ -77,7 +70,7 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
   const { S } = useLocale();
 
   const [provider, setProviderState] = useState<string>(
-    () => localStorage.getItem(PROVIDER_STORE_KEY) || 'gemini'
+    () => localStorage.getItem(PROVIDER_STORE_KEY) || 'gemini',
   );
   const [model, setModelState] = useState<string>(() => PROVIDERS['gemini'].models[0]);
   const [apiKey, setApiKeyState] = useState<string>('');
@@ -86,7 +79,10 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
   const [ownKeyTouched, setOwnKeyTouchedState] = useState<boolean>(false);
   const [serverDefaults, setServerDefaults] = useState<ServerDefaults>({});
   const [serverConfigLoaded, setServerConfigLoaded] = useState(false);
-  const [anonymousQuota, setAnonymousQuota] = useState<{ limit: number; remaining: number | null } | null>(null);
+  const [anonymousQuota, setAnonymousQuota] = useState<{
+    limit: number;
+    remaining: number | null;
+  } | null>(null);
   const [connStatus, setConnStatusText] = useState<string>('');
   const [connStatusColor, setConnStatusColor] = useState<string>('var(--muted)');
 
@@ -97,7 +93,7 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
 
   const hasServerDefault = useCallback(
     (p: string) => !!serverDefaults[p]?.available,
-    [serverDefaults]
+    [serverDefaults],
   );
 
   // Compute effective key mode based on state and server defaults
@@ -107,7 +103,7 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
       currentServerDefaults: ServerDefaults,
       touchedByUser: boolean,
       currentApiKey: string,
-      currentUseOwnKey: boolean
+      currentUseOwnKey: boolean,
     ) => {
       const prov = PROVIDERS[currentProvider];
       const hasDefault = !!currentServerDefaults[currentProvider]?.available;
@@ -118,13 +114,13 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
         shouldUseOwn = !!storedKey || !hasDefault;
       }
 
-      const newApiKey = shouldUseOwn ? (storedKey || currentApiKey) : '';
+      const newApiKey = shouldUseOwn ? storedKey || currentApiKey : '';
       const newPlaceholder = shouldUseOwn ? prov.placeholder : S.placeholderEnvKey;
       void newPlaceholder; // used by the component UI
 
       return { shouldUseOwn, newApiKey, hasDefault };
     },
-    [S]
+    [S],
   );
 
   // Load server config on mount
@@ -203,7 +199,7 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
       }
       void prov;
     },
-    [provider]
+    [provider],
   );
 
   const setApiKey = useCallback(
@@ -216,48 +212,45 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
         destination.setItem(destinationPrefix + provider, key);
       }
     },
-    [provider, rememberKey, useOwnKey]
+    [provider, rememberKey, useOwnKey],
   );
 
-  const setRememberKey = useCallback((remember: boolean) => {
-    setRememberKeyState(remember);
-    const key = apiKey.trim();
-    if (remember) {
-      localStorage.setItem(PROVIDER_REMEMBER_PREFIX + provider, 'true');
-      if (key) localStorage.setItem(PROVIDER_KEY_PREFIX + provider, key);
-      sessionStorage.removeItem(PROVIDER_SESSION_KEY_PREFIX + provider);
-    } else {
-      localStorage.removeItem(PROVIDER_REMEMBER_PREFIX + provider);
-      localStorage.removeItem(PROVIDER_KEY_PREFIX + provider);
-      if (key) sessionStorage.setItem(PROVIDER_SESSION_KEY_PREFIX + provider, key);
-    }
-  }, [apiKey, provider]);
+  const setRememberKey = useCallback(
+    (remember: boolean) => {
+      setRememberKeyState(remember);
+      const key = apiKey.trim();
+      if (remember) {
+        localStorage.setItem(PROVIDER_REMEMBER_PREFIX + provider, 'true');
+        if (key) localStorage.setItem(PROVIDER_KEY_PREFIX + provider, key);
+        sessionStorage.removeItem(PROVIDER_SESSION_KEY_PREFIX + provider);
+      } else {
+        localStorage.removeItem(PROVIDER_REMEMBER_PREFIX + provider);
+        localStorage.removeItem(PROVIDER_KEY_PREFIX + provider);
+        if (key) sessionStorage.setItem(PROVIDER_SESSION_KEY_PREFIX + provider, key);
+      }
+    },
+    [apiKey, provider],
+  );
 
   const setModel = useCallback((m: string) => setModelState(m), []);
 
   const ownGeminiKey = useMemo(() => {
-    return (
-      loadStoredKey('gemini').key ||
-      (provider === 'gemini' && useOwnKey ? apiKey.trim() : '')
-    );
+    return loadStoredKey('gemini').key || (provider === 'gemini' && useOwnKey ? apiKey.trim() : '');
   }, [provider, useOwnKey, apiKey]);
 
   const callClaude = useCallback(
     (system: string, messages: Message[], maxTokens = 2500) =>
       callAI(provider, model, apiKey, useOwnKey, serverDefaults, S, system, messages, maxTokens),
-    [provider, model, apiKey, useOwnKey, serverDefaults, S]
+    [provider, model, apiKey, useOwnKey, serverDefaults, S],
   );
 
   const callGrounded = useCallback(
     (system: string, user: string, maxTokens = 3000) =>
       callGeminiGrounded(ownGeminiKey, serverDefaults, S, system, user, maxTokens),
-    [ownGeminiKey, serverDefaults, S]
+    [ownGeminiKey, serverDefaults, S],
   );
 
-  const extractJSONCb = useCallback(
-    (text: string) => extractJSON(text, S),
-    [S]
-  );
+  const extractJSONCb = useCallback((text: string) => extractJSON(text, S), [S]);
 
   const testConnection = useCallback(async () => {
     setConnStatus(S.statusTesting, 'var(--muted)');
@@ -273,9 +266,12 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
     // Resetting provider preferences must not erase progress, interview
     // history, or resume drafts.
     Object.keys(localStorage)
-      .filter(k => k === PROVIDER_STORE_KEY
-        || k.startsWith(PROVIDER_KEY_PREFIX)
-        || k.startsWith(PROVIDER_REMEMBER_PREFIX))
+      .filter(
+        k =>
+          k === PROVIDER_STORE_KEY ||
+          k.startsWith(PROVIDER_KEY_PREFIX) ||
+          k.startsWith(PROVIDER_REMEMBER_PREFIX),
+      )
       .forEach(k => localStorage.removeItem(k));
     Object.keys(sessionStorage)
       .filter(k => k.startsWith(PROVIDER_SESSION_KEY_PREFIX))
@@ -315,16 +311,34 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
       ownGeminiKey,
     }),
     [
-      provider, setProvider, model, setModel, apiKey, setApiKey, rememberKey, setRememberKey,
-      useOwnKey, setUseOwnKey, ownKeyTouched, serverDefaults, serverConfigLoaded, anonymousQuota, hasServerDefault,
-      connStatus, connStatusColor, setConnStatus, testConnection, resetSettings,
-      callClaude, callGrounded, extractJSONCb, ownGeminiKey,
-    ]
+      provider,
+      setProvider,
+      model,
+      setModel,
+      apiKey,
+      setApiKey,
+      rememberKey,
+      setRememberKey,
+      useOwnKey,
+      setUseOwnKey,
+      ownKeyTouched,
+      serverDefaults,
+      serverConfigLoaded,
+      anonymousQuota,
+      hasServerDefault,
+      connStatus,
+      connStatusColor,
+      setConnStatus,
+      testConnection,
+      resetSettings,
+      callClaude,
+      callGrounded,
+      extractJSONCb,
+      ownGeminiKey,
+    ],
   );
 
-  return (
-    <ProviderContext.Provider value={value}>{children}</ProviderContext.Provider>
-  );
+  return <ProviderContext.Provider value={value}>{children}</ProviderContext.Provider>;
 }
 
 export function useProviderContext(): ProviderContextValue {

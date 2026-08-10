@@ -127,9 +127,7 @@ test.describe('gemini key hints', () => {
 
 test.describe('anthropic', () => {
   test('rejects a key that belongs to another vendor', () => {
-    expect(() => PROVIDERS.anthropic!.validateKey!('sk-proj-abc', S)).toThrow(
-      S.errKeyNotAnthropic,
-    );
+    expect(() => PROVIDERS.anthropic!.validateKey!('sk-proj-abc', S)).toThrow(S.errKeyNotAnthropic);
   });
 
   test('accepts a well-formed key', () => {

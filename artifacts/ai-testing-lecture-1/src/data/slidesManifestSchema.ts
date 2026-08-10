@@ -27,8 +27,6 @@ export function parseSlidesManifest(input: unknown): SlideEntry[] {
   }
 
   const firstIssue = parsed.error.issues[0];
-  const issuePath = firstIssue?.path.length
-    ? firstIssue.path.join('.')
-    : 'manifest';
+  const issuePath = firstIssue?.path.length ? firstIssue.path.join('.') : 'manifest';
   throw new Error(`Invalid manifest at ${issuePath}: ${firstIssue?.message}`);
 }

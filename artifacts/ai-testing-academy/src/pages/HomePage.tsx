@@ -46,7 +46,7 @@ export function HomePage() {
   // nav-ready class: delay transition so drawer doesn't flash on initial load
   useEffect(() => {
     requestAnimationFrame(() =>
-      requestAnimationFrame(() => document.body.classList.add('nav-ready'))
+      requestAnimationFrame(() => document.body.classList.add('nav-ready')),
     );
     return () => document.body.classList.remove('nav-ready');
   }, []);
@@ -65,18 +65,15 @@ export function HomePage() {
 
   return (
     <>
-      <a className="skip-link" href="#main-content">{locale.ui.skip}</a>
+      <a className="skip-link" href="#main-content">
+        {locale.ui.skip}
+      </a>
       <ScrollProgress />
       <NavToggle navOpen={navOpen} onToggle={() => setNavOpen(v => !v)} />
       <NavScrim navOpen={navOpen} onClose={() => setNavOpen(false)} />
       <BackToTop />
 
-      <Nav
-        navOpen={navOpen}
-        setNavOpen={setNavOpen}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-      />
+      <Nav navOpen={navOpen} setNavOpen={setNavOpen} theme={theme} onToggleTheme={toggleTheme} />
 
       <Hero />
 

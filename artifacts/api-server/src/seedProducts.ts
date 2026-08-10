@@ -34,8 +34,8 @@ async function createProducts() {
 
     console.log(`Created product: ${product.id}`);
     console.log(`PRICE_ID=${price.id}`);
-  } catch (err: any) {
-    console.error('Error:', err.message);
+  } catch (err) {
+    console.error('Error:', err instanceof Error ? err.message : err);
     process.exit(1);
   }
 }

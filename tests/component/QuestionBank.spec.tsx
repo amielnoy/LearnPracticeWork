@@ -36,7 +36,9 @@ test('hides every hint and answer until asked', async ({ questionBank }) => {
   await expect(component.locator('.q-answer')).toHaveCount(0);
 });
 
-test('reveals one question at a time, leaving its neighbours collapsed', async ({ questionBank }) => {
+test('reveals one question at a time, leaving its neighbours collapsed', async ({
+  questionBank,
+}) => {
   const { component, openAllStages } = questionBank;
   await openAllStages();
 
@@ -51,7 +53,9 @@ test('reveals one question at a time, leaving its neighbours collapsed', async (
   await expect(component.locator('.q-hint')).toHaveCount(1);
 });
 
-test('gives every question a unique text, so the cards keep stable keys', async ({ questionBank }) => {
+test('gives every question a unique text, so the cards keep stable keys', async ({
+  questionBank,
+}) => {
   const questions = EN_BANK.stages.flatMap(stage => stage.items.map(item => item.q));
   expect(new Set(questions).size).toBe(questions.length);
 

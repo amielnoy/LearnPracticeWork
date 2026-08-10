@@ -15,10 +15,13 @@ export function ToolLauncher() {
   const progress = useProgress();
   const { anonymousQuota } = useProviderContext();
   const bank = lang === 'he' ? HE_BANK : EN_BANK;
-  const practiceTotal = bank.stages.reduce((total, stage) => total + stage.items.length, 0)
-    + locale.codingChallenges.levels.reduce((total, level) => total + level.items.length, 0);
+  const practiceTotal =
+    bank.stages.reduce((total, stage) => total + stage.items.length, 0) +
+    locale.codingChallenges.levels.reduce((total, level) => total + level.items.length, 0);
   const languagePrefix = `${lang}:`;
-  const practiceDone = progress.practiceCompleted.filter(id => id.startsWith(languagePrefix)).length;
+  const practiceDone = progress.practiceCompleted.filter(id =>
+    id.startsWith(languagePrefix),
+  ).length;
 
   const percentages: Record<ToolId, number> = {
     resume: progress.resumeCompleted ? 100 : progress.resumeStarted ? 35 : 0,
@@ -27,7 +30,7 @@ export function ToolLauncher() {
       : progress.interviewStarted
         ? Math.min(90, 15 + progress.interviewAnswers * 12)
         : 0,
-    practice: practiceTotal ? Math.round(practiceDone / practiceTotal * 100) : 0,
+    practice: practiceTotal ? Math.round((practiceDone / practiceTotal) * 100) : 0,
   };
 
   const cards: Array<{ id: ToolId; icon: string; title: string; desc: string; cta: string }> = [
@@ -44,7 +47,11 @@ export function ToolLauncher() {
       <p className="lead">{t.lead}</p>
 
       {progress.lastTool && (
-        <a className="continue-card" href={continueHref} onClick={() => progress.startTool(progress.lastTool!)}>
+        <a
+          className="continue-card"
+          href={continueHref}
+          onClick={() => progress.startTool(progress.lastTool!)}
+        >
           <span>{t.continueLabel}</span>
           <strong>{cards.find(card => card.id === progress.lastTool)?.title}</strong>
           <span aria-hidden="true">→</span>
@@ -61,11 +68,15 @@ export function ToolLauncher() {
               href={TOOL_LINKS[card.id]}
               onClick={() => {
                 progress.startTool(card.id);
-                if (card.id === 'resume') window.dispatchEvent(new CustomEvent('ata:sample-resume'));
-                if (card.id === 'interview') window.dispatchEvent(new CustomEvent('ata:start-sample-interview'));
+                if (card.id === 'resume')
+                  window.dispatchEvent(new CustomEvent('ata:sample-resume'));
+                if (card.id === 'interview')
+                  window.dispatchEvent(new CustomEvent('ata:start-sample-interview'));
               }}
             >
-              <span className="tool-icon" aria-hidden="true">{card.icon}</span>
+              <span className="tool-icon" aria-hidden="true">
+                {card.icon}
+              </span>
               <h3>{card.title}</h3>
               <p>{card.desc}</p>
               <div
@@ -78,7 +89,9 @@ export function ToolLauncher() {
               >
                 <span style={{ width: `${percent}%` }} />
               </div>
-              <span className="tool-meta">{percent ? `${percent}% ${t.completedLabel}` : t.freshLabel}</span>
+              <span className="tool-meta">
+                {percent ? `${percent}% ${t.completedLabel}` : t.freshLabel}
+              </span>
               <strong className="tool-cta">{card.cta}</strong>
             </a>
           );
@@ -89,8 +102,9 @@ export function ToolLauncher() {
         <p className="quota-note" aria-live="polite">
           {anonymousQuota.remaining === null
             ? t.quotaAvailableLabel.replace('{limit}', String(anonymousQuota.limit))
-            : t.quotaLabel.replace('{remaining}', String(anonymousQuota.remaining))
-              .replace('{limit}', String(anonymousQuota.limit))}
+            : t.quotaLabel
+                .replace('{remaining}', String(anonymousQuota.remaining))
+                .replace('{limit}', String(anonymousQuota.limit))}
         </p>
       )}
     </section>

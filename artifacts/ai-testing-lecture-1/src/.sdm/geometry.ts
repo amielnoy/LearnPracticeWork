@@ -80,14 +80,8 @@ export function resizeFrame(
     const widthScale = width / start.width;
     const heightScale = height / start.height;
     const requestedScale =
-      Math.abs(widthScale - 1) >= Math.abs(heightScale - 1)
-        ? widthScale
-        : heightScale;
-    const scale = Math.max(
-      requestedScale,
-      MIN_SIZE / start.width,
-      MIN_SIZE / start.height,
-    );
+      Math.abs(widthScale - 1) >= Math.abs(heightScale - 1) ? widthScale : heightScale;
+    const scale = Math.max(requestedScale, MIN_SIZE / start.width, MIN_SIZE / start.height);
     width = start.width * scale;
     height = start.height * scale;
   }

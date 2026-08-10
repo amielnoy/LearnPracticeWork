@@ -16,7 +16,8 @@ import type { APIRequestContext, APIResponse } from '@playwright/test';
  */
 
 /** Header names whose values must never reach the report. */
-const SECRET_HEADER = /^(authorization|cookie|set-cookie|proxy-authorization|x-api-key|x-goog-api-key|x-auth-token)$/i;
+const SECRET_HEADER =
+  /^(authorization|cookie|set-cookie|proxy-authorization|x-api-key|x-goog-api-key|x-auth-token)$/i;
 
 const REDACTED = '«redacted»';
 
@@ -48,7 +49,10 @@ type ShorthandMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
 function redactHeaders(headers: Record<string, string> = {}): Record<string, string> {
   return Object.fromEntries(
-    Object.entries(headers).map(([name, value]) => [name, SECRET_HEADER.test(name) ? REDACTED : value]),
+    Object.entries(headers).map(([name, value]) => [
+      name,
+      SECRET_HEADER.test(name) ? REDACTED : value,
+    ]),
   );
 }
 
@@ -139,7 +143,8 @@ export function withAllureReporting(request: APIRequestContext): ApiClient {
   });
 
   const shorthand =
-    (method: ShorthandMethod) => (url: string, options: ApiCallOptions = {}) =>
+    (method: ShorthandMethod) =>
+    (url: string, options: ApiCallOptions = {}) =>
       call(method, url, options, () => request[method](url, playwrightOptions(options)));
 
   return {

@@ -16,7 +16,7 @@ export interface ProviderDef {
     model: string,
     system: string,
     messages: Message[],
-    maxTokens: number
+    maxTokens: number,
   ) => { url: string; headers: Record<string, string>; body: unknown };
   parse: (d: unknown) => string;
   keyHint?: (key: string, status: number, S: Locale['s']) => string;
@@ -31,7 +31,8 @@ export const PROVIDERS: Record<string, ProviderDef> = {
       const generationConfig: Record<string, unknown> = { maxOutputTokens: maxTokens };
       if (model.includes('flash')) generationConfig.thinkingConfig = { thinkingBudget: 0 };
       return {
-        url: 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent',
+        url:
+          'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent',
         headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
         body: {
           system_instruction: { parts: [{ text: system }] },
@@ -44,8 +45,12 @@ export const PROVIDERS: Record<string, ProviderDef> = {
       };
     },
     parse: (d: unknown) =>
-      ((d as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }).candidates?.[0]?.content?.parts || [])
-        .map(p => p.text || '').join('\n'),
+      (
+        (d as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> })
+          .candidates?.[0]?.content?.parts || []
+      )
+        .map(p => p.text || '')
+        .join('\n'),
     keyHint: (key, status, S) =>
       [400, 401, 403].includes(status) && !key.startsWith('AIza') ? S.errGeminiKeyHint : '',
   },
@@ -70,7 +75,9 @@ export const PROVIDERS: Record<string, ProviderDef> = {
     },
     parse: (d: unknown) =>
       ((d as { content?: Array<{ type: string; text?: string }> }).content || [])
-        .filter(b => b.type === 'text').map(b => b.text || '').join('\n'),
+        .filter(b => b.type === 'text')
+        .map(b => b.text || '')
+        .join('\n'),
   },
   openai: {
     label: S => S.keyLabelOpenai,
@@ -91,7 +98,8 @@ export const PROVIDERS: Record<string, ProviderDef> = {
       };
     },
     parse: (d: unknown) =>
-      ((d as { choices?: Array<{ message?: { content?: string } }> }).choices?.[0]?.message?.content) || '',
+      (d as { choices?: Array<{ message?: { content?: string } }> }).choices?.[0]?.message
+        ?.content || '',
   },
 };
 
@@ -122,7 +130,7 @@ async function callServerProxy(
   system: string,
   messages: Message[],
   maxTokens: number,
-  grounded = false
+  grounded = false,
 ): Promise<string> {
   const res = await fetch('/api/ai/generate', {
     method: 'POST',
@@ -144,7 +152,7 @@ export async function callAI(
   S: Locale['s'],
   system: string,
   messages: Message[],
-  maxTokens = 2500
+  maxTokens = 2500,
 ): Promise<string> {
   const own = useOwnKey;
   if (!own && provider === 'gemini' && serverDefaults.gemini?.available) {
@@ -165,7 +173,7 @@ export async function callAI(
         S.errBlockedMid +
         S.errBlockedCauses +
         S.errBlockedTry +
-        S.errBlockedOpenUrl
+        S.errBlockedOpenUrl,
     );
   }
   if (!res.ok) {
@@ -182,11 +190,17 @@ export async function callGeminiGrounded(
   S: Locale['s'],
   system: string,
   user: string,
-  maxTokens = 3000
+  maxTokens = 3000,
 ): Promise<string> {
   if (!ownGeminiKey) {
     if (!serverDefaults.gemini?.available) throw new Error(S.errNoKey);
-    return callServerProxy('gemini-2.5-flash', system, [{ role: 'user', content: user }], maxTokens, true);
+    return callServerProxy(
+      'gemini-2.5-flash',
+      system,
+      [{ role: 'user', content: user }],
+      maxTokens,
+      true,
+    );
   }
   const model = 'gemini-2.5-flash';
   const body = {
@@ -201,10 +215,13 @@ export async function callGeminiGrounded(
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-goog-api-key': ownGeminiKey },
       body: JSON.stringify(body),
-    }
+    },
   );
-  if (!res.ok) throw new Error(S.errApiPrefix + res.status + '): ' + (await res.text()).slice(0, 300));
-  const d = (await res.json()) as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+  if (!res.ok)
+    throw new Error(S.errApiPrefix + res.status + '): ' + (await res.text()).slice(0, 300));
+  const d = (await res.json()) as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
   return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('\n');
 }
 
@@ -218,8 +235,7 @@ export async function callGeminiGrounded(
 function findJson(s: string): string {
   const objAt = s.indexOf('{');
   const arrAt = s.indexOf('[');
-  const open =
-    objAt === -1 ? arrAt : arrAt === -1 ? objAt : Math.min(objAt, arrAt);
+  const open = objAt === -1 ? arrAt : arrAt === -1 ? objAt : Math.min(objAt, arrAt);
   if (open === -1) return '';
 
   let depth = 0;

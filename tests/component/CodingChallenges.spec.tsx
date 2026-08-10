@@ -15,7 +15,11 @@ const totalChallenges = t.levels.reduce((sum, level) => sum + level.items.length
 
 test('renders every level in the catalog', async ({ mount }) => {
   const component = await mount(
-    <LocaleProvider><ProgressProvider><CodingChallenges /></ProgressProvider></LocaleProvider>,
+    <LocaleProvider>
+      <ProgressProvider>
+        <CodingChallenges />
+      </ProgressProvider>
+    </LocaleProvider>,
   );
 
   await expect(component.locator('.challenge-level')).toHaveCount(t.levels.length);
@@ -28,7 +32,11 @@ test('renders every level in the catalog', async ({ mount }) => {
 
 test('renders one card per challenge', async ({ mount }) => {
   const component = await mount(
-    <LocaleProvider><ProgressProvider><CodingChallenges /></ProgressProvider></LocaleProvider>,
+    <LocaleProvider>
+      <ProgressProvider>
+        <CodingChallenges />
+      </ProgressProvider>
+    </LocaleProvider>,
   );
 
   await expect(component.locator('.agent-box')).toHaveCount(totalChallenges);
@@ -37,18 +45,24 @@ test('renders one card per challenge', async ({ mount }) => {
 
 test('hides every hint and solution until asked', async ({ mount }) => {
   const component = await mount(
-    <LocaleProvider><ProgressProvider><CodingChallenges /></ProgressProvider></LocaleProvider>,
+    <LocaleProvider>
+      <ProgressProvider>
+        <CodingChallenges />
+      </ProgressProvider>
+    </LocaleProvider>,
   );
 
   await expect(component.locator('pre')).toHaveCount(0);
-  await expect(component.getByRole('button', { name: t.showHintBtn })).toHaveCount(
-    totalChallenges,
-  );
+  await expect(component.getByRole('button', { name: t.showHintBtn })).toHaveCount(totalChallenges);
 });
 
 test('reveals one card at a time, leaving its neighbours collapsed', async ({ mount }) => {
   const component = await mount(
-    <LocaleProvider><ProgressProvider><CodingChallenges /></ProgressProvider></LocaleProvider>,
+    <LocaleProvider>
+      <ProgressProvider>
+        <CodingChallenges />
+      </ProgressProvider>
+    </LocaleProvider>,
   );
 
   await component.locator('.agent-box').first().getByRole('button').click();
@@ -64,7 +78,11 @@ test('gives every challenge a unique title, so the cards keep stable keys', asyn
   expect(new Set(titles).size).toBe(titles.length);
 
   const component = await mount(
-    <LocaleProvider><ProgressProvider><CodingChallenges /></ProgressProvider></LocaleProvider>,
+    <LocaleProvider>
+      <ProgressProvider>
+        <CodingChallenges />
+      </ProgressProvider>
+    </LocaleProvider>,
   );
   await expect(component.locator('.agent-box h4')).toHaveCount(titles.length);
 });

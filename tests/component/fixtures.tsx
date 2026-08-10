@@ -6,6 +6,9 @@ import { ProviderContextProvider } from '@academy/context/ProviderContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';
 import { ConnectionSetup } from '@academy/components/ConnectionSetup';
 import { QuestionBank } from '@academy/components/QuestionBank';
+import { ResumeAgent } from '@academy/components/ResumeAgent';
+import { GoogleSignIn } from '@academy/components/GoogleSignIn';
+import { AuthProvider } from '@academy/context/AuthContext';
 
 /**
  * Component fixtures. The provider context probes `/api/ai/config` on mount, so
@@ -22,11 +25,104 @@ type QuestionBankHarness = {
   openAllStages: () => Promise<void>;
 };
 
+/**
+ * ResumeAgent, already mounted, plus the three places it answers from: the
+ * upload zone's own label, the error line, and the editor the extracted text
+ * lands in. `upload` hands over bytes built in the test process, so a fixture
+ * PDF never has to exist on disk.
+ */
+type ResumeAgentHarness = {
+  component: Locator;
+  upload: (name: string, bytes: Buffer) => Promise<void>;
+  uploadLabel: Locator;
+  error: Locator;
+  resumeText: Locator;
+  /** The hidden picker itself, for asserting on what it still holds. */
+  fileInput: Locator;
+  /** `files.length` of the picker, which no locator assertion exposes. */
+  selectedFileCount: () => Promise<number>;
+  /**
+   * Starts recording every label the upload zone passes through, and returns
+   * the reader for them. Reading a file is fast enough that the intermediate
+   * states are gone before any assertion could catch them, so they are captured
+   * as they happen rather than sampled afterwards.
+   */
+  recordUploadLabels: () => Promise<() => Promise<string[]>>;
+};
+
+/** The window property the label recorder collects into. */
+interface RecordingWindow extends Window {
+  __uploadLabels?: string[];
+}
+
+/** What the stubbed Google client recorded, and the credential it will hand back. */
+interface GoogleStubWindow extends Window {
+  __gsi?: {
+    clientId?: string;
+    locales: string[];
+    autoSelectDisabled: boolean;
+  };
+  __credential?: string;
+}
+
+/** How the sign-in control is mounted, and what a test can do to it afterwards. */
+type GoogleSignInHarness = {
+  /** Mounts the control. An empty `clientId` stands for a build without one. */
+  mount: (options?: { clientId?: string; lang?: 'en' | 'he' }) => Promise<Locator>;
+  /** Puts a credential in storage before mounting, as a returning visit would. */
+  seedCredential: (credential: string) => Promise<void>;
+  /** Clicks Google's button, which hands `credential` back through its callback. */
+  signInWith: (credential: string) => Promise<void>;
+  /** What the stubbed Google client was told and asked to do. */
+  stub: () => Promise<{ clientId?: string; locales: string[]; autoSelectDisabled: boolean }>;
+};
+
+/**
+ * Stands in for Google's hosted sign-in client.
+ *
+ * Serving this in place of the real script is what makes the flow testable at
+ * all: the genuine one renders into a cross-origin iframe, needs a client ID
+ * registered to the page's origin, and would put a live Google request in the
+ * middle of the suite. The component's own loading path still runs — it asks
+ * for the script, waits for it, and calls the same three methods.
+ */
+const GOOGLE_STUB = `
+  window.__gsi = { locales: [], autoSelectDisabled: false };
+  window.google = {
+    accounts: {
+      id: {
+        initialize(config) {
+          window.__gsi.clientId = config.client_id;
+          window.__gsi.callback = config.callback;
+        },
+        renderButton(parent, options) {
+          window.__gsi.locales.push(options.locale);
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.id = 'fakeGoogleButton';
+          button.textContent = 'Sign in with Google';
+          button.addEventListener('click', () => {
+            window.__gsi.callback({ credential: window.__credential });
+          });
+          parent.appendChild(button);
+        },
+        disableAutoSelect() {
+          window.__gsi.autoSelectDisabled = true;
+        },
+      },
+    },
+  };
+`;
+
 type ComponentFixtures = {
   /** Mount ConnectionSetup against a chosen server config, wrapped in its providers. */
   mountSetup: (config: unknown) => Promise<Locator>;
   /** QuestionBank mounted with no server key (its stages start collapsed). */
   questionBank: QuestionBankHarness;
+  /** ResumeAgent mounted with no server key, ready to be handed a file. */
+  resumeAgent: ResumeAgentHarness;
+  /** Sign in with Google, against a stubbed Google client. */
+  googleSignIn: GoogleSignInHarness;
 };
 
 const withProviders = (node: ReactNode) => (
@@ -56,6 +152,77 @@ export const test = base.extend<ComponentFixtures>({
       for (let i = 0; i < count; i++) await stages.nth(i).locator('summary').click();
     };
     await use({ component, openAllStages });
+  },
+
+  resumeAgent: async ({ mount, page }, use) => {
+    await page.route('**/api/ai/config', route => route.fulfill({ json: NO_SERVER_KEY }));
+    const component = await mount(withProviders(<ResumeAgent />));
+    const fileInput = component.locator('#resumeFile');
+    await use({
+      component,
+      fileInput,
+      selectedFileCount: () =>
+        fileInput.evaluate(input => (input as HTMLInputElement).files?.length ?? 0),
+      // The input is hidden behind the drop zone, which is why the file is set
+      // on it directly rather than by clicking: a real picker cannot be driven
+      // from a test, and the component's own handler is what is under test.
+      upload: (name, bytes) =>
+        fileInput.setInputFiles({ name, mimeType: 'application/pdf', buffer: bytes }),
+      uploadLabel: component.locator('#uploadLabel'),
+      recordUploadLabels: async () => {
+        await page.evaluate(() => {
+          const label = document.getElementById('uploadLabel');
+          if (!label) throw new Error('the upload zone has no #uploadLabel to record');
+          const target = window as RecordingWindow;
+          target.__uploadLabels = [label.textContent ?? ''];
+          new MutationObserver(() => {
+            target.__uploadLabels?.push(label.textContent ?? '');
+          }).observe(label, { childList: true, characterData: true, subtree: true });
+        });
+        return () => page.evaluate(() => (window as RecordingWindow).__uploadLabels ?? []);
+      },
+      error: component.locator('#resumeErr'),
+      resumeText: component.locator('#resumeText'),
+    });
+  },
+
+  googleSignIn: async ({ mount, page }, use) => {
+    await page.route('https://accounts.google.com/gsi/client', route =>
+      route.fulfill({ contentType: 'text/javascript', body: GOOGLE_STUB }),
+    );
+
+    // Nothing here navigates, so state written before `mount` is still there
+    // when the component reads it — which is how a returning visit and a
+    // Hebrew visit are set up without a hook in the component itself.
+    const setBeforeMount = (key: string, value: string) =>
+      page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, value] as const);
+
+    await use({
+      mount: async ({
+        clientId = 'test-client-id.apps.googleusercontent.com',
+        lang = 'en',
+      } = {}) => {
+        await setBeforeMount('ata_lang', lang);
+        return mount(
+          <LocaleProvider>
+            <AuthProvider clientId={clientId}>
+              <GoogleSignIn />
+            </AuthProvider>
+          </LocaleProvider>,
+        );
+      },
+      seedCredential: credential => setBeforeMount('ata_google_credential', credential),
+      signInWith: async credential => {
+        await page.evaluate(value => {
+          (window as GoogleStubWindow).__credential = value;
+        }, credential);
+        await page.locator('#fakeGoogleButton').click();
+      },
+      stub: async () =>
+        page.evaluate(
+          () => (window as GoogleStubWindow).__gsi ?? { locales: [], autoSelectDisabled: false },
+        ),
+    });
   },
 });
 

@@ -1,9 +1,5 @@
 import type { SlideEntry } from '../src/data/slidesManifestSchema';
-import {
-  parseSlideDocument,
-  type Element,
-  type SlideDocument,
-} from '../src/.sdm/core/schema';
+import { parseSlideDocument, type Element, type SlideDocument } from '../src/.sdm/core/schema';
 import { analyzeSlideLayout } from '../src/.sdm/core/layoutValidation';
 
 export interface SdmValidationIo {
@@ -26,10 +22,7 @@ function formatMessage(
   return `${filepath} [${code}]${ids}: ${message}`;
 }
 
-function collectWidgetModules(
-  elements: Array<Element>,
-  into: Map<string, string>,
-): void {
+function collectWidgetModules(elements: Array<Element>, into: Map<string, string>): void {
   for (const element of elements) {
     if (element.type === 'widget') {
       into.set(element.id, element.widget.module);
@@ -49,9 +42,7 @@ function widgetModuleMessages(
   if (modules.size === 0) {
     return [];
   }
-  const widgetFiles = new Set(
-    io.listFiles(WIDGETS_DIR).map((file) => file.replaceAll('\\', '/')),
-  );
+  const widgetFiles = new Set(io.listFiles(WIDGETS_DIR).map(file => file.replaceAll('\\', '/')));
   const messages: Array<string> = [];
   for (const [elementId, module] of modules) {
     const relative = module.replace(/^\.\/widgets\//, '');
@@ -70,10 +61,7 @@ function widgetModuleMessages(
   return messages;
 }
 
-export function validateSdmEntries(
-  entries: Array<SlideEntry>,
-  io: SdmValidationIo,
-): Array<string> {
+export function validateSdmEntries(entries: Array<SlideEntry>, io: SdmValidationIo): Array<string> {
   const messages: Array<string> = [];
   for (const entry of entries) {
     if (!SDM_SLIDE_ID.test(entry.id)) {
@@ -116,9 +104,7 @@ export function validateSdmEntries(
       json = JSON.parse(raw);
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      messages.push(
-        formatMessage(entry.filepath, 'parse-json', [], reason),
-      );
+      messages.push(formatMessage(entry.filepath, 'parse-json', [], reason));
       continue;
     }
     const result = parseSlideDocument(json);
@@ -135,21 +121,14 @@ export function validateSdmEntries(
       } else {
         for (const issue of result.issues) {
           messages.push(
-            formatMessage(
-              entry.filepath,
-              'schema-invalid',
-              [],
-              `${issue.path}: ${issue.message}`,
-            ),
+            formatMessage(entry.filepath, 'schema-invalid', [], `${issue.path}: ${issue.message}`),
           );
         }
       }
       continue;
     }
     for (const issue of analyzeSlideLayout(result.document)) {
-      messages.push(
-        formatMessage(entry.filepath, issue.code, issue.elementIds, issue.message),
-      );
+      messages.push(formatMessage(entry.filepath, issue.code, issue.elementIds, issue.message));
     }
     messages.push(...widgetModuleMessages(entry.filepath, result.document, io));
   }
@@ -157,14 +136,9 @@ export function validateSdmEntries(
   return messages;
 }
 
-export function findOrphanSdmFiles(
-  entries: Array<SlideEntry>,
-  io: SdmValidationIo,
-): Array<string> {
+export function findOrphanSdmFiles(entries: Array<SlideEntry>, io: SdmValidationIo): Array<string> {
   const referenced = new Set(
-    entries
-      .filter((entry) => entry.kind === 'sdm')
-      .map((entry) => entry.filepath),
+    entries.filter(entry => entry.kind === 'sdm').map(entry => entry.filepath),
   );
   const messages: Array<string> = [];
   for (const file of io.listFiles(SDM_SLIDES_DIR)) {

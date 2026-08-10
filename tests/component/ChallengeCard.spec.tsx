@@ -34,9 +34,7 @@ test('shows the challenge with nothing revealed', async ({ mount }) => {
   await expect(component.getByRole('button')).toHaveAttribute('aria-expanded', 'false');
 });
 
-test('reveals the hint on the first click, without giving away the solution', async ({
-  mount,
-}) => {
+test('reveals the hint on the first click, without giving away the solution', async ({ mount }) => {
   const component = await mount(<ChallengeCard challenge={challenge} labels={labels} />);
 
   await component.getByRole('button').click();

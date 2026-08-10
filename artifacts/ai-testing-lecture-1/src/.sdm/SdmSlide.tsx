@@ -13,12 +13,7 @@ import {
   type ParseSlideDocumentResult,
   type SlideDocument,
 } from './core/schema';
-import {
-  backgroundValue,
-  PaintLayer,
-  SdmElementView,
-  SdmRenderContext,
-} from './render';
+import { backgroundValue, PaintLayer, SdmElementView, SdmRenderContext } from './render';
 import { resolveAssetSrc, paintToBackground } from './style';
 import { SDM_BASE_URL, sdmWidgetModules } from './sdmRuntime';
 
@@ -32,16 +27,14 @@ interface ParsedState {
   error: string | null;
 }
 
-function describeParseFailure(
-  result: Exclude<ParseSlideDocumentResult, { ok: true }>,
-): string {
+function describeParseFailure(result: Exclude<ParseSlideDocumentResult, { ok: true }>): string {
   if (result.reason === 'unsupportedVersion') {
     return `document version ${result.version} is newer than this runtime supports`;
   }
 
   return result.issues
     .slice(0, 8)
-    .map((issue) => `${issue.path}: ${issue.message}`)
+    .map(issue => `${issue.path}: ${issue.message}`)
     .join('; ');
 }
 
@@ -82,9 +75,7 @@ function useStageScale(
 }
 
 export function SdmSlide({ slideId, initialDocument }: Props) {
-  const [state, setState] = useState<ParsedState>(() =>
-    tryParse(initialDocument),
-  );
+  const [state, setState] = useState<ParsedState>(() => tryParse(initialDocument));
   const rootRef = useRef<HTMLDivElement>(null);
 
   const document = state.document;
@@ -111,19 +102,14 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
     window.postMessage({ type: 'sdm:action', action }, '*');
   }, []);
 
-  const renderContext = useMemo(
-    () => ({ baseUrl: SDM_BASE_URL, widgets: sdmWidgetModules }),
-    [],
-  );
+  const renderContext = useMemo(() => ({ baseUrl: SDM_BASE_URL, widgets: sdmWidgetModules }), []);
 
   const background = document
-    ? paintToBackground(document.background, document.theme, (assetId) =>
+    ? paintToBackground(document.background, document.theme, assetId =>
         resolveAssetSrc(document.assets, assetId, SDM_BASE_URL),
       )
     : undefined;
-  const stageBackground = document
-    ? (backgroundValue(background) ?? '#ffffff')
-    : '#1a1a1a';
+  const stageBackground = document ? (backgroundValue(background) ?? '#ffffff') : '#1a1a1a';
 
   return (
     <SdmRenderContext.Provider value={renderContext}>
@@ -148,7 +134,7 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
           }}
         >
           <PaintLayer resolved={background} />
-          {document?.elements.map((element) => (
+          {document?.elements.map(element => (
             <SdmElementView
               key={element.id}
               element={element}

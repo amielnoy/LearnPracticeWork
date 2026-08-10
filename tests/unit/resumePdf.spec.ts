@@ -28,6 +28,7 @@ const STANDARD_FONTS = `${path.join(ACADEMY_ROOT, 'node_modules/pdfjs-dist/stand
 
 // A4, and the margin the builders lay out to.
 const PAGE_WIDTH_MM = 210;
+const PAGE_HEIGHT_MM = 297;
 const MARGIN_MM = 15;
 
 interface PdfOutput {
@@ -51,7 +52,12 @@ function stubFontFetch(): { calls: string[]; restore: () => void } {
         bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
     };
   }) as unknown as typeof fetch;
-  return { calls, restore: () => { globalThis.fetch = original; } };
+  return {
+    calls,
+    restore: () => {
+      globalThis.fetch = original;
+    },
+  };
 }
 
 /** The text layer, one entry per page, as a PDF parser would read it. */
@@ -75,13 +81,14 @@ async function extractText(pdf: unknown): Promise<string> {
 }
 
 /**
- * The clickable regions of page one, in the order they were added, with their
- * horizontal extent converted from PDF points to the millimetres the builder
- * works in.
+ * The clickable regions of page one, in the order they were added, converted
+ * from PDF points to the millimetres the builder works in. `top` is measured
+ * down from the top of the page, the direction the builder lays lines out in,
+ * rather than up from the origin as the PDF itself stores it.
  */
 async function extractLinkRegions(
   pdf: unknown,
-): Promise<Array<{ url: string; left: number; right: number }>> {
+): Promise<Array<{ url: string; left: number; right: number; top: number }>> {
   const bytes = (pdf as PdfOutput).output('arraybuffer');
   const pdfjs = await import(PDFJS_PATH);
   const doc = await pdfjs.getDocument({
@@ -96,6 +103,7 @@ async function extractLinkRegions(
       url: a.url,
       left: toMm(a.rect[0]!),
       right: toMm(a.rect[2]!),
+      top: PAGE_HEIGHT_MM - toMm(a.rect[3]!),
     }));
 }
 
@@ -112,6 +120,95 @@ test.describe('pdfFromText — the left-to-right résumé', () => {
     expect(text).toContain('LinkedIn');
     expect(text).not.toContain('](');
   });
+
+  test('gives every link on a contact line its own clickable region', async () => {
+    // The English counterpart of the Hebrew contact-row case below: one region
+    // per link, each over its own label, so "YouTube" does not open LinkedIn.
+    const pdf = await pdfFromText(
+      '**[LinkedIn](https://www.linkedin.com/in/amiel-peled/)** | ' +
+        '[YouTube](https://www.youtube.com/@amielnoy) | amielnoy@gmail.com',
+    );
+    const regions = await extractLinkRegions(pdf);
+
+    expect(regions.map(r => r.url)).toEqual([
+      'https://www.linkedin.com/in/amiel-peled/',
+      'https://www.youtube.com/@amielnoy',
+      'mailto:amielnoy@gmail.com',
+    ]);
+    // Distinct, non-overlapping areas of the page — not three copies of the line.
+    for (let i = 1; i < regions.length; i++) {
+      expect(regions[i]!.left).toBeGreaterThanOrEqual(regions[i - 1]!.right);
+    }
+  });
+
+  test('places the first link of an LTR line at the left margin', async () => {
+    // Mirror of the RTL positioning check: left-to-right, the first thing read
+    // is the left-most thing drawn.
+    const pdf = await pdfFromText('[LinkedIn](https://www.linkedin.com/in/amiel-peled/) | YouTube');
+    const [first] = await extractLinkRegions(pdf);
+    expect(first!.left).toBeCloseTo(MARGIN_MM, 0);
+  });
+
+  test('leaves text with no URL unclickable rather than guessing one', async () => {
+    // "GitHub" is written without a link, so it must not inherit its
+    // neighbour's — a region in the wrong place is worse than none at all.
+    const pdf = await pdfFromText('[LinkedIn](https://www.linkedin.com/in/amiel-peled/) | GitHub');
+    expect(await extractLinkRegions(pdf)).toHaveLength(1);
+  });
+
+  test('keeps a link clickable on a line long enough to wrap', async () => {
+    // Links are matched per display line, so one that ends up on the second
+    // half of a wrapped paragraph has to be found there rather than dropped.
+    const link = '[case study](https://example.com/case-study)';
+    const filler = 'Automation engineer building resilient end-to-end suites for web platforms. ';
+    const [wrapped] = await extractLinkRegions(
+      await pdfFromText(`${filler}${filler}Portfolio: ${link} and more.`),
+    );
+    const [onOwnLine] = await extractLinkRegions(await pdfFromText(link));
+
+    expect(wrapped?.url).toBe('https://example.com/case-study');
+    // Below where the same link sits when it is the whole first line — which is
+    // to say, the region followed the label onto the second display line.
+    expect(wrapped!.top).toBeGreaterThan(onOwnLine!.top);
+  });
+});
+
+/**
+ * The two builders are separate code paths — a fix applied to one is not
+ * automatically true of the other, which is how the Hebrew résumé once ended up
+ * with every contact link pointing at LinkedIn while the English one was fine.
+ */
+test.describe('both directions', () => {
+  let font: ReturnType<typeof stubFontFetch> | undefined;
+
+  test.beforeEach(() => {
+    font = stubFontFetch();
+  });
+  test.afterEach(() => {
+    font?.restore();
+  });
+
+  test('expose the same links for the same contact line', async () => {
+    const contactLine = (linkedin: string, youtube: string) =>
+      `**[${linkedin}](https://www.linkedin.com/in/amiel-peled/)** | ` +
+      `[${youtube}](https://www.youtube.com/@amielnoy) | amielnoy@gmail.com`;
+    const expected = [
+      'https://www.linkedin.com/in/amiel-peled/',
+      'https://www.youtube.com/@amielnoy',
+      'mailto:amielnoy@gmail.com',
+    ];
+
+    const ltr = await extractLinkRegions(await pdfFromText(contactLine('LinkedIn', 'YouTube')));
+    const rtl = await extractLinkRegions(
+      await pdfFromRtlText(
+        `מהנדס אוטומציה\n${contactLine('לינקדאין', 'יוטיוב')}`,
+        'http://stub/parity.ttf',
+      ),
+    );
+
+    expect(ltr.map(r => r.url)).toEqual(expected);
+    expect(rtl.map(r => r.url)).toEqual(expected);
+  });
 });
 
 test.describe('pdfFromRtlText — the Hebrew résumé', () => {
@@ -119,8 +216,12 @@ test.describe('pdfFromRtlText — the Hebrew résumé', () => {
   // lifetime of the module.
   let font: ReturnType<typeof stubFontFetch> | undefined;
 
-  test.beforeEach(() => { font = stubFontFetch(); });
-  test.afterEach(() => { font?.restore(); });
+  test.beforeEach(() => {
+    font = stubFontFetch();
+  });
+  test.afterEach(() => {
+    font?.restore();
+  });
 
   test('produces a text layer rather than a picture of one', async () => {
     const pdf = await pdfFromRtlText('מהנדס אוטומציה', 'http://stub/a.ttf');

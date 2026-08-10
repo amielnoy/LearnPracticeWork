@@ -16,8 +16,7 @@ const head = (page: import('@playwright/test').Page) =>
     lang: document.documentElement.lang,
     dir: document.documentElement.dir,
     title: document.title,
-    description:
-      document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '',
+    description: document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '',
     canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href') ?? '',
   }));
 

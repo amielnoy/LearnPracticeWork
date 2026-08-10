@@ -61,7 +61,7 @@
       "Bash(curl -s -i https://free-tier-insights--amielpeled.replit.app/api/ai/config)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/api/ai/config)",
       "Bash(curl -s https://free-tier-insights--amielpeled.replit.app/api/ai/config)",
-      "Bash(node ./build.mjs)",
+      "Bash(node ./build.ts)",
       "Bash(GEMINI_API_KEY=local-dev-placeholder PORT=8080 node ./dist/index.mjs)",
       "Bash(curl -s http://localhost:8080/api/ai/config)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5199/api/ai/config)",

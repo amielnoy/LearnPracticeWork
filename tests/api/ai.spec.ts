@@ -98,9 +98,18 @@ test.describe('server-side key configured', () => {
     // step, so a failure says which rule stopped being enforced instead of
     // pointing at an index.
     const cases = [
-      { rule: 'the system role is not accepted', data: { messages: [{ role: 'system', content: 'not allowed' }] } },
-      { rule: 'maxTokens above the ceiling', data: { messages: [{ role: 'user', content: 'hello' }], maxTokens: 4_001 } },
-      { rule: 'unknown top-level fields', data: { messages: [{ role: 'user', content: 'hello' }], unexpected: true } },
+      {
+        rule: 'the system role is not accepted',
+        data: { messages: [{ role: 'system', content: 'not allowed' }] },
+      },
+      {
+        rule: 'maxTokens above the ceiling',
+        data: { messages: [{ role: 'user', content: 'hello' }], maxTokens: 4_001 },
+      },
+      {
+        rule: 'unknown top-level fields',
+        data: { messages: [{ role: 'user', content: 'hello' }], unexpected: true },
+      },
     ];
 
     for (const { rule, data } of cases) {

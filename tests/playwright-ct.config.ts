@@ -27,14 +27,19 @@ export default defineConfig({
     ['list'],
     ['allure-playwright', { resultsDir: allureResultsDir }],
     ...(process.env.CI
-      // Own folder: the e2e config resolves its default to the same
-      // tests/playwright-report and would overwrite this one.
-      ? [['html', { open: 'never', outputFolder: '../playwright-report/component' }] as const]
+      ? // Own folder: the e2e config resolves its default to the same
+        // tests/playwright-report and would overwrite this one.
+        [['html', { open: 'never', outputFolder: '../playwright-report/component' }] as const]
       : [['blob', { outputDir: blobDir }] as const]),
   ],
   // Keep the last screenshot, a video and a trace whenever a component test
   // fails; the Allure reporter attaches them alongside the HTML report's copies.
   use: {
+    // The site picks its language from `navigator.language`, and the specs
+    // assert against the English catalogue. Pinned rather than left to whatever
+    // the browser defaults to, so a machine that reports Hebrew does not turn
+    // every text assertion red.
+    locale: 'en-US',
     ctPort: 3101,
     ctViteConfig: {
       resolve: {

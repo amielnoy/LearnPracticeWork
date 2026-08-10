@@ -89,7 +89,9 @@ test('renders the inline markup the answers carry, rather than printing it', asy
   const marked: QuestionItem = {
     q: 'How do you parametrize a test?',
     hint: 'Reach for `@pytest.mark.parametrize`.',
-    answer: ['Use `ids=` so the report names the case, and assert a *rate* rather than a single run.'],
+    answer: [
+      'Use `ids=` so the report names the case, and assert a *rate* rather than a single run.',
+    ],
   };
 
   const component = await mount(<QuestionCard item={marked} labels={labels} />);
