@@ -7,6 +7,8 @@ import { ProgressProvider } from '@academy/context/ProgressContext';
 import { ConnectionSetup } from '@academy/components/ConnectionSetup';
 import { QuestionBank } from '@academy/components/QuestionBank';
 import { ResumeAgent } from '@academy/components/ResumeAgent';
+import { GoogleSignIn } from '@academy/components/GoogleSignIn';
+import { AuthProvider } from '@academy/context/AuthContext';
 
 /**
  * Component fixtures. The provider context probes `/api/ai/config` on mount, so
@@ -53,6 +55,65 @@ interface RecordingWindow extends Window {
   __uploadLabels?: string[];
 }
 
+/** What the stubbed Google client recorded, and the credential it will hand back. */
+interface GoogleStubWindow extends Window {
+  __gsi?: {
+    clientId?: string;
+    locales: string[];
+    autoSelectDisabled: boolean;
+  };
+  __credential?: string;
+}
+
+/** How the sign-in control is mounted, and what a test can do to it afterwards. */
+type GoogleSignInHarness = {
+  /** Mounts the control. An empty `clientId` stands for a build without one. */
+  mount: (options?: { clientId?: string; lang?: 'en' | 'he' }) => Promise<Locator>;
+  /** Puts a credential in storage before mounting, as a returning visit would. */
+  seedCredential: (credential: string) => Promise<void>;
+  /** Clicks Google's button, which hands `credential` back through its callback. */
+  signInWith: (credential: string) => Promise<void>;
+  /** What the stubbed Google client was told and asked to do. */
+  stub: () => Promise<{ clientId?: string; locales: string[]; autoSelectDisabled: boolean }>;
+};
+
+/**
+ * Stands in for Google's hosted sign-in client.
+ *
+ * Serving this in place of the real script is what makes the flow testable at
+ * all: the genuine one renders into a cross-origin iframe, needs a client ID
+ * registered to the page's origin, and would put a live Google request in the
+ * middle of the suite. The component's own loading path still runs — it asks
+ * for the script, waits for it, and calls the same three methods.
+ */
+const GOOGLE_STUB = `
+  window.__gsi = { locales: [], autoSelectDisabled: false };
+  window.google = {
+    accounts: {
+      id: {
+        initialize(config) {
+          window.__gsi.clientId = config.client_id;
+          window.__gsi.callback = config.callback;
+        },
+        renderButton(parent, options) {
+          window.__gsi.locales.push(options.locale);
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.id = 'fakeGoogleButton';
+          button.textContent = 'Sign in with Google';
+          button.addEventListener('click', () => {
+            window.__gsi.callback({ credential: window.__credential });
+          });
+          parent.appendChild(button);
+        },
+        disableAutoSelect() {
+          window.__gsi.autoSelectDisabled = true;
+        },
+      },
+    },
+  };
+`;
+
 type ComponentFixtures = {
   /** Mount ConnectionSetup against a chosen server config, wrapped in its providers. */
   mountSetup: (config: unknown) => Promise<Locator>;
@@ -60,6 +121,8 @@ type ComponentFixtures = {
   questionBank: QuestionBankHarness;
   /** ResumeAgent mounted with no server key, ready to be handed a file. */
   resumeAgent: ResumeAgentHarness;
+  /** Sign in with Google, against a stubbed Google client. */
+  googleSignIn: GoogleSignInHarness;
 };
 
 const withProviders = (node: ReactNode) => (
@@ -120,6 +183,45 @@ export const test = base.extend<ComponentFixtures>({
       },
       error: component.locator('#resumeErr'),
       resumeText: component.locator('#resumeText'),
+    });
+  },
+
+  googleSignIn: async ({ mount, page }, use) => {
+    await page.route('https://accounts.google.com/gsi/client', route =>
+      route.fulfill({ contentType: 'text/javascript', body: GOOGLE_STUB }),
+    );
+
+    // Nothing here navigates, so state written before `mount` is still there
+    // when the component reads it — which is how a returning visit and a
+    // Hebrew visit are set up without a hook in the component itself.
+    const setBeforeMount = (key: string, value: string) =>
+      page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, value] as const);
+
+    await use({
+      mount: async ({
+        clientId = 'test-client-id.apps.googleusercontent.com',
+        lang = 'en',
+      } = {}) => {
+        await setBeforeMount('ata_lang', lang);
+        return mount(
+          <LocaleProvider>
+            <AuthProvider clientId={clientId}>
+              <GoogleSignIn />
+            </AuthProvider>
+          </LocaleProvider>,
+        );
+      },
+      seedCredential: credential => setBeforeMount('ata_google_credential', credential),
+      signInWith: async credential => {
+        await page.evaluate(value => {
+          (window as GoogleStubWindow).__credential = value;
+        }, credential);
+        await page.locator('#fakeGoogleButton').click();
+      },
+      stub: async () =>
+        page.evaluate(
+          () => (window as GoogleStubWindow).__gsi ?? { locales: [], autoSelectDisabled: false },
+        ),
     });
   },
 });

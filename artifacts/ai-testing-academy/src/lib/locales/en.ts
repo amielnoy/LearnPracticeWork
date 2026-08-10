@@ -249,6 +249,10 @@ export const en = {
     copyBtnDone: '✅ Copied!',
     copyBtnReset: 'Copy',
     copyBtnFail: '❌ Failed to copy',
+    // Google draws the sign-in button and translates its own label from the
+    // `locale` it is handed, so only the surrounding text lives here.
+    signInAria: 'Sign in with Google',
+    signOutBtn: 'Sign out',
   },
   codingChallenges: {
     title: '🐍 Python Coding Challenges for Test Automation',

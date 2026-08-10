@@ -248,6 +248,8 @@ export const he: Locale = {
     copyBtnDone: '✅ הועתק!',
     copyBtnReset: 'העתק',
     copyBtnFail: '❌ ההעתקה נכשלה',
+    signInAria: 'התחברות עם Google',
+    signOutBtn: 'התנתקות',
   },
   codingChallenges: {
     title: '🐍 אתגרי קוד בפייתון לאוטומציית בדיקות',

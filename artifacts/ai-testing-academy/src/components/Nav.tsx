@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useLocale } from '../context/LocaleContext';
+import { GoogleSignIn } from './GoogleSignIn';
 
 interface NavProps {
   navOpen: boolean;
@@ -25,7 +26,7 @@ export function Nav({ navOpen, setNavOpen, theme, onToggleTheme }: NavProps) {
           }
         });
       },
-      { rootMargin: '-25% 0px -65% 0px' }
+      { rootMargin: '-25% 0px -65% 0px' },
     );
 
     sectionIds.forEach(id => {
@@ -125,17 +126,13 @@ export function Nav({ navOpen, setNavOpen, theme, onToggleTheme }: NavProps) {
         <span id="langIcon">🌐</span>
         <span id="langLabel">{locale.nav.langToggle.label}</span>
       </button>
+
+      <GoogleSignIn />
     </nav>
   );
 }
 
-export function NavToggle({
-  navOpen,
-  onToggle,
-}: {
-  navOpen: boolean;
-  onToggle: () => void;
-}) {
+export function NavToggle({ navOpen, onToggle }: { navOpen: boolean; onToggle: () => void }) {
   const { locale } = useLocale();
   // The toggle floats over the content on phones, so it retracts while the
   // reader scrolls down into a section and comes back on any upward scroll —
@@ -171,13 +168,12 @@ export function NavToggle({
   );
 }
 
-export function NavScrim({ navOpen: _navOpen, onClose }: { navOpen: boolean; onClose: () => void }) {
-  return (
-    <div
-      className="nav-scrim"
-      id="navScrim"
-      onClick={onClose}
-      aria-hidden="true"
-    />
-  );
+export function NavScrim({
+  navOpen: _navOpen,
+  onClose,
+}: {
+  navOpen: boolean;
+  onClose: () => void;
+}) {
+  return <div className="nav-scrim" id="navScrim" onClick={onClose} aria-hidden="true" />;
 }

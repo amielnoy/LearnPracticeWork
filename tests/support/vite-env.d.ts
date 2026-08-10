@@ -7,11 +7,16 @@
  *
  * At runtime, under the plain-Node unit project, `import.meta.env` really is
  * undefined. That is why anything reachable from a test resolves it lazily
- * (see `hebrewFontUrl` in `resumePdf.ts`) instead of at module scope.
+ * (see `hebrewFontUrl` in `resumePdf.ts`, `googleClientId` in
+ * `googleIdentity.ts`) instead of at module scope.
+ *
+ * These mirror the artifact's own `src/vite-env.d.ts`; a variable added there
+ * and used from a tested module has to be added here too.
  */
 
 interface ImportMetaEnv {
   readonly BASE_URL: string;
+  readonly VITE_GOOGLE_CLIENT_ID?: string;
 }
 
 interface ImportMeta {
