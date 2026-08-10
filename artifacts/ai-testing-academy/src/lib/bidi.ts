@@ -24,8 +24,7 @@
  */
 
 /** Hebrew, Arabic, Syriac and Thaana, plus the Arabic presentation forms. */
-const RTL_RE =
-  /[\u0590-\u05ff\u0600-\u06ff\u0700-\u074f\u0780-\u07bf\ufb1d-\ufdff\ufe70-\ufeff]/;
+const RTL_RE = /[\u0590-\u05ff\u0600-\u06ff\u0700-\u074f\u0780-\u07bf\ufb1d-\ufdff\ufe70-\ufeff]/;
 
 /**
  * Latin letters and digits. Digits count as left-to-right so that "2019-2024"
@@ -39,19 +38,26 @@ const LTR_RE = /[A-Za-z0-9\u00c0-\u024f]/;
  * reversing a run has to carry them along with their base rather than strand
  * them on the neighbouring glyph.
  */
-const COMBINING_RE = /[\u0300-\u036f\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u065f\u0670]/;
+const COMBINING_RE =
+  /[\u0300-\u036f\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u065f\u0670]/;
 
 /**
  * Paired characters that point the other way once a run is reversed. Without
  * this, a parenthesised year inside a Hebrew line comes out as ")2019(".
  */
 const MIRRORED: Record<string, string> = {
-  '(': ')', ')': '(',
-  '[': ']', ']': '[',
-  '{': '}', '}': '{',
-  '<': '>', '>': '<',
-  '«': '»', '»': '«',
-  '‹': '›', '›': '‹',
+  '(': ')',
+  ')': '(',
+  '[': ']',
+  ']': '[',
+  '{': '}',
+  '}': '{',
+  '<': '>',
+  '>': '<',
+  '«': '»',
+  '»': '«',
+  '‹': '›',
+  '›': '‹',
 };
 
 /**
@@ -71,7 +77,9 @@ const DIGIT_RE = /[0-9]/;
  * "greater than" in another and drag unrelated text into its direction.
  */
 const BRACKET_PAIRS: Record<string, string> = {
-  '(': ')', '[': ']', '{': '}',
+  '(': ')',
+  '[': ']',
+  '{': '}',
 };
 
 type Direction = 'R' | 'L';
@@ -97,8 +105,7 @@ function resolveTerminators(chars: string[], classes: CharClass[]): void {
     let end = i;
     while (end < chars.length && classes[end] === 'N' && TERMINATOR_RE.test(chars[end]!)) end++;
     const touchesNumber =
-      (i > 0 && DIGIT_RE.test(chars[i - 1]!)) ||
-      (end < chars.length && DIGIT_RE.test(chars[end]!));
+      (i > 0 && DIGIT_RE.test(chars[i - 1]!)) || (end < chars.length && DIGIT_RE.test(chars[end]!));
     if (touchesNumber) for (let j = i; j < end; j++) classes[j] = 'L';
     i = end;
   }
@@ -127,7 +134,10 @@ function resolveBracketPairs(chars: string[], classes: CharClass[]): void {
 
     let enclosed: Direction | null = null;
     for (let j = start + 1; j < i; j++) {
-      if (classes[j] === 'R') { enclosed = 'R'; break; }
+      if (classes[j] === 'R') {
+        enclosed = 'R';
+        break;
+      }
       if (classes[j] === 'L') enclosed = 'L';
     }
     if (enclosed) classes[start] = classes[i] = enclosed;

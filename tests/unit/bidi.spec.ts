@@ -105,8 +105,9 @@ test.describe('mirrored pairs', () => {
 
   test('emits as many closing brackets as opening ones', () => {
     const visual = toVisualOrder(`${HEB} (${HEB} Playwright) ${HEB}`);
-    expect([...visual].filter(c => c === '(').length)
-      .toBe([...visual].filter(c => c === ')').length);
+    expect([...visual].filter(c => c === '(').length).toBe(
+      [...visual].filter(c => c === ')').length,
+    );
   });
 
   test('does not pair angle brackets across unrelated clauses', () => {

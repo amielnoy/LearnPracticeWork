@@ -57,7 +57,10 @@ test.describe('when the server has no default key', () => {
     await expect(component.getByText(t.useOwnKeyLabel)).toBeHidden();
   });
 
-  test('keeps a typed key in sessionStorage by default and out of the DOM', async ({ mountSetup, page }) => {
+  test('keeps a typed key in sessionStorage by default and out of the DOM', async ({
+    mountSetup,
+    page,
+  }) => {
     const component = await mountSetup(WITHOUT_SERVER_KEY);
 
     await component.locator('#apiKey').fill('AIzaMyOwnKey');
@@ -70,17 +73,22 @@ test.describe('when the server has no default key', () => {
     await expect(component.locator('#apiKey')).toHaveAttribute('type', 'password');
   });
 
-  test('persists a key only after explicit opt-in and displays a warning', async ({ mountSetup, page }) => {
+  test('persists a key only after explicit opt-in and displays a warning', async ({
+    mountSetup,
+    page,
+  }) => {
     const component = await mountSetup(WITHOUT_SERVER_KEY);
     await component.locator('#apiKey').fill('AIzaRememberMe');
 
     await component.getByLabel(t.rememberKeyLabel).check();
 
     await expect(component.getByText(t.rememberKeyWarning)).toBeVisible();
-    expect(await page.evaluate(() => window.localStorage.getItem('ata_key_gemini')))
-      .toBe('AIzaRememberMe');
-    expect(await page.evaluate(() => window.sessionStorage.getItem('ata_session_key_gemini')))
-      .toBeNull();
+    expect(await page.evaluate(() => window.localStorage.getItem('ata_key_gemini'))).toBe(
+      'AIzaRememberMe',
+    );
+    expect(
+      await page.evaluate(() => window.sessionStorage.getItem('ata_session_key_gemini')),
+    ).toBeNull();
   });
 });
 
@@ -97,9 +105,9 @@ test.describe('provider switching', () => {
   test('offers exactly the providers the locale advertises', async ({ mountSetup }) => {
     const component = await mountSetup(WITH_SERVER_KEY);
 
-    const values = await component.locator('#providerSel option').evaluateAll(options =>
-      options.map(option => (option as HTMLOptionElement).value),
-    );
+    const values = await component
+      .locator('#providerSel option')
+      .evaluateAll(options => options.map(option => (option as HTMLOptionElement).value));
     expect(values).toEqual(t.providers.map(p => p.value));
     // Every advertised provider must actually be implemented.
     for (const value of values) {

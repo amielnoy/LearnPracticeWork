@@ -82,9 +82,7 @@ test.describe('getLocale', () => {
   });
 
   test('exposes the same string keys in both catalogs', () => {
-    expect(Object.keys(getLocale('he').s).sort()).toEqual(
-      Object.keys(getLocale('en').s).sort(),
-    );
+    expect(Object.keys(getLocale('he').s).sort()).toEqual(Object.keys(getLocale('en').s).sort());
   });
 });
 

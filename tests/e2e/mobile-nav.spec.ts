@@ -5,7 +5,11 @@ import { test, expect } from './fixtures';
  * flow is skipped on the desktop project and runs only under mobile Chrome.
  * The `nav` fixture already has the page open.
  */
-test('opens the drawer and closes it once a destination is chosen', async ({ nav, page, isMobile }) => {
+test('opens the drawer and closes it once a destination is chosen', async ({
+  nav,
+  page,
+  isMobile,
+}) => {
   test.skip(!isMobile, 'the navigation drawer is part of the mobile layout only');
 
   const { toggle } = nav;

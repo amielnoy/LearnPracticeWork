@@ -48,14 +48,13 @@ interface DocumentedOperation {
   operation: OpenApiOperation;
 }
 
-const documented: DocumentedOperation[] = Object.entries(spec.paths).flatMap(
-  ([route, methods]) =>
-    HTTP_METHODS.filter(method => methods[method]).map(method => ({
-      method,
-      route,
-      url: `${basePath}${route}`,
-      operation: methods[method]!,
-    })),
+const documented: DocumentedOperation[] = Object.entries(spec.paths).flatMap(([route, methods]) =>
+  HTTP_METHODS.filter(method => methods[method]).map(method => ({
+    method,
+    route,
+    url: `${basePath}${route}`,
+    operation: methods[method]!,
+  })),
 );
 
 /** Orval names a response schema after the operation: healthCheck → HealthCheckResponse. */
@@ -119,7 +118,9 @@ test.describe('spec ↔ running server', () => {
       ).toContain(String(response.status()));
     });
 
-    test(`${method.toUpperCase()} ${route} answers with a documented media type`, async ({ api }) => {
+    test(`${method.toUpperCase()} ${route} answers with a documented media type`, async ({
+      api,
+    }) => {
       const response = await api.fetch(url, { method: method.toUpperCase() });
       const documentedTypes = Object.keys(
         operation.responses[String(response.status())]?.content ?? {},
@@ -140,8 +141,9 @@ test.describe('spec ↔ running server', () => {
 
       // Strict: an undocumented extra field is drift too, and clients that
       // round-trip the payload will silently drop it.
-      expect(() => (schema as { strict(): { parse(d: unknown): unknown } }).strict().parse(body))
-        .not.toThrow();
+      expect(() =>
+        (schema as { strict(): { parse(d: unknown): unknown } }).strict().parse(body),
+      ).not.toThrow();
     });
   }
 });

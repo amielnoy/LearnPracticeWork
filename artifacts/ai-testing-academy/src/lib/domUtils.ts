@@ -1,6 +1,12 @@
 /* Ported from assets/js/dom.js — utility functions for text processing */
 
-const ESC_MAP: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const ESC_MAP: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+};
 
 /** HTML-escape untrusted text */
 export const esc = (s: unknown): string =>
@@ -9,9 +15,10 @@ export const esc = (s: unknown): string =>
 /** True when text contains Hebrew characters */
 export const isRtlText = (t: string): boolean => /[֐-׿]/.test(t);
 
-const URL_RE = /((?:https?:\/\/|www\.)[^\s<>"')]+)|([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+const URL_RE =
+  /((?:https?:\/\/|www\.)[^\s<>"')]+)|([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
 const toHref = (raw: string, isEmail: boolean): string =>
-  isEmail ? `mailto:${raw}` : (raw.startsWith('http') ? raw : `https://${raw}`);
+  isEmail ? `mailto:${raw}` : raw.startsWith('http') ? raw : `https://${raw}`;
 
 export interface LinkMatch {
   start: number;
@@ -56,7 +63,8 @@ export function findLinks(text: string): LinkMatch[] {
 function linkifyPlainSegment(text: string): string {
   const s = String(text == null ? '' : text);
   const links = findLinks(s);
-  let out = '', last = 0;
+  let out = '',
+    last = 0;
   for (const l of links) {
     out += esc(s.slice(last, l.start));
     out += `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.text)}</a>`;
@@ -77,7 +85,8 @@ function linkifyPlainSegment(text: string): string {
  * `[label](url)` syntax and no link at all, so it is matched here and repaired
  * in `normalizeHref` instead.
  */
-const MD_RE = /\*\*\[(?<blLabel>[^\]]+)\]\((?<blHref>(?:https?:\/\/|mailto:)[^)]+)\)\*\*|\*\*(?<bold>.+?)\*\*|\[(?<lnLabel>[^\]]+)\]\((?<lnHref>(?:https?:\/\/|mailto:)[^)]+)\)/g;
+const MD_RE =
+  /\*\*\[(?<blLabel>[^\]]+)\]\((?<blHref>(?:https?:\/\/|mailto:)[^)]+)\)\*\*|\*\*(?<bold>.+?)\*\*|\[(?<lnLabel>[^\]]+)\]\((?<lnHref>(?:https?:\/\/|mailto:)[^)]+)\)/g;
 
 /**
  * Strips the whitespace a text extractor injected. Safe unconditionally: a
@@ -88,7 +97,9 @@ const normalizeHref = (href: string): string => href.replace(/\s+/g, '');
 /** HTML with Markdown bold/links rendered as real <strong>/<a> tags */
 export function linkifyHtml(text: string): string {
   const s = String(text == null ? '' : text);
-  let out = '', last = 0, m: RegExpExecArray | null;
+  let out = '',
+    last = 0,
+    m: RegExpExecArray | null;
   MD_RE.lastIndex = 0;
   while ((m = MD_RE.exec(s))) {
     out += linkifyPlainSegment(s.slice(last, m.index));
@@ -114,13 +125,15 @@ export interface PlainLine {
 /** Plain-text version of a line with link metadata (for jsPDF) */
 export function markdownLineToPlain(rawLine: string): PlainLine {
   const s = String(rawLine == null ? '' : rawLine);
-  let plain = '', last = 0, m: RegExpExecArray | null;
+  let plain = '',
+    last = 0,
+    m: RegExpExecArray | null;
   const links: Array<{ label: string; href: string }> = [];
   MD_RE.lastIndex = 0;
   while ((m = MD_RE.exec(s))) {
     plain += s.slice(last, m.index);
     const g = m.groups as Record<string, string | undefined>;
-    const label = g.blLabel !== undefined ? g.blLabel : (g.bold !== undefined ? g.bold : g.lnLabel!);
+    const label = g.blLabel !== undefined ? g.blLabel : g.bold !== undefined ? g.bold : g.lnLabel!;
     const href = g.blLabel !== undefined ? g.blHref : g.lnHref;
     plain += label;
     if (href) links.push({ label, href: normalizeHref(href) });

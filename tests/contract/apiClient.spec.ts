@@ -55,7 +55,7 @@ test('sets a JSON content type from a JSON body without being told to', async ()
 });
 
 test('refuses to send a body on a GET, instead of letting the server reject it', async () => {
-  await expect(
-    customFetch('/api/healthz', { method: 'GET', body: '{}' }),
-  ).rejects.toThrow(TypeError);
+  await expect(customFetch('/api/healthz', { method: 'GET', body: '{}' })).rejects.toThrow(
+    TypeError,
+  );
 });

@@ -52,7 +52,12 @@ function stubFontFetch(): { calls: string[]; restore: () => void } {
         bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
     };
   }) as unknown as typeof fetch;
-  return { calls, restore: () => { globalThis.fetch = original; } };
+  return {
+    calls,
+    restore: () => {
+      globalThis.fetch = original;
+    },
+  };
 }
 
 /** The text layer, one entry per page, as a PDF parser would read it. */
@@ -176,8 +181,12 @@ test.describe('pdfFromText — the left-to-right résumé', () => {
 test.describe('both directions', () => {
   let font: ReturnType<typeof stubFontFetch> | undefined;
 
-  test.beforeEach(() => { font = stubFontFetch(); });
-  test.afterEach(() => { font?.restore(); });
+  test.beforeEach(() => {
+    font = stubFontFetch();
+  });
+  test.afterEach(() => {
+    font?.restore();
+  });
 
   test('expose the same links for the same contact line', async () => {
     const contactLine = (linkedin: string, youtube: string) =>
@@ -191,7 +200,10 @@ test.describe('both directions', () => {
 
     const ltr = await extractLinkRegions(await pdfFromText(contactLine('LinkedIn', 'YouTube')));
     const rtl = await extractLinkRegions(
-      await pdfFromRtlText(`מהנדס אוטומציה\n${contactLine('לינקדאין', 'יוטיוב')}`, 'http://stub/parity.ttf'),
+      await pdfFromRtlText(
+        `מהנדס אוטומציה\n${contactLine('לינקדאין', 'יוטיוב')}`,
+        'http://stub/parity.ttf',
+      ),
     );
 
     expect(ltr.map(r => r.url)).toEqual(expected);
@@ -204,8 +216,12 @@ test.describe('pdfFromRtlText — the Hebrew résumé', () => {
   // lifetime of the module.
   let font: ReturnType<typeof stubFontFetch> | undefined;
 
-  test.beforeEach(() => { font = stubFontFetch(); });
-  test.afterEach(() => { font?.restore(); });
+  test.beforeEach(() => {
+    font = stubFontFetch();
+  });
+  test.afterEach(() => {
+    font?.restore();
+  });
 
   test('produces a text layer rather than a picture of one', async () => {
     const pdf = await pdfFromRtlText('מהנדס אוטומציה', 'http://stub/a.ttf');

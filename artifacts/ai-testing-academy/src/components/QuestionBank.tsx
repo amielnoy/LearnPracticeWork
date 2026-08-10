@@ -6,7 +6,8 @@ import { QuestionCard } from './QuestionCard';
 import { EN_BANK, HE_BANK } from '../lib/questionBank';
 import { useProgress } from '../context/ProgressContext';
 
-const SEED_KEYWORDS = 'AI dev, AI test automation, Playwright, pytest, Page Object Model, flaky tests, CI/CD, Docker, API testing, SDET, AI/LLM testing';
+const SEED_KEYWORDS =
+  'AI dev, AI test automation, Playwright, pytest, Page Object Model, flaky tests, CI/CD, Docker, API testing, SDET, AI/LLM testing';
 const INTERVIEW_VIDEO_ID = 'gl2TVA4JLpc';
 
 interface EnrichedQA {
@@ -16,7 +17,8 @@ interface EnrichedQA {
   keywords?: string[];
 }
 
-const QA_SYSTEM = 'You are a senior QA-Automation interviewer and career coach. Return ONLY valid JSON, no prose.';
+const QA_SYSTEM =
+  'You are a senior QA-Automation interviewer and career coach. Return ONLY valid JSON, no prose.';
 
 export function QuestionBank() {
   const { lang } = useLocale();
@@ -49,7 +51,7 @@ export function QuestionBank() {
       // Accept either the requested {"questions":[…]} wrapper or a bare […]
       // array, since the model sometimes drops the wrapper.
       const parsed = extractJSON(reply) as { questions?: EnrichedQA[] } | EnrichedQA[];
-      const items = Array.isArray(parsed) ? parsed : parsed.questions ?? [];
+      const items = Array.isArray(parsed) ? parsed : (parsed.questions ?? []);
       setEnrichedItems(items);
       setEnrichedRole(role);
       setEnrichedHeading(bank.enrichHeading);
@@ -90,7 +92,12 @@ export function QuestionBank() {
             value={keywords}
             style={{ flex: '1', minWidth: '220px' }}
             onChange={e => setKeywords(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); doEnrich(); } }}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                doEnrich();
+              }
+            }}
           />
           <button
             type="button"
@@ -104,10 +111,14 @@ export function QuestionBank() {
           </button>
         </div>
         <p className="notice">{bank.enrichHint}</p>
-        <div id="qaEnrichErr" className="error" role="alert">{enrichErr}</div>
+        <div id="qaEnrichErr" className="error" role="alert">
+          {enrichErr}
+        </div>
         {enrichedItems.length > 0 && (
           <div id="qaEnriched" role="region" aria-live="polite">
-            <h3>{enrichedHeading} — {enrichedRole}</h3>
+            <h3>
+              {enrichedHeading} — {enrichedRole}
+            </h3>
             {enrichedItems.map((q, i) => (
               <details key={i} className="agent-box">
                 <summary>
@@ -116,10 +127,14 @@ export function QuestionBank() {
                 {q.answer && <p style={{ marginTop: '12px' }}>{q.answer}</p>}
                 <div>
                   {(q.keywords || []).map((k, j) => (
-                    <span key={j} className="tag">{k}</span>
+                    <span key={j} className="tag">
+                      {k}
+                    </span>
                   ))}
                   {q.stage && (
-                    <span className="notice" style={{ marginInlineStart: '8px' }}>{q.stage}</span>
+                    <span className="notice" style={{ marginInlineStart: '8px' }}>
+                      {q.stage}
+                    </span>
                   )}
                 </div>
               </details>
@@ -134,7 +149,9 @@ export function QuestionBank() {
       {bank.stages.map((stage, stageIndex) => (
         <details key={stageIndex} className="agent-box reveal">
           <summary>
-            <h3 style={{ display: 'inline', margin: 0 }}>{stage.icon} {stage.title}</h3>
+            <h3 style={{ display: 'inline', margin: 0 }}>
+              {stage.icon} {stage.title}
+            </h3>
           </summary>
           <ul className="q-list">
             {stage.items.map((item, itemIndex) => (
@@ -142,7 +159,9 @@ export function QuestionBank() {
                 key={item.q}
                 item={item}
                 labels={bank.labels}
-                onComplete={() => completePracticeItem(`${lang}:question:${stageIndex}:${itemIndex}`)}
+                onComplete={() =>
+                  completePracticeItem(`${lang}:question:${stageIndex}:${itemIndex}`)
+                }
               />
             ))}
           </ul>

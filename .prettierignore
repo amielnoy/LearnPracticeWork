@@ -1,0 +1,18 @@
+# Build output and generated reports — formatting these would churn artefacts
+# that are rewritten on every run and never read as source.
+node_modules/
+dist/
+build/
+allure-results/
+allure-report/
+allure-report-single/
+blob-report/
+playwright-report/
+test-results/
+tests/playwright/.cache/
+tests/playwright-report/
+tests/test-results/
+pnpm-lock.yaml
+
+# Pasted material kept verbatim as a record of what was received.
+attached_assets/

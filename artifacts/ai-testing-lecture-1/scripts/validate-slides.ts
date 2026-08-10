@@ -4,24 +4,14 @@ import { access } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import {
-  safeParseSlidesManifest,
-  type SlideEntry,
-} from '../src/data/slidesManifestSchema';
-import {
-  findOrphanSdmFiles,
-  validateSdmEntries,
-  type SdmValidationIo,
-} from './sdmValidation';
+import { safeParseSlidesManifest, type SlideEntry } from '../src/data/slidesManifestSchema';
+import { findOrphanSdmFiles, validateSdmEntries, type SdmValidationIo } from './sdmValidation';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const slidesDir = path.join(projectRoot, 'src/pages/slides');
-const slidesManifestPath = path.join(
-  projectRoot,
-  'src/data/slides-manifest.json',
-);
+const slidesManifestPath = path.join(projectRoot, 'src/data/slides-manifest.json');
 
 type ValidationIssue = {
   message: string;
@@ -37,7 +27,7 @@ function formatIssuePath(issuePath: PropertyKey[]): string {
   if (issuePath.length === 0) {
     return 'manifest';
   }
-  return issuePath.map((segment) => String(segment)).join('.');
+  return issuePath.map(segment => String(segment)).join('.');
 }
 
 function getSlideFilenames(): string[] {
@@ -45,7 +35,7 @@ function getSlideFilenames(): string[] {
     return [];
   }
 
-  return readdirSync(slidesDir).filter((name) => name.endsWith('.tsx'));
+  return readdirSync(slidesDir).filter(name => name.endsWith('.tsx'));
 }
 
 function validateDuplicatePositions(issues: ValidationIssue[]) {
@@ -96,7 +86,7 @@ function validateContiguousPositions(issues: ValidationIssue[]) {
 }
 
 function jsxSlides(): SlideEntry[] {
-  return slides.filter((slide) => slide.kind !== 'sdm');
+  return slides.filter(slide => slide.kind !== 'sdm');
 }
 
 function validateFilepaths(issues: ValidationIssue[]) {
@@ -132,12 +122,10 @@ function validateFilepaths(issues: ValidationIssue[]) {
 
 function validateOrphanedSlideFiles(issues: ValidationIssue[]) {
   const manifestSet = new Set(
-    jsxSlides().map((slide) =>
-      path.normalize(path.resolve(projectRoot, slide.filepath)),
-    ),
+    jsxSlides().map(slide => path.normalize(path.resolve(projectRoot, slide.filepath))),
   );
 
-  const files = getSlideFilenames().map((name) => path.join(slidesDir, name));
+  const files = getSlideFilenames().map(name => path.join(slidesDir, name));
 
   for (const file of files) {
     if (!manifestSet.has(path.normalize(file))) {
@@ -150,21 +138,21 @@ function validateOrphanedSlideFiles(issues: ValidationIssue[]) {
 
 function validateSdmSlides(issues: ValidationIssue[]) {
   const io: SdmValidationIo = {
-    readFile: (relativePath) => {
+    readFile: relativePath => {
       try {
         return readFileSync(path.join(projectRoot, relativePath), 'utf8');
       } catch {
         return null;
       }
     },
-    listFiles: (relativeDir) => {
+    listFiles: relativeDir => {
       try {
         return readdirSync(path.join(projectRoot, relativeDir), {
           recursive: true,
           withFileTypes: true,
         })
-          .filter((entry) => entry.isFile())
-          .map((entry) =>
+          .filter(entry => entry.isFile())
+          .map(entry =>
             relativeToProject(path.join(entry.parentPath, entry.name)).slice(
               `${relativeDir}/`.length,
             ),
@@ -174,11 +162,8 @@ function validateSdmSlides(issues: ValidationIssue[]) {
       }
     },
   };
-  const sdmEntries = slides.filter((slide) => slide.kind === 'sdm');
-  const messages = [
-    ...validateSdmEntries(sdmEntries, io),
-    ...findOrphanSdmFiles(slides, io),
-  ];
+  const sdmEntries = slides.filter(slide => slide.kind === 'sdm');
+  const messages = [...validateSdmEntries(sdmEntries, io), ...findOrphanSdmFiles(slides, io)];
   for (const message of messages) {
     issues.push({ message });
   }
@@ -200,9 +185,7 @@ async function main() {
 
   let rawManifest: unknown;
   try {
-    rawManifest = JSON.parse(
-      readFileSync(slidesManifestPath, 'utf8'),
-    ) as unknown;
+    rawManifest = JSON.parse(readFileSync(slidesManifestPath, 'utf8')) as unknown;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(
@@ -236,9 +219,7 @@ async function main() {
   validateSdmSlides(issues);
 
   if (issues.length > 0) {
-    console.error(
-      `Slide manifest validation failed (${issues.length} issue(s)):\n`,
-    );
+    console.error(`Slide manifest validation failed (${issues.length} issue(s)):\n`);
     for (const issue of issues) {
       console.error(`- ${issue.message}`);
     }

@@ -10,10 +10,7 @@ import { useCallback, useState } from 'react';
 export function useDisclosure(stageCount: number) {
   const [stage, setStage] = useState(0);
 
-  const next = useCallback(
-    () => setStage(current => (current + 1) % stageCount),
-    [stageCount]
-  );
+  const next = useCallback(() => setStage(current => (current + 1) % stageCount), [stageCount]);
 
   const isRevealed = useCallback((atLeast: number) => stage >= atLeast, [stage]);
 

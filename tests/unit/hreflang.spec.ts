@@ -99,7 +99,9 @@ for (const site of SITES) {
     test('agrees with itself: markup and sitemap point at the same URLs', () => {
       const fromHtml = Object.values(htmlAlternates(read(site.html))).sort();
       const fromSitemap = [
-        ...new Set([...read(site.sitemap).matchAll(/hreflang="[^"]+" href="([^"]+)"/g)].map(m => m[1]!)),
+        ...new Set(
+          [...read(site.sitemap).matchAll(/hreflang="[^"]+" href="([^"]+)"/g)].map(m => m[1]!),
+        ),
       ].sort();
 
       expect(fromSitemap).toEqual(fromHtml);

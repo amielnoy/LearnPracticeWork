@@ -20,11 +20,7 @@ export function ChallengeCard({ challenge, labels, onComplete }: ChallengeCardPr
   const { stage, next, isRevealed } = useDisclosure(STAGE_COUNT);
 
   const buttonLabel =
-    stage === SOLUTION
-      ? labels.hide
-      : stage === HINT
-        ? labels.showSolution
-        : labels.showHint;
+    stage === SOLUTION ? labels.hide : stage === HINT ? labels.showSolution : labels.showHint;
 
   return (
     <div className="agent-box reveal">

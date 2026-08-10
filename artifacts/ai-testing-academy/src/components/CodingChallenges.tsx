@@ -24,7 +24,7 @@ export function CodingChallenges() {
       showSolution: t.showSolutionBtn,
       hide: t.hideBtn,
     }),
-    [t]
+    [t],
   );
 
   return (
@@ -42,7 +42,9 @@ export function CodingChallenges() {
               key={challenge.title}
               challenge={challenge}
               labels={labels}
-              onComplete={() => completePracticeItem(`${lang}:challenge:${levelIndex}:${challengeIndex}`)}
+              onComplete={() =>
+                completePracticeItem(`${lang}:challenge:${levelIndex}:${challengeIndex}`)
+              }
             />
           ))}
         </div>

@@ -12,9 +12,7 @@ export function useReveal<T extends HTMLElement = HTMLElement>() {
     const section = ref.current;
     if (!section) return;
 
-    const targets = section.querySelectorAll(
-      'h2, .lead, .card, .agent-box, pre, table, h3, ul, p'
-    );
+    const targets = section.querySelectorAll('h2, .lead, .card, .agent-box, pre, table, h3, ul, p');
     const io = new IntersectionObserver(
       es =>
         es.forEach(en => {
@@ -23,7 +21,7 @@ export function useReveal<T extends HTMLElement = HTMLElement>() {
             io.unobserve(en.target);
           }
         }),
-      { rootMargin: '0px 0px -8% 0px' }
+      { rootMargin: '0px 0px -8% 0px' },
     );
 
     targets.forEach(el => {

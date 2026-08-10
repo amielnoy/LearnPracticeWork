@@ -27,7 +27,8 @@ export function Hero() {
             href={c.href}
             onClick={() => {
               if (c.sampleResume) window.dispatchEvent(new CustomEvent('ata:sample-resume'));
-              if (c.sampleInterview) window.dispatchEvent(new CustomEvent('ata:start-sample-interview'));
+              if (c.sampleInterview)
+                window.dispatchEvent(new CustomEvent('ata:start-sample-interview'));
             }}
           >
             {c.label}

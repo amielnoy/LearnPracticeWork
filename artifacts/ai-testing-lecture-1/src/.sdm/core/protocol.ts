@@ -1,11 +1,7 @@
 import { Type, type Static } from '@sinclair/typebox';
 import { Value } from '@sinclair/typebox/value';
 
-import {
-  parseSlideDocument,
-  SlideDocumentSchema,
-  type SdmIssue,
-} from './schema';
+import { parseSlideDocument, SlideDocumentSchema, type SdmIssue } from './schema';
 
 /**
  * Wire contract between the workspace (authoritative document, history,
@@ -132,38 +128,26 @@ export const RuntimeToWorkspaceMessageSchema = Type.Union([
     {
       ...envelope,
       type: Type.Literal('sdm:saveStatus'),
-      state: Type.Union([
-        Type.Literal('saving'),
-        Type.Literal('saved'),
-        Type.Literal('error'),
-      ]),
+      state: Type.Union([Type.Literal('saving'), Type.Literal('saved'), Type.Literal('error')]),
       message: Type.Optional(Type.String()),
     },
     strict,
   ),
 ]);
 
-export type WorkspaceToRuntimeMessage = Static<
-  typeof WorkspaceToRuntimeMessageSchema
->;
-export type RuntimeToWorkspaceMessage = Static<
-  typeof RuntimeToWorkspaceMessageSchema
->;
+export type WorkspaceToRuntimeMessage = Static<typeof WorkspaceToRuntimeMessageSchema>;
+export type RuntimeToWorkspaceMessage = Static<typeof RuntimeToWorkspaceMessageSchema>;
 
 export type ParseSdmMessageResult<Message> =
   | { ok: true; message: Message }
   | { ok: false; reason: 'invalid'; issues: Array<SdmIssue> }
   | { ok: false; reason: 'unsupportedVersion'; version: number };
 
-export function isWorkspaceToRuntimeMessage(
-  input: unknown,
-): input is WorkspaceToRuntimeMessage {
+export function isWorkspaceToRuntimeMessage(input: unknown): input is WorkspaceToRuntimeMessage {
   return parseWorkspaceToRuntimeMessage(input).ok;
 }
 
-export function isRuntimeToWorkspaceMessage(
-  input: unknown,
-): input is RuntimeToWorkspaceMessage {
+export function isRuntimeToWorkspaceMessage(input: unknown): input is RuntimeToWorkspaceMessage {
   return parseRuntimeToWorkspaceMessage(input).ok;
 }
 
@@ -172,10 +156,7 @@ function probeUnsupportedVersion(input: unknown): number | undefined {
     return undefined;
   }
   const candidate = input as Record<string, unknown>;
-  if (
-    typeof candidate.type !== 'string' ||
-    !candidate.type.startsWith('sdm:')
-  ) {
+  if (typeof candidate.type !== 'string' || !candidate.type.startsWith('sdm:')) {
     return undefined;
   }
   return typeof candidate.protocolVersion === 'number' &&
@@ -185,9 +166,7 @@ function probeUnsupportedVersion(input: unknown): number | undefined {
     : undefined;
 }
 
-function embeddedDocumentIssues(
-  message: Record<string, unknown>,
-): Array<SdmIssue> {
+function embeddedDocumentIssues(message: Record<string, unknown>): Array<SdmIssue> {
   if (!('document' in message)) {
     return [];
   }
@@ -196,7 +175,7 @@ function embeddedDocumentIssues(
     return [];
   }
   if (result.reason === 'invalid') {
-    return result.issues.map((issue) => ({
+    return result.issues.map(issue => ({
       path: issue.path === '/' ? '/document' : `/document${issue.path}`,
       message: issue.message,
     }));
@@ -210,9 +189,7 @@ function embeddedDocumentIssues(
 }
 
 function parseMessage<Message>(
-  schema:
-    | typeof WorkspaceToRuntimeMessageSchema
-    | typeof RuntimeToWorkspaceMessageSchema,
+  schema: typeof WorkspaceToRuntimeMessageSchema | typeof RuntimeToWorkspaceMessageSchema,
   input: unknown,
 ): ParseSdmMessageResult<Message> {
   const futureVersion = probeUnsupportedVersion(input);
@@ -220,15 +197,13 @@ function parseMessage<Message>(
     return { ok: false, reason: 'unsupportedVersion', version: futureVersion };
   }
   if (!Value.Check(schema, input)) {
-    const issues = [...Value.Errors(schema, input)].map((error) => ({
+    const issues = [...Value.Errors(schema, input)].map(error => ({
       path: error.path || '/',
       message: error.message,
     }));
     return { ok: false, reason: 'invalid', issues };
   }
-  const documentIssues = embeddedDocumentIssues(
-    input as Record<string, unknown>,
-  );
+  const documentIssues = embeddedDocumentIssues(input as Record<string, unknown>);
   if (documentIssues.length > 0) {
     return { ok: false, reason: 'invalid', issues: documentIssues };
   }

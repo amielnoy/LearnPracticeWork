@@ -17,7 +17,7 @@ const colorHex = Type.String({ pattern: '^#[0-9A-Fa-f]{6}$' });
  * JSON Schema resolvers may reject as a duplicate identifier. */
 function jsonValueSchema($id: string) {
   return Type.Recursive(
-    (Self) =>
+    Self =>
       Type.Union([
         Type.Null(),
         Type.Boolean(),
@@ -60,10 +60,7 @@ export const InsetsSchema = Type.Object(
   strict,
 );
 
-export const PointSchema = Type.Object(
-  { x: finiteNumber, y: finiteNumber },
-  strict,
-);
+export const PointSchema = Type.Object({ x: finiteNumber, y: finiteNumber }, strict);
 
 export const ColorSchema = Type.Union([
   Type.Object(
@@ -131,11 +128,7 @@ export const PaintSchema = Type.Union([
     {
       kind: Type.Literal('image'),
       assetId: Type.String({ minLength: 1 }),
-      fit: Type.Union([
-        Type.Literal('cover'),
-        Type.Literal('contain'),
-        Type.Literal('fill'),
-      ]),
+      fit: Type.Union([Type.Literal('cover'), Type.Literal('contain'), Type.Literal('fill')]),
       opacity: Type.Optional(unitInterval),
     },
     strict,
@@ -148,18 +141,10 @@ export const StrokeSchema = Type.Object(
     widthPt: Type.Number({ minimum: 0 }),
     opacity: Type.Optional(unitInterval),
     dash: Type.Optional(
-      Type.Union([
-        Type.Literal('solid'),
-        Type.Literal('dash'),
-        Type.Literal('dot'),
-      ]),
+      Type.Union([Type.Literal('solid'), Type.Literal('dash'), Type.Literal('dot')]),
     ),
     cap: Type.Optional(
-      Type.Union([
-        Type.Literal('flat'),
-        Type.Literal('round'),
-        Type.Literal('square'),
-      ]),
+      Type.Union([Type.Literal('flat'), Type.Literal('round'), Type.Literal('square')]),
     ),
     startArrow: Type.Optional(
       Type.Union([
@@ -189,9 +174,7 @@ export const ActionSchema = Type.Union([
       kind: Type.Literal('openUrl'),
       url: Type.String({ minLength: 1 }),
       tooltip: Type.Optional(Type.String()),
-      target: Type.Optional(
-        Type.Union([Type.Literal('sameWindow'), Type.Literal('newWindow')]),
-      ),
+      target: Type.Optional(Type.Union([Type.Literal('sameWindow'), Type.Literal('newWindow')])),
     },
     strict,
   ),
@@ -250,10 +233,7 @@ export const ParagraphSchema = Type.Object(
     bullet: Type.Optional(
       Type.Union([
         Type.Object({ kind: Type.Literal('none') }, strict),
-        Type.Object(
-          { kind: Type.Literal('character'), character: Type.String() },
-          strict,
-        ),
+        Type.Object({ kind: Type.Literal('character'), character: Type.String() }, strict),
         Type.Object(
           {
             kind: Type.Literal('number'),
@@ -275,22 +255,12 @@ export const TextBodySchema = Type.Object(
   {
     paragraphs: Type.Array(ParagraphSchema),
     verticalAlign: Type.Optional(
-      Type.Union([
-        Type.Literal('top'),
-        Type.Literal('middle'),
-        Type.Literal('bottom'),
-      ]),
+      Type.Union([Type.Literal('top'), Type.Literal('middle'), Type.Literal('bottom')]),
     ),
     autofit: Type.Optional(
-      Type.Union([
-        Type.Literal('none'),
-        Type.Literal('shrink'),
-        Type.Literal('resize'),
-      ]),
+      Type.Union([Type.Literal('none'), Type.Literal('shrink'), Type.Literal('resize')]),
     ),
-    overflow: Type.Optional(
-      Type.Union([Type.Literal('clip'), Type.Literal('visible')]),
-    ),
+    overflow: Type.Optional(Type.Union([Type.Literal('clip'), Type.Literal('visible')])),
     insetsPt: Type.Optional(InsetsSchema),
   },
   strict,
@@ -331,7 +301,7 @@ const elementBase = {
 };
 
 export const ElementSchema = Type.Recursive(
-  (Element) =>
+  Element =>
     Type.Union([
       Type.Object(
         {
@@ -359,11 +329,7 @@ export const ElementSchema = Type.Recursive(
           ...elementBase,
           type: Type.Literal('image'),
           assetId: Type.String({ minLength: 1 }),
-          fit: Type.Union([
-            Type.Literal('cover'),
-            Type.Literal('contain'),
-            Type.Literal('fill'),
-          ]),
+          fit: Type.Union([Type.Literal('cover'), Type.Literal('contain'), Type.Literal('fill')]),
           crop: Type.Optional(InsetsSchema),
         },
         strict,
@@ -392,10 +358,7 @@ export const ElementSchema = Type.Recursive(
           ...elementBase,
           type: Type.Literal('table'),
           columns: Type.Array(
-            Type.Object(
-              { width: Type.Number({ exclusiveMinimum: 0 }) },
-              strict,
-            ),
+            Type.Object({ width: Type.Number({ exclusiveMinimum: 0 }) }, strict),
             { minItems: 1 },
           ),
           rows: Type.Array(
@@ -431,19 +394,13 @@ export const ElementSchema = Type.Recursive(
               }),
               exportName: Type.Optional(Type.String({ minLength: 1 })),
               props: Type.Optional(
-                Type.Record(
-                  Type.String(),
-                  jsonValueSchema('SdmWidgetPropValue'),
-                ),
+                Type.Record(Type.String(), jsonValueSchema('SdmWidgetPropValue')),
               ),
               sizing: Type.Optional(Type.Literal('fill')),
               export: Type.Optional(
                 Type.Object(
                   {
-                    mode: Type.Union([
-                      Type.Literal('snapshot'),
-                      Type.Literal('svg'),
-                    ]),
+                    mode: Type.Union([Type.Literal('snapshot'), Type.Literal('svg')]),
                   },
                   strict,
                 ),
@@ -533,8 +490,7 @@ function probeUnsupportedVersion(input: unknown): number | undefined {
   if (candidate.format !== SDM_FORMAT) {
     return undefined;
   }
-  return typeof candidate.version === 'number' &&
-    candidate.version > SDM_VERSION
+  return typeof candidate.version === 'number' && candidate.version > SDM_VERSION
     ? candidate.version
     : undefined;
 }
@@ -617,12 +573,10 @@ export function parseSlideDocument(input: unknown): ParseSlideDocumentResult {
   }
 
   if (!isSlideDocument(input)) {
-    const issues = [...Value.Errors(SlideDocumentSchema, input)].map(
-      (error) => ({
-        path: error.path || '/',
-        message: error.message,
-      }),
-    );
+    const issues = [...Value.Errors(SlideDocumentSchema, input)].map(error => ({
+      path: error.path || '/',
+      message: error.message,
+    }));
     return { ok: false, reason: 'invalid', issues };
   }
 

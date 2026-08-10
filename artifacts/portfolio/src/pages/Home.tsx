@@ -1,43 +1,51 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { 
-  Terminal, 
-  BookOpen, 
-  Briefcase, 
-  Award, 
+import React from 'react';
+import { motion } from 'framer-motion';
+import {
+  Terminal,
+  BookOpen,
+  Briefcase,
+  Award,
   Linkedin,
   Github,
-  Youtube, 
+  Youtube,
   Mail,
   ChevronRight,
   Code2,
   Shield,
   Cpu,
-  Users
-} from "lucide-react";
-import { 
-  SiGithubactions, 
-  SiCircleci, 
-  SiTypescript, 
-  SiAppium
-} from "react-icons/si";
-import { FaJava, FaWhatsapp } from "react-icons/fa";
-import { VscAzureDevops } from "react-icons/vsc";
+  Users,
+} from 'lucide-react';
+import { SiGithubactions, SiCircleci, SiTypescript, SiAppium } from 'react-icons/si';
+import { FaJava, FaWhatsapp } from 'react-icons/fa';
+import { VscAzureDevops } from 'react-icons/vsc';
 
-import profileImg from "@assets/image_1776081510333.png";
-import { Button } from "@/components/ui/button";
+import profileImg from '@assets/image_1776081510333.png';
+import { Button } from '@/components/ui/button';
 
-const PlaywrightIcon = ({ className = "" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1.5 5.5c1.38 0 2.5 1.12 2.5 2.5S11.88 12.5 10.5 12.5 8 11.38 8 10s1.12-2.5 2.5-2.5zm5 0c.828 0 1.5.672 1.5 1.5S16.328 10.5 15.5 10.5 14 9.828 14 9s.672-1.5 1.5-1.5zm-8 8c0-1.657 2.015-3 4.5-3s4.5 1.343 4.5 3H7.5z"/>
+const PlaywrightIcon = ({ className = '' }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1.5 5.5c1.38 0 2.5 1.12 2.5 2.5S11.88 12.5 10.5 12.5 8 11.38 8 10s1.12-2.5 2.5-2.5zm5 0c.828 0 1.5.672 1.5 1.5S16.328 10.5 15.5 10.5 14 9.828 14 9s.672-1.5 1.5-1.5zm-8 8c0-1.657 2.015-3 4.5-3s4.5 1.343 4.5 3H7.5z" />
   </svg>
 );
 
-const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
+const FadeIn = ({
+  children,
+  delay = 0,
+  className = '',
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-100px" }}
+    viewport={{ once: true, margin: '-100px' }}
     transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
     className={className}
   >
@@ -48,15 +56,20 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
 export default function Home() {
   return (
     <div className="min-h-[100dvh] bg-background text-foreground selection:bg-primary selection:text-primary-foreground overflow-x-hidden">
-      
       {/* Navigation (Sticky) */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <span className="font-bold text-lg tracking-tight">Amiel Peled</span>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <a href="#expertise" className="hover:text-foreground transition-colors">Expertise</a>
-            <a href="#mentorship" className="hover:text-foreground transition-colors">Mentorship</a>
-            <a href="#career" className="hover:text-foreground transition-colors">Career</a>
+            <a href="#expertise" className="hover:text-foreground transition-colors">
+              Expertise
+            </a>
+            <a href="#mentorship" className="hover:text-foreground transition-colors">
+              Mentorship
+            </a>
+            <a href="#career" className="hover:text-foreground transition-colors">
+              Career
+            </a>
             <Button size="sm" className="rounded-full font-semibold" asChild>
               <a href="#contact">Let's Talk</a>
             </Button>
@@ -75,38 +88,56 @@ export default function Home() {
                 Israel | Open to Work
               </div>
             </FadeIn>
-            
+
             <FadeIn delay={0.1}>
               <h1 className="text-5xl md:text-7xl font-bold leading-[1.1] tracking-tight mb-6">
                 Architecting <span className="text-primary">Automation</span>. <br />
                 Mentoring <span className="text-secondary dark:text-primary/80">Engineers</span>.
               </h1>
             </FadeIn>
-            
+
             <FadeIn delay={0.2}>
               <p className="text-xl text-muted-foreground max-w-2xl mb-8 leading-relaxed">
-                I am <strong className="text-foreground font-semibold">Amiel Shlomo Zvi Peled</strong>. 
-                An AI Test Automation & DevOps Tech Lead who builds resilient infrastructure and a warm-hearted community mentor who guides students from Android Bagrut to Senior Engineer.
+                I am{' '}
+                <strong className="text-foreground font-semibold">Amiel Shlomo Zvi Peled</strong>.
+                An AI Test Automation & DevOps Tech Lead who builds resilient infrastructure and a
+                warm-hearted community mentor who guides students from Android Bagrut to Senior
+                Engineer.
               </p>
             </FadeIn>
-            
+
             <FadeIn delay={0.3} className="flex flex-wrap items-center gap-4">
               <Button size="lg" className="rounded-full font-bold px-8" asChild>
                 <a href="#contact">Get in Touch</a>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full font-bold px-8 group" asChild>
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full font-bold px-8 group"
+                asChild
+              >
                 <a href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noreferrer">
                   <Linkedin className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
                   LinkedIn
                 </a>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full font-bold px-8 group" asChild>
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full font-bold px-8 group"
+                asChild
+              >
                 <a href="https://github.com/amielnoy" target="_blank" rel="noreferrer">
                   <Github className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
                   GitHub
                 </a>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full font-bold px-8 group" asChild>
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full font-bold px-8 group"
+                asChild
+              >
                 <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation">
                   <Briefcase className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
                   AI TEST TRANSFORMATION
@@ -114,12 +145,12 @@ export default function Home() {
               </Button>
             </FadeIn>
           </div>
-          
+
           <FadeIn delay={0.4} className="relative mx-auto md:mx-0 max-w-[300px] md:max-w-none">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-[60px] translate-y-12" />
-            <img 
-              src={profileImg} 
-              alt="Amiel Peled" 
+            <img
+              src={profileImg}
+              alt="Amiel Peled"
               className="relative w-full aspect-square object-cover rounded-[2rem] shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500 border-4 border-background"
             />
           </FadeIn>
@@ -134,15 +165,18 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-70">
             {[
-              { Icon: PlaywrightIcon, name: "Playwright" },
-              { Icon: SiAppium, name: "Appium" },
-              { Icon: VscAzureDevops, name: "Azure DevOps" },
-              { Icon: SiGithubactions, name: "GitHub Actions" },
-              { Icon: SiCircleci, name: "CircleCI" },
-              { Icon: FaJava, name: "Java" },
-              { Icon: SiTypescript, name: "TypeScript" },
+              { Icon: PlaywrightIcon, name: 'Playwright' },
+              { Icon: SiAppium, name: 'Appium' },
+              { Icon: VscAzureDevops, name: 'Azure DevOps' },
+              { Icon: SiGithubactions, name: 'GitHub Actions' },
+              { Icon: SiCircleci, name: 'CircleCI' },
+              { Icon: FaJava, name: 'Java' },
+              { Icon: SiTypescript, name: 'TypeScript' },
             ].map((tech, i) => (
-              <div key={tech.name} className="flex items-center gap-2 text-xl font-mono grayscale hover:grayscale-0 hover:text-primary transition-all duration-300">
+              <div
+                key={tech.name}
+                className="flex items-center gap-2 text-xl font-mono grayscale hover:grayscale-0 hover:text-primary transition-all duration-300"
+              >
                 <tech.Icon className="w-6 h-6" />
                 <span className="hidden md:inline-block text-sm font-bold">{tech.name}</span>
               </div>
@@ -165,17 +199,28 @@ export default function Home() {
                 </div>
                 <h3 className="text-3xl font-bold mb-4">The Architect</h3>
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  Deep expertise in designing robust 3-layer test automation frameworks. From championing Ranorex at Intel to building full CI/CD environments on Azure DevOps from scratch at Sepio Cyber.
+                  Deep expertise in designing robust 3-layer test automation frameworks. From
+                  championing Ranorex at Intel to building full CI/CD environments on Azure DevOps
+                  from scratch at Sepio Cyber.
                 </p>
                 <ul className="space-y-3 font-medium">
-                  <li className="flex items-center gap-3"><ChevronRight className="w-4 h-4 text-primary" /> Test Automation Architecture</li>
-                  <li className="flex items-center gap-3"><ChevronRight className="w-4 h-4 text-primary" /> DevOps & CI/CD Pipelines</li>
-                  <li className="flex items-center gap-3"><ChevronRight className="w-4 h-4 text-primary" /> Parallel Android Automation</li>
-                  <li className="flex items-center gap-3"><ChevronRight className="w-4 h-4 text-primary" /> AI-Assisted Automation Strategies</li>
+                  <li className="flex items-center gap-3">
+                    <ChevronRight className="w-4 h-4 text-primary" /> Test Automation Architecture
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <ChevronRight className="w-4 h-4 text-primary" /> DevOps & CI/CD Pipelines
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <ChevronRight className="w-4 h-4 text-primary" /> Parallel Android Automation
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <ChevronRight className="w-4 h-4 text-primary" /> AI-Assisted Automation
+                    Strategies
+                  </li>
                 </ul>
               </div>
             </FadeIn>
-            
+
             <FadeIn delay={0.2}>
               <div className="h-full p-10 rounded-[2rem] bg-secondary text-secondary-foreground border border-secondary-border shadow-sm relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity text-primary">
@@ -186,13 +231,24 @@ export default function Home() {
                 </div>
                 <h3 className="text-3xl font-bold mb-4">The Mentor</h3>
                 <p className="text-secondary-foreground/80 leading-relaxed mb-6">
-                  A warm-hearted community leader who answers DMs. Known for coaching students entering the Israeli tech ecosystem and guiding professionals through complex career transitions.
+                  A warm-hearted community leader who answers DMs. Known for coaching students
+                  entering the Israeli tech ecosystem and guiding professionals through complex
+                  career transitions.
                 </p>
                 <ul className="space-y-3 font-medium">
-                  <li className="flex items-center gap-3"><ChevronRight className="w-4 h-4 text-primary" /> Android Bagrut Coaching</li>
-                  <li className="flex items-center gap-3"><ChevronRight className="w-4 h-4 text-primary" /> Interview Preparation & Coding Tasks</li>
-                  <li className="flex items-center gap-3"><ChevronRight className="w-4 h-4 text-primary" /> "Open to Work" Career Guidance</li>
-                  <li className="flex items-center gap-3"><ChevronRight className="w-4 h-4 text-primary" /> YouTube Content Creator</li>
+                  <li className="flex items-center gap-3">
+                    <ChevronRight className="w-4 h-4 text-primary" /> Android Bagrut Coaching
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <ChevronRight className="w-4 h-4 text-primary" /> Interview Preparation & Coding
+                    Tasks
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <ChevronRight className="w-4 h-4 text-primary" /> "Open to Work" Career Guidance
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <ChevronRight className="w-4 h-4 text-primary" /> YouTube Content Creator
+                  </li>
                 </ul>
               </div>
             </FadeIn>
@@ -212,15 +268,44 @@ export default function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: Code2, title: "Automation Framework Design", desc: "Custom architecture consulting and robust 3-layer framework implementation." },
-              { icon: Cpu, title: "DevOps & CI/CD", desc: "Setting up seamless deployment pipelines using Azure DevOps, GitHub Actions, or CircleCI." },
-              { icon: Shield, title: "Cybersecurity Consulting", desc: "Information security guidance baked into the testing and release process." },
-              { icon: BookOpen, title: "Interview Prep", desc: "Real-world coding questions and strategic coaching to land your next tech role." },
-              { icon: Award, title: "Software Testing", desc: "Comprehensive quality assurance strategies from manual to fully automated." },
-              { icon: Briefcase, title: "Custom Development", desc: "Tailored software solutions designed for scale and maintainability." },
+              {
+                icon: Code2,
+                title: 'Automation Framework Design',
+                desc: 'Custom architecture consulting and robust 3-layer framework implementation.',
+              },
+              {
+                icon: Cpu,
+                title: 'DevOps & CI/CD',
+                desc: 'Setting up seamless deployment pipelines using Azure DevOps, GitHub Actions, or CircleCI.',
+              },
+              {
+                icon: Shield,
+                title: 'Cybersecurity Consulting',
+                desc: 'Information security guidance baked into the testing and release process.',
+              },
+              {
+                icon: BookOpen,
+                title: 'Interview Prep',
+                desc: 'Real-world coding questions and strategic coaching to land your next tech role.',
+              },
+              {
+                icon: Award,
+                title: 'Software Testing',
+                desc: 'Comprehensive quality assurance strategies from manual to fully automated.',
+              },
+              {
+                icon: Briefcase,
+                title: 'Custom Development',
+                desc: 'Tailored software solutions designed for scale and maintainability.',
+              },
             ].map((service, i) => (
               <FadeIn key={service.title} delay={i * 0.1}>
-                <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation" target="_blank" rel="noreferrer" className="block p-8 rounded-2xl bg-card border hover:border-primary hover:shadow-md transition-all duration-300 group cursor-pointer">
+                <a
+                  href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block p-8 rounded-2xl bg-card border hover:border-primary hover:shadow-md transition-all duration-300 group cursor-pointer"
+                >
                   <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <service.icon className="w-6 h-6" />
                   </div>
@@ -244,13 +329,20 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <FadeIn>
-              <a href="https://docs.google.com/spreadsheets/d/1IaTpcqOQhrIeh8YgX_CKEUR89twpw-B2/edit?usp=drive_link&ouid=103822320646748524987&rtpof=true&sd=true" target="_blank" rel="noreferrer" className="block p-8 rounded-2xl bg-card border shadow-sm h-full hover:border-primary hover:shadow-md transition-all">
+              <a
+                href="https://docs.google.com/spreadsheets/d/1IaTpcqOQhrIeh8YgX_CKEUR89twpw-B2/edit?usp=drive_link&ouid=103822320646748524987&rtpof=true&sd=true"
+                target="_blank"
+                rel="noreferrer"
+                className="block p-8 rounded-2xl bg-card border shadow-sm h-full hover:border-primary hover:shadow-md transition-all"
+              >
                 <div className="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-6">
                   <Briefcase className="w-6 h-6" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3">AI for Business Domains</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Courses focused on applying AI across product, operations, quality, and management workflows — with practical use cases, automation ideas, and team-ready adoption patterns.
+                  Courses focused on applying AI across product, operations, quality, and management
+                  workflows — with practical use cases, automation ideas, and team-ready adoption
+                  patterns.
                 </p>
               </a>
             </FadeIn>
@@ -262,7 +354,8 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold mb-3">AI for Education</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Training for schools, teachers, and students on using AI responsibly for learning, lesson design, study support, and project-based exploration.
+                  Training for schools, teachers, and students on using AI responsibly for learning,
+                  lesson design, study support, and project-based exploration.
                 </p>
               </div>
             </FadeIn>
@@ -275,7 +368,9 @@ export default function Home() {
         <div className="max-w-3xl mx-auto">
           <FadeIn className="mb-16">
             <h2 className="text-4xl font-bold mb-4">Career Highlights</h2>
-            <p className="text-muted-foreground text-lg">A track record of taking ownership and driving technical excellence.</p>
+            <p className="text-muted-foreground text-lg">
+              A track record of taking ownership and driving technical excellence.
+            </p>
           </FadeIn>
 
           <div className="space-y-12 relative before:absolute before:inset-0 before:ml-6 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-border">
@@ -288,7 +383,10 @@ export default function Home() {
                   <h4 className="font-bold text-xl">AI Test Automation & DevOps Tech Lead</h4>
                   <span className="text-xs font-mono text-muted-foreground">Ovalix</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Leading automation and DevOps strategy with a focus on AI-assisted quality engineering, mentoring the team, and building reliable delivery systems.</p>
+                <p className="text-sm text-muted-foreground">
+                  Leading automation and DevOps strategy with a focus on AI-assisted quality
+                  engineering, mentoring the team, and building reliable delivery systems.
+                </p>
               </div>
             </FadeIn>
 
@@ -298,10 +396,16 @@ export default function Home() {
               </div>
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-6 rounded-2xl bg-card border shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-xl">Test Automation & DevOps AP Technical Leader</h4>
+                  <h4 className="font-bold text-xl">
+                    Test Automation & DevOps AP Technical Leader
+                  </h4>
                   <span className="text-xs font-mono text-muted-foreground">Melio</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Designing and developing GUI and API automation tests using Playwright, leading a multi-layer test automation framework, and integrating automation into CI pipelines.</p>
+                <p className="text-sm text-muted-foreground">
+                  Designing and developing GUI and API automation tests using Playwright, leading a
+                  multi-layer test automation framework, and integrating automation into CI
+                  pipelines.
+                </p>
               </div>
             </FadeIn>
 
@@ -314,38 +418,66 @@ export default function Home() {
                   <h4 className="font-bold text-xl">Automation TL & DevOps & Cloud Developer</h4>
                   <span className="text-xs font-mono text-muted-foreground">Perception Point</span>
                 </div>
-                <p className="text-sm text-muted-foreground">Planning, designing, and developing frontend and cloud infrastructure for test automation and DevOps workflows using Playwright, Python, JavaScript, Bash, Java, and C#. Built GitHub Actions and Azure Pipelines, Docker-based environments, AWS services, secure browser testing, and Terraform-managed Azure machines.</p>
+                <p className="text-sm text-muted-foreground">
+                  Planning, designing, and developing frontend and cloud infrastructure for test
+                  automation and DevOps workflows using Playwright, Python, JavaScript, Bash, Java,
+                  and C#. Built GitHub Actions and Azure Pipelines, Docker-based environments, AWS
+                  services, secure browser testing, and Terraform-managed Azure machines.
+                </p>
               </div>
             </FadeIn>
-
           </div>
         </div>
       </section>
 
       {/* CTA / Contact */}
-      <section id="contact" className="py-24 px-6 relative overflow-hidden bg-secondary text-secondary-foreground">
+      <section
+        id="contact"
+        className="py-24 px-6 relative overflow-hidden bg-secondary text-secondary-foreground"
+      >
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <FadeIn>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">Let's build something robust.</h2>
+            <h2 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
+              Let's build something robust.
+            </h2>
             <p className="text-xl text-secondary-foreground/80 mb-10 max-w-2xl mx-auto">
-              Whether you need architecture consulting, an interview prep session, or a community mentor—my door is open.
+              Whether you need architecture consulting, an interview prep session, or a community
+              mentor—my door is open.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" className="rounded-full font-bold px-8 bg-primary text-primary-foreground hover:bg-primary/90" asChild>
+              <Button
+                size="lg"
+                className="rounded-full font-bold px-8 bg-primary text-primary-foreground hover:bg-primary/90"
+                asChild
+              >
                 <a href="mailto:amielnoy@gmail.com">
                   <Mail className="w-5 h-5 mr-2" />
                   Send an Email
                 </a>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full font-bold px-8 border-secondary-border hover:bg-secondary-border" asChild>
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full font-bold px-8 border-secondary-border hover:bg-secondary-border"
+                asChild
+              >
                 <a href="https://www.youtube.com/@amielnoy" target="_blank" rel="noreferrer">
                   <Youtube className="w-5 h-5 mr-2 text-red-500" />
                   YouTube Channel
                 </a>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full font-bold px-8 border-secondary-border hover:bg-secondary-border" asChild>
-                <a href="https://chat.whatsapp.com/Bwjb01CGfxqIE04lkz2us0?mode=gi_t" target="_blank" rel="noreferrer">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full font-bold px-8 border-secondary-border hover:bg-secondary-border"
+                asChild
+              >
+                <a
+                  href="https://chat.whatsapp.com/Bwjb01CGfxqIE04lkz2us0?mode=gi_t"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <FaWhatsapp className="w-5 h-5 mr-2 text-green-500" />
                   AI Automation & DevOps Community
                 </a>
