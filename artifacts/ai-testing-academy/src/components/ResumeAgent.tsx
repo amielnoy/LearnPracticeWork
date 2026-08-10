@@ -18,16 +18,38 @@ const SAMPLE_RESUMES = {
   },
 };
 
-async function extractPdf(file: File): Promise<string> {
+interface PdfExtraction {
+  text: string;
+  /**
+   * How many text runs pdf.js found that carry an actual character. Zero means
+   * the file has no text layer at all — a scan, or a résumé exported as a
+   * picture of itself — which is a different failure from one that yielded a
+   * little text, and worth saying so: the same absence is why an ATS cannot
+   * read the file either.
+   */
+  textRuns: number;
+}
+
+/** Which page is being read, out of how many, as reading proceeds. */
+type PdfProgress = (page: number, pages: number) => void;
+
+async function extractPdf(file: File, onProgress: PdfProgress): Promise<PdfExtraction> {
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
   const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
   const out: string[] = [];
+  let textRuns = 0;
   for (let i = 1; i <= pdf.numPages; i++) {
+    // Announced before the page is read, so the count names the work in hand
+    // rather than the work just finished. Each read is a round trip to the
+    // worker, which leaves the main thread free to paint in between.
+    onProgress(i, pdf.numPages);
     const content = await (await pdf.getPage(i)).getTextContent();
-    out.push(pdfItemsToText(content.items.filter(item => 'str' in item)));
+    const items = content.items.filter(item => 'str' in item);
+    textRuns += items.filter(item => item.str.trim() !== '').length;
+    out.push(pdfItemsToText(items));
   }
-  return out.join('\n\n');
+  return { text: out.join('\n\n'), textRuns };
 }
 
 async function extractDocx(file: File): Promise<string> {
@@ -86,15 +108,23 @@ async function pdfFromCanvas(text: string): Promise<JsPdfInstance> {
     const holderRect = holder.getBoundingClientRect();
     const linkRects = [...holder.querySelectorAll('a')].map(a => {
       const r = a.getBoundingClientRect();
-      return { href: a.getAttribute('href'), x: r.left - holderRect.left, y: r.top - holderRect.top, w: r.width, h: r.height };
+      return {
+        href: a.getAttribute('href'),
+        x: r.left - holderRect.left,
+        y: r.top - holderRect.top,
+        w: r.width,
+        h: r.height,
+      };
     });
     const canvas = await html2canvas(holder, { scale: 2, backgroundColor: '#ffffff' });
     const pdf = await pdfFromText('');
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
-    const imgH = canvas.height * pageW / canvas.width;
+    const imgH = (canvas.height * pageW) / canvas.width;
     const imgData = canvas.toDataURL('image/png');
-    let heightLeft = imgH, position = 0, pageCount = 1;
+    let heightLeft = imgH,
+      position = 0,
+      pageCount = 1;
     pdf.addImage(imgData, 'PNG', 0, position, pageW, imgH);
     heightLeft -= pageH;
     while (heightLeft > 0) {
@@ -125,8 +155,12 @@ export function ResumeAgent() {
   const sectionRef = useReveal();
 
   const draftPrefix = `ata_resume_draft_${locale.lang}_`;
-  const [resumeText, setResumeText] = useState(() => sessionStorage.getItem(draftPrefix + 'resume') || '');
-  const [targetRole, setTargetRole] = useState(() => sessionStorage.getItem(draftPrefix + 'role') || '');
+  const [resumeText, setResumeText] = useState(
+    () => sessionStorage.getItem(draftPrefix + 'resume') || '',
+  );
+  const [targetRole, setTargetRole] = useState(
+    () => sessionStorage.getItem(draftPrefix + 'role') || '',
+  );
   const [jobDesc, setJobDesc] = useState(() => sessionStorage.getItem(draftPrefix + 'job') || '');
   const [uploadLabel, setUploadLabel] = useState(t.uploadPrompt);
   const [isDragging, setIsDragging] = useState(false);
@@ -156,54 +190,95 @@ export function ResumeAgent() {
     setImprovedHtml('');
   }, [jobDesc]);
 
-  useEffect(() => { sessionStorage.setItem(draftPrefix + 'resume', resumeText); }, [draftPrefix, resumeText]);
-  useEffect(() => { sessionStorage.setItem(draftPrefix + 'role', targetRole); }, [draftPrefix, targetRole]);
-  useEffect(() => { sessionStorage.setItem(draftPrefix + 'job', jobDesc); }, [draftPrefix, jobDesc]);
+  useEffect(() => {
+    sessionStorage.setItem(draftPrefix + 'resume', resumeText);
+  }, [draftPrefix, resumeText]);
+  useEffect(() => {
+    sessionStorage.setItem(draftPrefix + 'role', targetRole);
+  }, [draftPrefix, targetRole]);
+  useEffect(() => {
+    sessionStorage.setItem(draftPrefix + 'job', jobDesc);
+  }, [draftPrefix, jobDesc]);
 
-  const processFile = useCallback(async (file: File | undefined | null) => {
-    if (!file) return;
-    setResumeErr('');
-    setUploadLabel(S.uploadReading + file.name + '...');
-    try {
+  const processFile = useCallback(
+    async (file: File | undefined | null) => {
+      if (!file) return;
       const ext = (file.name.split('.').pop() || '').toLowerCase();
-      let text: string;
-      if (ext === 'pdf') text = await extractPdf(file);
-      else if (ext === 'docx') text = await extractDocx(file);
-      else if (ext === 'txt') text = await file.text();
-      else throw new Error(S.errFormatPrefix + ext + S.errFormatSuffix);
-      text = text.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
-      if (text.length < 40) throw new Error(S.errExtractFail);
-      setResumeText(text);
-      setUploadLabel('✅ ' + file.name + S.uploadLoadedMid + text.length + S.uploadLoadedSuffix);
-    } catch (e) {
-      setUploadLabel(S.uploadPrompt);
-      setResumeErr((e as Error).message);
-    }
-  }, [S]);
+      setResumeErr('');
+      // A PDF is not read the moment it is handed over: pdf.js and its worker are
+      // fetched on first use, which is well over a megabyte and, on a slow
+      // connection, the longest part of the wait — and all of it before there is
+      // a page count to report. Naming that stretch separately is what stops the
+      // label sitting on one unchanging line from beginning to end.
+      setUploadLabel((ext === 'pdf' ? S.uploadPreparing : S.uploadReading) + file.name + '...');
+      try {
+        let text: string;
+        if (ext === 'pdf') {
+          const extracted = await extractPdf(file, (page, pages) =>
+            setUploadLabel(
+              S.uploadReading + file.name + S.uploadPageMid + page + S.uploadPageOf + pages + '...',
+            ),
+          );
+          // Checked before the length guard below, so a scan is reported as a
+          // scan rather than as an extraction that came up short.
+          if (extracted.textRuns === 0) throw new Error(S.errScannedPdf);
+          text = extracted.text;
+        } else if (ext === 'docx') text = await extractDocx(file);
+        else if (ext === 'txt') text = await file.text();
+        else throw new Error(S.errFormatPrefix + ext + S.errFormatSuffix);
+        text = text
+          .replace(/[ \t]+/g, ' ')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+        if (text.length < 40) throw new Error(S.errExtractFail);
+        setResumeText(text);
+        setUploadLabel('✅ ' + file.name + S.uploadLoadedMid + text.length + S.uploadLoadedSuffix);
+      } catch (e) {
+        setUploadLabel(S.uploadPrompt);
+        setResumeErr((e as Error).message);
+      }
+    },
+    [S],
+  );
 
-  const evaluateResume = useCallback(async (textOverride?: string, roleOverride?: string) => {
-    const txt = (textOverride ?? resumeText).trim();
-    setResumeErr('');
-    if (txt.length < 80) { setResumeErr(S.errResumeEmpty); return; }
-    startTool('resume');
-    setEvaluating(true);
-    try {
-      const role = (roleOverride ?? targetRole).trim() || 'QA Automation Engineer';
-      const reply = await callClaude(locale.prompts.resume, [
-        { role: 'user', content: S.promptRolePrefix + role + S.promptResumeLabel + txt },
-      ]);
-      const r = extractJSON(reply) as EvalResult;
-      setEvalResult(r);
-      setLastEval({ resume: txt, role, evaluation: r });
-      improvedResumeRef.current = null;
-      setImprovedVisible(false);
-      setImprovedHtml('');
-      completeResume();
-    } catch (e) {
-      setResumeErr((e as Error).message);
-    }
-    setEvaluating(false);
-  }, [resumeText, targetRole, S, callClaude, extractJSON, locale.prompts.resume, startTool, completeResume]);
+  const evaluateResume = useCallback(
+    async (textOverride?: string, roleOverride?: string) => {
+      const txt = (textOverride ?? resumeText).trim();
+      setResumeErr('');
+      if (txt.length < 80) {
+        setResumeErr(S.errResumeEmpty);
+        return;
+      }
+      startTool('resume');
+      setEvaluating(true);
+      try {
+        const role = (roleOverride ?? targetRole).trim() || 'QA Automation Engineer';
+        const reply = await callClaude(locale.prompts.resume, [
+          { role: 'user', content: S.promptRolePrefix + role + S.promptResumeLabel + txt },
+        ]);
+        const r = extractJSON(reply) as EvalResult;
+        setEvalResult(r);
+        setLastEval({ resume: txt, role, evaluation: r });
+        improvedResumeRef.current = null;
+        setImprovedVisible(false);
+        setImprovedHtml('');
+        completeResume();
+      } catch (e) {
+        setResumeErr((e as Error).message);
+      }
+      setEvaluating(false);
+    },
+    [
+      resumeText,
+      targetRole,
+      S,
+      callClaude,
+      extractJSON,
+      locale.prompts.resume,
+      startTool,
+      completeResume,
+    ],
+  );
 
   useEffect(() => {
     const analyzeSample = () => {
@@ -220,15 +295,26 @@ export function ResumeAgent() {
     if (improvedResumeRef.current) return improvedResumeRef.current;
     if (!lastEval) throw new Error(S.errNoEval);
     const jd = jobDesc.trim();
-    const reply = await callClaude(locale.prompts.improve, [{
-      role: 'user',
-      content:
-        S.promptRolePrefixImprove + lastEval.role +
-        (jd ? S.promptJobDescLabel + jd : '') +
-        S.promptEvalResultsLabel +
-        JSON.stringify({ gaps: lastEval.evaluation.gaps, recommendations: lastEval.evaluation.recommendations }) +
-        S.promptOriginalResumeLabel + lastEval.resume,
-    }], 4000);
+    const reply = await callClaude(
+      locale.prompts.improve,
+      [
+        {
+          role: 'user',
+          content:
+            S.promptRolePrefixImprove +
+            lastEval.role +
+            (jd ? S.promptJobDescLabel + jd : '') +
+            S.promptEvalResultsLabel +
+            JSON.stringify({
+              gaps: lastEval.evaluation.gaps,
+              recommendations: lastEval.evaluation.recommendations,
+            }) +
+            S.promptOriginalResumeLabel +
+            lastEval.resume,
+        },
+      ],
+      4000,
+    );
     improvedResumeRef.current = reply.trim();
     return improvedResumeRef.current;
   }, [lastEval, jobDesc, S, callClaude, locale.prompts.improve]);
@@ -242,7 +328,10 @@ export function ResumeAgent() {
       setImprovedHtml(linkifyHtml(text));
       setImprovedDir(rtl ? 'rtl' : 'ltr');
       setImprovedVisible(true);
-      setTimeout(() => improvedWrapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      setTimeout(
+        () => improvedWrapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        50,
+      );
     } catch (e) {
       setImprovedErr((e as Error).message);
     }
@@ -255,7 +344,11 @@ export function ResumeAgent() {
     try {
       const text = await ensureImprovedResume();
       const role = lastEval?.role || 'Resume';
-      const filename = ('Resume - ' + role).replace(/[\\/:*?"<>|]+/g, '-').trim().slice(0, 80) + '.pdf';
+      const filename =
+        ('Resume - ' + role)
+          .replace(/[\\/:*?"<>|]+/g, '-')
+          .trim()
+          .slice(0, 80) + '.pdf';
       const pdf = await buildResumePdf(text);
       pdf.save(filename);
     } catch (e) {
@@ -265,7 +358,11 @@ export function ResumeAgent() {
   }, [ensureImprovedResume, lastEval]);
 
   const scoreColor = evalResult
-    ? evalResult.overall >= 75 ? 'var(--green)' : evalResult.overall >= 50 ? 'var(--yellow)' : 'var(--red)'
+    ? evalResult.overall >= 75
+      ? 'var(--green)'
+      : evalResult.overall >= 50
+        ? 'var(--yellow)'
+        : 'var(--red)'
     : 'var(--accent)';
 
   return (
@@ -277,7 +374,8 @@ export function ResumeAgent() {
       <div className="agent-box reveal">
         <h3>{t.boxTitle}</h3>
         <label htmlFor="targetRole">
-          {t.targetRoleLabel} <span style={{ color: 'var(--muted)', fontWeight: 400 }}>{t.targetRoleOptional}</span>
+          {t.targetRoleLabel}{' '}
+          <span style={{ color: 'var(--muted)', fontWeight: 400 }}>{t.targetRoleOptional}</span>
         </label>
         <input
           type="text"
@@ -293,9 +391,18 @@ export function ResumeAgent() {
           tabIndex={0}
           role="button"
           aria-label={t.uploadZoneAriaLabel}
-          onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-          onDragEnter={e => { e.preventDefault(); setIsDragging(true); }}
-          onDragLeave={e => { e.preventDefault(); setIsDragging(false); }}
+          onDragOver={e => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragEnter={e => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={e => {
+            e.preventDefault();
+            setIsDragging(false);
+          }}
           onDrop={e => {
             e.preventDefault();
             setIsDragging(false);
@@ -314,7 +421,14 @@ export function ResumeAgent() {
             ref={fileInputRef}
             accept=".pdf,.docx,.txt"
             style={{ display: 'none' }}
-            onChange={e => processFile(e.target.files?.[0])}
+            // Cleared after each pick: the input only fires `change` when the
+            // selection differs from what it already holds, so re-choosing the
+            // same file after a failed read was silently doing nothing.
+            onChange={e => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              processFile(file);
+            }}
           />
           <span id="uploadLabel">{uploadLabel}</span>
         </label>
@@ -329,7 +443,8 @@ export function ResumeAgent() {
           onChange={e => setResumeText(e.target.value)}
         />
         <label htmlFor="jobDesc">
-          {t.jobDescLabel} <span style={{ color: 'var(--muted)', fontWeight: 400 }}>{t.jobDescOptional}</span>
+          {t.jobDescLabel}{' '}
+          <span style={{ color: 'var(--muted)', fontWeight: 400 }}>{t.jobDescOptional}</span>
         </label>
         <textarea
           id="jobDesc"
@@ -338,7 +453,9 @@ export function ResumeAgent() {
           value={jobDesc}
           onChange={e => setJobDesc(e.target.value)}
         />
-        <div id="resumeErr" className="error" role="alert">{resumeErr}</div>
+        <div id="resumeErr" className="error" role="alert">
+          {resumeErr}
+        </div>
         <button
           type="button"
           className="primary"
@@ -385,20 +502,26 @@ export function ResumeAgent() {
             <div className="card">
               <h4>{t.strengthsTitle}</h4>
               <ul id="resumeStrengths">
-                {(evalResult.strengths || []).map((s, i) => <li key={i}>{s}</li>)}
+                {(evalResult.strengths || []).map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
               </ul>
             </div>
             <div className="card">
               <h4>{t.gapsTitle}</h4>
               <ul id="resumeGaps">
-                {(evalResult.gaps || []).map((g, i) => <li key={i}>{g}</li>)}
+                {(evalResult.gaps || []).map((g, i) => (
+                  <li key={i}>{g}</li>
+                ))}
               </ul>
             </div>
           </div>
           <div className="card" style={{ marginTop: '14px' }}>
             <h4>{t.recsTitle}</h4>
             <ul id="resumeRecs">
-              {(evalResult.recommendations || []).map((r, i) => <li key={i}>{r}</li>)}
+              {(evalResult.recommendations || []).map((r, i) => (
+                <li key={i}>{r}</li>
+              ))}
             </ul>
           </div>
           <div style={{ marginTop: '22px' }}>
@@ -412,7 +535,9 @@ export function ResumeAgent() {
               {improving ? S.btnImproving : t.buildResumeBtn}
             </button>
           </div>
-          <div id="improvedErr" className="error" role="alert">{improvedErr}</div>
+          <div id="improvedErr" className="error" role="alert">
+            {improvedErr}
+          </div>
           {improvedVisible && (
             <div id="improvedWrap" ref={improvedWrapRef} style={{ marginTop: '22px' }}>
               <div className="card">

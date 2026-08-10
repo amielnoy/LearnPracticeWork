@@ -39,6 +39,14 @@ export interface JsPdfInstance {
   link: (x: number, y: number, w: number, h: number, opts: { url: string | null }) => void;
   setPage: (n: number) => void;
   save: (filename: string) => void;
+  /**
+   * The finished document as bytes. The site itself only ever hands the
+   * document to `save()`, but anything that has to read a built PDF back — the
+   * suites that parse one to check what an applicant tracking system would
+   * see — goes through here, and declaring it keeps those callers from casting
+   * their way around this type.
+   */
+  output: (type: 'arraybuffer') => ArrayBuffer;
   addFileToVFS: (filename: string, data: string) => void;
   addFont: (filename: string, family: string, style: string) => void;
 }

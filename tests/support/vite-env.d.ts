@@ -17,3 +17,14 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * Vite turns a `?url` import into the URL of the emitted asset. Declared for
+ * the same reason as `import.meta.env` above: the component suite typechecks
+ * ResumeAgent, which asks for the pdf.js worker that way, and the alternative
+ * is pulling `vite/client` into a package that does not depend on Vite.
+ */
+declare module '*?url' {
+  const url: string;
+  export default url;
+}
