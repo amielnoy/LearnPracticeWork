@@ -835,7 +835,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   The two instances exist because <code>routes/ai.ts</code> answers <code>503</code> for a
   missing key <em>before</em> it validates the body — on a keyless server the
   <code>400 messages is required</code> branch is unreachable.
-  <code>tests/support/start-api-servers.mjs</code> builds the server once and starts both.
+  <code>tests/support/start-api-servers.ts</code> builds the server once and starts both.
 </p>
 
 <p>
