@@ -63,7 +63,7 @@ pnpm --filter @workspace/tests run test:browsers
 
 Every config starts whatever server it needs, so nothing has to be running first:
 
-- **api / contract** — two `api-server` instances via `tests/support/start-api-servers.mjs`
+- **api / contract** — two `api-server` instances via `tests/support/start-api-servers.ts`
   (ports 8788 and 8789). One has no Gemini key and one has a throwaway key that only ever
   receives invalid requests, so no test can reach a model vendor. Both start with
   `DATABASE_URL` and the Replit connector variables blanked, so the suite does not depend on

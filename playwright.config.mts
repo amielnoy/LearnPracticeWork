@@ -38,7 +38,8 @@ function selectedProjects(): string[] {
 }
 
 const selected = selectedProjects();
-const needsApiServers = selected.length === 0 || selected.some(p => p === 'api' || p === 'contract');
+const needsApiServers =
+  selected.length === 0 || selected.some(p => p === 'api' || p === 'contract');
 
 export default defineConfig({
   testDir: './tests',
@@ -54,16 +55,16 @@ export default defineConfig({
     // response attachments, which is the report someone can read.
     ['allure-playwright', { resultsDir: allureResultsDir, detail: false }],
     ...(process.env.CI
-      // Own folder, matching the component and e2e configs, so CI uploads one
-      // artifact holding all three rather than whichever suite finished last.
-      ? [['html', { open: 'never', outputFolder: 'playwright-report/node' }] as const]
+      ? // Own folder, matching the component and e2e configs, so CI uploads one
+        // artifact holding all three rather than whichever suite finished last.
+        [['html', { open: 'never', outputFolder: 'playwright-report/node' }] as const]
       : [['blob', { outputDir: blobDir }] as const]),
   ],
 
   // Booting a server for a pure-Node unit run is pure waiting, so skip it.
   webServer: needsApiServers
     ? {
-        command: 'node ./tests/support/start-api-servers.mjs',
+        command: 'node ./tests/support/start-api-servers.ts',
         url: `${KEYLESS_URL}/api/healthz`,
         reuseExistingServer: !process.env.CI,
         timeout: 90_000,

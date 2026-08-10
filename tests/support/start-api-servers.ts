@@ -14,8 +14,12 @@
  * Every environment variable that changes server behaviour is pinned to an
  * explicit value so a developer's shell (or a Replit deployment) cannot leak
  * in and make the suite non-deterministic.
+ *
+ * Run straight from source as TypeScript: Node strips the types itself, so the
+ * one file standing between the suites and a running server needs no build step
+ * and no loader of its own.
  */
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -28,7 +32,7 @@ const LIMITED_PORT = process.env.TEST_API_PORT_LIMITED ?? '8790';
 const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
 
 /** Env that must look the same on every machine for the assertions to hold. */
-const PINNED = {
+const PINNED: Readonly<Record<string, string>> = {
   NODE_ENV: 'test',
   // No database and no Replit connector: the Stripe routes are expected to
   // fail as JSON, which is exactly what the api suite asserts.
@@ -45,15 +49,15 @@ const PINNED = {
   AI_DAILY_QUOTA: '1000',
 };
 
-const children = [];
+const children: ChildProcess[] = [];
 
-function run(command, args, options) {
-  const child = spawn(command, args, { stdio: 'inherit', ...options });
+function run(command: string, args: readonly string[], options: SpawnOptions): ChildProcess {
+  const child = spawn(command, [...args], { stdio: 'inherit', ...options });
   children.push(child);
   return child;
 }
 
-function shutdown(code) {
+function shutdown(code: number): never {
   for (const child of children) {
     if (!child.killed) child.kill('SIGTERM');
   }
@@ -63,7 +67,7 @@ function shutdown(code) {
 process.on('SIGTERM', () => shutdown(0));
 process.on('SIGINT', () => shutdown(0));
 
-async function waitForHealth(port, timeoutMs = 20_000) {
+async function waitForHealth(port: string, timeoutMs = 20_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     try {
@@ -77,7 +81,7 @@ async function waitForHealth(port, timeoutMs = 20_000) {
   throw new Error(`api-server on port ${port} did not become healthy in ${timeoutMs}ms`);
 }
 
-function startServer(port, extraEnv) {
+function startServer(port: string, extraEnv: Readonly<Record<string, string>>): ChildProcess {
   const child = run(process.execPath, ['--enable-source-maps', './dist/index.mjs'], {
     cwd: apiServerDir,
     env: { ...process.env, ...PINNED, PORT: String(port), ...extraEnv },
@@ -91,8 +95,8 @@ function startServer(port, extraEnv) {
   return child;
 }
 
-await new Promise((resolve, reject) => {
-  const build = run(process.execPath, ['./build.mjs'], { cwd: apiServerDir });
+await new Promise<void>((resolve, reject) => {
+  const build = run(process.execPath, ['./build.ts'], { cwd: apiServerDir });
   build.on('exit', code =>
     code === 0 ? resolve() : reject(new Error(`api-server build failed with code ${code}`)),
   );
