@@ -88,10 +88,12 @@ pnpm run report:allure:serve   # generate and open it
 
 Allure 3 is a plain Node CLI — no JVM. The e2e config keeps a screenshot, a video and a trace
 on failure, and Allure picks those up as attachments. CI generates the report, uploads it
-alongside the raw results and the Playwright HTML report, and the `publish-allure` job pushes
-it to a **separate reports repository's** `main` branch (via the `ALLURE_PAGES_TOKEN` secret and
-the `ALLURE_PAGES_REPO` variable), so the report gets its own Pages URL and never lands on the
-portfolio site.
+alongside the raw results and the Playwright HTML report, and the `publish-allure` job
+force-pushes it to a **separate reports repository's** `gh-pages` branch (via the
+`ALLURE_PAGES_TOKEN` secret and the `ALLURE_PAGES_REPO` variable), so the report gets its own
+Pages URL and never lands on the portfolio site. That repository keeps its own Pages workflow
+on `main`, so publishing to `gh-pages` cannot delete the workflow that deploys it — which is
+why the job then dispatches a `report-published` event to trigger the deployment.
 
 ### Docker
 
@@ -120,9 +122,10 @@ Two targets from the same build:
 - **Replit** — `.replit-artifact/artifact.toml` per artifact. The site and `api-server` share
   one origin, so relative `/api` calls work.
 - **GitHub Pages** — `.github/workflows/ci.yml` publishes from `main`: the portfolio at the
-  site root, `ai-testing-academy/` and `ai-testing-lecture-1/` beneath it, `architecture.html`
-  alongside, and the Allure report at `allure/`. Static only, so the academy's AI panel falls
-  back to bring-your-own-key.
+  site root, `ai-testing-academy/` and `ai-testing-lecture-1/` beneath it, and
+  `architecture.html` alongside. Static only, so the academy's AI panel falls back to
+  bring-your-own-key. The Allure report is **not** part of this site — it is published to its
+  own reports repository, with its own Pages URL.
 
   Publishing runs **even when the test job fails** — that is when the Allure report is most
   worth reading. The site job overrides the skip-on-failed-dependency default with
