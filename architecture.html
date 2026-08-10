@@ -87,6 +87,8 @@
   .stack .depth4{margin-left:54px}
   .stack .depth5{margin-left:72px}
   .stack .depth6{margin-left:90px}
+  .stack .depth7{margin-left:108px}
+  .stack .depth8{margin-left:126px}
   @media (max-width:620px){.stack [class^=depth]{margin-left:0}}
 
   /* two-column grids */
@@ -132,6 +134,7 @@
     <span class="pill">Tailwind + Radix (shadcn/ui)</span>
     <span class="pill">EN / HE with RTL</span>
     <span class="pill">Static SPA</span>
+    <span class="pill">Google sign-in (identity only)</span>
   </p>
 </header>
 
@@ -271,9 +274,11 @@
   <div class="lvl depth1"><span class="nm">QueryClientProvider</span> — <span class="why">TanStack Query client; present for future server state, not yet on the hot path.</span></div>
   <div class="lvl depth2"><span class="nm">TooltipProvider</span> — <span class="why">Radix tooltip root for the shadcn/ui primitives.</span></div>
   <div class="lvl depth3"><span class="nm">LocaleProvider</span> — <span class="why">Resolves the language once, exposes <code>locale</code> / <code>S</code>, stamps <code>lang</code> and <code>dir</code> on <code>&lt;html&gt;</code>.</span></div>
-  <div class="lvl depth4"><span class="nm">ProviderContextProvider</span> — <span class="why">Owns provider/model/key state and the <code>callClaude</code> / <code>callGrounded</code> functions every AI feature uses.</span></div>
-  <div class="lvl depth5"><span class="nm">WouterRouter</span> — <span class="why">Base path taken from <code>import.meta.env.BASE_URL</code>, so the app works under a sub-path deploy.</span></div>
-  <div class="lvl depth6"><span class="nm">Switch → HomePage | NotFound</span> — <span class="why">One real route. The router is here for the sub-path handling and the 404, not for navigation.</span></div>
+  <div class="lvl depth4"><span class="nm">AuthProvider</span> — <span class="why">Google sign-in. Inside <code>LocaleProvider</code> because Google renders the button's own label and has to be handed the current language.</span></div>
+  <div class="lvl depth5"><span class="nm">ProgressProvider</span> — <span class="why">Per-tool progress, so the launcher can offer to continue where the reader stopped.</span></div>
+  <div class="lvl depth6"><span class="nm">ProviderContextProvider</span> — <span class="why">Owns provider/model/key state and the <code>callClaude</code> / <code>callGrounded</code> functions every AI feature uses.</span></div>
+  <div class="lvl depth7"><span class="nm">WouterRouter</span> — <span class="why">Base path taken from <code>import.meta.env.BASE_URL</code>, so the app works under a sub-path deploy.</span></div>
+  <div class="lvl depth8"><span class="nm">Switch → HomePage | NotFound</span> — <span class="why">One real route. The router is here for the sub-path handling and the 404, not for navigation.</span></div>
 </div>
 
 <h3>Below the router</h3>
@@ -286,7 +291,7 @@
 
 <pre><code>HomePage
 ├── skip link · ScrollProgress · NavToggle · NavScrim · BackToTop
-├── Nav          ← theme toggle, language toggle, scroll-spy
+├── Nav          ← theme toggle, language toggle, scroll-spy, Google sign-in
 ├── Hero
 └── main
     ├── ConnectionSetup     → useProviderContext()
@@ -448,7 +453,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <h3>📄 Resume Agent — the heavyweight</h3>
 <p>
-  At ~540 lines it is the largest component, because it is really a small document pipeline:
+  At ~575 lines it is the largest component, because it is really a small document pipeline:
   read a file, extract text, score it, rewrite it, export it. All of it client-side.
 </p>
 <div class="flow">
@@ -458,14 +463,55 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <div class="arrow">→</div>
   <div class="stage"><span class="k">rewrite</span><p>A second call with the improve prompt returns ATS-friendly prose, not JSON.</p></div>
   <div class="arrow">→</div>
-  <div class="stage"><span class="k">export</span><p><b>jsPDF</b> + <b>html2canvas</b> render the result back out as a downloadable PDF.</p></div>
+  <div class="stage"><span class="k">export</span><p><code>lib/resumePdf.ts</code> builds the PDF with <b>jsPDF</b>, embedding a Hebrew face for RTL.</p></div>
 </div>
 <p>
-  Those four libraries are <b>not bundled</b>. They are injected at runtime by
-  <code>loadFirst()</code>, which walks cdnjs → jsDelivr → unpkg and stops at the first host
-  that actually defines the expected global. The two parsers are also warmed on first
-  interaction, so the upload does not stall on a cold CDN. It keeps the main bundle small,
-  at the cost of a hard dependency on public CDN reachability.
+  All four libraries are <b>bundled dependencies</b>, reached through dynamic
+  <code>import()</code> so they are fetched on first use rather than on page load. Nothing is
+  pulled from a public CDN: the runtime-injection loader that used to walk
+  cdnjs → jsDelivr → unpkg is gone, along with the exposure it carried. The cost has moved
+  from CDN reachability to size — pdf.js and its worker are about 1.6 MB, and fetching them
+  is the slowest part of the first upload by a wide margin.
+</p>
+
+<div class="callout">
+  <b>The export must be text, not a picture.</b> An applicant tracking system reads the text
+  layer, so a résumé rendered as an image fails the first automated sift while looking perfect
+  to the person holding it. That is why the Hebrew path embeds a font and reorders each line
+  into visual order rather than rasterising, and why <code>pdfFromCanvas()</code> survives only
+  as the fallback for when the font itself cannot be fetched.
+</div>
+
+<p>
+  The same principle runs in reverse on the way in. <code>extractPdf()</code> counts the text
+  runs pdf.js finds, and a file with none is reported as what it is — a scan, or a résumé
+  exported as an image — rather than as a generic extraction failure, because the reader whose
+  only copy is a picture has a problem well beyond this upload. Reading also reports progress:
+  the zone names the wait for the parser itself, then counts pages as it goes, so a large file
+  never leaves one unchanging line on screen. The file input is cleared after every pick, since
+  a picker holding the same file fires no <code>change</code> event and the obvious retry would
+  otherwise do nothing at all.
+</p>
+
+<h3>🔐 Sign in with Google</h3>
+<p>
+  <code>AuthProvider</code> plus a <code>GoogleSignIn</code> control in the nav drawer. Google's
+  hosted client is loaded on demand, draws its own button, and hands back an ID token;
+  <code>lib/googleIdentity.ts</code> reads the name, address and picture out of it and nothing
+  else. Google renders the button's label itself, so the current language is passed to
+  <code>renderButton</code> — that half of the translation cannot come from a strings file.
+</p>
+<p>
+  <b>It is identity, not authorisation.</b> The token is read and never verified: checking the
+  signature needs Google's keys and a server trusted to use them, and the Pages deployment has
+  neither. Anyone can hand the page a hand-written token and appear signed in as anybody, which
+  is exactly why nothing is gated on it — no quota, no permission, no stored record. If any of
+  that arrives, the token has to go to <code>api-server</code> and come back verified first.
+</p>
+<p>
+  A build with no <code>VITE_GOOGLE_CLIENT_ID</code> renders no sign-in at all and never
+  contacts Google, so a deployment that has not been given an OAuth client stays whole rather
+  than showing a button that cannot work.
 </p>
 
 <h3>🎙️ Interview Agent</h3>
@@ -519,13 +565,16 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr><td><code>ata_lang</code></td><td>i18n</td><td>Resolved language, re-written on every resolve so it stays sticky.</td></tr>
     <tr><td><code>ata_provider</code></td><td>ProviderContext</td><td>Selected vendor; defaults to <code>gemini</code>.</td></tr>
     <tr><td><code>ata_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>The user's own API key, one slot per vendor, saved only while “use my key” is on.</td></tr>
+    <tr><td><code>ata_google_credential</code></td><td>AuthContext</td><td>The last Google ID token, so a reload does not sign the reader out. Dropped the moment it fails to parse or its <code>exp</code> passes.</td></tr>
   </tbody>
 </table>
 </div>
 
 <p>
-  <code>resetSettings()</code> clears every <code>ata_</code> key and reloads — that prefix is
-  the reason it can be a one-line sweep rather than a maintained list.
+  <code>resetSettings()</code> deliberately does <b>not</b> sweep the whole prefix. It removes
+  the provider selection, the per-vendor keys and their remember flags, and nothing else:
+  resetting which model you talk to should not also erase your progress, your interview
+  history, your résumé drafts, or which account you are signed in as.
 </p>
 
 <h3>The key-mode decision</h3>
@@ -595,8 +644,17 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <li><b>Untrusted input is model output.</b> Everything a model returns is escaped before it reaches the DOM; the markdown renderer builds its tags from parsed groups, never by interpolating raw text.</li>
   <li><b>No secret is bundled.</b> Server-side keys stay in <code>api-server</code>; the client only ever learns the boolean <code>available</code> and a default model name.</li>
   <li><b>Error bodies are truncated</b> to 300 characters before display, which keeps a verbose upstream error from dumping a wall of text into the UI.</li>
-  <li><b>Third-party script injection is real surface.</b> The resume tools are pulled from public CDNs at runtime; a compromised CDN would execute on this origin. Pinned versions and a fixed host list limit, but do not remove, that exposure.</li>
+  <li><b>One third-party script, by necessity.</b> Google's sign-in client is loaded from <code>accounts.google.com</code> and runs on this origin — there is no packaged equivalent, the credential flow only exists inside the hosted client. It is the only runtime code on the site that does not ship with it, it is requested only when an OAuth client is configured, and the résumé libraries that used to be fetched from public CDNs are now bundled dependencies.</li>
+  <li><b>Sign-in proves nothing.</b> The ID token is read, not verified, so identity here is a display convenience and not a security claim. Nothing is gated on it. Treating it as authorisation would mean trusting a value any visitor can forge.</li>
 </ul>
+
+<div class="callout">
+  <b>The client ID is not a secret.</b> <code>VITE_GOOGLE_CLIENT_ID</code> is inlined into the
+  bundle by design and is readable by anyone who opens it; committing it changes nothing about
+  who can see it, and Google enforces which origins may use it. A client <i>secret</i> is a
+  different thing entirely and must never become a <code>VITE_</code> variable, because the
+  browser would receive it.
+</div>
 
 <!-- ───────────────────────── 10 ───────────────────────── -->
 <h2 id="build">10 · Build &amp; deploy</h2>
@@ -613,7 +671,28 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <dt>pnpm build</dt><dd>Emits to <code>dist/public</code> with <code>emptyOutDir</code>.</dd>
   <dt>pnpm serve</dt><dd>Previews the built output on the same port contract.</dd>
   <dt>pnpm typecheck</dt><dd><code>tsc --noEmit</code> — the gate that keeps <code>he.ts</code> aligned with <code>en.ts</code>.</dd>
+  <dt>pnpm format</dt><dd>Prettier over every TypeScript source. <code>.prettierrc.json</code> pins the house style — 100 columns, single quotes, no parens on single-argument arrows — rather than accepting defaults that would have rewritten some 8,000 string literals.</dd>
 </dl>
+
+<p>
+  Build-time configuration lives in a committed <code>.env</code> beside the Vite config.
+  Committing it is deliberate and safe for exactly one reason: Vite inlines every
+  <code>VITE_</code> value into the emitted JavaScript, so nothing there was ever private, and
+  keeping it in the repository is what lets the Pages build produce a working site without a
+  secret store. <code>.env.local</code> is git-ignored and is where anything you would not
+  publish belongs.
+</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Variable</th><th>Required</th><th>Effect</th></tr></thead>
+  <tbody>
+    <tr><td><code>PORT</code></td><td>yes</td><td>Dev and preview server port. Missing or malformed throws at config time.</td></tr>
+    <tr><td><code>BASE_PATH</code></td><td>yes</td><td>Deploy sub-path, threaded to both asset URLs and the router.</td></tr>
+    <tr><td><code>VITE_GOOGLE_CLIENT_ID</code></td><td>no</td><td>OAuth client for Sign in with Google. Absent, the control is not rendered and Google is never contacted.</td></tr>
+  </tbody>
+</table>
+</div>
 
 <div class="callout good">
   <b>Config fails loudly.</b> <code>vite.config.ts</code> throws if <code>PORT</code> or
@@ -650,14 +729,23 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   test results keep their own URL and never land on the portfolio site.
 </p>
 
+<div class="callout good">
+  <b>The tooling is TypeScript too.</b> <code>api-server/build.ts</code> (the esbuild driver)
+  and <code>tests/support/start-api-servers.ts</code> (the Playwright <code>webServer</code>
+  entry point) are run straight from source as <code>node ./build.ts</code>. Node strips the
+  types itself from 22.18 on, and CI pins 24, so neither needs a loader, a build step, or a
+  dependency to earn the same typechecking as the rest of the repo — <code>build.ts</code>
+  through its own <code>tsconfig.tools.json</code>, since it sits outside <code>rootDir</code>.
+</div>
+
 <!-- ───────────────────────── 11 ───────────────────────── -->
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers five layers — around 245 cases at the
-  time of writing. Playwright is used as the runner throughout, not just as a browser driver:
-  the unit project never launches a browser, it executes the same TypeScript modules the app
-  imports.
+  One Playwright package at <code>tests/</code> covers five layers — 419 cases at the time of
+  writing (185 unit, 138 component, 43 api and contract, 53 e2e). Playwright is used as the
+  runner throughout, not just as a browser driver: the unit project never launches a browser,
+  it executes the same TypeScript modules the app imports.
 </p>
 
 <div class="scroll">
@@ -667,12 +755,12 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr>
       <td><code>tests/unit</code></td>
       <td>Node</td>
-      <td><code>domUtils</code> escaping and linkifying, language resolution, the whole provider registry — request building, key validation, error mapping, proxy-vs-direct routing.</td>
+      <td><code>domUtils</code> escaping and linkifying, language resolution, the whole provider registry — request building, key validation, error mapping, proxy-vs-direct routing. Also the two things that must hold before a browser is involved: the résumé PDF builders, checked by parsing the emitted file back with pdf.js rather than by asserting which jsPDF calls were made, and the Google ID token reader, checked for reading a Hebrew name intact and for answering “nobody” to every malformed or expired token instead of throwing on page load.</td>
     </tr>
     <tr>
       <td><code>tests/component</code></td>
       <td>Chromium (Playwright CT + Vite)</td>
-      <td>The real components, mounted: the disclosure cycle, the locale chain, the scroll affordance, and the key-mode decisions in <code>ConnectionSetup</code>.</td>
+      <td>The real components, mounted: the disclosure cycle, the locale chain, the scroll affordance, the key-mode decisions in <code>ConnectionSetup</code>, the résumé uploader driven with real PDFs through the real pdf.js, and sign-in in both languages against a stubbed Google client.</td>
     </tr>
     <tr>
       <td><code>tests/api</code></td>
@@ -699,6 +787,25 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   one genuinely layout-specific test — the off-canvas drawer — is guarded by the
   <code>isMobile</code> fixture instead of being duplicated.
 </p>
+
+<h3>Fixtures carry the arrangement, not the specs</h3>
+<p>
+  <code>tests/component/fixtures.tsx</code> folds “serve the config, then mount inside the
+  providers” into one step per feature, so a spec declares what it wants and never repeats the
+  setup. Two of them are worth naming because they make otherwise untestable things testable.
+</p>
+<ul class="notes">
+  <li><b>PDFs are built, not stored.</b> <code>tests/support/pdfFixtures.ts</code> assembles an image-only PDF byte by byte — one page, one full-bleed image, no text operators — so the “résumé that is a picture of a résumé” case is exercised without a binary in the repository. Its text-bearing counterpart is produced by the site's own exporter, so fixture and production code cannot drift apart.</li>
+  <li><b>Google's client is stubbed.</b> The real one renders into a cross-origin iframe and needs an origin registered to the client ID, so the suite serves its own script in place of it. The component's loading path still runs unchanged — it asks for the script, waits for it, and calls the same three methods.</li>
+</ul>
+<div class="callout">
+  <b>A test that cannot fail is worth nothing.</b> Two cases here were rewritten after they
+  passed against deliberately broken code. <code>setInputFiles</code> raises
+  <code>change</code> whatever the input already holds, so “pick the same file twice” could
+  never reproduce the bug it was written for; the assertion moved to the property that actually
+  makes the retry work — that the picker is left holding nothing. Every regression test in this
+  area is checked by reverting its fix and watching it go red.
+</div>
 
 <h3>The e2e layer uses page objects</h3>
 
