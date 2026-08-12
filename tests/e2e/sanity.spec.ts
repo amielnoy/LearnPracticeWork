@@ -46,7 +46,10 @@ test('a coding challenge reveals its solution on the second click', async ({ cha
   await expect(challenges.solution(0)).toBeVisible();
 });
 
-test('the back-to-top button appears after scrolling and returns to the top', async ({ home, page }) => {
+test('the back-to-top button appears after scrolling and returns to the top', async ({
+  home,
+  page,
+}) => {
   await expect(home.backToTop).not.toHaveClass(/show/);
 
   await page.evaluate(() => window.scrollTo(0, 2000));

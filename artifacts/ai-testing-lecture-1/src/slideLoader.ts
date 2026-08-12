@@ -1,17 +1,16 @@
 import { createElement, type ComponentType } from 'react';
 import manifestJson from '@/data/slides-manifest.json';
-import {
-  parseSlidesManifest,
-  type SlideEntry,
-} from '@/data/slidesManifestSchema';
+import { parseSlidesManifest, type SlideEntry } from '@/data/slidesManifestSchema';
 import { SdmSlide } from '@/.sdm/SdmSlide';
 
 export interface LoadedSlide extends SlideEntry {
   Component: ComponentType;
 }
 
-const slideModules: Record<string, { default: ComponentType }> =
-  import.meta.glob('./pages/slides/*.tsx', { eager: true });
+const slideModules: Record<string, { default: ComponentType }> = import.meta.glob(
+  './pages/slides/*.tsx',
+  { eager: true },
+);
 
 const sdmModules: Record<string, { default: unknown }> = import.meta.glob(
   './data/slides/*.sdm.json',
@@ -60,7 +59,7 @@ const manifestSlides = loadManifestSlides();
 
 export const slides: LoadedSlide[] = [...manifestSlides]
   .sort((a, b) => a.position - b.position)
-  .map((entry) => {
+  .map(entry => {
     if (entry.kind === 'sdm') {
       const filename = `${entry.id}.sdm.json`;
       const expectedPath = `src/data/slides/${filename}`;

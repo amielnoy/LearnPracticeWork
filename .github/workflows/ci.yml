@@ -126,16 +126,43 @@ jobs:
 
       # Every suite above wrote into the shared repo-root `allure-results`, so a
       # single generate covers the whole run.
-      - name: Generate the Allure report
+      #
+      # Two formats, because the two delivery channels want different things.
+      # The multi-file report is what gets published: it is an ordinary static
+      # site of many small files, which is what a web server serves well. The
+      # single-file build inlines the whole report into one `index.html` so it
+      # can be downloaded and opened without a server — convenient to hand
+      # someone, and hopeless to publish.
+      #
+      # They were the same thing until that single file passed roughly 6 MB and
+      # GitHub's Pages build began failing on it outright: three runs in a row
+      # errored, the last success having been at 5.8 MB. Test output only grows,
+      # so the published copy is the one that must not be a single huge file.
+      - name: Generate the Allure report (published, multi-file)
         if: ${{ !cancelled() }}
         run: pnpm run report:allure
 
+      - name: Generate the Allure report (downloadable, single file)
+        if: ${{ !cancelled() }}
+        run: pnpm run report:allure:single
+
+      # The published copy, consumed by the `publish-allure` job below.
       - name: Upload the Allure report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
           path: allure-report
+          retention-days: 14
+          if-no-files-found: warn
+
+      # The open-it-locally copy. Download, unzip, open `index.html` — no server.
+      - name: Upload the single-file Allure report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-single-file
+          path: allure-report-single
           retention-days: 14
           if-no-files-found: warn
 
@@ -217,6 +244,34 @@ jobs:
         with:
           enablement: true
 
+      # `configure-pages` enables Pages when it is missing, but it will not
+      # convert a site that is already enabled. A repo left on "Deploy from a
+      # branch" therefore keeps that setting, and GitHub's own
+      # pages-build-deployment publishes the branch root instead of `_site` —
+      # while every job here, deploy-pages included, still reports success.
+      #
+      # That is not hypothetical. It is how this site spent its time serving its
+      # own source tree (`/package.json` 200, `/` 404) across green runs. Failing
+      # loudly is the whole point: a deployment nobody serves is worse than one
+      # that does not run.
+      - name: Require Pages to build from this workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          read_type() { gh api "repos/${{ github.repository }}/pages" --jq .build_type; }
+          current=$(read_type)
+          if [ "$current" != "workflow" ]; then
+            echo "Pages build_type is '$current' — setting it to 'workflow'."
+            gh api -X PUT "repos/${{ github.repository }}/pages" -f build_type=workflow
+            current=$(read_type)
+          fi
+          if [ "$current" != "workflow" ]; then
+            echo "::error::Pages build_type is '$current', not 'workflow'. The artifact uploaded below would never be served. Set Settings → Pages → Source to 'GitHub Actions'."
+            exit 1
+          fi
+          echo "Pages build_type is 'workflow'."
+
       # Pages serves a project site from /<repo>/, so every artifact's Vite
       # `base` has to carry that prefix or the hashed asset URLs 404. Prefer the
       # path Pages itself reports — a custom domain or a user/org site is served
@@ -291,6 +346,10 @@ jobs:
     # the hyphen as subtraction.)
     if: ${{ !cancelled() && needs['build-pages'].result == 'success' }}
     runs-on: ubuntu-latest
+    # GitHub's Pages backend has recently taken slightly longer than the
+    # deploy action's 10-minute default even though the artifact was accepted.
+    # Keep the wait bounded, but leave enough room for a slow Pages publish.
+    timeout-minutes: 25
     permissions:
       pages: write
       id-token: write
@@ -300,6 +359,8 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: '1200000'
 
   publish-allure:
     name: Publish the Allure report
@@ -312,8 +373,9 @@ jobs:
     #   • Secret ALLURE_PAGES_TOKEN — a token (classic PAT with `repo`, or a
     #     fine-grained token with Contents: write on the target repo) that can
     #     push to the reports repository.
-    #   • The target repo itself, with Pages set to "Deploy from a branch" on
-    #     `main` / (root) — which is where this job force-pushes the report.
+    #   • The target repo itself, with its deployment workflow on `main` and
+    #     Pages set to "GitHub Actions". Generated report files live on
+    #     `gh-pages`, so publishing cannot delete the deployment workflow.
     #     Defaults to <owner>/allure-report-learn-practice-deploy; override with
     #     the repository variable ALLURE_PAGES_REPO if you rename it.
     needs: [gate, test]
@@ -351,12 +413,22 @@ jobs:
         with:
           personal_token: ${{ env.ALLURE_PAGES_TOKEN }}
           external_repository: ${{ vars.ALLURE_PAGES_REPO || format('{0}/allure-report-learn-practice-deploy', github.repository_owner) }}
-          publish_branch: main
+          publish_branch: gh-pages
           publish_dir: ./allure-report
           keep_files: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Allure report from ${{ github.repository }}@${{ github.sha }}'
+
+      # The reports repository keeps its Pages workflow on `main`, while the
+      # generated site is force-pushed to `gh-pages`. Explicitly notify that
+      # workflow after each publish so it can package and deploy the new report.
+      - name: Deploy the published report
+        if: ${{ env.ALLURE_PAGES_TOKEN != '' && hashFiles('allure-report/index.html') != '' }}
+        env:
+          GH_TOKEN: ${{ env.ALLURE_PAGES_TOKEN }}
+          REPORT_REPO: ${{ vars.ALLURE_PAGES_REPO || format('{0}/allure-report-learn-practice-deploy', github.repository_owner) }}
+        run: gh api --method POST "repos/${REPORT_REPO}/dispatches" -f event_type=report-published
 
       # Put the report's OWN Pages URL in the run summary, so the correct link is
       # one click away here — the portfolio's Pages URL shown on the "Publish to

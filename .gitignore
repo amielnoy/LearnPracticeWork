@@ -20,6 +20,7 @@ playwright/.cache
 # Allure (results are generated per-run; report is generated from them)
 allure-results
 allure-report
+allure-report-single
 
 # IDEs and editors
 /.idea
@@ -57,3 +58,8 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Local env overrides. Unlike the committed `.env` files, which hold only
+# public build-time config, this is where anything you would not publish goes.
+.env.local
+.env.*.local

@@ -26,7 +26,11 @@ function renderInline(text: string): ReactNode {
     if (match.index > last) out.push(text.slice(last, match.index));
     const key = `${match.index}`;
     if (match[1] !== undefined) {
-      out.push(<code className="inline" key={key}>{match[1]}</code>);
+      out.push(
+        <code className="inline" key={key}>
+          {match[1]}
+        </code>,
+      );
     } else {
       out.push(<em key={key}>{match[2]}</em>);
     }
@@ -55,8 +59,7 @@ interface QuestionCardProps {
 export function QuestionCard({ item, labels, onComplete }: QuestionCardProps) {
   const { stage, next, isRevealed } = useDisclosure(STAGE_COUNT);
 
-  const cue =
-    stage === ANSWER ? labels.hide : stage === HINT ? labels.showAnswer : labels.showHint;
+  const cue = stage === ANSWER ? labels.hide : stage === HINT ? labels.showAnswer : labels.showHint;
 
   return (
     <li className="q-item">

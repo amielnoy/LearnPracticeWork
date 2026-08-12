@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in npm/*|yarn/*) echo \"Use pnpm instead\" >&2; exit 1 ;; *) ;; esac'",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "format": "prettier --write \"artifacts/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\" \"scripts/**/*.{ts,tsx}\" \"*.mts\"",
+    "format:check": "prettier --check \"artifacts/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\" \"scripts/**/*.{ts,tsx}\" \"*.mts\"",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --filter \"./tests\" --if-present run typecheck",
     "test": "pnpm --filter @workspace/tests run test",
@@ -14,6 +16,7 @@
     "test:contract": "pnpm --filter @workspace/tests run test:contract",
     "test:e2e": "pnpm --filter @workspace/tests run test:e2e",
     "report:allure": "pnpm --filter @workspace/tests run report:allure",
+    "report:allure:single": "pnpm --filter @workspace/tests run report:allure:single",
     "report:allure:serve": "pnpm --filter @workspace/tests run report:allure:serve"
   },
   "private": true,

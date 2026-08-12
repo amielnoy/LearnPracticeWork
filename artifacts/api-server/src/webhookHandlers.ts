@@ -5,8 +5,10 @@ export class WebhookHandlers {
     if (!Buffer.isBuffer(payload)) {
       throw new Error(
         'STRIPE WEBHOOK ERROR: Payload must be a Buffer. ' +
-        'Received type: ' + typeof payload + '. ' +
-        'FIX: Ensure webhook route is registered BEFORE app.use(express.json()).'
+          'Received type: ' +
+          typeof payload +
+          '. ' +
+          'FIX: Ensure webhook route is registered BEFORE app.use(express.json()).',
       );
     }
 

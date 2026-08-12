@@ -31,17 +31,41 @@ export default function TitleSlide() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('COURSE OVERVIEW', 'סקירת הקורס')}</div>
           <div>{t('LECTURE 01', 'הרצאה 01')}</div>
         </div>
       </div>
 
       {/* Left column */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
         <div
           style={{
             fontSize: '1.2vw',
@@ -54,13 +78,30 @@ export default function TitleSlide() {
         >
           {t('Lecture Series \u2014 AI Testing Track', 'סדרת הרצאות \u2014 מסלול בדיקות AI')}
         </div>
-        <h1 style={{ fontSize: '4.6vw', fontWeight: 800, margin: '0 0 2vh 0', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '4.6vw',
+            fontWeight: 800,
+            margin: '0 0 2vh 0',
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {t('Introduction to AI Testing', 'מבוא לבדיקות AI')}
         </h1>
-        <p style={{ fontSize: '1.5vw', fontWeight: 400, color: '#475569', margin: '0 0 4vh 0', lineHeight: 1.5, maxWidth: '38vw' }}>
+        <p
+          style={{
+            fontSize: '1.5vw',
+            fontWeight: 400,
+            color: '#475569',
+            margin: '0 0 4vh 0',
+            lineHeight: 1.5,
+            maxWidth: '38vw',
+          }}
+        >
           {t(
             'How do you test software that gives a different answer every time you ask it the same question?',
-            'כיצד בודקים תוכנה שנותנת תשובה שונה בכל פעם שמציגים לה את אותה שאלה?'
+            'כיצד בודקים תוכנה שנותנת תשובה שונה בכל פעם שמציגים לה את אותה שאלה?',
           )}
         </p>
 
@@ -76,7 +117,15 @@ export default function TitleSlide() {
               boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Lecture Number', 'מספר הרצאה')}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '1vw' }}>
@@ -106,7 +155,15 @@ export default function TitleSlide() {
               boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Run Time', 'משך זמן')}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '1vw' }}>
@@ -129,7 +186,14 @@ export default function TitleSlide() {
       </div>
 
       {/* Right column - roadmap panel */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <div
           style={{
             background: '#FFFFFF',
@@ -145,7 +209,9 @@ export default function TitleSlide() {
             boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
           }}
         >
-          <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#1E3A5F' }}>{t("Today\u2019s Roadmap", 'מפת הדרך להיום')}</div>
+          <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#1E3A5F' }}>
+            {t('Today\u2019s Roadmap', 'מפת הדרך להיום')}
+          </div>
 
           <div
             style={{
@@ -158,21 +224,117 @@ export default function TitleSlide() {
               paddingBottom: '1vh',
             }}
           >
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1vh' }}>
-              <div style={{ width: '100%', height: '7vh', backgroundColor: 'rgba(13, 148, 136, 0.2)', borderRadius: '0.4vw 0.4vw 0 0' }} />
-              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>{t('Foundations', 'יסודות')}</div>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1vh',
+              }}
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '7vh',
+                  backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                  borderRadius: '0.4vw 0.4vw 0 0',
+                }}
+              />
+              <div
+                style={{
+                  fontSize: '0.85vw',
+                  color: '#64748B',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                }}
+              >
+                {t('Foundations', 'יסודות')}
+              </div>
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1vh' }}>
-              <div style={{ width: '100%', height: '11vh', backgroundColor: 'rgba(13, 148, 136, 0.4)', borderRadius: '0.4vw 0.4vw 0 0' }} />
-              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>{t('Core Challenge', 'האתגר המרכזי')}</div>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1vh',
+              }}
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '11vh',
+                  backgroundColor: 'rgba(13, 148, 136, 0.4)',
+                  borderRadius: '0.4vw 0.4vw 0 0',
+                }}
+              />
+              <div
+                style={{
+                  fontSize: '0.85vw',
+                  color: '#64748B',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                }}
+              >
+                {t('Core Challenge', 'האתגר המרכזי')}
+              </div>
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1vh' }}>
-              <div style={{ width: '100%', height: '15vh', backgroundColor: 'rgba(13, 148, 136, 0.7)', borderRadius: '0.4vw 0.4vw 0 0' }} />
-              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>{t('Evaluation', 'הערכה')}</div>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1vh',
+              }}
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '15vh',
+                  backgroundColor: 'rgba(13, 148, 136, 0.7)',
+                  borderRadius: '0.4vw 0.4vw 0 0',
+                }}
+              />
+              <div
+                style={{
+                  fontSize: '0.85vw',
+                  color: '#64748B',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                }}
+              >
+                {t('Evaluation', 'הערכה')}
+              </div>
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1vh' }}>
-              <div style={{ width: '100%', height: '19vh', backgroundColor: '#0D9488', borderRadius: '0.4vw 0.4vw 0 0' }} />
-              <div style={{ fontSize: '0.85vw', color: '#64748B', fontWeight: 500, textAlign: 'center' }}>{t('Practice', 'תרגול')}</div>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1vh',
+              }}
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '19vh',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '0.4vw 0.4vw 0 0',
+                }}
+              />
+              <div
+                style={{
+                  fontSize: '0.85vw',
+                  color: '#64748B',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                }}
+              >
+                {t('Practice', 'תרגול')}
+              </div>
             </div>
           </div>
         </div>

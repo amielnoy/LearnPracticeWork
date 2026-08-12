@@ -23,9 +23,7 @@ test.describe('esc', () => {
   });
 
   test('neutralises a script tag', () => {
-    expect(esc('<script>alert(1)</script>')).toBe(
-      '&lt;script&gt;alert(1)&lt;/script&gt;',
-    );
+    expect(esc('<script>alert(1)</script>')).toBe('&lt;script&gt;alert(1)&lt;/script&gt;');
   });
 
   test('treats null and undefined as the empty string', () => {
@@ -130,9 +128,7 @@ test.describe('linkifyHtml', () => {
   });
 
   test('escapes markup in the surrounding text', () => {
-    expect(linkifyHtml('<img src=x onerror=alert(1)>')).toBe(
-      '&lt;img src=x onerror=alert(1)&gt;',
-    );
+    expect(linkifyHtml('<img src=x onerror=alert(1)>')).toBe('&lt;img src=x onerror=alert(1)&gt;');
   });
 
   test('escapes markup inside a link label', () => {
@@ -176,9 +172,7 @@ test.describe('markdownLineToPlain', () => {
   test('records a bare URL exactly once', () => {
     const { plain, links } = markdownLineToPlain('see https://example.com');
     expect(plain).toBe('see https://example.com');
-    expect(links).toEqual([
-      { label: 'https://example.com', href: 'https://example.com' },
-    ]);
+    expect(links).toEqual([{ label: 'https://example.com', href: 'https://example.com' }]);
   });
 
   test('leaves a plain line untouched', () => {
@@ -265,18 +259,19 @@ test.describe('pdfItemsToText', () => {
   });
 
   test('keeps the spaces pdf.js already worked out', () => {
-    expect(pdfItemsToText([{ str: 'Amiel Peled ' }, { str: 'DevOps' }]))
-      .toBe('Amiel Peled DevOps');
+    expect(pdfItemsToText([{ str: 'Amiel Peled ' }, { str: 'DevOps' }])).toBe('Amiel Peled DevOps');
   });
 
   test('breaks a line where pdf.js says one ends', () => {
-    expect(pdfItemsToText([{ str: 'first', hasEOL: true }, { str: 'second' }]))
-      .toBe('first\nsecond');
+    expect(pdfItemsToText([{ str: 'first', hasEOL: true }, { str: 'second' }])).toBe(
+      'first\nsecond',
+    );
   });
 
   test('does not split a URL that changes style part way through', () => {
-    expect(pdfItemsToText([{ str: 'https://example.com/' }, { str: 'amielnoy' }]))
-      .toBe('https://example.com/amielnoy');
+    expect(pdfItemsToText([{ str: 'https://example.com/' }, { str: 'amielnoy' }])).toBe(
+      'https://example.com/amielnoy',
+    );
   });
 
   test('returns the empty string for a page with no text', () => {

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { test, expect } from '@playwright/test';
+import { test, expect, labelApiSuite } from '../support/apiFixtures';
 import { parse as parseYaml } from 'yaml';
 import * as apiZod from '@workspace/api-zod';
 
@@ -48,14 +48,13 @@ interface DocumentedOperation {
   operation: OpenApiOperation;
 }
 
-const documented: DocumentedOperation[] = Object.entries(spec.paths).flatMap(
-  ([route, methods]) =>
-    HTTP_METHODS.filter(method => methods[method]).map(method => ({
-      method,
-      route,
-      url: `${basePath}${route}`,
-      operation: methods[method]!,
-    })),
+const documented: DocumentedOperation[] = Object.entries(spec.paths).flatMap(([route, methods]) =>
+  HTTP_METHODS.filter(method => methods[method]).map(method => ({
+    method,
+    route,
+    url: `${basePath}${route}`,
+    operation: methods[method]!,
+  })),
 );
 
 /** Orval names a response schema after the operation: healthCheck → HealthCheckResponse. */
@@ -70,6 +69,10 @@ function isZodObject(value: unknown): value is {
 } {
   return typeof value === 'object' && value !== null && 'shape' in value;
 }
+
+test.beforeEach(async () => {
+  await labelApiSuite('OpenAPI contract');
+});
 
 test.describe('the spec itself', () => {
   test('documents at least one operation', () => {
@@ -106,10 +109,8 @@ test.describe('spec ↔ generated Zod schemas', () => {
 
 test.describe('spec ↔ running server', () => {
   for (const { method, route, url, operation } of documented) {
-    test(`${method.toUpperCase()} ${route} answers with a documented status`, async ({
-      request,
-    }) => {
-      const response = await request.fetch(url, { method: method.toUpperCase() });
+    test(`${method.toUpperCase()} ${route} answers with a documented status`, async ({ api }) => {
+      const response = await api.fetch(url, { method: method.toUpperCase() });
 
       expect(
         Object.keys(operation.responses),
@@ -118,9 +119,9 @@ test.describe('spec ↔ running server', () => {
     });
 
     test(`${method.toUpperCase()} ${route} answers with a documented media type`, async ({
-      request,
+      api,
     }) => {
-      const response = await request.fetch(url, { method: method.toUpperCase() });
+      const response = await api.fetch(url, { method: method.toUpperCase() });
       const documentedTypes = Object.keys(
         operation.responses[String(response.status())]?.content ?? {},
       );
@@ -131,19 +132,18 @@ test.describe('spec ↔ running server', () => {
       );
     });
 
-    test(`${method.toUpperCase()} ${route} returns a body its schema accepts`, async ({
-      request,
-    }) => {
+    test(`${method.toUpperCase()} ${route} returns a body its schema accepts`, async ({ api }) => {
       const schema = generatedSchemaFor(operation.operationId);
       test.skip(!isZodObject(schema), 'no generated object schema for this operation');
 
-      const response = await request.fetch(url, { method: method.toUpperCase() });
+      const response = await api.fetch(url, { method: method.toUpperCase() });
       const body = await response.json();
 
       // Strict: an undocumented extra field is drift too, and clients that
       // round-trip the payload will silently drop it.
-      expect(() => (schema as { strict(): { parse(d: unknown): unknown } }).strict().parse(body))
-        .not.toThrow();
+      expect(() =>
+        (schema as { strict(): { parse(d: unknown): unknown } }).strict().parse(body),
+      ).not.toThrow();
     });
   }
 });
@@ -175,8 +175,8 @@ test.describe('undocumented routes', () => {
   });
 
   for (const entry of UNDOCUMENTED_ROUTES.filter(r => r.probe !== false)) {
-    test(`${entry.method} ${entry.route} is implemented`, async ({ request }) => {
-      const response = await request.fetch(`${basePath}${entry.route}`, {
+    test(`${entry.method} ${entry.route} is implemented`, async ({ api }) => {
+      const response = await api.fetch(`${basePath}${entry.route}`, {
         method: entry.method,
         ...(entry.method === 'POST' ? { data: {} } : {}),
       });

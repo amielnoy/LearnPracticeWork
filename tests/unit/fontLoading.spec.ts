@@ -60,10 +60,9 @@ for (const site of SITES) {
         .filter(isFontStylesheet)
         .filter(tag => !/media\s*=\s*["']print["']/i.test(tag));
 
-      expect(
-        blocking,
-        'a font stylesheet without media="print" blocks the first paint',
-      ).toEqual([]);
+      expect(blocking, 'a font stylesheet without media="print" blocks the first paint').toEqual(
+        [],
+      );
     });
 
     test('fetches the font CSS early with a preload', () => {
@@ -89,9 +88,7 @@ for (const site of SITES) {
       const html = read(site.html);
       const noscript = html.match(/<noscript[\s\S]*?<\/noscript>/i)?.[0] ?? '';
 
-      expect(noscript, 'no <noscript> fallback for the font CSS').toContain(
-        'fonts.googleapis.com',
-      );
+      expect(noscript, 'no <noscript> fallback for the font CSS').toContain('fonts.googleapis.com');
     });
 
     test('warms up both font hosts with preconnect', () => {

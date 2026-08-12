@@ -15,6 +15,19 @@ allowBuilds:
 
 autoInstallPeers: false
 
+# Replit's deployment builder installs the pnpm pinned by `packageManager` with
+# a bare `pnpm add pnpm@<version>` run at the repository root. In a workspace
+# pnpm refuses that without an explicit `-w`, failing the Build stage with
+# ERR_PNPM_ADDING_TO_ROOT before any of this project's own build commands run —
+# and the builder passes `--loglevel=error`, so the only thing surfaced is
+# "Command failed with exit code 1".
+#
+# The command is the platform's and cannot be given the flag, so the check is
+# turned off here instead. It only ever guarded against a mistyped `pnpm add`
+# landing in the root rather than in a package; adding to the root is precisely
+# what the bootstrap intends.
+ignoreWorkspaceRootCheck: true
+
 catalog:
   '@replit/vite-plugin-cartographer': ^0.5.1
   '@replit/vite-plugin-dev-banner': ^0.1.1

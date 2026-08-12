@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Zap,
-  Brain,
-  Target,
-  Workflow,
-  Users,
-  BarChart3,
-  Rocket,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Zap, Brain, Target, Workflow, Users, BarChart3, Rocket } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
+const FadeIn = ({
+  children,
+  delay = 0,
+  className = '',
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-100px" }}
+    viewport={{ once: true, margin: '-100px' }}
     transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
     className={className}
   >
@@ -26,95 +25,95 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
 
 const tabs = [
   {
-    id: "vision",
-    label: "The Shift",
+    id: 'vision',
+    label: 'The Shift',
     icon: Rocket,
-    title: "Shift Your Test Automation to the AI Era",
+    title: 'Shift Your Test Automation to the AI Era',
     content: `I provide a comprehensive AI Test Automation transformation service that takes your team from traditional scripted testing into the AI-powered quality engineering era. This isn't just tooling—it's a strategic shift in how your organization approaches quality, velocity, and engineering culture.`,
     bullets: [
-      "Move from brittle, high-maintenance test suites to self-healing, AI-augmented automation",
-      "Replace manual test authoring with AI-generated scenarios from requirements and user stories",
-      "Empower your QA engineers to become AI-first quality architects",
-      "Achieve predictive quality insights instead of reactive bug hunting",
+      'Move from brittle, high-maintenance test suites to self-healing, AI-augmented automation',
+      'Replace manual test authoring with AI-generated scenarios from requirements and user stories',
+      'Empower your QA engineers to become AI-first quality architects',
+      'Achieve predictive quality insights instead of reactive bug hunting',
     ],
   },
   {
-    id: "methodology",
-    label: "How It Works",
+    id: 'methodology',
+    label: 'How It Works',
     icon: Workflow,
-    title: "My Transformation Methodology",
+    title: 'My Transformation Methodology',
     content: `A hands-on, phased engagement designed to minimize disruption while maximizing adoption. I work directly with your team to build AI capabilities into your existing pipelines, not alongside them.`,
     bullets: [
-      "Audit: Deep analysis of your current automation stack, flakiness hotspots, and AI readiness",
-      "Pilot: Deploy self-healing selectors and smart assertions on your most painful test suites",
-      "Scale: Roll out AI test generation integrated with your CI/CD, Jira, and API contracts",
-      "Optimize: Continuous feedback loops with predictive dashboards and team coaching",
+      'Audit: Deep analysis of your current automation stack, flakiness hotspots, and AI readiness',
+      'Pilot: Deploy self-healing selectors and smart assertions on your most painful test suites',
+      'Scale: Roll out AI test generation integrated with your CI/CD, Jira, and API contracts',
+      'Optimize: Continuous feedback loops with predictive dashboards and team coaching',
     ],
   },
   {
-    id: "solutions",
-    label: "What I Deliver",
+    id: 'solutions',
+    label: 'What I Deliver',
     icon: Zap,
-    title: "AI Test Automation Solutions I Provide",
+    title: 'AI Test Automation Solutions I Provide',
     content: `Practical, production-ready implementations that your team owns and operates. Every solution is tailored to your tech stack and integrated into your delivery pipeline.`,
     bullets: [
-      "Self-healing UI automation using Playwright + AI selectors that adapt to DOM changes",
-      "AI-generated test cases from natural language requirements, PRDs, and API specs",
-      "Visual regression testing powered by computer vision and LLM-based reasoning",
-      "Intelligent test data synthesis with edge-case generation and privacy-safe synthetic data",
+      'Self-healing UI automation using Playwright + AI selectors that adapt to DOM changes',
+      'AI-generated test cases from natural language requirements, PRDs, and API specs',
+      'Visual regression testing powered by computer vision and LLM-based reasoning',
+      'Intelligent test data synthesis with edge-case generation and privacy-safe synthetic data',
     ],
   },
   {
-    id: "impact",
-    label: "Results",
+    id: 'impact',
+    label: 'Results',
     icon: BarChart3,
-    title: "Measurable Results for Your Team",
+    title: 'Measurable Results for Your Team',
     content: `Real outcomes from teams I've guided through the AI Test Automation shift. These numbers reflect what happens when AI is embedded into quality engineering, not bolted on top.`,
     bullets: [
-      "40-60% reduction in time spent authoring and maintaining test cases",
-      "Up to 80% reduction in flaky test failures through self-healing mechanisms",
-      "3x faster feedback loops: AI catches issues at commit time, not in staging",
-      "Expanded test coverage without expanding headcount or budget",
+      '40-60% reduction in time spent authoring and maintaining test cases',
+      'Up to 80% reduction in flaky test failures through self-healing mechanisms',
+      '3x faster feedback loops: AI catches issues at commit time, not in staging',
+      'Expanded test coverage without expanding headcount or budget',
     ],
   },
   {
-    id: "team",
-    label: "Team Growth",
+    id: 'team',
+    label: 'Team Growth',
     icon: Users,
-    title: "I Grow Your Team, Not Replace Them",
+    title: 'I Grow Your Team, Not Replace Them',
     content: `The most successful AI transformations happen when the existing team becomes the driver. I provide intensive upskilling so your engineers lead the AI era, not watch it from the sidelines.`,
     bullets: [
-      "Hands-on workshops: prompt engineering for test generation, debugging, and maintenance",
-      "Tool evaluation and integration coaching for Playwright, GitHub Actions, Azure DevOps, and AI APIs",
-      "Building internal AI champions who train and support the rest of the team",
+      'Hands-on workshops: prompt engineering for test generation, debugging, and maintenance',
+      'Tool evaluation and integration coaching for Playwright, GitHub Actions, Azure DevOps, and AI APIs',
+      'Building internal AI champions who train and support the rest of the team',
       "Ongoing mentorship program tuned to your team's pace and tech stack",
     ],
   },
   {
-    id: "roadmap",
-    label: "Engagement",
+    id: 'roadmap',
+    label: 'Engagement',
     icon: Target,
-    title: "Engagement Roadmap",
+    title: 'Engagement Roadmap',
     content: `A focused, time-boxed engagement that delivers visible results within weeks. Designed for teams who want to lead the shift to AI-powered quality, not follow it.`,
     bullets: [
-      "Week 1-2: Assessment of current automation maturity and AI opportunity mapping",
-      "Month 1: Pilot rollout with self-healing automation on critical user journeys",
-      "Month 2-3: Full AI generation pipeline + team training and knowledge transfer",
-      "Month 4-6: Predictive quality dashboards, continuous optimization, and team autonomy",
+      'Week 1-2: Assessment of current automation maturity and AI opportunity mapping',
+      'Month 1: Pilot rollout with self-healing automation on critical user journeys',
+      'Month 2-3: Full AI generation pipeline + team training and knowledge transfer',
+      'Month 4-6: Predictive quality dashboards, continuous optimization, and team autonomy',
     ],
   },
 ];
 
 export default function AITransformation() {
-  const [activeTab, setActiveTab] = useState("vision");
-  const active = tabs.find((t) => t.id === activeTab)!;
+  const [activeTab, setActiveTab] = useState('vision');
+  const active = tabs.find(t => t.id === activeTab)!;
 
   useEffect(() => {
-    const BASE = "https://free-tier-insights--amielpeled.replit.app";
+    const BASE = 'https://free-tier-insights--amielpeled.replit.app';
     const PAGE_URL = `${BASE}/ai-test-transformation`;
-    const PAGE_TITLE = "AI Test Transformation Services | Amiel Peled";
+    const PAGE_TITLE = 'AI Test Transformation Services | Amiel Peled';
     const PAGE_DESC =
-      "Hands-on AI test automation transformation — self-healing UI tests, AI-generated scenarios, CI/CD integration, and team upskilling for engineering teams.";
+      'Hands-on AI test automation transformation — self-healing UI tests, AI-generated scenarios, CI/CD integration, and team upskilling for engineering teams.';
 
     // Title
     document.title = PAGE_TITLE;
@@ -122,10 +121,8 @@ export default function AITransformation() {
     const setMeta = (selector: string, attr: string, value: string) => {
       let el = document.querySelector<HTMLMetaElement>(selector);
       if (!el) {
-        el = document.createElement("meta");
-        const [attrName, attrValue] = selector
-          .replace(/[\[\]"]/g, "")
-          .split("=");
+        el = document.createElement('meta');
+        const [attrName, attrValue] = selector.replace(/[\[\]"]/g, '').split('=');
         el.setAttribute(attrName, attrValue);
         document.head.appendChild(el);
       }
@@ -135,24 +132,24 @@ export default function AITransformation() {
     const setLink = (rel: string, href: string) => {
       let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
       if (!el) {
-        el = document.createElement("link");
-        el.setAttribute("rel", rel);
+        el = document.createElement('link');
+        el.setAttribute('rel', rel);
         document.head.appendChild(el);
       }
-      el.setAttribute("href", href);
+      el.setAttribute('href', href);
     };
 
-    setMeta('meta[name="description"]', "content", PAGE_DESC);
-    setMeta('meta[property="og:title"]', "content", PAGE_TITLE);
-    setMeta('meta[property="og:description"]', "content", PAGE_DESC);
-    setMeta('meta[property="og:url"]', "content", PAGE_URL);
-    setMeta('meta[property="twitter:title"]', "content", PAGE_TITLE);
-    setMeta('meta[property="twitter:description"]', "content", PAGE_DESC);
-    setLink("canonical", PAGE_URL);
+    setMeta('meta[name="description"]', 'content', PAGE_DESC);
+    setMeta('meta[property="og:title"]', 'content', PAGE_TITLE);
+    setMeta('meta[property="og:description"]', 'content', PAGE_DESC);
+    setMeta('meta[property="og:url"]', 'content', PAGE_URL);
+    setMeta('meta[property="twitter:title"]', 'content', PAGE_TITLE);
+    setMeta('meta[property="twitter:description"]', 'content', PAGE_DESC);
+    setLink('canonical', PAGE_URL);
 
     return () => {
       // Restore homepage defaults on unmount
-      document.title = "Amiel Peled - AI Test Automation & DevOps Tech Lead";
+      document.title = 'Amiel Peled - AI Test Automation & DevOps Tech Lead';
     };
   }, []);
 
@@ -189,7 +186,9 @@ export default function AITransformation() {
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              I provide AI Test Automation transformation services that move your team from legacy testing practices into AI-powered quality engineering. A strategic, hands-on program for organizations ready to lead.
+              I provide AI Test Automation transformation services that move your team from legacy
+              testing practices into AI-powered quality engineering. A strategic, hands-on program
+              for organizations ready to lead.
             </p>
           </FadeIn>
         </div>
@@ -199,7 +198,7 @@ export default function AITransformation() {
       <section className="px-6 pb-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-wrap justify-center gap-2">
-            {tabs.map((tab) => {
+            {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
@@ -208,9 +207,10 @@ export default function AITransformation() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`
                     flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all
-                    ${isActive
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-card border hover:border-primary/50 text-muted-foreground hover:text-foreground"
+                    ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'bg-card border hover:border-primary/50 text-muted-foreground hover:text-foreground'
                     }
                   `}
                 >
@@ -234,15 +234,10 @@ export default function AITransformation() {
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold">{active.title}</h2>
               </div>
-              <p className="text-muted-foreground leading-relaxed mb-8 text-lg">
-                {active.content}
-              </p>
+              <p className="text-muted-foreground leading-relaxed mb-8 text-lg">{active.content}</p>
               <ul className="space-y-4">
                 {active.bullets.map((bullet, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-3 p-4 rounded-xl bg-secondary/30"
-                  >
+                  <li key={i} className="flex items-start gap-3 p-4 rounded-xl bg-secondary/30">
                     <Zap className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <span className="font-medium">{bullet}</span>
                   </li>
@@ -263,7 +258,9 @@ export default function AITransformation() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" className="rounded-full font-bold px-8" asChild>
-                <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation">AI Test Transformation</a>
+                <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation">
+                  AI Test Transformation
+                </a>
               </Button>
               <Button size="lg" variant="outline" className="rounded-full font-bold px-8" asChild>
                 <a href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noreferrer">
