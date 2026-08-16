@@ -209,7 +209,7 @@ export function InterviewAgent() {
         className="interview-illustration reveal"
         loading="lazy"
         width={1024}
-        height={1024}
+        height={483}
       />
       <div className="agent-box reveal">
         <h3>{t.boxTitle}</h3>
