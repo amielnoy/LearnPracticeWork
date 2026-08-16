@@ -4,6 +4,7 @@ import { useProviderContext } from '../context/ProviderContext';
 import { useReveal } from '../hooks/useReveal';
 import type { Message } from '../lib/providers';
 import { useProgress } from '../context/ProgressContext';
+import mockInterviewImage from '../assets/mock-interview.jpg';
 
 interface ChatMsg {
   cls: 'ai' | 'user' | 'sys';
@@ -202,6 +203,14 @@ export function InterviewAgent() {
         <span className="num">{t.num}</span> {t.title}
       </h2>
       <p className="lead reveal">{t.lead}</p>
+      <img
+        src={mockInterviewImage}
+        alt={t.imageAlt}
+        className="interview-illustration reveal"
+        loading="lazy"
+        width={1024}
+        height={1024}
+      />
       <div className="agent-box reveal">
         <h3>{t.boxTitle}</h3>
         <p className="notice" style={{ marginBottom: '12px' }}>

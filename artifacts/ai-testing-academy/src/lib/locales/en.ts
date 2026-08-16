@@ -164,6 +164,8 @@ export const en = {
     num: '02',
     title: 'Agent 2 — Mock Interview',
     lead: 'Run a realistic QA-Automation interview with an AI interviewer — five stages, from HR to AI testing.',
+    imageAlt:
+      'A candidate confidently mirrors her interviewer\u2019s stiff, self-important posture with a playful, teasing grin.',
     boxTitle: '🎙️ Start your mock interview',
     notice:
       'Free AI usage starts automatically. If it is unavailable or exhausted, open Settings to connect your own provider.',
