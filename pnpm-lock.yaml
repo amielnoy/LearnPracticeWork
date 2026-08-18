@@ -181,12 +181,6 @@ importers:
         specifier: ~5.9.2
         version: 5.9.3
 
-  .local/share/pnpm/.tools/pnpm/11.20.0_tmp_909:
-    dependencies:
-      pnpm:
-        specifier: 11.20.0
-        version: 11.20.0
-
   artifacts/ai-testing-academy:
     dependencies:
       html2canvas:
@@ -3897,11 +3891,6 @@ packages:
   playwright@1.62.1:
     resolution: {integrity: sha512-0M+L3LAD8/nm554LOla9Ayx0j0tmFZ0FBcoQ7F1VuVHpM/XpiC8RcDzBQB8W5+hA8L22THxELzeF+2WcUzvcLg==}
     engines: {node: '>=20'}
-    hasBin: true
-
-  pnpm@11.20.0:
-    resolution: {integrity: sha512-mm8zCpW2ZEbqCI+vFSFAWooB8H/ecSTMmVjf7VLUu0NnN+ZbCPhfN7Rvy6N1CSVYrFEmK4FoRLIvY0Bu0Wa/7g==}
-    engines: {node: '>=22.13'}
     hasBin: true
 
   postcss-selector-parser@6.0.10:
@@ -8036,8 +8025,6 @@ snapshots:
       playwright-core: 1.62.1
     optionalDependencies:
       fsevents: 2.3.2
-
-  pnpm@11.20.0: {}
 
   postcss-selector-parser@6.0.10:
     dependencies:
