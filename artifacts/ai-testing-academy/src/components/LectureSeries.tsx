@@ -1,7 +1,7 @@
 import { useLocale } from '../context/LocaleContext';
 import { useReveal } from '../hooks/useReveal';
 
-interface LectureData {
+export interface LectureData {
   num: number;
   ready: boolean;
   title: string;
@@ -9,13 +9,13 @@ interface LectureData {
   url?: string;
 }
 
-interface TrackData {
+export interface TrackData {
   title: string;
   lead: string;
   lectures: LectureData[];
 }
 
-interface BankData {
+export interface BankData {
   nav: string;
   title: string;
   lead: string;
@@ -25,7 +25,7 @@ interface BankData {
   tracks: TrackData[];
 }
 
-const EN: BankData = {
+export const EN: BankData = {
   nav: '🎓 Lecture Series',
   title: '🎓 Lecture Series',
   lead: 'Two structured tracks of 10 in-depth lectures each — from AI testing fundamentals to advanced evaluation techniques, and from AI basics to foundational cybersecurity practice. Work through them in order, or jump to what you need most.',
@@ -171,7 +171,7 @@ const EN: BankData = {
   ],
 };
 
-const HE: BankData = {
+export const HE: BankData = {
   nav: '🎓 סדרת הרצאות',
   title: '🎓 סדרת הרצאות',
   lead: 'שני טראקים מובנים של 10 הרצאות כל אחד — מהיסודות של בדיקות AI ועד לטכניקות הערכה מתקדמות, ומיסודות הבינה המלאכותית ועד לתרגול אבטחת מידע בסיסי. עבדו לפי הסדר, או קפצו למה שאתם הכי צריכים.',

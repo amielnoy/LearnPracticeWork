@@ -1,0 +1,12 @@
+insert into lecture_items (id, track_id, position, num, ready, title, description, url) values (35, 4, 4, 5, false, 'ניתוח תוכנות זדוניות באמצעות למידת מכונה', 'סיווג וקיבוץ של דגימות תוכנה זדונית עם מודלי ML, ויסודות הניתוח הסטטי לעומת ההתנהגותי.', null);
+insert into lecture_items (id, track_id, position, num, ready, title, description, url) values (36, 4, 5, 6, false, 'אוטומציה של סריקת פגיעויות עם AI', 'כיצד סורקים מבוססי AI מתעדפים ומסננים פגיעויות, מפחיתים רעש ומאפשרים לצוותים להתמקד במה שחשוב.', null);
+insert into lecture_items (id, track_id, position, num, ready, title, description, url) values (37, 4, 6, 7, false, 'AI לניתוח לוגים וזיהוי אנומליות', 'הפיכת כמויות עצומות של לוגים להתראות שניתן לפעול לפיהן, באמצעות זיהוי אנומליות וטכניקות clustering מבוססות AI.', null);
+insert into lecture_items (id, track_id, position, num, ready, title, description, url) values (38, 4, 7, 8, false, 'אבטחת מערכות ה-AI עצמן', 'הצד השני של המטבע — הגנה על מערכות ה-AI שלכם מפני prompt injection, גניבת מודלים, הרעלת נתונים וסיכוני שרשרת אספקה.', null);
+insert into lecture_items (id, track_id, position, num, ready, title, description, url) values (39, 4, 8, 9, false, 'תגובה לאירועי אבטחה בסיוע AI', 'שימוש בעוזרי AI כדי להאיץ טריאז'', ניתוח שורש הבעיה ודיווח במהלך אירוע אבטחה חי.', null);
+insert into lecture_items (id, track_id, position, num, ready, title, description, url) values (40, 4, 9, 10, false, 'בניית אסטרטגיית AI לאבטחת מידע', 'הכל ביחד — מפת דרכים מעשית לאימוץ AI על פני זיהוי, תגובה ומניעה בתוכנית האבטחה שלכם.', null);
+select setval('question_bank_stages_id_seq', 10);
+select setval('question_bank_items_id_seq', 150);
+select setval('coding_challenge_levels_id_seq', 6);
+select setval('coding_challenges_id_seq', 80);
+select setval('lecture_tracks_id_seq', 4);
+select setval('lecture_items_id_seq', 40);
