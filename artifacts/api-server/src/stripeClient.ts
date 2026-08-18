@@ -14,13 +14,18 @@ interface ConnectorResponse {
   items?: Array<{ settings?: { secret_key?: string; webhook_secret?: string } }>;
 }
 
-// The Supabase project's direct-connection host/user/port/db are fixed and not
+// The Supabase project's connection host/user/port/db are fixed and not
 // secret; only the password is. Building the URL here — instead of asking for
 // a full connection string — means the password never needs manual
 // percent-encoding by whoever provides it.
-const SUPABASE_DB_HOST = 'db.ikhqtmgfkqhynpazqrac.supabase.co';
-const SUPABASE_DB_PORT = 5432;
-const SUPABASE_DB_USER = 'postgres';
+//
+// Using the session pooler (not the direct `db.<ref>.supabase.co` host):
+// this container's network can't resolve the direct host's IPv6-only address
+// (getaddrinfo ENOTFOUND), and the pooler also works from IPv4-only
+// environments like most deployment targets.
+const SUPABASE_DB_HOST = 'aws-0-ap-northeast-1.pooler.supabase.com';
+const SUPABASE_DB_PORT = 5432; // session pooler — supports the prepared statements migrations need
+const SUPABASE_DB_USER = 'postgres.ikhqtmgfkqhynpazqrac';
 const SUPABASE_DB_NAME = 'postgres';
 
 export function getSupabaseDatabaseUrl(): string {
