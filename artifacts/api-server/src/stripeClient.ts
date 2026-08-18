@@ -14,6 +14,23 @@ interface ConnectorResponse {
   items?: Array<{ settings?: { secret_key?: string; webhook_secret?: string } }>;
 }
 
+// The Supabase project's direct-connection host/user/port/db are fixed and not
+// secret; only the password is. Building the URL here — instead of asking for
+// a full connection string — means the password never needs manual
+// percent-encoding by whoever provides it.
+const SUPABASE_DB_HOST = 'db.ikhqtmgfkqhynpazqrac.supabase.co';
+const SUPABASE_DB_PORT = 5432;
+const SUPABASE_DB_USER = 'postgres';
+const SUPABASE_DB_NAME = 'postgres';
+
+export function getSupabaseDatabaseUrl(): string {
+  const password = process.env.SUPABASE_DB_PASSWORD;
+  if (!password) {
+    throw new Error('SUPABASE_DB_PASSWORD environment variable is required');
+  }
+  return `postgresql://${SUPABASE_DB_USER}:${encodeURIComponent(password)}@${SUPABASE_DB_HOST}:${SUPABASE_DB_PORT}/${SUPABASE_DB_NAME}`;
+}
+
 async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecret?: string }> {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
@@ -66,10 +83,7 @@ export async function getStripeSync(): Promise<StripeSync> {
   // Stripe's synced data (customers, products, prices, subscriptions) lives in
   // the project's Supabase Postgres database, not the generic Replit
   // DATABASE_URL — see replit.md for why.
-  const databaseUrl = process.env.SUPABASE_DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error('SUPABASE_DATABASE_URL environment variable is required');
-  }
+  const databaseUrl = getSupabaseDatabaseUrl();
 
   const { secretKey, webhookSecret } = await getStripeCredentials();
   return new StripeSync({

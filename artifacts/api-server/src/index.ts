@@ -1,5 +1,5 @@
 import { runMigrations } from 'stripe-replit-sync';
-import { getStripeSync } from './stripeClient';
+import { getStripeSync, getSupabaseDatabaseUrl } from './stripeClient';
 import app from './app';
 import { logger } from './lib/logger';
 
@@ -26,14 +26,15 @@ if (Number.isNaN(port) || port <= 0) {
 
 async function initStripe() {
   // Stripe's synced tables live in Supabase, not the generic Replit
-  // DATABASE_URL — see replit.md for why.
-  const databaseUrl = process.env.SUPABASE_DATABASE_URL;
-  if (!databaseUrl) {
-    logger.warn('SUPABASE_DATABASE_URL not set — skipping Stripe init');
+  // DATABASE_URL — see replit.md for why. getStripeSync() builds the
+  // connection string itself from SUPABASE_DB_PASSWORD.
+  if (!process.env.SUPABASE_DB_PASSWORD) {
+    logger.warn('SUPABASE_DB_PASSWORD not set — skipping Stripe init');
     return;
   }
 
   try {
+    const databaseUrl = getSupabaseDatabaseUrl();
     logger.info('Initializing Stripe schema...');
     // `MigrationConfig` takes only the connection (plus optional ssl/logger):
     // the library owns the schema it migrates into, so the `schema: 'stripe'`
