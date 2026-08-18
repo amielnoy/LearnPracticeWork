@@ -47,7 +47,7 @@ test('sets a JSON content type from a JSON body without being told to', async ()
   // Express never parses the body and every POST looks empty to the server.
   const failure = (await customFetch('/api/ai/generate', {
     method: 'POST',
-    body: JSON.stringify({ messages: [] }),
+    body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }] }),
   }).catch((err: unknown) => err)) as ApiError;
 
   // 503 (no key) rather than a parse failure means the body arrived intact.

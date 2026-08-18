@@ -33,7 +33,7 @@ test.describe('when the server has a default key', () => {
   test('adopts the model the server says it defaults to', async ({ mountSetup }) => {
     const component = await mountSetup(WITH_SERVER_KEY);
 
-    await expect(component.locator('#modelSel')).toHaveValue('gemini-2.5-pro');
+    await expect(component.locator('#modelSel')).toHaveValue('openai/gpt-oss-20b');
   });
 
   test('unlocks the key field once you opt into your own key', async ({ mountSetup }) => {
@@ -44,7 +44,7 @@ test.describe('when the server has a default key', () => {
     await expect(component.locator('#apiKey')).toBeEnabled();
     await expect(component.locator('#apiKey')).toHaveAttribute(
       'placeholder',
-      PROVIDERS.gemini!.placeholder,
+      PROVIDERS.groq!.placeholder,
     );
   });
 });

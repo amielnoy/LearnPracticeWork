@@ -59,9 +59,15 @@ test.describe('no server-side key configured', () => {
     expect(await response.json()).toHaveProperty('error');
   });
 
-  test('rejects before reading the body, so no upstream call is attempted', async ({ api }) => {
+  test('rejects a malformed body with a validation error, not a false "not configured"', async ({
+    api,
+  }) => {
+    // Which provider's key to check depends on the `grounded` flag, which
+    // only exists once the body has parsed successfully — so an empty/
+    // malformed body fails schema validation (400) rather than short-
+    // circuiting to 503 the way a well-formed-but-keyless request does above.
     const response = await api.post('/api/ai/generate', { data: {} });
-    expect(response.status()).toBe(503);
+    expect(response.status()).toBe(400);
   });
 });
 
