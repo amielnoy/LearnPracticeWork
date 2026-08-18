@@ -79,13 +79,18 @@ flip).
 
 Connection Setup lets a visitor use a **server-side default key** or **their own**.
 
-- **Default key (Gemini only)** — held as a Replit Secret (`GEMINI_API_KEY`) on
-  `artifacts/api-server` and never sent to the browser. The client calls `GET /api/ai/config`
-  for a boolean and a default model name, and `POST /api/ai/generate` to run a completion.
-  See `artifacts/api-server/src/routes/ai.ts`.
-- **Own key (any provider)** — entered by the visitor, kept in `sessionStorage` by default, and
-  sent straight from the browser to Gemini, Anthropic or OpenAI. It never touches our server.
-  A clearly labelled opt-in can persist it in `localStorage` on a private device. Keys saved by
+- **Default key (Groq)** — held as a Replit Secret (`GROQ_API_KEY`) on `artifacts/api-server`
+  and never sent to the browser. This is the site's default free chat provider for resume
+  scoring and the mock interview. The client calls `GET /api/ai/config` for a boolean and a
+  default model name, and `POST /api/ai/generate` to run a completion. See
+  `artifacts/api-server/src/routes/ai.ts`.
+- **Gemini (search-only default)** — a separate Replit Secret (`GEMINI_API_KEY`) also held on
+  `artifacts/api-server`. It is used exclusively for the live Google Search grounding feature
+  in the Practice Library's question enrichment (`grounded: true` requests) and is not offered
+  as a general chat provider anymore.
+- **Own key (Claude or OpenAI)** — entered by the visitor, kept in `sessionStorage` by default,
+  and sent straight from the browser to Anthropic or OpenAI. It never touches our server. A
+  clearly labelled opt-in can persist it in `localStorage` on a private device. Keys saved by
   older versions are migrated out of persistent storage automatically. See
   `src/context/ProviderContext.tsx` and `src/lib/providers.ts`.
 
@@ -96,7 +101,8 @@ origin must call the API. `REPLIT_DOMAINS` is included automatically. The quota 
 defaults can be overridden with `AI_RATE_LIMIT_WINDOW_MS`, `AI_RATE_LIMIT_MAX`,
 `AI_DAILY_QUOTA`, and `AI_UPSTREAM_TIMEOUT_MS`.
 
-Only Gemini has a server-side default. Anthropic and OpenAI are own-key or nothing, and when no
+Groq and Gemini each have a server-side default, scoped to different purposes (general chat vs.
+search grounding, respectively). Anthropic and OpenAI are own-key or nothing, and when no
 default exists the "use my own key" checkbox is dropped entirely rather than rendered ticked
 and disabled.
 

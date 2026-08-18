@@ -23,36 +23,31 @@ export interface ProviderDef {
 }
 
 export const PROVIDERS: Record<string, ProviderDef> = {
-  gemini: {
-    label: S => S.keyLabelGemini,
-    placeholder: 'AIza...',
-    models: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'],
+  groq: {
+    label: S => S.keyLabelGroq,
+    placeholder: 'gsk_...',
+    models: ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound'],
+    validateKey(key, S) {
+      if (!key.startsWith('gsk_')) throw new Error(S.errKeyNotGroq);
+    },
     build(key, model, system, messages, maxTokens) {
-      const generationConfig: Record<string, unknown> = { maxOutputTokens: maxTokens };
-      if (model.includes('flash')) generationConfig.thinkingConfig = { thinkingBudget: 0 };
       return {
-        url:
-          'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent',
-        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + key },
         body: {
-          system_instruction: { parts: [{ text: system }] },
-          contents: messages.map(m => ({
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: m.content }],
-          })),
-          generationConfig,
+          model,
+          max_tokens: maxTokens,
+          // See the matching comment in api-server/src/routes/ai.ts.
+          reasoning_effort: 'low',
+          messages: [{ role: 'system', content: system }, ...messages],
         },
       };
     },
     parse: (d: unknown) =>
-      (
-        (d as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> })
-          .candidates?.[0]?.content?.parts || []
-      )
-        .map(p => p.text || '')
-        .join('\n'),
+      (d as { choices?: Array<{ message?: { content?: string } }> }).choices?.[0]?.message
+        ?.content || '',
     keyHint: (key, status, S) =>
-      [400, 401, 403].includes(status) && !key.startsWith('AIza') ? S.errGeminiKeyHint : '',
+      [400, 401, 403].includes(status) && !key.startsWith('gsk_') ? S.errGroqKeyHint : '',
   },
   anthropic: {
     label: S => S.keyLabelAnthropic,
@@ -155,7 +150,7 @@ export async function callAI(
   maxTokens = 2500,
 ): Promise<string> {
   const own = useOwnKey;
-  if (!own && provider === 'gemini' && serverDefaults.gemini?.available) {
+  if (!own && provider === 'groq' && serverDefaults.groq?.available) {
     return callServerProxy(model, system, messages, maxTokens);
   }
   const key = apiKey.trim();

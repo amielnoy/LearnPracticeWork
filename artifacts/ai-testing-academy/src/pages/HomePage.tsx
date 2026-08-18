@@ -86,7 +86,7 @@ export function HomePage() {
         <LectureSeries />
         <ConnectionSetup
           collapsed
-          forceOpen={quotaExhausted || (serverConfigLoaded && !hasServerDefault('gemini'))}
+          forceOpen={quotaExhausted || (serverConfigLoaded && !hasServerDefault('groq'))}
         />
       </main>
 

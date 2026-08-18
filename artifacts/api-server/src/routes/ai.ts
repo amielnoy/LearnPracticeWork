@@ -11,21 +11,35 @@ function resolveGeminiKey(): string | undefined {
   return process.env.GEMINI_API_KEY?.trim() || undefined;
 }
 
-// Models the "AI Testing Academy" client is allowed to request through the
-// server-held default Gemini key. Keep this list in sync with the models
-// offered in artifacts/ai-testing-academy/assets/js/providers.js.
-const ALLOWED_GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-2.5-pro',
-] as const;
+function resolveGroqKey(): string | undefined {
+  return process.env.GROQ_API_KEY?.trim() || undefined;
+}
 
-const configuredDefaultModel = process.env.GEMINI_MODEL;
-const DEFAULT_MODEL =
-  configuredDefaultModel &&
-  ALLOWED_GEMINI_MODELS.includes(configuredDefaultModel as (typeof ALLOWED_GEMINI_MODELS)[number])
-    ? configuredDefaultModel
+// Gemini is kept server-side ONLY to power the live Google Search grounding
+// feature (question bank enrichment) — it is no longer offered as a general
+// default chat provider. Keep in sync with `providers.ts` on the client.
+const ALLOWED_GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'] as const;
+
+const configuredDefaultGeminiModel = process.env.GEMINI_MODEL;
+const DEFAULT_GEMINI_MODEL =
+  configuredDefaultGeminiModel &&
+  ALLOWED_GEMINI_MODELS.includes(
+    configuredDefaultGeminiModel as (typeof ALLOWED_GEMINI_MODELS)[number],
+  )
+    ? configuredDefaultGeminiModel
     : 'gemini-2.5-flash';
+
+// Groq is the site's default free chat provider (resume scoring + interview
+// chat). Keep this list in sync with the models offered in
+// artifacts/ai-testing-academy/src/lib/providers.ts.
+const ALLOWED_GROQ_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound'] as const;
+
+const configuredDefaultGroqModel = process.env.GROQ_MODEL;
+const DEFAULT_GROQ_MODEL =
+  configuredDefaultGroqModel &&
+  ALLOWED_GROQ_MODELS.includes(configuredDefaultGroqModel as (typeof ALLOWED_GROQ_MODELS)[number])
+    ? configuredDefaultGroqModel
+    : 'openai/gpt-oss-120b';
 
 function positiveIntFromEnv(name: string, fallback: number): number {
   const value = Number(process.env[name]);
@@ -92,7 +106,10 @@ const MessageSchema = z
 
 const GenerateRequestSchema = z
   .object({
-    model: z.enum(ALLOWED_GEMINI_MODELS).optional(),
+    // Grounded (live Google Search) requests always use Gemini; ungrounded
+    // requests always use Groq, the site's default free provider. `model`
+    // is validated against the matching allowlist once `grounded` is known.
+    model: z.string().max(100).optional(),
     system: z.string().max(12_000).default(''),
     messages: z.array(MessageSchema).min(1).max(20),
     maxTokens: z.number().int().min(1).max(4_000).default(2_500),
@@ -117,28 +134,117 @@ const GenerateRequestSchema = z
 // show "use my own key" as required or optional.
 router.get('/ai/config', (_req, res) => {
   res.json({
+    groq: {
+      available: !!resolveGroqKey(),
+      defaultModel: DEFAULT_GROQ_MODEL,
+      anonymousDailyQuota: DAILY_QUOTA,
+    },
+    // Gemini is exposed here only so the client knows live Google Search
+    // enrichment works without the visitor supplying their own key — it is
+    // not offered as a general chat provider anymore.
     gemini: {
       available: !!resolveGeminiKey(),
-      defaultModel: DEFAULT_MODEL,
+      defaultModel: DEFAULT_GEMINI_MODEL,
       anonymousDailyQuota: DAILY_QUOTA,
     },
   });
 });
 
-// Proxies Gemini calls server-side so the API key never reaches the browser.
-// Used only when the visitor has not supplied their own key.
+async function callGemini(
+  model: string,
+  system: string,
+  messages: { role: 'user' | 'assistant'; content: string }[],
+  maxTokens: number,
+  grounded: boolean,
+): Promise<{ status: number; text?: string; error?: string }> {
+  const key = resolveGeminiKey();
+  if (!key) return { status: 503, error: 'No server-side Gemini key is configured.' };
+
+  const generationConfig: Record<string, unknown> = { maxOutputTokens: maxTokens };
+  if (!grounded && model.includes('flash')) {
+    generationConfig.thinkingConfig = { thinkingBudget: 0 };
+  }
+  const body: Record<string, unknown> = {
+    system_instruction: { parts: [{ text: system || '' }] },
+    contents: messages.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    })),
+    generationConfig,
+  };
+  if (grounded) body.tools = [{ google_search: {} }];
+
+  const upstream = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    },
+  );
+  const data = (await upstream.json()) as {
+    error?: { message?: string };
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
+  if (!upstream.ok) {
+    return { status: upstream.status, error: data.error?.message || 'Gemini request failed' };
+  }
+  const text = (data.candidates?.[0]?.content?.parts || [])
+    .map((p: { text?: string }) => p.text || '')
+    .join('\n');
+  return { status: 200, text };
+}
+
+async function callGroq(
+  model: string,
+  system: string,
+  messages: { role: 'user' | 'assistant'; content: string }[],
+  maxTokens: number,
+): Promise<{ status: number; text?: string; error?: string }> {
+  const key = resolveGroqKey();
+  if (!key) return { status: 503, error: 'No server-side Groq key is configured.' };
+
+  const body = {
+    model,
+    max_tokens: maxTokens,
+    // gpt-oss models spend part of the token budget on hidden chain-of-thought
+    // reasoning before the visible answer; capping that effort keeps short
+    // responses (like the settings "test connection" ping) from being
+    // truncated to nothing. Groq ignores this field for non-reasoning models.
+    reasoning_effort: 'low',
+    messages: [
+      ...(system ? [{ role: 'system' as const, content: system }] : []),
+      ...messages,
+    ],
+  };
+
+  const upstream = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+  });
+  const data = (await upstream.json()) as {
+    error?: { message?: string };
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  if (!upstream.ok) {
+    return { status: upstream.status, error: data.error?.message || 'Groq request failed' };
+  }
+  return { status: 200, text: data.choices?.[0]?.message?.content || '' };
+}
+
+// Proxies chat calls server-side so no API key ever reaches the browser.
+// Used only when the visitor has not supplied their own key. Grounded (live
+// Google Search) requests are always served by Gemini; everything else is
+// served by Groq, the site's default free provider.
 router.post(
   '/ai/generate',
   burstLimiter,
   dailyQuota,
   exposeDailyQuota,
   async (req, res): Promise<void> => {
-    const key = resolveGeminiKey();
-    if (!key) {
-      res.status(503).json({ error: 'No server-side Gemini key is configured.' });
-      return;
-    }
-
     const parsed = GenerateRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       logger.warn(
@@ -157,55 +263,29 @@ router.post(
     }
 
     const { model, system, messages, maxTokens, grounded } = parsed.data;
-    const resolvedModel = model ?? DEFAULT_MODEL;
-
-    const generationConfig: Record<string, unknown> = { maxOutputTokens: maxTokens };
-    if (!grounded && resolvedModel.includes('flash')) {
-      generationConfig.thinkingConfig = { thinkingBudget: 0 };
-    }
-
-    const body: Record<string, unknown> = {
-      system_instruction: { parts: [{ text: system || '' }] },
-      contents: messages.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      })),
-      generationConfig,
-    };
-    if (grounded) {
-      body.tools = [{ google_search: {} }];
-    }
+    const provider = grounded ? 'gemini' : 'groq';
+    const allowedModels: readonly string[] = grounded ? ALLOWED_GEMINI_MODELS : ALLOWED_GROQ_MODELS;
+    const requestedModel = model && allowedModels.includes(model) ? model : undefined;
+    const resolvedModel = requestedModel ?? (grounded ? DEFAULT_GEMINI_MODEL : DEFAULT_GROQ_MODEL);
 
     try {
-      const upstream = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${resolvedModel}:generateContent`,
-        {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-          body: JSON.stringify(body),
-          signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-        },
-      );
-      const data = (await upstream.json()) as {
-        error?: { message?: string };
-        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-      };
-      if (!upstream.ok) {
-        res.status(upstream.status).json({ error: data.error?.message || 'Gemini request failed' });
+      const result = grounded
+        ? await callGemini(resolvedModel, system, messages, maxTokens, true)
+        : await callGroq(resolvedModel, system, messages, maxTokens);
+
+      if (result.status !== 200) {
+        res.status(result.status).json({ error: result.error || `${provider} request failed` });
         return;
       }
-      const text = (data.candidates?.[0]?.content?.parts || [])
-        .map((p: { text?: string }) => p.text || '')
-        .join('\n');
-      res.json({ text });
+      res.json({ text: result.text || '' });
     } catch (err: unknown) {
       const timedOut = err instanceof Error && err.name === 'TimeoutError';
       logger.error(
-        { err, requestId: req.id, model: resolvedModel, timedOut },
-        timedOut ? 'Gemini request timed out' : 'Gemini request failed',
+        { err, requestId: req.id, provider, model: resolvedModel, timedOut },
+        timedOut ? `${provider} request timed out` : `${provider} request failed`,
       );
       res.status(timedOut ? 504 : 502).json({
-        error: timedOut ? 'Gemini request timed out' : 'Failed to reach Gemini',
+        error: timedOut ? `${provider} request timed out` : `Failed to reach ${provider}`,
       });
     }
   },

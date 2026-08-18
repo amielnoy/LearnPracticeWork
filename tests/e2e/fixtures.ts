@@ -32,7 +32,7 @@ export const test = base.extend<AcademyFixtures>({
   stubApi: [
     async ({ page }, use) => {
       await page.route('**/api/ai/config', route =>
-        route.fulfill({ json: { gemini: { available: false } } }),
+        route.fulfill({ json: { groq: { available: false }, gemini: { available: false } } }),
       );
       await use();
     },

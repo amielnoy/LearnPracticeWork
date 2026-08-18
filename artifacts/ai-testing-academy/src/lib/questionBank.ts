@@ -56,7 +56,7 @@ export const EN_BANK: BankData = {
   enrichCta: '✨ Enrich with AI',
   enrichPlaceholder: 'Role or keywords (e.g. SDET, Playwright, CI/CD)',
   enrichHint:
-    'Uses Gemini with live Google Search to pull the QA / AI-test-automation interview questions most searched in the last 3 months — each with a model answer. Free usage starts automatically; connect a Gemini key in Settings if needed.',
+    'Uses Gemini with live Google Search to pull the QA / AI-test-automation interview questions most searched in the last 3 months — each with a model answer. Free usage starts automatically.',
   enriching: '✨ Enriching…',
   enrichHeading: '✨ AI-enriched Q&A — trending in the last 3 months',
   roleDefault: 'QA Automation Engineer',
@@ -821,7 +821,7 @@ export const HE_BANK: BankData = {
   enrichCta: '✨ העשר עם AI',
   enrichPlaceholder: 'תפקיד או מילות מפתח (למשל SDET, Playwright, CI/CD)',
   enrichHint:
-    'משתמש ב-Gemini עם חיפוש Google חי כדי להביא את שאלות הראיון (QA ואוטומציית בדיקות מבוססת AI) המחופשות ביותר ב-3 החודשים האחרונים — כל אחת עם תשובת מודל. השימוש החינמי מתחיל אוטומטית; במידת הצורך אפשר לחבר מפתח Gemini בהגדרות.',
+    'משתמש ב-Gemini עם חיפוש Google חי כדי להביא את שאלות הראיון (QA ואוטומציית בדיקות מבוססת AI) המחופשות ביותר ב-3 החודשים האחרונים — כל אחת עם תשובת מודל. השימוש החינמי מתחיל אוטומטית.',
   enriching: '✨ מעשיר…',
   enrichHeading: '✨ שו"ת בהעשרת AI — מגמות 3 החודשים האחרונים',
   roleDefault: 'מהנדס/ת אוטומציית QA',

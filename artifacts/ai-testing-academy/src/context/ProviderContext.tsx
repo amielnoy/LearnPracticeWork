@@ -69,10 +69,13 @@ function loadStoredKey(provider: string): { key: string; remember: boolean } {
 export function ProviderContextProvider({ children }: { children: React.ReactNode }) {
   const { S } = useLocale();
 
-  const [provider, setProviderState] = useState<string>(
-    () => localStorage.getItem(PROVIDER_STORE_KEY) || 'gemini',
-  );
-  const [model, setModelState] = useState<string>(() => PROVIDERS['gemini'].models[0]);
+  const [provider, setProviderState] = useState<string>(() => {
+    // Gemini is no longer a selectable chat provider (search-only now); a
+    // visitor with an old preference stored falls back to the new default.
+    const stored = localStorage.getItem(PROVIDER_STORE_KEY);
+    return stored && PROVIDERS[stored] ? stored : 'groq';
+  });
+  const [model, setModelState] = useState<string>(() => PROVIDERS['groq'].models[0]);
   const [apiKey, setApiKeyState] = useState<string>('');
   const [rememberKey, setRememberKeyState] = useState<boolean>(false);
   const [useOwnKey, setUseOwnKeyState] = useState<boolean>(false);
@@ -234,9 +237,9 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
 
   const setModel = useCallback((m: string) => setModelState(m), []);
 
-  const ownGeminiKey = useMemo(() => {
-    return loadStoredKey('gemini').key || (provider === 'gemini' && useOwnKey ? apiKey.trim() : '');
-  }, [provider, useOwnKey, apiKey]);
+  // Gemini is no longer a selectable chat provider, so the only source for a
+  // visitor-supplied Gemini key is one saved by an older version of the site.
+  const ownGeminiKey = useMemo(() => loadStoredKey('gemini').key, []);
 
   const callClaude = useCallback(
     (system: string, messages: Message[], maxTokens = 2500) =>
@@ -255,7 +258,10 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
   const testConnection = useCallback(async () => {
     setConnStatus(S.statusTesting, 'var(--muted)');
     try {
-      const reply = await callClaude(S.pingSystem, [{ role: 'user', content: S.pingUser }], 20);
+      // Reasoning-capable Groq models spend part of the token budget on hidden
+      // chain-of-thought before the visible reply; a very small cap can leave
+      // zero tokens for the actual answer even though the request succeeded.
+      const reply = await callClaude(S.pingSystem, [{ role: 'user', content: S.pingUser }], 80);
       setConnStatus(S.statusOkPrefix + model + '): ' + reply.slice(0, 40), 'var(--green)');
     } catch (e) {
       setConnStatus('❌ ' + (e as Error).message, 'var(--red)');

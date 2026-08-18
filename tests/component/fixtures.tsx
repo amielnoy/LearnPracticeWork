@@ -17,7 +17,7 @@ import { AuthProvider } from '@academy/context/AuthContext';
  * a spec declares what it wants (`{ questionBank }`, `{ mountSetup }`) instead of
  * repeating the arrangement.
  */
-const NO_SERVER_KEY = { gemini: { available: false } };
+const NO_SERVER_KEY = { groq: { available: false }, gemini: { available: false } };
 
 /** QuestionBank, already mounted, plus a helper to expand its collapsed stages. */
 type QuestionBankHarness = {

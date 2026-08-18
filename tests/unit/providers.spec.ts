@@ -27,7 +27,10 @@ test.afterEach(() => {
 
 test.describe('provider registry', () => {
   test('offers the three providers the UI lists', () => {
-    expect(Object.keys(PROVIDERS).sort()).toEqual(['anthropic', 'gemini', 'openai']);
+    // Gemini is intentionally absent: it is kept server-side only for the
+    // live Google Search grounding feature and is no longer a selectable
+    // chat provider (see callGeminiGrounded, tested separately below).
+    expect(Object.keys(PROVIDERS).sort()).toEqual(['anthropic', 'groq', 'openai']);
   });
 
   test('every provider offers at least one model and a label', () => {
@@ -37,38 +40,36 @@ test.describe('provider registry', () => {
     }
   });
 
-  test('the Gemini models match the ones the server proxy allows', () => {
-    // Mirrors ALLOWED_GEMINI_MODELS in artifacts/api-server/src/routes/ai.ts —
+  test('the Groq models match the ones the server proxy allows', () => {
+    // Mirrors ALLOWED_GROQ_MODELS in artifacts/api-server/src/routes/ai.ts —
     // a model offered here but rejected there silently downgrades the request.
-    expect(PROVIDERS.gemini!.models).toEqual([
-      'gemini-2.5-flash',
-      'gemini-2.5-flash-lite',
-      'gemini-2.5-pro',
+    expect(PROVIDERS.groq!.models).toEqual([
+      'openai/gpt-oss-120b',
+      'openai/gpt-oss-20b',
+      'groq/compound',
     ]);
   });
 });
 
-test.describe('gemini request building', () => {
-  test('targets the model the caller asked for and sends the key as a header', () => {
-    const { url, headers } = PROVIDERS.gemini!.build(
-      'AIzaKEY',
-      'gemini-2.5-pro',
+test.describe('groq request building', () => {
+  test('targets the OpenAI-compatible chat endpoint and sends the key as a bearer token', () => {
+    const { url, headers } = PROVIDERS.groq!.build(
+      'gsk_KEY',
+      'openai/gpt-oss-120b',
       'sys',
       [{ role: 'user', content: 'hi' }],
       100,
     );
 
-    expect(url).toBe(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent',
-    );
-    expect(headers['x-goog-api-key']).toBe('AIzaKEY');
+    expect(url).toBe('https://api.groq.com/openai/v1/chat/completions');
+    expect(headers['Authorization']).toBe('Bearer gsk_KEY');
     expect(headers['content-type']).toBe('application/json');
   });
 
-  test('maps assistant turns to the role Gemini expects', () => {
-    const { body } = PROVIDERS.gemini!.build(
-      'AIzaKEY',
-      'gemini-2.5-flash',
+  test('puts the system prompt first and keeps user/assistant turns as-is', () => {
+    const { body } = PROVIDERS.groq!.build(
+      'gsk_KEY',
+      'openai/gpt-oss-120b',
       'sys',
       [
         { role: 'user', content: 'hi' },
@@ -77,51 +78,56 @@ test.describe('gemini request building', () => {
       100,
     );
 
-    const contents = (body as any).contents as Array<{ role: string; parts: [{ text: string }] }>;
-    expect(contents.map(c => c.role)).toEqual(['user', 'model']);
-    expect(contents[1]!.parts[0]!.text).toBe('hello');
+    expect((body as any).messages).toEqual([
+      { role: 'system', content: 'sys' },
+      { role: 'user', content: 'hi' },
+      { role: 'assistant', content: 'hello' },
+    ]);
   });
 
-  test('disables thinking on flash models to keep replies fast', () => {
-    const { body } = PROVIDERS.gemini!.build('k', 'gemini-2.5-flash', '', [], 100);
-    expect((body as any).generationConfig.thinkingConfig).toEqual({ thinkingBudget: 0 });
-  });
-
-  test('leaves thinking enabled on pro models', () => {
-    const { body } = PROVIDERS.gemini!.build('k', 'gemini-2.5-pro', '', [], 100);
-    expect((body as any).generationConfig.thinkingConfig).toBeUndefined();
+  test('caps hidden reasoning effort so short replies are not starved of visible tokens', () => {
+    // gpt-oss models spend part of max_tokens on a hidden reasoning field
+    // before the visible answer; without this a small maxTokens (e.g. the
+    // settings "test connection" ping) can come back with empty content.
+    const { body } = PROVIDERS.groq!.build('gsk_KEY', 'openai/gpt-oss-120b', '', [], 100);
+    expect((body as any).reasoning_effort).toBe('low');
   });
 
   test('passes the token ceiling through', () => {
-    const { body } = PROVIDERS.gemini!.build('k', 'gemini-2.5-pro', '', [], 1234);
-    expect((body as any).generationConfig.maxOutputTokens).toBe(1234);
+    const { body } = PROVIDERS.groq!.build('gsk_KEY', 'openai/gpt-oss-120b', '', [], 1234);
+    expect((body as any).max_tokens).toBe(1234);
   });
 });
 
-test.describe('gemini response parsing', () => {
-  test('joins every text part of the first candidate', () => {
-    const text = PROVIDERS.gemini!.parse({
-      candidates: [{ content: { parts: [{ text: 'one' }, { text: 'two' }] } }],
-    });
-    expect(text).toBe('one\ntwo');
+test.describe('groq response parsing', () => {
+  test('reads the first choice', () => {
+    expect(PROVIDERS.groq!.parse({ choices: [{ message: { content: 'hi' } }] })).toBe('hi');
   });
 
-  test('returns the empty string when the model returned no candidates', () => {
-    expect(PROVIDERS.gemini!.parse({})).toBe('');
+  test('returns the empty string when there are no choices', () => {
+    expect(PROVIDERS.groq!.parse({})).toBe('');
   });
 });
 
-test.describe('gemini key hints', () => {
-  test('explains the key format on an auth failure with a non-Gemini key', () => {
-    expect(PROVIDERS.gemini!.keyHint!('sk-whatever', 401, S)).toBe(S.errGeminiKeyHint);
+test.describe('groq key hints and validation', () => {
+  test('rejects a key that does not look like a Groq key', () => {
+    expect(() => PROVIDERS.groq!.validateKey!('sk-ant-abc', S)).toThrow(S.errKeyNotGroq);
   });
 
-  test('stays quiet when the key already looks like a Gemini key', () => {
-    expect(PROVIDERS.gemini!.keyHint!('AIzaSomething', 401, S)).toBe('');
+  test('accepts a well-formed key', () => {
+    expect(() => PROVIDERS.groq!.validateKey!('gsk_abc', S)).not.toThrow();
+  });
+
+  test('explains the key format on an auth failure with a non-Groq key', () => {
+    expect(PROVIDERS.groq!.keyHint!('sk-whatever', 401, S)).toBe(S.errGroqKeyHint);
+  });
+
+  test('stays quiet when the key already looks like a Groq key', () => {
+    expect(PROVIDERS.groq!.keyHint!('gsk_something', 401, S)).toBe('');
   });
 
   test('stays quiet for failures that are not about the key', () => {
-    expect(PROVIDERS.gemini!.keyHint!('sk-whatever', 500, S)).toBe('');
+    expect(PROVIDERS.groq!.keyHint!('sk-whatever', 500, S)).toBe('');
   });
 });
 
@@ -306,17 +312,17 @@ test.describe('loadServerConfig', () => {
 });
 
 test.describe('callAI', () => {
-  const serverHasGemini: ServerDefaults = { gemini: { available: true } };
+  const serverHasGroq: ServerDefaults = { groq: { available: true } };
 
   test('routes through the server proxy when the visitor has no key of their own', async () => {
     fetchStub = stubFetch(() => jsonResponse({ text: 'proxied' }));
 
     const reply = await callAI(
-      'gemini',
-      'gemini-2.5-flash',
+      'groq',
+      'openai/gpt-oss-120b',
       '',
       false,
-      serverHasGemini,
+      serverHasGroq,
       S,
       'sys',
       [{ role: 'user', content: 'hi' }],
@@ -329,7 +335,7 @@ test.describe('callAI', () => {
     expect(call.url).toBe('/api/ai/generate');
     expect(call.method).toBe('POST');
     expect(call.body).toEqual({
-      model: 'gemini-2.5-flash',
+      model: 'openai/gpt-oss-120b',
       system: 'sys',
       messages: [{ role: 'user', content: 'hi' }],
       maxTokens: 200,
@@ -340,49 +346,47 @@ test.describe('callAI', () => {
   test('never sends the visitor key to the proxy path', async () => {
     fetchStub = stubFetch(() => jsonResponse({ text: 'ok' }));
 
-    await callAI('gemini', 'gemini-2.5-flash', 'AIzaSECRET', false, serverHasGemini, S, '', [
+    await callAI('groq', 'openai/gpt-oss-120b', 'gsk_SECRET', false, serverHasGroq, S, '', [
       { role: 'user', content: 'hi' },
     ]);
 
-    expect(JSON.stringify(fetchStub.only())).not.toContain('AIzaSECRET');
+    expect(JSON.stringify(fetchStub.only())).not.toContain('gsk_SECRET');
   });
 
   test('surfaces a proxy failure with its status code', async () => {
     fetchStub = stubFetch(() => jsonResponse({ error: 'upstream exploded' }, 502));
 
     await expect(
-      callAI('gemini', 'gemini-2.5-flash', '', false, serverHasGemini, S, '', [
+      callAI('groq', 'openai/gpt-oss-120b', '', false, serverHasGroq, S, '', [
         { role: 'user', content: 'hi' },
       ]),
     ).rejects.toThrow(/API error \(502\).*upstream exploded/s);
   });
 
   test('calls the vendor directly once the visitor supplies a key', async () => {
-    fetchStub = stubFetch(() =>
-      jsonResponse({ candidates: [{ content: { parts: [{ text: 'direct' }] } }] }),
-    );
+    fetchStub = stubFetch(() => jsonResponse({ choices: [{ message: { content: 'direct' } }] }));
 
     const reply = await callAI(
-      'gemini',
-      'gemini-2.5-flash',
-      'AIzaKEY',
+      'groq',
+      'openai/gpt-oss-120b',
+      'gsk_KEY',
       true,
-      serverHasGemini,
+      serverHasGroq,
       S,
       '',
       [{ role: 'user', content: 'hi' }],
     );
 
     expect(reply).toBe('direct');
-    expect(fetchStub.only().url).toContain('generativelanguage.googleapis.com');
-    expect(fetchStub.only().headers['x-goog-api-key']).toBe('AIzaKEY');
+    expect(fetchStub.only().url).toBe('https://api.groq.com/openai/v1/chat/completions');
+    expect(fetchStub.only().headers['authorization']).toBe('Bearer gsk_KEY');
   });
 
   test('asks for a key when there is neither a server default nor a visitor key', async () => {
     fetchStub = stubFetch(() => jsonResponse({}));
 
     await expect(
-      callAI('gemini', 'gemini-2.5-flash', '   ', false, {}, S, '', [
+      callAI('groq', 'openai/gpt-oss-120b', '   ', false, {}, S, '', [
         { role: 'user', content: 'hi' },
       ]),
     ).rejects.toThrow(S.errNoKey);
@@ -414,15 +418,12 @@ test.describe('callAI', () => {
     ).rejects.toThrow(/api\.anthropic\.com/);
   });
 
-  test('appends the key-format hint to a Gemini auth failure', async () => {
-    fetchStub = stubFetch(() => textResponse('invalid key', 401));
-
-    await expect(
-      callAI('gemini', 'gemini-2.5-flash', 'sk-wrong-vendor', true, {}, S, '', [
-        { role: 'user', content: 'hi' },
-      ]),
-    ).rejects.toThrow(S.errGeminiKeyHint);
-  });
+  // Unlike Gemini (which had no validateKey), Groq's keyHint condition can
+  // never actually fire through callAI: validateKey already rejects any key
+  // without a gsk_ prefix before a request is attempted, so a 401 is only
+  // ever reached with a key that already satisfies the hint's own check. The
+  // hint format itself is covered directly in "groq key hints and validation"
+  // above.
 });
 
 test.describe('callGeminiGrounded', () => {

@@ -29,3 +29,10 @@ export const LIMITED_URL = `http://127.0.0.1:${LIMITED_PORT}`;
  * in production.
  */
 export const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
+
+/**
+ * Not a real credential. It only has to be non-empty so `resolveGroqKey()`
+ * reports a key exists; the keyed instance is only ever sent invalid
+ * requests, so no test can reach Groq for real.
+ */
+export const DUMMY_GROQ_KEY = 'gsk_TEST-not-a-real-key-000000000000000';
