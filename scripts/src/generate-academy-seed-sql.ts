@@ -99,7 +99,7 @@ console.log(`Wrote academy-seed.sql (${lines.length} statements)`);
 // Also write batched chunks (splitting the *statement array*, not raw text
 // lines, since several statements contain embedded newlines from Python code
 // snippets — a text-line split would cut a statement in half).
-const CHUNK_SIZE = 15;
+const CHUNK_SIZE = 8;
 const contentLines = lines.filter(l => l !== 'begin;' && l !== 'commit;');
 for (let i = 0; i < contentLines.length; i += CHUNK_SIZE) {
   const chunk = contentLines.slice(i, i + CHUNK_SIZE);

@@ -1,79 +1,8 @@
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (4, 1, 3, '4. Count test results by status', 'Given a list of result dicts like `{"name": ..., "status": "passed"}`, return how many results there are per status.', 'One pass and a dict of counters is enough. collections.Counter does the bookkeeping for you.', 'from collections import Counter
-
-def count_by_status(results):
-    return Counter(r["status"] for r in results)', 'Time: O(n). Space: O(k), where k is the number of distinct statuses.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (5, 1, 4, '5. Find the N slowest tests', 'Given a list of test dicts with a `duration` field, return the n slowest of them, slowest first.', 'Sorting the whole list is O(m log m) when you only need n items. heapq.nlargest keeps a heap of size n instead.', 'import heapq
-
-def slowest(tests, n):
-    return heapq.nlargest(n, tests, key=lambda t: t["duration"])', 'Time: O(m log n) for m tests. Space: O(n) for the heap and the result.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (6, 1, 5, '6. Group tests by tag', 'Given a list of test dicts like `{"name": ..., "tags": ["smoke", "api"]}`, return a dict mapping each tag to the list of test names carrying it.', 'A plain dict forces you to check "is this key here yet?" on every insert. collections.defaultdict(list) creates the empty list for you on first touch.', 'from collections import defaultdict
-
-def group_by_tag(tests):
-    groups = defaultdict(list)
-    for test in tests:
-        for tag in test.get("tags", ()):
-            groups[tag].append(test["name"])
-    return dict(groups)', 'Time: O(n*t) for n tests with t tags each. Space: O(n*t) for the grouped output.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (7, 1, 6, '7. Chunk test IDs into batches', 'Split a flat list of test IDs into consecutive batches of at most `size` items, so each batch can be handed to a separate CI runner.', 'Slice with a stride: range(0, len(ids), size) gives you every batch start, and a slice past the end simply returns a shorter list — no special case for the remainder.', 'def chunk(ids, size):
-    if size <= 0:
-        raise ValueError("size must be positive")
-    return [ids[i:i + size] for i in range(0, len(ids), size)]', 'Time: O(n). Space: O(n) for the batches.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (8, 1, 7, '8. Parse a duration string into seconds', 'Test reports print durations as strings like `"1h 2m 30s"`, `"90s"` or `"2m"`. Convert one into a total number of seconds.', 'Split on whitespace and read each token as a number plus a unit suffix. A units dict keyed by the suffix letter turns the whole thing into one multiply-and-add.', 'UNITS = {"h": 3600, "m": 60, "s": 1}
-
-def parse_duration(text):
-    total = 0
-    for token in text.split():
-        unit = token[-1]
-        if unit not in UNITS:
-            raise ValueError(f"Unknown unit in {token!r}")
-        total += float(token[:-1]) * UNITS[unit]
-    return total', 'Time: O(n) in the length of the string. Space: O(n) for the split tokens.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (9, 1, 8, '9. Diff two config dicts', 'Compare a baseline config against a new one and report which keys were added, which were removed, and which changed value.', 'Treat the two key sets as sets: new - old is added, old - new is removed, and the intersection only needs a value comparison.', 'def diff_config(old, new):
-    old_keys, new_keys = set(old), set(new)
-    return {
-        "added": sorted(new_keys - old_keys),
-        "removed": sorted(old_keys - new_keys),
-        "changed": sorted(
-            k for k in old_keys & new_keys if old[k] != new[k]
-        ),
-    }', 'Time: O(n + m) for the two configs. Space: O(n + m) for the key sets.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (10, 1, 9, '10. Which tests ran yesterday but not today?', 'Given the ordered list of test names from run A and from run B, return the names present in A but missing from B, keeping the order they had in A.', 'Build a set from B first so each membership check is O(1), then filter A in order. Using a plain list for the lookup silently makes this O(n*m).', 'def missing_from(run_a, run_b):
-    present = set(run_b)
-    return [name for name in run_a if name not in present]', 'Time: O(n + m). Space: O(m) for the lookup set, plus O(n) worst case for the output.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (11, 1, 10, '11. Find the longest test name', 'Given a list of test names, return the longest one. If several tie, return the one that appears first.', 'max() takes a key function, so max(names, key=len) does the whole scan for you — and it already returns the first of any tie. Handle the empty list explicitly.', 'def longest_name(names):
-    if not names:
-        return None
-    return max(names, key=len)', 'Time: O(n) over the names. Space: O(1).');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (12, 1, 11, '12. Total and average suite duration', 'Given a list of test dicts with a `duration` field, return the total runtime and the average runtime of the suite.', 'sum() over a generator avoids building an intermediate list. The only trap is dividing by zero when the suite is empty — decide what an empty suite should report before you divide.', 'def suite_timing(tests):
-    total = sum(t["duration"] for t in tests)
-    average = total / len(tests) if tests else 0.0
-    return total, average', 'Time: O(n). Space: O(1) — the generator holds one value at a time.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (13, 1, 12, '13. Compute the pass rate', 'Given a list of result dicts with a `status` field, return the percentage that passed, rounded to one decimal place.', 'A boolean is an int in Python, so sum(r["status"] == "passed" for r in results) counts matches directly. Guard the empty case before dividing.', 'def pass_rate(results):
-    if not results:
-        return 0.0
-    passed = sum(r["status"] == "passed" for r in results)
-    return round(passed / len(results) * 100, 1)', 'Time: O(n). Space: O(1).');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (14, 1, 13, '14. Turn a test title into a valid identifier', 'Convert a human title like `"Login  with VALID user!"` into a snake_case test function name: `login_with_valid_user`.', 'Lowercase, then replace every run of non-alphanumeric characters with a single underscore, then trim the underscores off the ends. One regex substitution handles the runs.', 'import re
-
-def slugify(title):
-    slug = re.sub(r"[^a-z0-9]+", "_", title.lower())
-    return slug.strip("_")', 'Time: O(n) in the length of the title. Space: O(n) for the new string.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (15, 1, 14, '15. Zip names and statuses into a dict', 'A legacy report gives you test names and their statuses as two parallel lists. Build a single dict mapping each name to its status.', 'dict(zip(names, statuses)) is the idiomatic one-liner. Note that zip stops at the shorter list, so check the lengths first if a mismatch is a real error.', 'def to_report(names, statuses):
-    if len(names) != len(statuses):
-        raise ValueError("Mismatched report columns")
-    return dict(zip(names, statuses))', 'Time: O(n). Space: O(n) for the resulting dict.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (16, 1, 15, '16. Tests that failed in every run', 'Given several runs, each a list of the test names that failed in it, return the names that failed in every single run — the consistently broken ones.', 'That is a set intersection. set.intersection(*rest) folds them all together, and an empty input needs its own answer.', 'def always_failing(runs):
-    if not runs:
-        return set()
-    first, *rest = (set(run) for run in runs)
-    return first.intersection(*rest)', 'Time: O(total names across runs). Space: O(size of the smallest run).');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (17, 1, 16, '17. Sort tests by status, then by duration', 'Order a list of test dicts so failures come first, and within each status the slowest tests come first.', 'Return a tuple from the sort key: Python compares tuples element by element. Negating the duration flips just that field to descending without a second sort.', 'def triage_order(tests):
-    return sorted(
-        tests,
-        key=lambda t: (t["status"] != "failed", -t["duration"]),
-    )', 'Time: O(n log n). Space: O(n) for the sorted copy.');
-insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (18, 1, 17, '18. Drop empty query parameters', 'Before sending a request, remove every key from a params dict whose value is None or an empty string, so the URL stays clean.', 'A dict comprehension rebuilds the dict in one pass. Test against None explicitly — `if value` would also throw away 0 and False, which are legitimate values.', 'def clean_params(params):
-    return {
-        k: v for k, v in params.items()
-        if v is not None and v != ""
-    }', 'Time: O(n). Space: O(n) for the filtered dict.');
+insert into question_bank_items (id, stage_id, position, question, hint, answer) values (82, 6, 6, 'מהן ציפיות השכר שלך?', 'עגנו בטווח מבוסס-מחקר, והחזירו לשיחה.', ARRAY['עשו מחקר קודם — נתוני שוק לתפקיד, לסניוריטי ולמיקום — ותנו טווח שאת תחתיתו הייתם באמת מקבלים.', 'הסיטו בעדינות אם מוקדם מדי: "אשמח קודם להבין את ההיקף, אבל לפי השוק אני מסתכל על X–Y". זה מראה הכנה בלי לכלוא אתכם.', 'לעולם אל תמכרו את עצמכם בזול מרוב מתח, ואל תנקבו במספר שאינכם יכולים להצדיק. קשרו את הסכום לערך ולהיקף שאתם מביאים, לא למה שאתם מרוויחים היום.']::text[]);
+insert into question_bank_items (id, stage_id, position, question, hint, answer) values (83, 6, 7, 'ספר על באג שדלף לפרודקשן. מה למדת?', 'רוצים בעלוּת ותיקון מערכתי, לא נס נטול-אשמה.', ARRAY['בחרו אחד אמיתי וקחו אחריות על חלקכם בלי להפיל חבר לצוות. "מעולם לא שחררתי באג" נשמע או חוסר ניסיון או חוסר כנות.', 'עברו על התגובה: איך התגלה, כמה מהר הוכל, ומה סיבת השורש — לא רק הסימפטום.', 'סיימו במה שהשתנה כדי שסוג הבאג לא יחזור: בדיקה חסרה שנוספה, פער ב-pipeline שנסגר, התראת ניטור שנוצרה. לקח שנלמד הוא מערכת שהשתנתה, לא החלטה להיזהר יותר.']::text[]);
+insert into question_bank_items (id, stage_id, position, question, hint, answer) values (84, 6, 8, 'איך אתה מתמודד עם לחץ ודדליינים צפופים?', 'הראו שיטת טריאז׳, לא גבורה.', ARRAY['תארו איך אתם מתעדפים תחת לחץ: בדיקות מבוססות-סיכון קודם — מסלול הכסף, הרשאות, שלמות נתונים — ואמרו במפורש מה במודע אינכם מכסים.', 'תקשרו את הפשרה במקום לקצץ בשקט: "אפשר לשחרר ביום שישי אם נקבל את שני הסיכונים האלה" מחזיר את ההחלטה למי שאחראי לה.', 'הזכירו מה שומר על האיכות מלהתמוטט בלחץ: אוטומציה שמריצה את הרגרסיה בשבילכם, וסוויטת smoke שחוסמת את השחרור בלי קשר לדדליין.']::text[]);
+insert into question_bank_items (id, stage_id, position, question, hint, answer) values (85, 6, 9, 'למה אתה רוצה לעבוד כאן?', 'ספציפי אליהם — סיבה שאי אפשר להעתיק לחברה אחרת.', ARRAY['הראו שעשיתם שיעורי בית: המוצר, תרבות ההנדסה, אתגר בתחום שלהם שמעניין אתכם. שבחים כלליים ("חברה מעולה") מסמנים שהגשתם לכולם.', 'קשרו לעצמכם — היכן שהצרכים שלהם נפגשים עם מה שאתם רוצים לצמוח אליו, בין אם זה סקייל, תרבות בדיקות לבנות, או פיצ׳רים כבדי-AI לשבור.', 'היו כנים. מראיינים מבחינים בין חנופה מתורגלת לעניין אמיתי, והגרסה האמיתית משכנעת יותר ממילא.']::text[]);
+insert into question_bank_items (id, stage_id, position, question, hint, answer) values (86, 6, 10, 'מהם החוזק הגדול והחולשה הגדולה שלך?', 'חולשה אמיתית עם מיטיגציה אמיתית — לא התרברבות בתחפושת.', ARRAY['לחוזק, בחרו אחד רלוונטי לתפקיד וגבו אותו בדוגמה קצרה במקום בתואר.', 'לחולשה, נקבו באחת אמיתית ובמה שאתם עושים בנוגע אליה. "אני נכנס עמוק מדי למקרי קצה ומאבד את מסגרת הזמן, אז עכשיו אני קובע גבול ומסמן את השאר כהמשך" — כן ומראה תיקון עצמי.', 'הימנעו מהתרברבות מוסווית ("אני עובד קשה מדי") — מראיינים שמעו את זה אלף פעם וזה נשמע כמו התחמקות.']::text[]);
+insert into question_bank_items (id, stage_id, position, question, hint, answer) values (87, 6, 11, 'מה התפקיד שלך בטקסי האג׳ייל — standup, planning, retro?', 'QA מעורב מה-refinement, לא מוברג בסוף.', ARRAY['ב-refinement וב-planning אתם מושכים בדיקוּת שמאלה: מאתגרים קריטריוני קבלה מעורפלים, שואלים על מקרי קצה ונתונים, ומעריכים את מאמץ הבדיקה כך שלא יהיה מחשבה שאחרי.', 'ב-standup אתם חושפים חסמים וסיכון מוקדם — סביבה מתנדנדת, build שאי אפשר לבדוק — במקום לדווח כמה טיקטים סגרתם אתמול.', 'ב-retro אתם מביאים אותות איכות: תקלות שדלפו, שיעור flaky, משוב איטי, ומציעים שיפור קונקרטי אחד. התייחסו ל"איכות היא באחריות כולם" כמשהו שאתם מאפשרים באופן פעיל, לא סיסמה.']::text[]);
+insert into question_bank_items (id, stage_id, position, question, hint, answer) values (88, 6, 12, 'איך אתה שומר על מיומנויות הבדיקה שלך מעודכנות?', 'ראיות עדיפות על כוונות — נקבו במה שבאמת עשיתם לאחרונה.', ARRAY['הצביעו על קלטים קונקרטיים ועדכניים: כלי שניסיתם בפרויקט צד, הרצאה או ניוזלטר שאתם עוקבים אחריו, סוויטת קוד-פתוח שקראתם.', 'הראו שאתם עוקבים לאן התחום זז — בדיקות בעזרת AI, בדיקות חוזה, הזזת איכות לתוך ה-pipeline — ויש לכם דעה, לא רק מודעות.', 'הכי טוב, הראו תוצר: פוסט, כלי קטן, הרצאה, PR לספריית בדיקות. לבנות משהו זו ההוכחה האמינה ביותר שאתם לומדים.']::text[]);
+insert into question_bank_items (id, stage_id, position, question, hint, answer) values (89, 6, 13, 'ספר על מקרה שבו התנגדת להחלטה.', 'בוחנים שיקול דעת ואיך אתם חולקים, לא אם ניצחתם.', ARRAY['בחרו מחלוקת אמיתית על מהות — שחרור מסוכן, פינה שנחתכת — לא התנגשות אישיות.', 'הראו שהובלתם עם נתונים ומיסגרתם כסיכון, לא כדעה: מה עלול להשתבש, בהסתברות כזו, בעלות כזו, ומה הצעתם במקום.', 'כבדו את התוצאה: לפעמים גברו עליכם וההחלטה הייתה סבירה בהינתן אילוצים שלא החזקתם. היכולת לחלוק ואז להתחייב חשובה כמו לצדוק.']::text[]);

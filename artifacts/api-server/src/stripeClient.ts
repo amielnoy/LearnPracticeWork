@@ -63,9 +63,12 @@ export async function getUncachableStripeClient(): Promise<Stripe> {
 }
 
 export async function getStripeSync(): Promise<StripeSync> {
-  const databaseUrl = process.env.DATABASE_URL;
+  // Stripe's synced data (customers, products, prices, subscriptions) lives in
+  // the project's Supabase Postgres database, not the generic Replit
+  // DATABASE_URL — see replit.md for why.
+  const databaseUrl = process.env.SUPABASE_DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL environment variable is required');
+    throw new Error('SUPABASE_DATABASE_URL environment variable is required');
   }
 
   const { secretKey, webhookSecret } = await getStripeCredentials();

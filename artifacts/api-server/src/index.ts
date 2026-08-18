@@ -25,9 +25,11 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 async function initStripe() {
-  const databaseUrl = process.env.DATABASE_URL;
+  // Stripe's synced tables live in Supabase, not the generic Replit
+  // DATABASE_URL — see replit.md for why.
+  const databaseUrl = process.env.SUPABASE_DATABASE_URL;
   if (!databaseUrl) {
-    logger.warn('DATABASE_URL not set — skipping Stripe init');
+    logger.warn('SUPABASE_DATABASE_URL not set — skipping Stripe init');
     return;
   }
 
