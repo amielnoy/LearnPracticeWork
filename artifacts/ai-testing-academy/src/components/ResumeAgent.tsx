@@ -416,6 +416,11 @@ export function ResumeAgent() {
             </ul>
           </div>
         </div>
+        <p style={{ marginTop: '14px', fontSize: '.85rem' }}>
+          <a href={t.tipsSourceUrl} target="_blank" rel="noopener noreferrer">
+            {t.tipsSourceLabel}
+          </a>
+        </p>
       </div>
 
       <div className="agent-box reveal">

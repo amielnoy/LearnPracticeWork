@@ -180,6 +180,8 @@ export const en = {
       'Don\'t count on explaining the fit out loud — you might never get to that stage.',
       'Don\'t assume the reader will guess the connection between your experience and the job\'s requirements — spell it out.',
     ],
+    tipsSourceLabel: '💡 Inspired by this LinkedIn post',
+    tipsSourceUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7495691019024400384/',
   },
   interview: {
     num: '03',
