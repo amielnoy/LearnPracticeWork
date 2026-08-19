@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-4/"
+title = "Playwright for AI Applications — Lecture 4"
+description = "Fourth lecture in the AI Testing Academy series: end-to-end testing of AI-powered UIs with Playwright, covering dynamic content, streaming responses, and resilient selectors. Matches the visual style and structure of Lecture 1 and Lecture 2 (dark code-panel worked examples, EN/HE support)."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-4"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-4/" ]
+localPort = 22182
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-4 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-4", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-4/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22182"
+BASE_PATH = "/ai-testing-lecture-4/"

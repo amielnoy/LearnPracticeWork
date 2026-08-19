@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-3/"
+title = "Testing LLM Outputs — Lecture 3"
+description = "Third lecture in the AI Testing Academy series: evaluation frameworks for LLM responses, covering semantic similarity, factuality checks, toxicity detection, and JSON schema validation. Matches the visual style and structure of Lecture 1 and Lecture 2 (dark code-panel worked examples, EN/HE support)."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-3"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-3/" ]
+localPort = 19519
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-3 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-3", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-3/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19519"
+BASE_PATH = "/ai-testing-lecture-3/"

@@ -1,0 +1,272 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567801",
+    "position": 1,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Playwright for AI Applications",
+    "description": "Title slide introducing Lecture 4: Playwright for AI Applications, with a four-stage roadmap covering Dynamic Content, Streaming, Resilient Selectors, and Scaling Up.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567802",
+    "position": 2,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "Learning Objectives",
+    "description": "What You'll Be Able To Do: four concrete outcomes covering asserting on dynamic AI content, testing streaming responses, writing resilient selectors, and testing loading/error states.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567803",
+    "position": 3,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhyE2eTestsBreak.tsx",
+    "title": "Why Traditional E2E Tests Break",
+    "description": "Problem statement: why traditional E2E tests fail on AI-powered UIs — hardcoded text assertions, streaming timing races, and selectors tied to volatile generated content.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567801",
+    "position": 4,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/AnatomyOfAnAiUiTest.tsx",
+    "title": "What's Different About Testing an AI UI",
+    "description": "Three layers of an AI UI test: the request, the streaming/incremental render, and the final rendered output — presented as a layered stack diagram.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567804",
+    "position": 5,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ThePlaywrightAiToolkit.tsx",
+    "title": "The Playwright AI Toolkit",
+    "description": "Toolkit overview introducing the three techniques covered in this lecture: dynamic content assertions, streaming response tests, and resilient selector patterns.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567802",
+    "position": 6,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/SettingUpTestFixtures.tsx",
+    "title": "Setting Up Test Fixtures for AI Apps",
+    "description": "Practical setup concerns for AI app tests: seeding conversation state, mocking auth, and resetting rate limit counters between tests.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567805",
+    "position": 7,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleDynamicContent.tsx",
+    "title": "Worked Example: Asserting on Dynamic AI Content",
+    "description": "Worked example showing how to write Playwright assertions that pass on valid AI responses without hardcoding exact generated text.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567803",
+    "position": 8,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/PatternsForContentAssertions.tsx",
+    "title": "Patterns for Asserting on Generated Content",
+    "description": "A comparison card grid of assertion patterns for AI-generated content: regex/structure checks, normalized snapshot testing, semantic assertions, and the exact-text anti-pattern.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567806",
+    "position": 9,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TestingStreamingResponses.tsx",
+    "title": "Testing Streaming Responses",
+    "description": "Concept slide explaining strategies for asserting on incrementally-delivered streaming responses: waiting for completion signals, testing partial UI state, and avoiding fixed waits.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567804",
+    "position": 10,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WaitStrategiesDeepDive.tsx",
+    "title": "Waiting for the Right Signal",
+    "description": "Deep dive comparing waitForResponse, waitForFunction/custom polling, and fixed sleep() — explaining why the first two are reliable and sleep() is not.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567807",
+    "position": 11,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleStreamingTest.tsx",
+    "title": "Worked Example: Testing a Streaming Response",
+    "description": "Worked example of a Playwright test that synchronises with a streaming AI response using real completion signals rather than arbitrary timeouts.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567805",
+    "position": 12,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/HandlingPartialAndAbortedStreams.tsx",
+    "title": "Testing Cancelled and Interrupted Streams",
+    "description": "Covering user-cancelled generation and network drops mid-stream as explicit test cases, including what to assert after each interruption scenario.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567808",
+    "position": 13,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WritingResilientSelectors.tsx",
+    "title": "Writing Selectors That Survive AI Output Changes",
+    "description": "Concept slide on preferring role and testid-based selectors over text-content selectors, and structuring the DOM so tests target stable containers rather than volatile generated text.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567806",
+    "position": 14,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/DataTestIdConventions.tsx",
+    "title": "Naming Conventions for data-testid",
+    "description": "Practical guidance on naming and placing stable data-testid attributes in an AI-generated UI tree, covering role+entity naming, stable containers, stream state attributes, and index anti-patterns.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567809",
+    "position": 15,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleResilientSelector.tsx",
+    "title": "Worked Example: Brittle vs. Resilient Selectors",
+    "description": "Worked example contrasting a brittle text-based selector that breaks on AI output changes with a resilient role/testid selector that survives any phrasing.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567807",
+    "position": 16,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/AccessibilityFirstSelectors.tsx",
+    "title": "Accessibility as a Resilience Strategy",
+    "description": "Using getByRole and getByLabel (a11y-driven selectors) as a bonus source of resilient, semantic selectors — with a priority ranking of selector strategies.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567810",
+    "position": 17,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/LoadingAndErrorStates.tsx",
+    "title": "Testing Loading & Error States",
+    "description": "Concept slide covering the AI response lifecycle: loading/typing indicators, timeout handling, and graceful error UI assertions for each state.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567808",
+    "position": 18,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TestingRateLimitsAndRetries.tsx",
+    "title": "Simulating Rate Limits and Failures",
+    "description": "Testing how the UI behaves under simulated 429 and 5xx responses from the AI backend, and verifying retry/backoff UI using page.route() interception.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567811",
+    "position": 19,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TamingFlakinessAtScale.tsx",
+    "title": "Taming Flakiness at Scale",
+    "description": "Slide on running AI Playwright tests reliably in CI: smart retry strategy, mocking the model layer for deterministic runs, and keeping a real-model smoke suite.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567809",
+    "position": 20,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/MockingTheModelLayer.tsx",
+    "title": "Mocking the Model Layer",
+    "description": "Intercepting network calls to return deterministic fixture responses for fast, non-flaky CI runs — with a real-model vs. mocked comparison table.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567810",
+    "position": 21,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/VisualRegressionForAiUi.tsx",
+    "title": "Visual Regression on Dynamic UIs",
+    "description": "Snapshot testing strategy that masks dynamic AI text regions while still catching real layout regressions — stable vs. unstable snapshot target classification.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567811",
+    "position": 22,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ParallelizationAndTestIsolation.tsx",
+    "title": "Running Many AI Tests in Parallel Safely",
+    "description": "Test isolation concerns specific to AI apps: shared rate limits, conversation state bleed, and isolating fixtures per worker — with an isolation checklist.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567812",
+    "position": 23,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CIPipelineForPlaywrightAiTests.tsx",
+    "title": "A CI Pipeline for AI E2E Tests",
+    "description": "Two-track CI pipeline: fast mocked suite on every PR plus a scheduled real-model smoke suite — covering sharding, retry policy, and artefact retention.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567813",
+    "position": 24,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/DebuggingFlakyAiTests.tsx",
+    "title": "Debugging Flaky AI Tests",
+    "description": "Using Playwright's trace viewer and video capture to reproduce and diagnose non-deterministic failures in AI test suites.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567814",
+    "position": 25,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CaseStudyChatSupportWidget.tsx",
+    "title": "Case Study: A Chat Support Widget",
+    "description": "A short narrative case study wiring dynamic-content assertions, streaming waits, and resilient selectors together in a realistic five-step chat widget test.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567815",
+    "position": 26,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CheckYourUnderstanding.tsx",
+    "title": "Check Your Understanding",
+    "description": "Three knowledge-check questions with answers testing core lecture concepts: wait strategies, parallel isolation, and resilient selector choices.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567816",
+    "position": 27,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ToolsAndLibrariesRecap.tsx",
+    "title": "Tools You Can Use Today",
+    "description": "A six-card recap grid mapping Playwright ecosystem capabilities — network interception, trace viewer, visual comparisons, sharding, accessibility selectors, retry/flake detection — to the techniques covered.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "f1a2b3c4-d5e6-4780-9abc-de1234567817",
+    "position": 28,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/SecurityConsiderationsTeaser.tsx",
+    "title": "Testing Isn't Just About Correctness",
+    "description": "A teaser slide framing prompt-injection and security-focused E2E testing as a related but separate topic, with a correctness vs. security comparison table pointing to a future lecture.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567812",
+    "position": 29,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CommonPitfalls.tsx",
+    "title": "Common Pitfalls to Avoid",
+    "description": "Three Playwright AI testing pitfalls: asserting on exact generated text, using sleep() instead of real signals, and never testing the failure path.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567813",
+    "position": 30,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Three-pillar summary: dynamic content assertions, streaming tests, and resilient selectors — the three techniques every Playwright AI test suite needs.",
+    "speakerNotes": ""
+  }
+]

@@ -1,0 +1,272 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567801",
+    "position": 1,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Testing LLM Outputs",
+    "description": "Title slide with lecture roadmap covering semantic checks, factuality, safety & structure, and test suites",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567802",
+    "position": 2,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "What You'll Be Able To Do",
+    "description": "Learning objectives: evaluate LLM outputs for meaning, factuality, safety, and structure",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567803",
+    "position": 3,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhyGradingIsHard.tsx",
+    "title": "Why Grading LLM Outputs Is Hard",
+    "description": "Problem statement: no single right answer, paraphrase vs error, subtle hallucinations, unstructured text",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b1c2d3e4-f5a6-7890-bcde-f01234567804",
+    "position": 4,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/AnatomyOfEvaluation.tsx",
+    "title": "The Evaluation Spectrum",
+    "description": "Comparison of deterministic checks vs statistical/similarity checks vs LLM-as-judge with tradeoffs in speed, cost, and precision",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567804",
+    "position": 5,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TheOutputTestingToolkit.tsx",
+    "title": "The Output Testing Toolkit",
+    "description": "Overview of three techniques: semantic similarity scoring, factuality checking, and JSON schema validation",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b2c3d4e5-f6a7-8901-cdef-012345678905",
+    "position": 6,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/NonDeterminismInPractice.tsx",
+    "title": "Same Prompt, Different Words",
+    "description": "Illustrative example showing 2-3 valid but differently-worded model responses to motivate semantic comparison over string matching",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b3c4d5e6-f7a8-9012-defa-123456789006",
+    "position": 7,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/SemanticSimilarityConcept.tsx",
+    "title": "How Semantic Similarity Scoring Works",
+    "description": "Concept slide explaining embeddings and cosine similarity with a simple diagram-style layout",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567805",
+    "position": 8,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleSemanticSimilarity.tsx",
+    "title": "Worked Example: Semantic Similarity Scoring",
+    "description": "Hands-on worked example showing semantic similarity scoring in practice",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b4c5d6e7-f8a9-0123-efab-234567890107",
+    "position": 9,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ChoosingASimilarityThreshold.tsx",
+    "title": "Choosing the Right Threshold",
+    "description": "Tradeoffs of too-low vs too-high similarity threshold covering false positives vs false negatives with a range visual",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b5c6d7e8-f9a0-1234-fabc-345678901208",
+    "position": 10,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhenSimilarityIsNotEnough.tsx",
+    "title": "Similarity Scores Meaning — Not Truth",
+    "description": "Transition slide showing similarity catches paraphrasing but not factual drift, setting up the factuality section",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567806",
+    "position": 11,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/FactualityConcept.tsx",
+    "title": "Checking Facts, Not Just Fluency",
+    "description": "Concept slide explaining factuality checking: claim extraction, source cross-reference, confidence-aware flagging",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b6c7d8e9-f0a1-2345-abcd-456789012309",
+    "position": 12,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ClaimExtractionDeepDive.tsx",
+    "title": "Breaking Answers Into Checkable Claims",
+    "description": "How factuality checking decomposes a response into atomic claims before cross-referencing sources",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567807",
+    "position": 13,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleFactualityCheck.tsx",
+    "title": "Worked Example: Automated Factuality Check",
+    "description": "Hands-on worked example demonstrating automated factuality checking",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b7c8d9e0-f1a2-3456-bcde-567890123410",
+    "position": 14,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ConfidenceAwareFlagging.tsx",
+    "title": "When the Checker Isn't Sure",
+    "description": "Routing low-confidence factuality verdicts to human review instead of auto-failing",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567808",
+    "position": 15,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ToxicitySafetyScreening.tsx",
+    "title": "Screening for Toxicity & Safety",
+    "description": "Concept slide on automated safety and toxicity classifiers as a testing layer",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b8c9d0e1-f2a3-4567-cdef-678901234511",
+    "position": 16,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/SafetyClassifierArchitecture.tsx",
+    "title": "Where Safety Screening Lives in the Pipeline",
+    "description": "Pipeline diagram showing a toxicity/safety classifier gating output before it reaches the user or CI",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b9c0d1e2-f3a4-5678-defa-789012345612",
+    "position": 17,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/BiasAndFairnessChecks.tsx",
+    "title": "Testing for Bias, Not Just Toxicity",
+    "description": "Fairness and bias probes across demographic variants of the same prompt as a second safety dimension",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567809",
+    "position": 18,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/StructuredOutputValidation.tsx",
+    "title": "Validating Structured Outputs",
+    "description": "Concept slide explaining JSON schema validation for LLM outputs that feed downstream code",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c0d1e2f3-a4b5-6789-efab-890123456713",
+    "position": 19,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/SchemaDesignBestPractices.tsx",
+    "title": "Designing Schemas for Testability",
+    "description": "Practical tips for writing JSON schemas that are strict enough to catch errors but not so strict they break on valid variation",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567810",
+    "position": 20,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleSchemaValidation.tsx",
+    "title": "Worked Example: JSON Schema Validation",
+    "description": "Hands-on worked example demonstrating JSON schema validation of LLM outputs",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c1d2e3f4-a5b6-7890-fabc-901234567814",
+    "position": 21,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhenSchemaValidPassesAreNotEnough.tsx",
+    "title": "Schema-Valid ≠ Semantically Correct",
+    "description": "Transition slide showing schema-valid responses can still be semantically wrong, bridging into pitfalls",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567811",
+    "position": 22,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/BuildingACompositeTestSuite.tsx",
+    "title": "Building a Composite Test Suite",
+    "description": "How the three techniques combine into one ordered pipeline: similarity check → factuality check → schema validation → verdict",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c2d3e4f5-a6b7-8901-abcd-012345678915",
+    "position": 23,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CIIntegrationPatterns.tsx",
+    "title": "Running the Pipeline in CI",
+    "description": "Gating merges and deploys on the composite test suite with pass/fail thresholds and blocking vs warning checks",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c3d4e5f6-a7b8-9012-bcde-123456789016",
+    "position": 24,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/RegressionTestingForPrompts.tsx",
+    "title": "Prompt Regression Testing",
+    "description": "Versioning prompts and re-running the same golden test suite against every prompt change",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c4d5e6f7-a8b9-0123-cdef-234567890117",
+    "position": 25,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/HumanInTheLoopReview.tsx",
+    "title": "The Human-in-the-Loop Safety Net",
+    "description": "Escalation path for low-confidence or flagged outputs to a human reviewer queue",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c5d6e7f8-a9b0-1234-defa-345678901218",
+    "position": 26,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CaseStudyCustomerSupportBot.tsx",
+    "title": "Case Study: A Customer Support Bot",
+    "description": "Narrative case study applying similarity, factuality, and schema checks on a realistic support-bot scenario",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c6d7e8f9-a0b1-2345-efab-456789012319",
+    "position": 27,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CheckYourUnderstanding.tsx",
+    "title": "Check Your Understanding",
+    "description": "Three discussion questions with answers testing the lecture's core concepts on thresholds, confidence flagging, and schema limits",
+    "speakerNotes": ""
+  },
+  {
+    "id": "c7d8e9f0-a1b2-3456-fabc-567890123420",
+    "position": 28,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/ToolsAndLibrariesRecap.tsx",
+    "title": "Tools You Can Use Today",
+    "description": "Recap card grid mapping evaluation tooling categories to each of the three core techniques",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567812",
+    "position": 29,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CommonPitfalls.tsx",
+    "title": "Common Pitfalls to Avoid",
+    "description": "Three pitfalls specific to testing LLM outputs: over-trusting similarity thresholds, treating factuality checker as ground truth, schema-valid but semantically wrong values",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567813",
+    "position": 30,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Three-pillar summary: semantic similarity, factuality checks, and schema validation as the lecture's key takeaways",
+    "speakerNotes": ""
+  }
+]
