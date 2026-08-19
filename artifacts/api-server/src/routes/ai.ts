@@ -18,7 +18,11 @@ function resolveGroqKey(): string | undefined {
 // Gemini is kept server-side ONLY to power the live Google Search grounding
 // feature (question bank enrichment) — it is no longer offered as a general
 // default chat provider. Keep in sync with `providers.ts` on the client.
-const ALLOWED_GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'] as const;
+const ALLOWED_GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-pro',
+] as const;
 
 const configuredDefaultGeminiModel = process.env.GEMINI_MODEL;
 const DEFAULT_GEMINI_MODEL =
@@ -213,10 +217,7 @@ async function callGroq(
     // responses (like the settings "test connection" ping) from being
     // truncated to nothing. Groq ignores this field for non-reasoning models.
     reasoning_effort: 'low',
-    messages: [
-      ...(system ? [{ role: 'system' as const, content: system }] : []),
-      ...messages,
-    ],
+    messages: [...(system ? [{ role: 'system' as const, content: system }] : []), ...messages],
   };
 
   const upstream = await fetch('https://api.groq.com/openai/v1/chat/completions', {

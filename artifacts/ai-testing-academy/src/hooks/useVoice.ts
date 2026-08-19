@@ -109,7 +109,9 @@ export function useVoice({
   const recRef = useRef<ISpeechRecognition | null>(null);
   // Keep callback in a ref so startListening closure stays stable.
   const onTranscriptRef = useRef(onFinalTranscript);
-  useEffect(() => { onTranscriptRef.current = onFinalTranscript; }, [onFinalTranscript]);
+  useEffect(() => {
+    onTranscriptRef.current = onFinalTranscript;
+  }, [onFinalTranscript]);
 
   // Cleanup on unmount.
   useEffect(() => {
@@ -157,13 +159,16 @@ export function useVoice({
     setIsListening(false);
   }, []);
 
-  const speak = useCallback((text: string) => {
-    if (!synthAvailable()) return;
-    speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(toSpeakable(text));
-    utter.lang = lang;
-    speechSynthesis.speak(utter);
-  }, [lang]);
+  const speak = useCallback(
+    (text: string) => {
+      if (!synthAvailable()) return;
+      speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(toSpeakable(text));
+      utter.lang = lang;
+      speechSynthesis.speak(utter);
+    },
+    [lang],
+  );
 
   const cancelSpeech = useCallback(() => {
     if (synthAvailable()) speechSynthesis.cancel();
