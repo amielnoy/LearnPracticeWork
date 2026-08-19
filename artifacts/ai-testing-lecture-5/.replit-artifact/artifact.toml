@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-5/"
+title = "API Testing with AI Features — Lecture 5"
+description = "Fifth lecture in the AI Testing Academy series: testing AI-powered APIs with pytest and Requests — mocking LLM responses, testing edge cases, and validating structured outputs. Bilingual EN/HE, 30 slides, matches the established AI Testing Academy visual style."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-5"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-5/" ]
+localPort = 24681
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-5 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-5", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-5/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24681"
+BASE_PATH = "/ai-testing-lecture-5/"

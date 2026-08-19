@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-6/"
+title = "CI/CD for AI Test Suites — Lecture 6"
+description = "Sixth lecture in the AI Testing Academy series: running AI test suites in GitHub Actions — parallelism without breaking rate limits, handling flaky tests, managing model-call cost, and using LLM-as-judge as a merge gate. Bilingual EN/HE, 30 slides, matches the established AI Testing Academy visual style."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-6"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-6/" ]
+localPort = 19878
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-6 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-6", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-6/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19878"
+BASE_PATH = "/ai-testing-lecture-6/"
