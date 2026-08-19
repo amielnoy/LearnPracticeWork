@@ -393,7 +393,12 @@ export function ResumeAgent() {
             <h4 style={{ color: 'var(--green)' }}>{t.doTitle}</h4>
             <ul id="resumeTipsDo">
               {t.dos.map((tip, i) => (
-                <li key={i}>{tip}</li>
+                <li key={i}>
+                  <span style={{ color: 'var(--green)' }} aria-hidden="true">
+                    ✓{' '}
+                  </span>
+                  {tip}
+                </li>
               ))}
             </ul>
           </div>
@@ -401,7 +406,12 @@ export function ResumeAgent() {
             <h4 style={{ color: 'var(--red)' }}>{t.dontTitle}</h4>
             <ul id="resumeTipsDont">
               {t.donts.map((tip, i) => (
-                <li key={i}>{tip}</li>
+                <li key={i}>
+                  <span style={{ color: 'var(--red)' }} aria-hidden="true">
+                    ✗{' '}
+                  </span>
+                  {tip}
+                </li>
               ))}
             </ul>
           </div>
