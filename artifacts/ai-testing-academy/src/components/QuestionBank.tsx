@@ -48,7 +48,10 @@ export function QuestionBank() {
         'concise 2-4 sentence model answer. ' +
         'Return ONLY JSON: {"questions":[{"stage":"...","question":"...","answer":"...","keywords":["..."]}]}. ' +
         `Write every question and answer in ${bank.langName}.`;
-      const reply = await callGrounded(QA_SYSTEM, user, 3000);
+      // 8 answers, in Hebrew or English, from a model whose thinking tokens
+      // come out of this same budget. 3000 was not enough for the Hebrew
+      // side and the reply came back cut off mid-sentence.
+      const reply = await callGrounded(QA_SYSTEM, user, 8000);
       // Accept either the requested {"questions":[…]} wrapper or a bare […]
       // array, since the model sometimes drops the wrapper.
       const parsed = extractJSON(reply) as { questions?: EnrichedQA[] } | EnrichedQA[];

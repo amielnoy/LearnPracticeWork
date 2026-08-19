@@ -224,6 +224,7 @@ export const he: Locale = {
     pingSystem: 'You are a helpful assistant. Reply with exactly the word: OK',
     pingUser: 'Ping',
     errNoKey: 'אין ספק AI זמין. הוסיפו מפתח API בהגדרות.',
+    errTruncated: 'המודל נגמר לו המקום לפני שסיים. נסו תפקיד קצר יותר או פחות מילות מפתח.',
     errBlockedPrefix: 'שגיאת רשת בגישה ל-',
     errBlockedMid: '. סיבות אפשריות:\n',
     errBlockedCauses: '• מדיניות CORS חוסמת את הבקשה הישירה מהדפדפן\n• חסימת רשת או firewall\n',

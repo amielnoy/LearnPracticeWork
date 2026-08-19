@@ -438,6 +438,46 @@ test.describe('callAI', () => {
   // above.
 });
 
+test.describe('a reply that ran out of room', () => {
+  /**
+   * The failure this covers is a silent one. When the model stops because it hit
+   * the token ceiling, the text ends mid-sentence — and `extractJSON` repairs the
+   * half-written object into something that renders as a finished answer. The
+   * reader gets a truncated sentence presented as complete, with nothing to
+   * suggest anything went wrong. So the transports have to refuse it, and these
+   * are the two places a reply can arrive from.
+   */
+  test('the proxy refuses a truncated answer rather than returning it', async () => {
+    fetchStub = stubFetch(() => jsonResponse({ text: 'half a sentence', truncated: true }));
+
+    await expect(
+      callGeminiGrounded('', { gemini: { available: true } }, S, 'sys', 'q'),
+    ).rejects.toThrow(S.errTruncated);
+  });
+
+  test('a direct Gemini call refuses one too, on its own finishReason', async () => {
+    fetchStub = stubFetch(() =>
+      jsonResponse({
+        candidates: [
+          { content: { parts: [{ text: 'half a sentence' }] }, finishReason: 'MAX_TOKENS' },
+        ],
+      }),
+    );
+
+    await expect(callGeminiGrounded('AIzaKEY', {}, S, 'sys', 'q')).rejects.toThrow(S.errTruncated);
+  });
+
+  test('a complete answer is still returned, finishReason and all', async () => {
+    fetchStub = stubFetch(() =>
+      jsonResponse({
+        candidates: [{ content: { parts: [{ text: 'a whole answer' }] }, finishReason: 'STOP' }],
+      }),
+    );
+
+    expect(await callGeminiGrounded('AIzaKEY', {}, S, 'sys', 'q')).toBe('a whole answer');
+  });
+});
+
 test.describe('callGeminiGrounded', () => {
   test('asks the proxy for a grounded answer when the visitor has no key', async () => {
     fetchStub = stubFetch(() => jsonResponse({ text: 'grounded' }));

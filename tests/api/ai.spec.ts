@@ -146,6 +146,17 @@ test.describe('server-side key configured', () => {
     expect(grounded.status(), 'grounded request reached Gemini').not.toBe(503);
   });
 
+  test('accepts the new ceiling itself, so the bound is where it says it is', async ({ api }) => {
+    // A rejection test alone cannot tell 8192 from 400: both refuse 8193. This
+    // is the other half — the value on the allowed side of the boundary gets
+    // past validation, and fails later on the throwaway key instead.
+    const response = await api.post(`${KEYED_URL}/api/ai/generate`, {
+      data: { messages: [{ role: 'user', content: 'hello' }], maxTokens: 8_192 },
+    });
+
+    expect(response.status()).not.toBe(400);
+  });
+
   test('strictly validates roles, token bounds, and unknown fields', async ({ api }) => {
     // Named cases rather than a bare loop: in the report each one is its own
     // step, so a failure says which rule stopped being enforced instead of
@@ -156,8 +167,12 @@ test.describe('server-side key configured', () => {
         data: { messages: [{ role: 'system', content: 'not allowed' }] },
       },
       {
+        // The ceiling is 8192. It was raised from 4000 because a grounded
+        // request spends part of the same budget on the model's thinking
+        // tokens, and Hebrew costs 2-3x the tokens of English for the same
+        // prose — together they cut the enrich answers off mid-sentence.
         rule: 'maxTokens above the ceiling',
-        data: { messages: [{ role: 'user', content: 'hello' }], maxTokens: 4_001 },
+        data: { messages: [{ role: 'user', content: 'hello' }], maxTokens: 8_193 },
       },
       {
         rule: 'unknown top-level fields',

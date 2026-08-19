@@ -226,6 +226,8 @@ export const en = {
     pingSystem: 'You are a helpful assistant. Reply with exactly the word: OK',
     pingUser: 'Ping',
     errNoKey: 'No AI provider is available. Add your key in Settings.',
+    errTruncated:
+      'The model ran out of room before finishing. Try a shorter role or fewer keywords.',
     errBlockedPrefix: 'Network error reaching ',
     errBlockedMid: '. Possible causes:\n',
     errBlockedCauses:

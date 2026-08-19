@@ -116,7 +116,11 @@ const GenerateRequestSchema = z
     model: z.string().max(100).optional(),
     system: z.string().max(12_000).default(''),
     messages: z.array(MessageSchema).min(1).max(20),
-    maxTokens: z.number().int().min(1).max(4_000).default(2_500),
+    // 8192, not 4000: a grounded request keeps the model's thinking tokens
+    // inside this same budget, and Hebrew runs 2-3x the tokens of English
+    // for the same prose — the enrich call was hitting the old ceiling and
+    // coming back cut off mid-sentence.
+    maxTokens: z.number().int().min(1).max(8_192).default(2_500),
     grounded: z.boolean().default(false),
   })
   .strict()
@@ -160,7 +164,7 @@ async function callGemini(
   messages: { role: 'user' | 'assistant'; content: string }[],
   maxTokens: number,
   grounded: boolean,
-): Promise<{ status: number; text?: string; error?: string }> {
+): Promise<{ status: number; text?: string; error?: string; truncated?: boolean }> {
   const key = resolveGeminiKey();
   if (!key) return { status: 503, error: 'No server-side Gemini key is configured.' };
 
@@ -189,15 +193,20 @@ async function callGemini(
   );
   const data = (await upstream.json()) as {
     error?: { message?: string };
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> }; finishReason?: string }>;
   };
   if (!upstream.ok) {
     return { status: upstream.status, error: data.error?.message || 'Gemini request failed' };
   }
-  const text = (data.candidates?.[0]?.content?.parts || [])
+  const candidate = data.candidates?.[0];
+  const text = (candidate?.content?.parts || [])
     .map((p: { text?: string }) => p.text || '')
     .join('\n');
-  return { status: 200, text };
+  // A run that stopped because it ran out of budget produces text that ends
+  // mid-sentence. Saying so is the difference between the caller showing an
+  // error and the caller repairing the half-written JSON into something that
+  // looks complete.
+  return { status: 200, text, truncated: candidate?.finishReason === 'MAX_TOKENS' };
 }
 
 async function callGroq(
@@ -205,7 +214,7 @@ async function callGroq(
   system: string,
   messages: { role: 'user' | 'assistant'; content: string }[],
   maxTokens: number,
-): Promise<{ status: number; text?: string; error?: string }> {
+): Promise<{ status: number; text?: string; error?: string; truncated?: boolean }> {
   const key = resolveGroqKey();
   if (!key) return { status: 503, error: 'No server-side Groq key is configured.' };
 
@@ -228,12 +237,19 @@ async function callGroq(
   });
   const data = (await upstream.json()) as {
     error?: { message?: string };
-    choices?: Array<{ message?: { content?: string } }>;
+    choices?: Array<{ message?: { content?: string }; finish_reason?: string }>;
   };
   if (!upstream.ok) {
     return { status: upstream.status, error: data.error?.message || 'Groq request failed' };
   }
-  return { status: 200, text: data.choices?.[0]?.message?.content || '' };
+  const choice = data.choices?.[0];
+  // OpenAI-compatible APIs call this 'length'; it means the same thing Gemini's
+  // MAX_TOKENS does — the answer stops mid-sentence.
+  return {
+    status: 200,
+    text: choice?.message?.content || '',
+    truncated: choice?.finish_reason === 'length',
+  };
 }
 
 // Proxies chat calls server-side so no API key ever reaches the browser.
@@ -278,7 +294,7 @@ router.post(
         res.status(result.status).json({ error: result.error || `${provider} request failed` });
         return;
       }
-      res.json({ text: result.text || '' });
+      res.json({ text: result.text || '', truncated: result.truncated === true });
     } catch (err: unknown) {
       const timedOut = err instanceof Error && err.name === 'TimeoutError';
       logger.error(
