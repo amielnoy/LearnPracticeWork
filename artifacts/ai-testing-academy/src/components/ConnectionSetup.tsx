@@ -36,8 +36,8 @@ export function ConnectionSetup({
 
   // When useOwnKey is false and there's a default, set placeholder; when true, show real key label
   const keyLabel = useOwnKey
-    ? prov?.label(S) || S.keyLabelGemini
-    : (prov?.label(S) || S.keyLabelGemini).replace(S.labelSuffixLocal, S.labelSuffixEnv);
+    ? prov?.label(S) || S.keyLabelGroq
+    : (prov?.label(S) || S.keyLabelGroq).replace(S.labelSuffixLocal, S.labelSuffixEnv);
   const keyPlaceholder = useOwnKey ? prov?.placeholder || '' : S.placeholderEnvKey;
 
   return (

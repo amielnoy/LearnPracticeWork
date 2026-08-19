@@ -33,6 +33,7 @@ const LIMITED_PORT = process.env.TEST_API_PORT_LIMITED ?? '8790';
 const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
 const ADMIN_TOKEN = 'test-admin-token-not-a-real-secret';
 const GOOGLE_CLIENT_ID = '000000000000-test.apps.googleusercontent.com';
+const DUMMY_GROQ_KEY = 'gsk_TEST-not-a-real-key-000000000000000';
 
 /** Env that must look the same on every machine for the assertions to hold. */
 const PINNED: Readonly<Record<string, string>> = {
@@ -114,16 +115,18 @@ startServer(KEYED_PORT, {
   GEMINI_API_KEY_B64: '',
   ADMIN_API_TOKEN: ADMIN_TOKEN,
   GOOGLE_CLIENT_ID,
+  GROQ_API_KEY: DUMMY_GROQ_KEY,
 });
 await waitForHealth(KEYED_PORT);
 
 startServer(LIMITED_PORT, {
   GEMINI_API_KEY: DUMMY_GEMINI_KEY,
   GEMINI_API_KEY_B64: '',
+  GROQ_API_KEY: DUMMY_GROQ_KEY,
   AI_RATE_LIMIT_MAX: '1000',
   AI_DAILY_QUOTA: '2',
 });
 await waitForHealth(LIMITED_PORT);
 
-startServer(KEYLESS_PORT, { GEMINI_API_KEY: '', GEMINI_API_KEY_B64: '' });
+startServer(KEYLESS_PORT, { GEMINI_API_KEY: '', GEMINI_API_KEY_B64: '', GROQ_API_KEY: '' });
 await waitForHealth(KEYLESS_PORT);

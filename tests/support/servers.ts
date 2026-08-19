@@ -44,3 +44,8 @@ export const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
  */
 export const ADMIN_TOKEN = 'test-admin-token-not-a-real-secret';
 export const GOOGLE_CLIENT_ID = '000000000000-test.apps.googleusercontent.com';
+ * Not a real credential. It only has to be non-empty so `resolveGroqKey()`
+ * reports a key exists; the keyed instance is only ever sent invalid
+ * requests, so no test can reach Groq for real.
+ */
+export const DUMMY_GROQ_KEY = 'gsk_TEST-not-a-real-key-000000000000000';

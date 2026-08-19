@@ -11,8 +11,8 @@ import { PROVIDERS } from '@academy/lib/providers';
  */
 const t = en.setup;
 
-const WITH_SERVER_KEY = { gemini: { available: true, defaultModel: 'gemini-2.5-pro' } };
-const WITHOUT_SERVER_KEY = { gemini: { available: false } };
+const WITH_SERVER_KEY = { groq: { available: true, defaultModel: 'openai/gpt-oss-20b' } };
+const WITHOUT_SERVER_KEY = { groq: { available: false } };
 
 test.describe('when the server has a default key', () => {
   test('offers the choice between the server key and your own', async ({ mountSetup }) => {
@@ -33,7 +33,7 @@ test.describe('when the server has a default key', () => {
   test('adopts the model the server says it defaults to', async ({ mountSetup }) => {
     const component = await mountSetup(WITH_SERVER_KEY);
 
-    await expect(component.locator('#modelSel')).toHaveValue('gemini-2.5-pro');
+    await expect(component.locator('#modelSel')).toHaveValue('openai/gpt-oss-20b');
   });
 
   test('unlocks the key field once you opt into your own key', async ({ mountSetup }) => {
@@ -44,7 +44,7 @@ test.describe('when the server has a default key', () => {
     await expect(component.locator('#apiKey')).toBeEnabled();
     await expect(component.locator('#apiKey')).toHaveAttribute(
       'placeholder',
-      PROVIDERS.gemini!.placeholder,
+      PROVIDERS.groq!.placeholder,
     );
   });
 });
@@ -63,12 +63,12 @@ test.describe('when the server has no default key', () => {
   }) => {
     const component = await mountSetup(WITHOUT_SERVER_KEY);
 
-    await component.locator('#apiKey').fill('AIzaMyOwnKey');
+    await component.locator('#apiKey').fill('gsk_MyOwnKey');
 
     await expect
-      .poll(() => page.evaluate(() => window.sessionStorage.getItem('ata_session_key_gemini')))
-      .toBe('AIzaMyOwnKey');
-    expect(await page.evaluate(() => window.localStorage.getItem('ata_key_gemini'))).toBeNull();
+      .poll(() => page.evaluate(() => window.sessionStorage.getItem('ata_session_key_groq')))
+      .toBe('gsk_MyOwnKey');
+    expect(await page.evaluate(() => window.localStorage.getItem('ata_key_groq'))).toBeNull();
     // Rendered as a password field so the key is never shown in plain text.
     await expect(component.locator('#apiKey')).toHaveAttribute('type', 'password');
   });
@@ -78,16 +78,16 @@ test.describe('when the server has no default key', () => {
     page,
   }) => {
     const component = await mountSetup(WITHOUT_SERVER_KEY);
-    await component.locator('#apiKey').fill('AIzaRememberMe');
+    await component.locator('#apiKey').fill('gsk_RememberMe');
 
     await component.getByLabel(t.rememberKeyLabel).check();
 
     await expect(component.getByText(t.rememberKeyWarning)).toBeVisible();
-    expect(await page.evaluate(() => window.localStorage.getItem('ata_key_gemini'))).toBe(
-      'AIzaRememberMe',
+    expect(await page.evaluate(() => window.localStorage.getItem('ata_key_groq'))).toBe(
+      'gsk_RememberMe',
     );
     expect(
-      await page.evaluate(() => window.sessionStorage.getItem('ata_session_key_gemini')),
+      await page.evaluate(() => window.sessionStorage.getItem('ata_session_key_groq')),
     ).toBeNull();
   });
 });

@@ -14,6 +14,28 @@ interface ConnectorResponse {
   items?: Array<{ settings?: { secret_key?: string; webhook_secret?: string } }>;
 }
 
+// The Supabase project's connection host/user/port/db are fixed and not
+// secret; only the password is. Building the URL here — instead of asking for
+// a full connection string — means the password never needs manual
+// percent-encoding by whoever provides it.
+//
+// Using the session pooler (not the direct `db.<ref>.supabase.co` host):
+// this container's network can't resolve the direct host's IPv6-only address
+// (getaddrinfo ENOTFOUND), and the pooler also works from IPv4-only
+// environments like most deployment targets.
+const SUPABASE_DB_HOST = 'aws-0-ap-northeast-1.pooler.supabase.com';
+const SUPABASE_DB_PORT = 5432; // session pooler — supports the prepared statements migrations need
+const SUPABASE_DB_USER = 'postgres.ikhqtmgfkqhynpazqrac';
+const SUPABASE_DB_NAME = 'postgres';
+
+export function getSupabaseDatabaseUrl(): string {
+  const password = process.env.SUPABASE_DB_PASSWORD;
+  if (!password) {
+    throw new Error('SUPABASE_DB_PASSWORD environment variable is required');
+  }
+  return `postgresql://${SUPABASE_DB_USER}:${encodeURIComponent(password)}@${SUPABASE_DB_HOST}:${SUPABASE_DB_PORT}/${SUPABASE_DB_NAME}`;
+}
+
 async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecret?: string }> {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
@@ -83,10 +105,10 @@ export async function getStripeClientWithWebhookSecret(): Promise<{
 }
 
 export async function getStripeSync(): Promise<StripeSync> {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error('DATABASE_URL environment variable is required');
-  }
+  // Stripe's synced data (customers, products, prices, subscriptions) lives in
+  // the project's Supabase Postgres database, not the generic Replit
+  // DATABASE_URL — see replit.md for why.
+  const databaseUrl = getSupabaseDatabaseUrl();
 
   const { secretKey, webhookSecret } = await getStripeCredentials();
   return new StripeSync({

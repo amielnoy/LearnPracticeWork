@@ -1,7 +1,7 @@
 import { useLocale } from '../context/LocaleContext';
 import { useReveal } from '../hooks/useReveal';
 
-interface LectureData {
+export interface LectureData {
   num: number;
   ready: boolean;
   title: string;
@@ -9,13 +9,13 @@ interface LectureData {
   url?: string;
 }
 
-interface TrackData {
+export interface TrackData {
   title: string;
   lead: string;
   lectures: LectureData[];
 }
 
-interface BankData {
+export interface BankData {
   nav: string;
   title: string;
   lead: string;
@@ -25,7 +25,7 @@ interface BankData {
   tracks: TrackData[];
 }
 
-const EN: BankData = {
+export const EN: BankData = {
   nav: '🎓 Lecture Series',
   title: '🎓 Lecture Series',
   lead: 'Two structured tracks of 10 in-depth lectures each — from AI testing fundamentals to advanced evaluation techniques, and from AI basics to foundational cybersecurity practice. Work through them in order, or jump to what you need most.',
@@ -113,28 +113,28 @@ const EN: BankData = {
         },
         {
           num: 2,
+          ready: true,
+          title: 'AI in Network Security Monitoring',
+          desc: 'Applying AI to traffic analysis and intrusion detection — spotting lateral movement and exfiltration patterns in network logs.',
+          url: 'https://ml-gf56k78.gamma.site/',
+        },
+        {
+          num: 3,
           ready: false,
           title: 'AI-Powered Threat Detection Basics',
           desc: 'How machine learning models flag suspicious activity, from rule-based detection to anomaly scoring, and where AI adds real value over static rules.',
         },
         {
-          num: 3,
+          num: 4,
           ready: false,
           title: 'Phishing & Social Engineering Detection with AI',
           desc: 'Using AI to spot phishing emails, deepfake voice scams, and social engineering attempts before they reach end users.',
         },
         {
-          num: 4,
+          num: 5,
           ready: false,
           title: 'Malware Analysis Using Machine Learning',
           desc: 'Classifying and clustering malware samples with ML models, and the basics of static vs. behavioral analysis pipelines.',
-        },
-        {
-          num: 5,
-          ready: true,
-          title: 'AI in Network Security Monitoring',
-          desc: 'Applying AI to traffic analysis and intrusion detection — spotting lateral movement and exfiltration patterns in network logs.',
-          url: 'https://ml-gf56k78.gamma.site/',
         },
         {
           num: 6,
@@ -171,7 +171,7 @@ const EN: BankData = {
   ],
 };
 
-const HE: BankData = {
+export const HE: BankData = {
   nav: '🎓 סדרת הרצאות',
   title: '🎓 סדרת הרצאות',
   lead: 'שני טראקים מובנים של 10 הרצאות כל אחד — מהיסודות של בדיקות AI ועד לטכניקות הערכה מתקדמות, ומיסודות הבינה המלאכותית ועד לתרגול אבטחת מידע בסיסי. עבדו לפי הסדר, או קפצו למה שאתם הכי צריכים.',
@@ -259,28 +259,28 @@ const HE: BankData = {
         },
         {
           num: 2,
+          ready: true,
+          title: 'AI בניטור אבטחת רשת',
+          desc: 'הפעלת AI על ניתוח תעבורת רשת וזיהוי חדירות — איתור תבניות תנועה רוחבית והדלפת מידע ביומני רשת.',
+          url: 'https://ml-gf56k78.gamma.site/',
+        },
+        {
+          num: 3,
           ready: false,
           title: 'יסודות זיהוי איומים עם AI',
           desc: 'כיצד מודלים של למידת מכונה מזהים פעילות חשודה, מזיהוי מבוסס חוקים ועד ניקוד אנומליות, והיכן AI מוסיף ערך אמיתי מעבר לחוקים סטטיים.',
         },
         {
-          num: 3,
+          num: 4,
           ready: false,
           title: 'זיהוי פישינג והנדסה חברתית עם AI',
           desc: 'שימוש ב-AI לזיהוי הודעות פישינג, הונאות קול מבוססות deepfake וניסיונות הנדסה חברתית לפני שהם מגיעים למשתמשי הקצה.',
         },
         {
-          num: 4,
+          num: 5,
           ready: false,
           title: 'ניתוח תוכנות זדוניות באמצעות למידת מכונה',
           desc: 'סיווג וקיבוץ של דגימות תוכנה זדונית עם מודלי ML, ויסודות הניתוח הסטטי לעומת ההתנהגותי.',
-        },
-        {
-          num: 5,
-          ready: true,
-          title: 'AI בניטור אבטחת רשת',
-          desc: 'הפעלת AI על ניתוח תעבורת רשת וזיהוי חדירות — איתור תבניות תנועה רוחבית והדלפת מידע ביומני רשת.',
-          url: 'https://ml-gf56k78.gamma.site/',
         },
         {
           num: 6,

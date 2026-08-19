@@ -12,7 +12,7 @@ export function useReveal<T extends HTMLElement = HTMLElement>() {
     const section = ref.current;
     if (!section) return;
 
-    const targets = section.querySelectorAll('h2, .lead, .card, .agent-box, pre, table, h3, ul, p');
+    const targets = section.querySelectorAll('h2, .lead, .card, .agent-box, pre, table, h3, ul, p, img');
     const io = new IntersectionObserver(
       es =>
         es.forEach(en => {

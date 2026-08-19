@@ -1,0 +1,1 @@
+select setval('lecture_items_id_seq', 40);

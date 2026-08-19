@@ -106,7 +106,15 @@
       "name": "AI Testing Academy — Test Automation, DevOps & AI Testing",
       "description": "Hands-on courses covering AI-powered test automation, Playwright, CI/CD pipelines, and DevOps.",
       "provider": { "@id": "https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/#organization" },
-      "url": "https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/"
+      "url": "https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/",
+      "hasCourseInstance": [
+        {
+          "@type": "CourseInstance",
+          "name": "AI Testing Track — Lecture 1: Introduction to AI Testing",
+          "courseMode": "online",
+          "url": "https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=en"
+        }
+      ]
     },
     {
       "@type": "WebSite",
@@ -135,7 +143,145 @@
 </noscript>
 </head>
 <body>
-<div id="root"></div>
+<div id="root">
+  <!--
+    Static pre-rendered content for crawlers and social bots.
+    The React app replaces this on mount.
+  -->
+  <nav aria-label="Primary">
+    <a href="#" aria-label="AI Testing Academy home">AI Testing Academy</a>
+    <ul>
+      <li><a href="#setup">⚙️ Connection Setup</a></li>
+      <li><a href="#resume">📄 Resume &amp; CV</a></li>
+      <li><a href="#lecture-series">🎓 Lecture Series</a></li>
+      <li><a href="#interview-talk">🎙️ Mock Interview</a></li>
+      <li><a href="#interview-questions">❓ Interview Questions</a></li>
+      <li><a href="#coding-challenges">🐍 Python Coding Challenges</a></li>
+    </ul>
+    <ul aria-label="Community links">
+      <li><a href="https://www.youtube.com/@amielnoy" target="_blank" rel="noopener noreferrer">▶ YouTube</a></li>
+      <li><a href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noopener noreferrer">💼 LinkedIn</a></li>
+      <li><a href="https://chat.whatsapp.com/Bwjb01CGfxqIE04lkz2us0?mode=gi_t" target="_blank" rel="noopener noreferrer">💬 AI Automation &amp; DevOps Community</a></li>
+    </ul>
+  </nav>
+
+  <header id="hero">
+    <h1>AI Testing Academy<br>Your AI-Powered QA Career Launchpad</h1>
+    <p>Master test automation, DevOps, and AI testing with hands-on agents, structured lectures, and real interview practice. Built for QA engineers who want to stay ahead of the curve.</p>
+    <ul aria-label="Features">
+      <li>🤖 AI Agents</li>
+      <li>🎙️ Mock Interviews</li>
+      <li>📄 Resume Review</li>
+      <li>🎓 Lecture Series</li>
+      <li>🐳 DevOps &amp; CI</li>
+    </ul>
+    <div>
+      <a href="#setup">Get Started →</a>
+      <a href="#lecture-series">Watch Lectures</a>
+    </div>
+    <div>
+      <b>What you get:</b>
+      <ul>
+        <li><b>Agent 1</b> — AI resume scorer and rewriter for QA roles</li>
+        <li><b>Agent 2</b> — Live mock interview with voice mode, 5 stages</li>
+        <li><b>Lecture Series</b> — 10 in-depth lectures on AI Testing</li>
+        <li><b>Question Bank</b> — 25+ real interview questions + AI enrichment</li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="main-content">
+
+    <section id="setup">
+      <h2>Connection Setup</h2>
+      <p>Connect your AI provider once — both agents share the same key. Gemini has a free tier; Claude gives the best resume rewrites.</p>
+    </section>
+
+    <section id="resume">
+      <h2>Agent 1 — Resume &amp; Cover Letter</h2>
+      <p>Upload your CV and get a scored evaluation with strengths, gaps, and an AI-rewritten version tailored to any QA or SDET role.</p>
+    </section>
+
+    <section id="lecture-series">
+      <h2>🎓 Lecture Series</h2>
+      <p>Two structured tracks of 10 in-depth lectures each — from AI testing fundamentals to advanced evaluation techniques, and from AI basics to foundational cybersecurity practice. Work through them in order, or jump to what you need most.</p>
+
+      <h3>AI Testing Track</h3>
+      <p>From AI testing fundamentals to advanced evaluation techniques.</p>
+      <ol>
+        <li>
+          <b>Lecture 1 — Introduction to AI Testing</b> (Live)
+          <p>What is AI testing, why it matters, and how it differs from traditional software testing. Covers LLMs, non-determinism, evaluation strategies, and the modern AI testing landscape.</p>
+          <a href="https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=en" target="_blank" rel="noopener noreferrer">Open lecture →</a>
+        </li>
+        <li><b>Lecture 2 — Prompt Engineering for Testers</b> (Coming soon)<p>How to write prompts that produce consistent, testable outputs. Covers prompt structure, system messages, temperature, and prompt injection basics.</p></li>
+        <li><b>Lecture 3 — Testing LLM Outputs</b> (Coming soon)<p>Evaluation frameworks for LLM responses — semantic similarity, factuality checks, toxicity detection, and JSON schema validation.</p></li>
+        <li><b>Lecture 4 — Playwright for AI Applications</b> (Coming soon)<p>End-to-end testing of AI-powered UIs with Playwright — handling dynamic content, testing streaming responses, and building resilient selectors.</p></li>
+        <li><b>Lecture 5 — API Testing with AI Features</b> (Coming soon)<p>Testing AI APIs with pytest and Requests — mocking LLM responses, testing edge cases, and validating structured outputs.</p></li>
+        <li><b>Lecture 6 — CI/CD for AI Test Suites</b> (Coming soon)<p>Running AI tests in GitHub Actions — parallelism, flakiness handling, cost management, and integrating LLM-as-judge into pipelines.</p></li>
+        <li><b>Lecture 7 — Security Testing for AI</b> (Coming soon)<p>Prompt injection attacks, data leakage, jailbreaking, and adversarial testing. How to write security tests for LLM-powered features.</p></li>
+        <li><b>Lecture 8 — Performance Testing AI Features</b> (Coming soon)<p>Latency benchmarking, throughput testing, and token-cost optimization. Load testing AI endpoints and establishing performance baselines.</p></li>
+        <li><b>Lecture 9 — AI-Assisted Test Generation</b> (Coming soon)<p>Using AI agents to generate test cases, identify edge cases, and triage failures. GitHub Copilot, Cursor, and custom test-generation pipelines.</p></li>
+        <li><b>Lecture 10 — Building an AI Testing Strategy</b> (Coming soon)<p>Putting it all together — designing a full AI testing strategy for your team, from unit to system level, with metrics, reporting, and continuous improvement.</p></li>
+      </ol>
+
+      <h3>AI-Powered Basic Cybersecurity Track</h3>
+      <p>Foundational cybersecurity concepts, powered and accelerated by AI tools.</p>
+      <ol>
+        <li>
+          <b>Lecture 1 — Introduction to Cybersecurity with AI</b> (Live)
+          <p>The fundamentals of cybersecurity — threats, attack surfaces, and defense-in-depth — and how AI tools are reshaping how security teams work today.</p>
+          <a href="https://gamma.app/docs/AI--e2m8rc9urhszuwb?mode=doc" target="_blank" rel="noopener noreferrer">Open lecture →</a>
+        </li>
+        <li><b>Lecture 2 — AI-Powered Threat Detection Basics</b> (Coming soon)<p>How machine learning models flag suspicious activity, from rule-based detection to anomaly scoring, and where AI adds real value over static rules.</p></li>
+        <li><b>Lecture 3 — Phishing &amp; Social Engineering Detection with AI</b> (Coming soon)<p>Using AI to spot phishing emails, deepfake voice scams, and social engineering attempts before they reach end users.</p></li>
+        <li><b>Lecture 4 — Malware Analysis Using Machine Learning</b> (Coming soon)<p>Classifying and clustering malware samples with ML models, and the basics of static vs. behavioral analysis pipelines.</p></li>
+        <li>
+          <b>Lecture 5 — AI in Network Security Monitoring</b> (Live)
+          <p>Applying AI to traffic analysis and intrusion detection — spotting lateral movement and exfiltration patterns in network logs.</p>
+          <a href="https://ml-gf56k78.gamma.site/" target="_blank" rel="noopener noreferrer">Open lecture →</a>
+        </li>
+        <li><b>Lecture 6 — Automating Vulnerability Scanning with AI</b> (Coming soon)<p>How AI-assisted scanners prioritize and triage vulnerabilities, reducing noise and helping teams focus on what matters.</p></li>
+        <li><b>Lecture 7 — AI for Log Analysis &amp; Anomaly Detection</b> (Coming soon)<p>Turning massive log volumes into actionable alerts with AI-driven anomaly detection and clustering techniques.</p></li>
+        <li><b>Lecture 8 — Securing AI Systems Themselves</b> (Coming soon)<p>The flip side — protecting your own AI systems from prompt injection, model theft, data poisoning, and supply-chain risks.</p></li>
+        <li><b>Lecture 9 — AI-Assisted Incident Response</b> (Coming soon)<p>Using AI copilots to speed up triage, root-cause analysis, and reporting during a live security incident.</p></li>
+        <li><b>Lecture 10 — Building a Cybersecurity AI Strategy</b> (Coming soon)<p>Putting it all together — a practical roadmap for adopting AI across detection, response, and prevention in your security program.</p></li>
+      </ol>
+    </section>
+
+    <section id="interview-talk">
+      <h2>Agent 2 — Mock Interview</h2>
+      <p>Run a realistic QA-Automation interview with an AI interviewer — five stages, from HR to AI testing. Voice mode lets you practice completely hands-free.</p>
+    </section>
+
+    <section id="interview-questions">
+      <h2>Interview Questions</h2>
+      <p>25+ real QA and test-automation interview questions with AI-powered enrichment and explanations.</p>
+    </section>
+
+    <section id="coding-challenges">
+      <h2>🐍 Python Coding Challenges for Test Automation</h2>
+      <p>10 practical coding problems that come up in real QA-Automation interviews. Each challenge includes a hint and an efficient solution with time and space complexity analysis.</p>
+      <ol>
+        <li>Retry decorator for flaky tests</li>
+        <li>Poll until a condition is true</li>
+        <li>Deduplicate test IDs, preserving order</li>
+        <li>Find the first duplicate test ID</li>
+        <li>Merge overlapping CI job time ranges</li>
+        <li>Rate-limit an API test helper</li>
+        <li>Group test results by status</li>
+        <li>Flatten a nested test report structure</li>
+        <li>Validate a JSON test payload schema</li>
+        <li>Build a minimal test fixture context manager</li>
+      </ol>
+    </section>
+
+  </main>
+
+  <footer id="site-footer">
+    <p>© 2025 AI Testing Academy · Built by <a href="https://www.linkedin.com/in/amiel-peled/" target="_blank" rel="noopener noreferrer">Amiel Peled</a> · For QA engineers who want to stay ahead</p>
+  </footer>
+</div>
 <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

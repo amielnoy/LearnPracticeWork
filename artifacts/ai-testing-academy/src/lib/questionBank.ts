@@ -56,7 +56,7 @@ export const EN_BANK: BankData = {
   enrichCta: '✨ Enrich with AI',
   enrichPlaceholder: 'Role or keywords (e.g. SDET, Playwright, CI/CD)',
   enrichHint:
-    'Uses Gemini with live Google Search to pull the QA / AI-test-automation interview questions most searched in the last 3 months — each with a model answer. Free usage starts automatically; connect a Gemini key in Settings if needed.',
+    'Uses Gemini with live Google Search to pull the QA / AI-test-automation interview questions most searched in the last 3 months — each with a model answer. Free usage starts automatically.',
   enriching: '✨ Enriching…',
   enrichHeading: '✨ AI-enriched Q&A — trending in the last 3 months',
   roleDefault: 'QA Automation Engineer',
@@ -460,7 +460,7 @@ export const EN_BANK: BankData = {
           hint: 'The unhappy files carry the risk: too big, wrong type, malicious.',
           answer: [
             'Happy path first: a valid file uploads, is stored, and downloads back byte-for-byte with the right content type and filename.',
-            'Then the negative space: oversized files, empty files, wrong or spoofed MIME types, dangerous extensions, and path-traversal filenames like `../../etc/passwd`.',
+            'Then the negative space: oversized files, empty files, wrong or spoofed MIME types, dangerous extensions, and path-traversal filenames that embed parent-directory references to escape the upload folder.',
             'Cover security and robustness: a disguised executable, a zip bomb, and an interrupted upload. Assert limits are enforced server-side and errors are clean rather than a 500.',
           ],
         },
@@ -821,7 +821,7 @@ export const HE_BANK: BankData = {
   enrichCta: '✨ העשר עם AI',
   enrichPlaceholder: 'תפקיד או מילות מפתח (למשל SDET, Playwright, CI/CD)',
   enrichHint:
-    'משתמש ב-Gemini עם חיפוש Google חי כדי להביא את שאלות הראיון (QA ואוטומציית בדיקות מבוססת AI) המחופשות ביותר ב-3 החודשים האחרונים — כל אחת עם תשובת מודל. השימוש החינמי מתחיל אוטומטית; במידת הצורך אפשר לחבר מפתח Gemini בהגדרות.',
+    'משתמש ב-Gemini עם חיפוש Google חי כדי להביא את שאלות הראיון (QA ואוטומציית בדיקות מבוססת AI) המחופשות ביותר ב-3 החודשים האחרונים — כל אחת עם תשובת מודל. השימוש החינמי מתחיל אוטומטית.',
   enriching: '✨ מעשיר…',
   enrichHeading: '✨ שו"ת בהעשרת AI — מגמות 3 החודשים האחרונים',
   roleDefault: 'מהנדס/ת אוטומציית QA',
@@ -1225,7 +1225,7 @@ export const HE_BANK: BankData = {
           hint: 'הקבצים הלא-מוצלחים נושאים את הסיכון: גדול מדי, סוג שגוי, זדוני.',
           answer: [
             'מסלול מוצלח קודם: קובץ תקין עולה, נשמר, ויורד חזרה בית-בבית עם content type ושם קובץ נכונים.',
-            'ואז המרחב השלילי: קבצים גדולים מדי, ריקים, סוגי MIME שגויים או מזויפים, סיומות מסוכנות, ושמות בסגנון path-traversal כמו `../../etc/passwd`.',
+            'ואז המרחב השלילי: קבצים גדולים מדי, ריקים, סוגי MIME שגויים או מזויפים, סיומות מסוכנות, ושמות בסגנון path-traversal שמכילים הפניות לתיקיית ההורה כדי לצאת מתיקיית ההעלאה.',
             'כסו אבטחה ועמידות: קובץ הרצה מוסווה, zip bomb, והעלאה שנקטעה. וודאו שהמגבלות נאכפות בצד השרת ושהשגיאות נקיות ולא 500.',
           ],
         },

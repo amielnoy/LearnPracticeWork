@@ -6,6 +6,7 @@ packages:
   - tests
 
 allowBuilds:
+  '@pnpm/exe': true
   '@swc/core': true
   core-js: false
   esbuild: true
