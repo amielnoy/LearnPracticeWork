@@ -159,6 +159,27 @@ export const en = {
     buildResumeBtn: '✨ Build improved resume',
     improvedTitle: '✨ Improved resume',
     downloadPdfBtn: '⬇️ Download as PDF',
+    tipsTitle: '📋 Resume Do\'s & Don\'ts',
+    tipsLead:
+      "The biggest mistake job seekers make: assuming that if they're a fit for the role, recruiters will figure it out on their own. They won't. Spell it out.",
+    doTitle: '✅ Do',
+    dontTitle: '🚫 Don\'t',
+    dos: [
+      'Understand the job posting deeply — what actually matters to them and what they\'re looking for.',
+      'Match your titles precisely to what the recruiter is searching for, not just what was on your email signature.',
+      'Weave keywords straight from the job description into the resume, so it clears the automated screen.',
+      'Show a clear employment timeline and fill any gaps in it.',
+      'Chew through what you did and spoon-feed it to the reader — don\'t expect anyone to dig your relevant experience out of the bullets.',
+      'Make the formula obvious on every line: this is what I did >> this is what they\'re looking for >> this is why I\'m the right fit.',
+    ],
+    donts: [
+      'If you did something but didn\'t write it down, as far as the recruiter is concerned, you didn\'t do it.',
+      'Don\'t leave your most relevant experience buried in a role from 10 years ago and expect anyone to reach it.',
+      'Don\'t rely on "if they read closely, they\'ll get it" — in most cases no one reads closely, and an ATS scans the file before a human ever sees it.',
+      'Don\'t leave a generic title that doesn\'t tell the recruiter you\'re a fit for this specific role.',
+      'Don\'t count on explaining the fit out loud — you might never get to that stage.',
+      'Don\'t assume the reader will guess the connection between your experience and the job\'s requirements — spell it out.',
+    ],
   },
   interview: {
     num: '03',

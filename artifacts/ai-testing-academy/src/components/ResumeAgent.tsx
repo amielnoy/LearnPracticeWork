@@ -384,6 +384,30 @@ export function ResumeAgent() {
         <span className="num">{t.num}</span> {t.title}
       </h2>
       <p className="lead reveal">{t.lead}</p>
+
+      <div className="card reveal" style={{ marginBottom: '22px' }}>
+        <h4>{t.tipsTitle}</h4>
+        <p style={{ color: 'var(--muted)', fontSize: '.95rem', marginTop: '-4px' }}>{t.tipsLead}</p>
+        <div className="result-cols" style={{ marginTop: '14px' }}>
+          <div>
+            <h4 style={{ color: 'var(--green)' }}>{t.doTitle}</h4>
+            <ul id="resumeTipsDo">
+              {t.dos.map((tip, i) => (
+                <li key={i}>{tip}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 style={{ color: 'var(--red)' }}>{t.dontTitle}</h4>
+            <ul id="resumeTipsDont">
+              {t.donts.map((tip, i) => (
+                <li key={i}>{tip}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div className="agent-box reveal">
         <h3>{t.boxTitle}</h3>
         <label htmlFor="targetRole">
