@@ -15,39 +15,16 @@ function LectureCard({ lec, bank }: { lec: LectureData; bank: BankData }) {
           flexWrap: 'wrap',
         }}
       >
-        <span
-          style={{
-            background: 'linear-gradient(135deg,var(--accent),var(--accent2))',
-            color: '#fff',
-            borderRadius: '8px',
-            padding: '3px 10px',
-            fontFamily: 'monospace',
-            fontSize: '.78rem',
-            fontWeight: 700,
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <span className="lecture-badge">
           {bank.lectureLabel} {lec.num}
         </span>
         {lec.ready ? (
-          <span
-            style={{
-              background: 'var(--green)',
-              color: '#fff',
-              borderRadius: '6px',
-              padding: '2px 8px',
-              fontSize: '.7rem',
-              fontWeight: 700,
-              letterSpacing: '.03em',
-            }}
-          >
+          <span className="lecture-live">
             <span aria-hidden="true">● </span>
             {bank.liveLabel}
           </span>
         ) : (
-          <span style={{ color: 'var(--muted)', fontSize: '.75rem', fontStyle: 'italic' }}>
-            {bank.comingSoon}
-          </span>
+          <span className="lecture-soon">{bank.comingSoon}</span>
         )}
       </div>
       <h4 style={{ marginBottom: '8px', fontSize: '1rem' }}>{lec.title}</h4>

@@ -424,7 +424,7 @@ export function ResumeAgent() {
             </ul>
           </div>
         </div>
-        <p style={{ marginTop: '14px', fontSize: '.85rem' }}>
+        <p className="tips-source" style={{ marginTop: '14px', fontSize: '.85rem' }}>
           <a href={t.tipsSourceUrl} target="_blank" rel="noopener noreferrer">
             {t.tipsSourceLabel}
           </a>
