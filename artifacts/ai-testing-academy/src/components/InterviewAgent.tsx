@@ -5,6 +5,7 @@ import { useReveal } from '../hooks/useReveal';
 import { useVoice } from '../hooks/useVoice';
 import type { Message } from '../lib/providers';
 import { useProgress } from '../context/ProgressContext';
+import { sectionNum } from '../lib/sections';
 import { readValidated, removeRaw, writeValidated } from '../lib/storage';
 
 interface ChatMsg {
@@ -282,7 +283,7 @@ export function InterviewAgent() {
   return (
     <section id="interview-talk" ref={sectionRef}>
       <h2>
-        <span className="num">{t.num}</span> {t.title}
+        <span className="num">{sectionNum('interview-talk')}</span> {t.title}
       </h2>
       <p className="lead reveal">{t.lead}</p>
       <div className="agent-box reveal">

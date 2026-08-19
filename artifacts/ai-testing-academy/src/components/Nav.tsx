@@ -1,23 +1,57 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type RefObject } from 'react';
 import { useLocale } from '../context/LocaleContext';
 import { GoogleSignIn } from './GoogleSignIn';
+import { SECTIONS } from '../lib/sections';
+
+/**
+ * The width at which the sidebar becomes a drawer.
+ *
+ * It has to be this number and not the 768 in `use-mobile`: below 900px the
+ * stylesheet slides the nav off-screen (`app.css`, the `max-width:900px`
+ * block), and the two behaviours that depend on it here — trapping focus out of
+ * a hidden drawer, and returning it afterwards — are wrong by exactly the
+ * 768–900 band if they disagree with the CSS.
+ */
+const DRAWER_MEDIA = '(max-width: 900px)';
+
+function useDrawerMode(): boolean {
+  const [drawer, setDrawer] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(DRAWER_MEDIA).matches,
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(DRAWER_MEDIA);
+    const onChange = (event: MediaQueryListEvent) => setDrawer(event.matches);
+    setDrawer(mql.matches);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+
+  return drawer;
+}
 
 interface NavProps {
   navOpen: boolean;
   setNavOpen: (open: boolean) => void;
   theme: string;
   onToggleTheme: () => void;
+  toggleRef: RefObject<HTMLButtonElement | null>;
 }
 
-export function Nav({ setNavOpen, theme, onToggleTheme }: NavProps) {
-  const { locale, lang: _lang, switchLang: doSwitchLang, S } = useLocale();
+export function Nav({ navOpen, setNavOpen, theme, onToggleTheme, toggleRef }: NavProps) {
+  const { locale, switchLang: doSwitchLang, S } = useLocale();
   const [activeSection, setActiveSection] = useState<string>('');
-  const [sectionNums, setSectionNums] = useState<Record<string, string>>({});
+  const drawerMode = useDrawerMode();
+
+  // Closed at drawer widths, the nav is only moved off-screen by a transform:
+  // it stays visible and focusable, so a keyboard user used to travel through
+  // twelve controls they could not see before reaching the page. `inert` takes
+  // the whole subtree out of focus and out of the accessibility tree, and it
+  // inherits, so nothing inside needs its own attribute.
+  const hidden = drawerMode && !navOpen;
 
   // Scroll-spy: highlight active section
   useEffect(() => {
-    const sectionIds = locale.nav.links.map(l => l.href.slice(1));
-
     const obs = new IntersectionObserver(
       entries => {
         entries.forEach(en => {
@@ -29,25 +63,40 @@ export function Nav({ setNavOpen, theme, onToggleTheme }: NavProps) {
       { rootMargin: '-25% 0px -65% 0px' },
     );
 
-    sectionIds.forEach(id => {
-      const el = document.getElementById(id);
+    SECTIONS.forEach(section => {
+      const el = document.getElementById(section.id);
       if (el) obs.observe(el);
     });
 
     return () => obs.disconnect();
-  }, [locale.nav.links]);
+  }, []);
 
-  // Read section number chips from DOM (after sections have mounted)
+  // Escape closes the drawer. It behaves as a modal at these widths — it locks
+  // body scroll and lays a scrim over the page — so the key that dismisses
+  // every other modal has to dismiss this one.
   useEffect(() => {
-    const nums: Record<string, string> = {};
-    locale.nav.links.forEach(link => {
-      const id = link.href.slice(1);
-      const el = document.getElementById(id);
-      const num = el?.querySelector('.num')?.textContent?.trim() || '';
-      if (num) nums[id] = num;
-    });
-    setSectionNums(nums);
-  }, [locale.nav.links]);
+    if (!navOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setNavOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [navOpen, setNavOpen]);
+
+  // Focus follows the drawer: into it on open, back to the button that opened
+  // it on close. Without the second half, dismissing the drawer drops focus on
+  // <body> and the next Tab restarts from the top of the document.
+  useEffect(() => {
+    if (!drawerMode) return;
+    if (navOpen) {
+      document.querySelector<HTMLAnchorElement>('#nav a.link')?.focus();
+    } else if (document.activeElement === document.body) {
+      toggleRef.current?.focus();
+    }
+  }, [navOpen, drawerMode, toggleRef]);
 
   const handleNavLinkClick = useCallback(() => {
     setNavOpen(false);
@@ -58,7 +107,7 @@ export function Nav({ setNavOpen, theme, onToggleTheme }: NavProps) {
   const themeLabel = dark ? S.themeLabelLight : S.themeLabelDark;
 
   return (
-    <nav id="nav" aria-label="Primary">
+    <nav id="nav" aria-label="Primary" inert={hidden}>
       <a
         className="logo"
         href="#"
@@ -71,25 +120,23 @@ export function Nav({ setNavOpen, theme, onToggleTheme }: NavProps) {
         {locale.nav.agentsGroup}
       </span>
 
-      {locale.nav.links.map(link => {
-        const id = link.href.slice(1);
-        const num = sectionNums[id];
-        return (
-          <a
-            key={link.href}
-            className={`link${activeSection === id ? ' active' : ''}`}
-            href={link.href}
-            onClick={handleNavLinkClick}
-          >
-            {num && (
-              <span className="nav-num" aria-hidden="true">
-                {num}
-              </span>
-            )}
-            {link.label}
-          </a>
-        );
-      })}
+      {/* Order, labels and numbering all come from SECTIONS, which is also what
+          HomePage renders from — so the list cannot fall out of step with the
+          page the way it used to. The number is the section's own, not this
+          list's position, which is why it is read rather than counted. */}
+      {SECTIONS.map(section => (
+        <a
+          key={section.id}
+          className={`link${activeSection === section.id ? ' active' : ''}`}
+          href={`#${section.id}`}
+          onClick={handleNavLinkClick}
+        >
+          <span className="nav-num" aria-hidden="true">
+            {section.num}
+          </span>
+          {locale.nav.labels[section.id]}
+        </a>
+      ))}
 
       <span className="nav-group">{locale.nav.communityGroup}</span>
 
@@ -132,7 +179,15 @@ export function Nav({ setNavOpen, theme, onToggleTheme }: NavProps) {
   );
 }
 
-export function NavToggle({ navOpen, onToggle }: { navOpen: boolean; onToggle: () => void }) {
+export function NavToggle({
+  navOpen,
+  onToggle,
+  buttonRef,
+}: {
+  navOpen: boolean;
+  onToggle: () => void;
+  buttonRef: RefObject<HTMLButtonElement | null>;
+}) {
   const { locale } = useLocale();
   // The toggle floats over the content on phones, so it retracts while the
   // reader scrolls down into a section and comes back on any upward scroll —
@@ -156,11 +211,16 @@ export function NavToggle({ navOpen, onToggle }: { navOpen: boolean; onToggle: (
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       className={`fab nav-toggle${tucked && !navOpen ? ' tucked' : ''}`}
       id="navToggle"
-      aria-label={locale.ui.navOpen}
+      // The label has to follow the state it is paired with: announced together
+      // with aria-expanded, a fixed "Open navigation menu" reads as "Open
+      // navigation menu, expanded" once the drawer is open.
+      aria-label={navOpen ? locale.ui.navClose : locale.ui.navOpen}
       aria-expanded={navOpen}
+      aria-controls="nav"
       onClick={onToggle}
     >
       {navOpen ? '✕' : '☰'}
@@ -168,12 +228,6 @@ export function NavToggle({ navOpen, onToggle }: { navOpen: boolean; onToggle: (
   );
 }
 
-export function NavScrim({
-  navOpen: _navOpen,
-  onClose,
-}: {
-  navOpen: boolean;
-  onClose: () => void;
-}) {
+export function NavScrim({ onClose }: { onClose: () => void }) {
   return <div className="nav-scrim" id="navScrim" onClick={onClose} aria-hidden="true" />;
 }

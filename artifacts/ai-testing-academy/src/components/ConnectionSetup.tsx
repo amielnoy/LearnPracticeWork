@@ -2,6 +2,7 @@ import { useLocale } from '../context/LocaleContext';
 import { useProviderContext } from '../context/ProviderContext';
 import { PROVIDERS } from '../lib/providers';
 import { useReveal } from '../hooks/useReveal';
+import { sectionNum } from '../lib/sections';
 
 export function ConnectionSetup({
   collapsed = false,
@@ -51,7 +52,7 @@ export function ConnectionSetup({
           <small>{forceOpen ? t.settingsQuotaHint : t.settingsHint}</small>
         </summary>
         <h2>
-          {!collapsed && <span className="num">{t.num}</span>} {t.title}
+          <span className="num">{sectionNum('setup')}</span> {t.title}
         </h2>
         <p className="lead reveal">{t.lead}</p>
         <div className="agent-box reveal">
