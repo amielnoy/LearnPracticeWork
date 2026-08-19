@@ -502,11 +502,26 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <code>renderButton</code> — that half of the translation cannot come from a strings file.
 </p>
 <p>
-  <b>It is identity, not authorisation.</b> The token is read and never verified: checking the
-  signature needs Google's keys and a server trusted to use them, and the Pages deployment has
-  neither. Anyone can hand the page a hand-written token and appear signed in as anybody, which
-  is exactly why nothing is gated on it — no quota, no permission, no stored record. If any of
-  that arrives, the token has to go to <code>api-server</code> and come back verified first.
+  <b>In the browser it is identity, not authorisation.</b> The token is read here and never
+  verified: checking a signature needs Google's keys and a server trusted to use them, and the
+  page has neither. Anyone can hand it a hand-written token and appear signed in as anybody, so
+  nothing on the client is gated on it — the profile is good for a name and an avatar in the
+  corner and for nothing else.
+</p>
+<p>
+  <b>On the server it is verified, and that is where decisions are made.</b> The condition this
+  page used to state — “if any of that arrives, the token has to go to <code>api-server</code>
+  and come back verified first” — is what now happens. When the token is sent to
+  <code>api-server</code> as a bearer credential, <code>lib/googleAuth.ts</code> checks the
+  signature against Google's published keys and then the issuer, audience, expiry and
+  <code>email_verified</code> before any claim in it counts. The algorithm is pinned to RS256
+  rather than read out of the token, which is how <code>alg: none</code> and key-confusion
+  attacks get in. That is what <code>GET /api/entitlements/course</code> answers from.
+</p>
+<p>
+  The two halves are not in tension: reading a token for display and verifying one for a
+  decision are different jobs, and only the second needs a server. A Pages build still has no
+  server, so it still has no entitlements — it renders the profile and nothing more.
 </p>
 <p>
   A build with no <code>VITE_GOOGLE_CLIENT_ID</code> renders no sign-in at all and never
@@ -552,20 +567,36 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h2 id="state">7 · State &amp; persistence</h2>
 
 <p>
-  There is no store. State is React state in two contexts plus local component state,
-  and the only thing that survives a reload is what is deliberately written to
-  <code>localStorage</code> under the <code>ata_</code> prefix.
+  There is no store. State is React state in two contexts plus local component state, and the
+  only thing that survives a reload is what is deliberately written under the <code>ata_</code>
+  prefix — to <code>localStorage</code> when it should outlive the visit, to
+  <code>sessionStorage</code> when it should not.
 </p>
+
+<div class="callout">
+  <b>Storage is input, not state.</b> Every read goes through <code>lib/storage.ts</code>, for
+  two reasons that apply to all eleven keys. Storage can be unavailable — private browsing,
+  blocked cookies, a full quota — and <code>getItem</code> <em>throws</em> rather than returning
+  null when it is, which in a module-scope initialiser takes the page down before it renders.
+  And the contents are editable from any devtools console, so a value read back has to be
+  validated like anything else that arrives from outside. Every failure is the same answer: the
+  value is absent, and the caller's default applies.
+</div>
 
 <div class="scroll">
 <table>
-  <thead><tr><th>Key</th><th>Written by</th><th>Holds</th></tr></thead>
+  <thead><tr><th>Key</th><th>Written by</th><th>Where</th><th>Holds</th></tr></thead>
   <tbody>
-    <tr><td><code>ata_theme</code></td><td>HomePage</td><td><code>light</code> / <code>dark</code>; first visit falls back to <code>prefers-color-scheme</code>.</td></tr>
-    <tr><td><code>ata_lang</code></td><td>i18n</td><td>Resolved language, re-written on every resolve so it stays sticky.</td></tr>
-    <tr><td><code>ata_provider</code></td><td>ProviderContext</td><td>Selected vendor; defaults to <code>gemini</code>.</td></tr>
-    <tr><td><code>ata_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>The user's own API key, one slot per vendor, saved only while “use my key” is on.</td></tr>
-    <tr><td><code>ata_google_credential</code></td><td>AuthContext</td><td>The last Google ID token, so a reload does not sign the reader out. Dropped the moment it fails to parse or its <code>exp</code> passes.</td></tr>
+    <tr><td><code>ata_theme</code></td><td>HomePage</td><td>local</td><td>Exactly <code>light</code> or <code>dark</code> — checked, because this value lands on <code>data-theme</code> and the toggle only ever flips between those two. First visit falls back to <code>prefers-color-scheme</code>.</td></tr>
+    <tr><td><code>ata_lang</code></td><td>i18n</td><td>local</td><td>Resolved language, checked against the catalogue. Re-written on every resolve so it stays sticky.</td></tr>
+    <tr><td><code>ata_progress_v1</code></td><td>ProgressContext</td><td>local</td><td>Which tools were started and finished. Field-by-field coercion with a bounded array — the pattern the rest of the keys were brought up to.</td></tr>
+    <tr><td><code>ata_provider</code></td><td>ProviderContext</td><td>local</td><td>Selected vendor, checked against the providers that exist; defaults to <code>gemini</code>.</td></tr>
+    <tr><td><code>ata_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>local</td><td>The user's own API key, one slot per vendor, saved only while “remember” is on.</td></tr>
+    <tr><td><code>ata_session_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>session</td><td>The same key when “remember” is off — the default. Keys written by older versions are migrated here on first read.</td></tr>
+    <tr><td><code>ata_remember_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>local</td><td>Which of the two slots above is in use.</td></tr>
+    <tr><td><code>ata_google_credential</code></td><td>AuthContext</td><td>local</td><td>The last Google ID token, so a reload does not sign the reader out. Dropped the moment it fails to parse or its <code>exp</code> passes.</td></tr>
+    <tr><td><code>ata_interview_session_v1</code></td><td>InterviewAgent</td><td>session</td><td>A partly-finished interview, so a reload does not lose it. Every element validated: <code>text</code> is rendered as a child and <code>cls</code> as a class name.</td></tr>
+    <tr><td><code>ata_resume_draft_&lt;lang&gt;_*</code></td><td>ResumeAgent</td><td>session</td><td>The résumé, target role and job description in progress. Three keys per language.</td></tr>
   </tbody>
 </table>
 </div>
@@ -577,12 +608,29 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   history, your résumé drafts, or which account you are signed in as.
 </p>
 
+<div class="callout good">
+  <b>Why the transcript and the drafts are session-scoped.</b> Both hold what someone wrote
+  about their own career, on a machine that may not be theirs. The résumé drafts were always
+  <code>sessionStorage</code>; the interview transcript was <code>localStorage</code> and
+  permanent, which was the same class of content on the opposite lifetime for no stated reason.
+  It is a session now, which is exactly as long as “resume after a reload” needs. Transcripts
+  left behind by the old version are deleted rather than migrated — carrying one into the
+  session would carry the problem forward a visit.
+</div>
+
 <h3>The key-mode decision</h3>
 <p>
   One subtlety worth naming: <code>ownKeyTouched</code>. Until the user explicitly toggles the
   switch, the app re-derives the mode whenever the provider changes or the server config
   arrives — a stored key or the absence of a server default turns own-key mode on.
   Once the user touches it, their choice is respected and never recomputed.
+</p>
+<p>
+  The flag is held in a ref as well as in state, because the effect has to <em>read</em> it
+  without <em>re-running</em> on it: the effect exists to re-evaluate the default when the
+  provider changes or the config lands, and firing it because someone just flipped the toggle
+  would undo the flip. That is a dependency the effect genuinely must not have, which is worth
+  saying in a ref rather than in a suppression comment.
 </p>
 
 <!-- ───────────────────────── 8 ───────────────────────── -->
@@ -645,7 +693,10 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <li><b>No secret is bundled.</b> Server-side keys stay in <code>api-server</code>; the client only ever learns the boolean <code>available</code> and a default model name.</li>
   <li><b>Error bodies are truncated</b> to 300 characters before display, which keeps a verbose upstream error from dumping a wall of text into the UI.</li>
   <li><b>One third-party script, by necessity.</b> Google's sign-in client is loaded from <code>accounts.google.com</code> and runs on this origin — there is no packaged equivalent, the credential flow only exists inside the hosted client. It is the only runtime code on the site that does not ship with it, it is requested only when an OAuth client is configured, and the résumé libraries that used to be fetched from public CDNs are now bundled dependencies.</li>
-  <li><b>Sign-in proves nothing.</b> The ID token is read, not verified, so identity here is a display convenience and not a security claim. Nothing is gated on it. Treating it as authorisation would mean trusting a value any visitor can forge.</li>
+  <li><b>Sign-in proves nothing <i>in the browser</i>.</b> The ID token is read here, not verified, so identity on the client is a display convenience and not a security claim — nothing on the page is gated on it, because treating it as authorisation would mean trusting a value any visitor can forge.</li>
+  <li><b>It proves something once the server has checked it.</b> Sent to <code>api-server</code> as a bearer credential, the same token is verified against Google's published keys — signature, issuer, audience, expiry, <code>email_verified</code> — and only then does a claim in it decide anything. That is the whole difference between the two halves, and it is why the entitlement answer lives on the server and not in the bundle.</li>
+  <li><b>A purchase record is never written by a browser.</b> Rows in <code>course_purchases</code> come from a signature-verified Stripe webhook and from nowhere else. The <code>googleSubject</code> a row carries is stamped into the checkout session from a token the server verified, so it is not a field any client can set — the checkout schema is strict and rejects the attempt.</li>
+  <li><b>The seed route is an admin route.</b> <code>POST /api/stripe/seed</code> writes a product and a price to a live Stripe account. It requires <code>ADMIN_API_TOKEN</code> as a bearer token, compared in constant time over hashes so a length mismatch cannot leak through an exception, and answers <code>404</code> rather than <code>401</code> when no token is configured — an unconfigured deployment should not advertise that the surface exists, and forgetting the variable should fail closed.</li>
 </ul>
 
 <div class="callout">
@@ -742,10 +793,11 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers five layers — 419 cases at the time of
-  writing (185 unit, 138 component, 43 api and contract, 53 e2e). Playwright is used as the
+  One Playwright package at <code>tests/</code> covers five layers — 485 cases at the time of
+  writing (211 unit, 152 component, 65 api and contract, 57 e2e). Playwright is used as the
   runner throughout, not just as a browser driver: the unit project never launches a browser,
-  it executes the same TypeScript modules the app imports.
+  it executes the same TypeScript modules the app imports — the academy's, and now
+  <code>api-server</code>'s too, wherever a module has no Express import to drag in.
 </p>
 
 <div class="scroll">
@@ -755,17 +807,17 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr>
       <td><code>tests/unit</code></td>
       <td>Node</td>
-      <td><code>domUtils</code> escaping and linkifying, language resolution, the whole provider registry — request building, key validation, error mapping, proxy-vs-direct routing. Also the two things that must hold before a browser is involved: the résumé PDF builders, checked by parsing the emitted file back with pdf.js rather than by asserting which jsPDF calls were made, and the Google ID token reader, checked for reading a Hebrew name intact and for answering “nobody” to every malformed or expired token instead of throwing on page load.</td>
+      <td><code>domUtils</code> escaping and linkifying, language resolution, the whole provider registry — request building, key validation, error mapping, proxy-vs-direct routing. Also the two things that must hold before a browser is involved: the résumé PDF builders, checked by parsing the emitted file back with pdf.js rather than by asserting which jsPDF calls were made, and the Google ID token reader, checked for reading a Hebrew name intact and for answering “nobody” to every malformed or expired token instead of throwing on page load. Two more since: <code>lib/storage.ts</code>, including the case no real <code>localStorage</code> can be made to produce — one that throws on every call — and the server's token verifier, signing real tokens with a keypair generated in the test process.</td>
     </tr>
     <tr>
       <td><code>tests/component</code></td>
       <td>Chromium (Playwright CT + Vite)</td>
-      <td>The real components, mounted: the disclosure cycle, the locale chain, the scroll affordance, the key-mode decisions in <code>ConnectionSetup</code>, the résumé uploader driven with real PDFs through the real pdf.js, and sign-in in both languages against a stubbed Google client.</td>
+      <td>The real components, mounted: the disclosure cycle, the locale chain, the scroll affordance, the key-mode decisions in <code>ConnectionSetup</code>, the résumé uploader driven with real PDFs through the real pdf.js, sign-in in both languages against a stubbed Google client, and what the interview restores from storage — including that a transcript left in <code>localStorage</code> by an older version is deleted rather than read.</td>
     </tr>
     <tr>
       <td><code>tests/api</code></td>
       <td>Node → live server</td>
-      <td>Status codes, CORS, malformed bodies, the webhook signature gate, and the raw-body registration order in <code>app.ts</code>.</td>
+      <td>Status codes, CORS, malformed bodies, the webhook signature gate, and the raw-body registration order in <code>app.ts</code>. Also the two authenticated surfaces: the admin token in front of the seed route — including that the right token gets <em>through</em> it, and then fails on Stripe rather than on auth — and the entitlements route, sent tokens shaped exactly like real ones to prove none of them work.</td>
     </tr>
     <tr>
       <td><code>tests/contract</code></td>
@@ -775,7 +827,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr>
       <td><code>tests/e2e</code></td>
       <td>Chromium, desktop + Pixel 5</td>
-      <td>The whole app on its own Vite server: hero and section rendering, in-page navigation, the theme and language toggles, the interview-question reveal, and the mobile nav drawer.</td>
+      <td>The whole app on its own Vite server: hero and section rendering, in-page navigation, the theme and language toggles — including that a tampered stored theme never reaches <code>data-theme</code> — the interview-question reveal, and the mobile nav drawer.</td>
     </tr>
   </tbody>
 </table>
@@ -824,19 +876,35 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 </div>
 
 <div class="callout good">
-  <b>No test can reach a model vendor.</b> The unit suite stubs <code>fetch</code>; the API
-  suite runs one server with a throwaway Gemini key that only ever receives invalid requests,
-  and one with no key at all. Both instances are started with <code>DATABASE_URL</code> and the
-  Replit connector variables blanked, so a developer's shell cannot make the suite pass or fail
-  by accident.
+  <b>No test can reach a model vendor — or create a product.</b> The unit suite stubs
+  <code>fetch</code>; the API suite runs one server with a throwaway Gemini key that only ever
+  receives invalid requests, and one with no key at all. All instances start with
+  <code>DATABASE_URL</code> and the Replit connector variables blanked, so a developer's shell
+  cannot make the suite pass or fail by accident — and so the furthest an authorised call to the
+  seed route can get is failing to fetch Stripe credentials.
 </div>
 
 <p>
-  The two instances exist because <code>routes/ai.ts</code> answers <code>503</code> for a
-  missing key <em>before</em> it validates the body — on a keyless server the
-  <code>400 messages is required</code> branch is unreachable.
-  <code>tests/support/start-api-servers.ts</code> builds the server once and starts both.
+  There are three instances, because most of these routes answer “not configured”
+  <em>before</em> they validate anything. <code>routes/ai.ts</code> answers <code>503</code> for
+  a missing key before it reads the body, so on a keyless server the
+  <code>400 messages is required</code> branch is unreachable; the seed route answers
+  <code>404</code> with no admin token, so its <code>401</code> branch is unreachable there too.
+  One instance carries nothing, one carries a Gemini key, an admin token and an OAuth client,
+  and a third carries a quota small enough for the rate-limit spec to exhaust.
+  <code>tests/support/start-api-servers.ts</code> builds the server once and starts all three.
 </p>
+
+<div class="callout">
+  <b>Assert the acceptance, not only the refusals.</b> A verifier that returns “no” to
+  everything passes every rejection test ever written for it, and signs nobody in while looking
+  perfectly secure. <code>tests/unit/googleAuth.spec.ts</code> therefore generates an RSA
+  keypair, serves a key set in place of Google's, signs a token, and asserts first that it is
+  <em>accepted</em> — every rejection after that is the same token with one property changed, so
+  each failure is attributable to exactly one rule. The suite was checked by mutation: deleting
+  the audience check turns one case red, and making the verifier return null unconditionally
+  turns five red.
+</div>
 
 <p>
   The e2e layer needs no API server at all: it boots the academy's own Vite dev server, whose
@@ -943,6 +1011,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <li><b>Grounded search is Gemini-only</b>, so the enrich action degrades if the user is on Anthropic or OpenAI without a Gemini key.</li>
   <li><b>The proxy path covers Gemini only.</b> The other two vendors are own-key or nothing.</li>
   <li><b>Resume tooling needs the public internet</b> beyond the model call; behind a strict CSP or an offline network, extraction and PDF export are the first things to fail.</li>
+  <li><b>Nothing calls checkout yet.</b> <code>POST /api/stripe/checkout</code>, the purchase record it produces, and <code>GET /api/entitlements/course</code> are all in place and tested, but no UI in this app starts a purchase — so in practice no row is ever written. The join exists; the flow that would exercise it does not.</li>
+  <li><b>The purchases table has not been created.</b> It is defined in <code>lib/db/src/schema/coursePurchases.ts</code> and needs one run of <code>pnpm --filter @workspace/db run push</code> against a live <code>DATABASE_URL</code>. Until then the server degrades rather than failing: a completed checkout logs a warning instead of writing, and the entitlement route answers <code>503</code>.</li>
 </ul>
 
 <footer>
