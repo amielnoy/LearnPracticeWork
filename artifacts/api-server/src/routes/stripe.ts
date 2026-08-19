@@ -2,7 +2,7 @@ import { Router, type IRouter } from 'express';
 import { z } from 'zod';
 import { getUncachableStripeClient } from '../stripeClient';
 import { adminRateLimiter, requireAdminToken } from '../middlewares/requireAdminToken';
-import { verifiedGoogleUser } from '../lib/googleAuth';
+import { verifiedGoogleUser } from '../middlewares/requireGoogleUser';
 
 const router: IRouter = Router();
 

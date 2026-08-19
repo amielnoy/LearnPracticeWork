@@ -1,5 +1,5 @@
 import { Router, type IRouter } from 'express';
-import { requireGoogleUser, type AuthenticatedRequest } from '../lib/googleAuth';
+import { requireGoogleUser, type AuthenticatedRequest } from '../middlewares/requireGoogleUser';
 import { findCourseAccess } from '../lib/purchases';
 import { logger } from '../lib/logger';
 

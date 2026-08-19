@@ -1,5 +1,4 @@
 import { createPublicKey, verify as verifySignature, type KeyObject } from 'node:crypto';
-import type { NextFunction, Request, Response } from 'express';
 import { logger } from './logger';
 
 /**
@@ -15,6 +14,11 @@ import { logger } from './logger';
  * No library: RS256 is a signature this runtime already verifies, and Google's
  * key set is one well-known JSON document. What that buys is that the rules
  * below are readable in one place rather than configured somewhere.
+ *
+ * Nothing here knows about Express. That is what lets the rules be tested
+ * against real signatures — a keypair generated in the test process, a stubbed
+ * key set, a token signed for the occasion — rather than only through a route.
+ * The request-shaped half lives in `middlewares/requireGoogleUser`.
  */
 
 const JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
@@ -166,8 +170,13 @@ export async function verifyGoogleIdToken(
     return null;
   }
 
-  // Pinned, not read from the token: accepting whatever `alg` the token names
-  // is how "none" and key-confusion attacks get in.
+  // Defence in depth, and honestly labelled as such. What actually closes the
+  // "none" and key-confusion attacks is one line further down: the verify call
+  // names sha256 and is handed an RSA public key, so the token's own `alg` never
+  // selects anything. Deleting this line changes no outcome — a mutation test
+  // confirms it — which is why there is no test asserting it in isolation. It
+  // stays because it makes the intent legible, and because a future refactor
+  // that derived the algorithm from the header would be a real bug.
   if (header.alg !== 'RS256' || !header.kid) return null;
 
   const signingInput = Buffer.from(`${segments[0]}.${segments[1]}`, 'utf8');
@@ -207,53 +216,15 @@ export async function verifyGoogleIdToken(
   };
 }
 
-function bearerToken(req: Request): string {
-  const match = /^Bearer[ ]+(.+)$/i.exec((req.get('authorization') ?? '').trim());
-  return match ? match[1].trim() : '';
-}
-
 /**
- * The verified caller, or null when there is no usable token.
+ * Drops the cached key set.
  *
- * For routes that behave differently for a signed-in visitor but still work
- * without one — checkout being the case that matters, since buying the course
- * must not require an account.
+ * Google rotates its keys and the cache honours their `cache-control`, so this
+ * is not needed in normal operation. It exists for two callers: a deployment
+ * that wants to force a refetch, and a test that has to start from a known
+ * state rather than from whatever a previous test left behind.
  */
-export async function verifiedGoogleUser(req: Request): Promise<VerifiedGoogleUser | null> {
-  const token = bearerToken(req);
-  if (!token) return null;
-  try {
-    return await verifyGoogleIdToken(token);
-  } catch (err) {
-    // A network failure reaching Google is not the caller's fault, but it is
-    // also not proof of identity: treat it as signed out and say so in the log.
-    logger.warn({ err, requestId: req.id }, 'Could not verify a Google ID token');
-    return null;
-  }
-}
-
-/** Express typing for a request that has been through `requireGoogleUser`. */
-export interface AuthenticatedRequest extends Request {
-  googleUser: VerifiedGoogleUser;
-}
-
-/** Rejects the request unless it carries a verified Google ID token. */
-export async function requireGoogleUser(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  if (!isGoogleAuthConfigured()) {
-    res.status(503).json({ error: 'Sign-in is not configured on this server.' });
-    return;
-  }
-
-  const user = await verifiedGoogleUser(req);
-  if (!user) {
-    res.status(401).json({ error: 'A valid Google ID token is required.' });
-    return;
-  }
-
-  (req as AuthenticatedRequest).googleUser = user;
-  next();
+export function resetGoogleKeyCache(): void {
+  cache = undefined;
+  inFlight = undefined;
 }
