@@ -46,9 +46,10 @@ export const EN: BankData = {
         },
         {
           num: 2,
-          ready: false,
+          ready: true,
           title: 'Prompt Engineering for Testers',
           desc: 'How to write prompts that produce consistent, testable outputs. Covers prompt structure, system messages, temperature, and prompt injection basics.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-2/slide1?lang=en',
         },
         {
           num: 3,
@@ -192,9 +193,10 @@ export const HE: BankData = {
         },
         {
           num: 2,
-          ready: false,
+          ready: true,
           title: 'הנדסת Prompt לבודקים',
           desc: 'כיצד לכתוב prompts שמייצרים תוצאות עקביות וניתנות לבדיקה. מכסה מבנה prompt, system messages, temperature ויסודות prompt injection.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-2/slide1?lang=he',
         },
         {
           num: 3,

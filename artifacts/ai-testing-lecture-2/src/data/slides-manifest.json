@@ -1,0 +1,164 @@
+[
+  {
+    "id": "52b534ba-3d21-460a-9634-9a280724be90",
+    "position": 1,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Prompt Engineering for Testers",
+    "description": "Title slide with lecture roadmap",
+    "speakerNotes": ""
+  },
+  {
+    "id": "7bdac608-c210-46b9-9fee-e3ba82203d4b",
+    "position": 2,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "What You'll Be Able To Do",
+    "description": "Learning objectives for the lecture",
+    "speakerNotes": ""
+  },
+  {
+    "id": "77df630d-89fa-47d1-996b-5e11cdf93a13",
+    "position": 3,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhyItMattersForTesters.tsx",
+    "title": "Why Prompt Engineering Matters for Testers",
+    "description": "Why this topic matters for testers",
+    "speakerNotes": ""
+  },
+  {
+    "id": "6efa316e-89b3-4515-9fe2-4f9c7a7c18bc",
+    "position": 4,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/AnatomyOfAPrompt.tsx",
+    "title": "Anatomy of a Prompt",
+    "description": "The structural parts of a prompt",
+    "speakerNotes": ""
+  },
+  {
+    "id": "26e995d2-6bd9-4eb3-801d-3fe658f1d916",
+    "position": 5,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/SystemMessages.tsx",
+    "title": "System Messages: Setting the Contract",
+    "description": "Role of the system message",
+    "speakerNotes": ""
+  },
+  {
+    "id": "fe70aa4e-3da8-422b-8295-cd022234ce76",
+    "position": 6,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TemperatureSampling.tsx",
+    "title": "Temperature & Sampling Parameters",
+    "description": "How temperature and sampling affect output",
+    "speakerNotes": ""
+  },
+  {
+    "id": "638573e8-a5d8-4a95-bb92-8b6f2b6c2101",
+    "position": 7,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/DeterminismVsVariability.tsx",
+    "title": "Determinism vs. Variability: The Testing Trade-off",
+    "description": "Balancing consistency and variety",
+    "speakerNotes": ""
+  },
+  {
+    "id": "14a9f61c-dda6-4e13-bcb5-633cf0a4ca73",
+    "position": 8,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/TestableOutputs.tsx",
+    "title": "Designing for Testable Outputs",
+    "description": "Structuring output for automated checks",
+    "speakerNotes": ""
+  },
+  {
+    "id": "03c8e096-5524-4e03-917f-5c539e5deb77",
+    "position": 9,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/FewShotExamples.tsx",
+    "title": "Few-Shot Examples: Anchoring Behavior",
+    "description": "Using examples to stabilize output",
+    "speakerNotes": ""
+  },
+  {
+    "id": "e9aa936e-a30d-4804-be65-984068cbc1c1",
+    "position": 10,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/PromptTemplatesVersioning.tsx",
+    "title": "Prompt Templates & Versioning",
+    "description": "Treating prompts as versioned code",
+    "speakerNotes": ""
+  },
+  {
+    "id": "913af21c-a8d5-4ed9-bd2b-c559009d1ce4",
+    "position": 11,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/CommonFailureModes.tsx",
+    "title": "Common Prompt Failure Modes",
+    "description": "Typical ways prompts fail",
+    "speakerNotes": ""
+  },
+  {
+    "id": "7c1a9de2-3ada-441e-8af8-e43a71438f88",
+    "position": 12,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/PromptInjectionBasics.tsx",
+    "title": "Prompt Injection Basics: What It Is",
+    "description": "Introduction to prompt injection",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b73b911a-6087-4a1f-9ab2-b43ac7063fdb",
+    "position": 13,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/InjectionAttackPatterns.tsx",
+    "title": "Prompt Injection Attack Patterns",
+    "description": "Common injection attack types",
+    "speakerNotes": ""
+  },
+  {
+    "id": "6ada8f0a-95ae-4c92-a957-6ed3e7d8315f",
+    "position": 14,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/DefendingAgainstInjection.tsx",
+    "title": "Defending Against Injection",
+    "description": "Mitigations against prompt injection",
+    "speakerNotes": ""
+  },
+  {
+    "id": "1487f984-6ee0-4015-96be-6d4be876e53c",
+    "position": 15,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/RegressionTestSuite.tsx",
+    "title": "Building a Prompt Regression Test Suite",
+    "description": "How to build a prompt regression suite",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ffed4f69-e661-421a-ac14-9278a46e50a1",
+    "position": 16,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/HandsOnChecklist.tsx",
+    "title": "Hands-On Checklist for Your Next Prompt Review",
+    "description": "Practical checklist for prompt review",
+    "speakerNotes": ""
+  },
+  {
+    "id": "8cb08752-d9e0-4403-9205-02df9bcdc203",
+    "position": 17,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Recap of the lecture",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b4f4769b-68f5-4574-8b60-dc7521e13d3a",
+    "position": 18,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WhatsNextTeaser.tsx",
+    "title": "What's Next: Lecture 3",
+    "description": "Teaser for the next lecture",
+    "speakerNotes": ""
+  }
+]

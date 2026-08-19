@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-2/"
+title = "Prompt Engineering for Testers — Lecture 2"
+description = "Lecture 2 of the AI Testing Academy series: how to write prompts that produce consistent, testable outputs. Covers prompt structure, system messages, temperature and sampling, designing for testable/structured output, few-shot examples, prompt versioning, common failure modes, prompt injection basics and defenses, and building a prompt regression test suite. Bilingual English/Hebrew, matching Lecture 1's visual style."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-2"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-2/" ]
+localPort = 19531
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-2 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-2", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-2/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19531"
+BASE_PATH = "/ai-testing-lecture-2/"
