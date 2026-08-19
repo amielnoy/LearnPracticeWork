@@ -24,6 +24,7 @@ function loadManifestSlides(): SlideEntry[] {
     const reason = error instanceof Error ? error.message : 'unknown error';
     throw new Error(
       `Invalid slide manifest. Run "pnpm run validate-slides" for details. ${reason}`,
+      { cause: error },
     );
   }
 }

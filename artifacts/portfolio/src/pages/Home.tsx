@@ -172,7 +172,7 @@ export default function Home() {
               { Icon: SiCircleci, name: 'CircleCI' },
               { Icon: FaJava, name: 'Java' },
               { Icon: SiTypescript, name: 'TypeScript' },
-            ].map((tech, i) => (
+            ].map(tech => (
               <div
                 key={tech.name}
                 className="flex items-center gap-2 text-xl font-mono grayscale hover:grayscale-0 hover:text-primary transition-all duration-300"
