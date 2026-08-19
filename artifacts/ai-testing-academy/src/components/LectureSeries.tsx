@@ -67,15 +67,17 @@ export const EN: BankData = {
         },
         {
           num: 5,
-          ready: false,
+          ready: true,
           title: 'API Testing with AI Features',
           desc: 'Testing AI APIs with pytest and Requests — mocking LLM responses, testing edge cases, and validating structured outputs.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-5/slide1?lang=en',
         },
         {
           num: 6,
-          ready: false,
+          ready: true,
           title: 'CI/CD for AI Test Suites',
           desc: 'Running AI tests in GitHub Actions — parallelism, flakiness handling, cost management, and integrating LLM-as-judge into pipelines.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-6/slide1?lang=en',
         },
         {
           num: 7,
@@ -216,15 +218,17 @@ export const HE: BankData = {
         },
         {
           num: 5,
-          ready: false,
+          ready: true,
           title: "בדיקות API עם פיצ'רים של AI",
           desc: 'בדיקת AI APIs עם pytest ו-Requests — הדמיית תגובות LLM, בדיקת מקרי קצה ואימות פלטים מובנים.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-5/slide1?lang=he',
         },
         {
           num: 6,
-          ready: false,
+          ready: true,
           title: 'CI/CD לסוויטות בדיקות AI',
           desc: 'הרצת בדיקות AI ב-GitHub Actions — מקביליות, טיפול ב-flakiness, ניהול עלויות ושילוב LLM-as-judge ב-pipelines.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-6/slide1?lang=he',
         },
         {
           num: 7,

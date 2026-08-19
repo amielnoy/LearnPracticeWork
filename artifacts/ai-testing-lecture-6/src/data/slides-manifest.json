@@ -1,1 +1,242 @@
-[]
+[
+  {
+    "id": "lecture6-slide-001",
+    "position": 1,
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "CI/CD for AI Test Suites",
+    "description": "Title slide for Lecture 6 of the AI Testing Academy series.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-002",
+    "position": 2,
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "Learning Objectives",
+    "description": "Four learning objectives for the lecture: sharding, flakiness, merge gates, and cost budgets.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-003",
+    "position": 3,
+    "filepath": "src/pages/slides/ProblemStatement.tsx",
+    "title": "The CI Problem with AI Tests",
+    "description": "Why naively adding AI tests to CI breaks the pipeline: slow, expensive, and flaky.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-004",
+    "position": 4,
+    "filepath": "src/pages/slides/ToolkitOverview.tsx",
+    "title": "The CI/CD AI Testing Toolkit",
+    "description": "Overview of the six-tool CI toolkit covered in this lecture.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-005",
+    "position": 5,
+    "filepath": "src/pages/slides/AnatomyDiagram.tsx",
+    "title": "Anatomy of an AI Test Pipeline",
+    "description": "Five-stage pipeline anatomy: trigger, shard, cache, test, and gate.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-006",
+    "position": 6,
+    "filepath": "src/pages/slides/SectionDivider1.tsx",
+    "title": "Section 1 — Running AI Tests in CI",
+    "description": "Dark navy section divider introducing Section 1.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-007",
+    "position": 7,
+    "filepath": "src/pages/slides/ShardingConcept.tsx",
+    "title": "Sharding Your AI Test Suite",
+    "description": "How to split an AI test collection across parallel CI runners using a shard-id / num-shards pattern.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-008",
+    "position": 8,
+    "filepath": "src/pages/slides/WorkedExampleGitHubActions.tsx",
+    "title": "Worked Example: GitHub Actions Matrix",
+    "description": "DB-fetched worked example: 4-shard GitHub Actions matrix workflow configuration.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-009",
+    "position": 9,
+    "filepath": "src/pages/slides/ResponseCaching.tsx",
+    "title": "Caching LLM Responses",
+    "description": "Hash-keyed response caching to avoid redundant API calls for unchanged prompts.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-010",
+    "position": 10,
+    "filepath": "src/pages/slides/EnvironmentSecrets.tsx",
+    "title": "Handling API Keys and Secrets",
+    "description": "Encrypted GitHub secrets, scoped env blocks, and secret scanning to prevent key leakage.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-011",
+    "position": 11,
+    "filepath": "src/pages/slides/Section1Recap.tsx",
+    "title": "Section 1 Recap",
+    "description": "Three principles from Section 1: shard, cache, and protect secrets.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-012",
+    "position": 12,
+    "filepath": "src/pages/slides/SectionDivider2.tsx",
+    "title": "Section 2 — Handling Flakiness & Non-determinism",
+    "description": "Dark navy section divider introducing Section 2.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-013",
+    "position": 13,
+    "filepath": "src/pages/slides/RetryWithBudget.tsx",
+    "title": "Bounded Retries with Outcome Logging",
+    "description": "A retry wrapper that limits attempts to 2-3 and logs each outcome to surface flaky tests.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-014",
+    "position": 14,
+    "filepath": "src/pages/slides/WorkedExampleRetryWrapper.tsx",
+    "title": "Worked Example: Retry Wrapper",
+    "description": "DB-fetched worked example: Python retry wrapper with outcome logging.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-015",
+    "position": 15,
+    "filepath": "src/pages/slides/QuarantineVsDelete.tsx",
+    "title": "Quarantine vs. Delete a Flaky Test",
+    "description": "When to quarantine a test vs. delete it, and how to manage the quarantine list.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-016",
+    "position": 16,
+    "filepath": "src/pages/slides/TemperatureControl.tsx",
+    "title": "Temperature and Seed Control",
+    "description": "Setting temperature=0 and a fixed random seed to reduce non-determinism in test runs.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-017",
+    "position": 17,
+    "filepath": "src/pages/slides/Section2Recap.tsx",
+    "title": "Section 2 Recap",
+    "description": "Three techniques from Section 2: bounded retries, quarantine lists, and temperature=0.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-018",
+    "position": 18,
+    "filepath": "src/pages/slides/SectionDivider3.tsx",
+    "title": "Section 3 — Cost, Speed & Merge Gates",
+    "description": "Dark navy section divider introducing Section 3.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-019",
+    "position": 19,
+    "filepath": "src/pages/slides/CostBudget.tsx",
+    "title": "Setting a Per-PR Cost Budget",
+    "description": "Instrumenting API calls, setting a per-run budget threshold, and persisting spend data for trending.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-020",
+    "position": 20,
+    "filepath": "src/pages/slides/WorkedExampleJudgeGate.tsx",
+    "title": "Worked Example: LLM-Judge Merge Gate",
+    "description": "DB-fetched worked example: LLM-as-judge merge gate with rubric scoring and threshold.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-021",
+    "position": 21,
+    "filepath": "src/pages/slides/FastPathVsFullSuite.tsx",
+    "title": "Fast Path vs. Full Suite",
+    "description": "@smoke subset on every PR vs. full nightly suite — two triggers, one test collection.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-022",
+    "position": 22,
+    "filepath": "src/pages/slides/CostLatencyAlerting.tsx",
+    "title": "Alerting on Cost or Latency Regressions",
+    "description": "Rolling baseline comparison to detect cost and latency spikes across pipeline runs.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-023",
+    "position": 23,
+    "filepath": "src/pages/slides/Section3Recap.tsx",
+    "title": "Section 3 Recap",
+    "description": "Three principles from Section 3: budget every run, split fast from full, alert on drift.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-024",
+    "position": 24,
+    "filepath": "src/pages/slides/FullPipelineWalkthrough.tsx",
+    "title": "A Full Pipeline Walkthrough",
+    "description": "End-to-end five-step pipeline walkthrough tying together all three sections.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-025",
+    "position": 25,
+    "filepath": "src/pages/slides/CaseStudyMigration.tsx",
+    "title": "Case Study: Jenkins to GitHub Actions",
+    "description": "Three real problems a team faced migrating their AI test suite, and the fixes applied.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-026",
+    "position": 26,
+    "filepath": "src/pages/slides/CommonPitfalls.tsx",
+    "title": "Common Pitfalls to Avoid",
+    "description": "Five pitfalls: full suite on every commit, hardcoded keys, silent retries, no cost visibility, no retry policy.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-027",
+    "position": 27,
+    "filepath": "src/pages/slides/CheckYourUnderstanding.tsx",
+    "title": "Check Your Understanding",
+    "description": "Four discussion questions covering caching, quarantine, gate design, and judge overrides.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-028",
+    "position": 28,
+    "filepath": "src/pages/slides/ToolsRecap.tsx",
+    "title": "Tools You Can Use Today",
+    "description": "Six tools and patterns: matrix sharding, encrypted secrets, response caching, retry wrapper, LLM judge, and cost dashboard.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-029",
+    "position": 29,
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Four key takeaways: shard and cache, track flakiness, judge gate, fast PR + full night.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture6-slide-030",
+    "position": 30,
+    "filepath": "src/pages/slides/ClosingSlide.tsx",
+    "title": "Thank You — Series Complete",
+    "description": "Closing slide listing all six lectures in the AI Testing Academy series.",
+    "speakerNotes": ""
+  }
+]

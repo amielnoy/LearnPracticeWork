@@ -10,6 +10,9 @@
     "validate-slides": "pnpm exec tsx scripts/validate-slides.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.3"
+  },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",
     "@replit/vite-plugin-dev-banner": "catalog:",
@@ -33,6 +36,6 @@
     "tailwindcss": "catalog:",
     "tsx": "catalog:",
     "vite": "catalog:",
-    "wouter": "catalog:"
+    "wouter": "^3.3.5"
   }
 }
