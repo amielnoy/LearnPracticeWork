@@ -1,9 +1,25 @@
 /* AI Testing Academy — hand-written CSS, ported from index.html inline <style> */
 
 :root{
+  /* Tells the engine which way the UA-painted parts go — form controls,
+     scrollbars, the canvas behind the page. Without it iOS Safari and Chrome on
+     Android render inputs and selects in light chrome even under the dark theme,
+     which is where the "dark mode has white boxes" look comes from. */
+  color-scheme:light;
   --bg:#fbf7f2; --bg2:#f8efe6; --card:#ffffff; --border:#e9dccf;
-  --text:#2e2933; --muted:#5a5460; --accent:#c0392b; --accent2:#e07b28;
-  --green:#3e8e57; --yellow:#b07c1f; --red:#c0392b;
+  --text:#2e2933; --muted:#5a5460; --accent:#c0392b;
+  /* accent2, green and yellow are the three that carry text on a near-white
+     surface, so they are tuned to clear WCAG AA (4.5:1) against --bg, which is
+     the harder of the two surfaces because it is darker than --card. The
+     originals measured 2.80, 3.78 and 3.42 — all of them failing, and all of
+     them worst exactly where the sun makes a phone screen hardest to read. */
+  --accent2:#ae5c19;
+  --green:#38804e; --yellow:#966a1a; --red:#c0392b;
+  /* Ink for text sitting ON the accent fill, and a border strong enough to be a
+     control's visible boundary (WCAG 1.4.11 wants 3:1 for those; --border stays
+     soft because a card edge is decoration, not a control). */
+  --on-accent:#ffffff;
+  --border-field:#b4875b;
   /* The code surface is dark in BOTH themes, so its foreground tokens are light
      in both — never inherit --text here or light mode paints ink on ink. */
   --code-bg:#332f3f;
@@ -115,7 +131,7 @@ td{color:var(--muted);}
 .agent-box h3{margin-top:0; font-size:1.2rem; color:var(--text);}
 .agent-box .sub{color:var(--muted); font-size:.9rem; margin-bottom:16px;}
 textarea,input[type=password],input[type=text],select{
-    width:100%; background:var(--field-bg); color:var(--text); border:1px solid var(--border);
+    width:100%; background:var(--field-bg); color:var(--text); border:1px solid var(--border-field);
     border-radius:10px; padding:12px; font-size:.92rem; font-family:inherit; resize:vertical;}
 textarea:focus,input:focus,select:focus{outline:none; border-color:var(--accent);}
 input[type=checkbox]{min-width:20px; min-height:20px; accent-color:var(--accent);}
@@ -123,7 +139,7 @@ input[type=checkbox]{min-width:20px; min-height:20px; accent-color:var(--accent)
 .remember-key input{width:auto; margin:0; flex:0 0 auto;}
 .key-warning{color:var(--yellow); margin-inline-start:28px;}
 label{display:block; font-size:.85rem; color:var(--muted); margin:12px 0 6px;}
-button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; border:none;
+button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2)); color:var(--on-accent); border:none;
     border-radius:10px; padding:11px 26px; font-size:.95rem; font-weight:700; cursor:pointer; margin-top:14px;}
 button.primary:disabled{opacity:.45; cursor:not-allowed;}
 button.ghost{background:transparent; color:var(--muted); border:1px solid var(--border);
@@ -212,7 +228,7 @@ html{scrollbar-width:thin; scrollbar-color:#d9c6b0 transparent;}
 h2{display:flex; align-items:center; gap:14px; padding-bottom:14px; position:relative;}
 h2::after{content:""; position:absolute; bottom:0; inset-inline-start:0; width:72px; height:4px;
     border-radius:4px; background:linear-gradient(90deg,var(--accent),var(--accent2));}
-h2 .num{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff;
+h2 .num{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--on-accent);
     border-radius:10px; padding:2px 12px; font-size:1.05rem; margin:0;}
 
 .card,.agent-box,pre,button.primary,button.ghost,.badge,nav a.link{transition:all .22s ease;}
@@ -246,6 +262,14 @@ section>*{opacity:1;}
 @media (prefers-reduced-motion: reduce){.reveal{opacity:1; transform:none; transition:none;}}
 
 html[data-theme="dark"]{
+  color-scheme:dark;
+  /* The brand colours are already well clear of the dark background (6.6:1 to
+     9.3:1) and stay as they are. What changes is the ink on top of them: white
+     on this gradient measured 2.74:1 and 2.04:1, so the primary button was the
+     least readable thing on the page. Dark ink on a bright fill is the same
+     move Material and iOS make for a light-toned accent. */
+  --on-accent:#17151c;
+  --border-field:#6a5f7a;
   --bg:#17151c; --bg2:#1e1b25; --card:#242029; --border:#37313f;
   --text:#ece8f0; --muted:#a99fb4; --accent:#ff6f57; --accent2:#f5a35a;
   --green:#5cc07e; --yellow:#e0b455; --red:#ff6f57;
@@ -291,8 +315,11 @@ nav .nav-account-avatar{width:24px; height:24px; border-radius:50%; flex:none;
 nav .nav-account-name{font-size:.85rem; font-weight:700; color:var(--text); min-width:0;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:9em;}
 
+/* No opacity here: --muted at 65% measured 3.05:1 in light and 3.75:1 in dark,
+   and this is 11px text, which needs 4.5:1. The colour alone already reads as
+   secondary. */
 nav a.link .nav-num{display:inline-block; min-width:1.6em; font-family:monospace; font-size:.72rem;
-    color:var(--muted); opacity:.65; margin-inline-end:6px;}
+    color:var(--muted); margin-inline-end:6px;}
 .card p + p{margin-top:10px; line-height:1.85;}
 
 .pre-wrap{position:relative;}
@@ -312,7 +339,7 @@ details.agent-box[open]>summary{margin-bottom:16px;}
 .hero-cta{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:24px 0 4px;}
 .hero-cta a{border-radius:10px; padding:11px 22px; font-weight:700; font-size:.95rem;
     border:1px solid var(--border); transition:transform .18s, box-shadow .18s, filter .18s;}
-.hero-cta a.primary{background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; border:none;}
+.hero-cta a.primary{background:linear-gradient(90deg,var(--accent),var(--accent2)); color:var(--on-accent); border:none;}
 .hero-cta a.ghost{background:var(--card); color:var(--text);}
 @media (hover:hover){.hero-cta a:hover{transform:translateY(-2px); box-shadow:var(--shadow);}}
 .tldr{max-width:660px; margin:24px auto 0; text-align:start; background:var(--card);
