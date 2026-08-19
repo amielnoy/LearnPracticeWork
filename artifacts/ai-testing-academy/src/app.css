@@ -176,12 +176,19 @@ a.job-card{display:block; color:inherit; transition:transform .15s, box-shadow .
 @media (hover:hover){a.job-card:hover{transform:translateY(-3px); box-shadow:0 6px 18px rgba(120,80,50,.15);}}
 a.job-card h4{color:var(--accent);}
 
-nav a.github-btn{background:#24292f; color:#fff !important; font-weight:700; text-align:center;}
-nav a.github-btn:hover{background:#000; box-shadow:0 4px 14px rgba(36,41,47,.35);}
-
-nav a.telegram-btn{background:linear-gradient(90deg,#0d76b5,#095e93); color:#fff !important;
+/* Community links, in the colours of the platforms they actually point at.
+   These classes were `github-btn` and `telegram-btn` until the names were
+   noticed: they were leftovers from an earlier set of links, so the YouTube
+   button rendered in GitHub charcoal and the LinkedIn one in Telegram blue,
+   and the next person to read the markup would have gone looking for a GitHub
+   link that does not exist. */
+nav a.youtube-btn{background:linear-gradient(90deg,#e62117,#c4140c); color:#fff !important;
     font-weight:700; text-align:center;}
-nav a.telegram-btn:hover{opacity:.9; box-shadow:0 4px 14px rgba(13,118,181,.35);}
+nav a.youtube-btn:hover{opacity:.9; box-shadow:0 4px 14px rgba(230,33,23,.35);}
+
+nav a.linkedin-btn{background:linear-gradient(90deg,#0a66c2,#004182); color:#fff !important;
+    font-weight:700; text-align:center;}
+nav a.linkedin-btn:hover{opacity:.9; box-shadow:0 4px 14px rgba(10,102,194,.35);}
 
 nav a.whatsapp-btn{background:linear-gradient(90deg,#25d366,#128c7e); color:#fff !important;
     font-weight:700; text-align:center;}
@@ -365,9 +372,23 @@ details.agent-box[open]>summary{margin-bottom:16px;}
    titles inside it, which is why those are h4 — heading order follows the
    nesting rather than the type scale. */
 .level-head{font-size:1.2rem; font-weight:800; color:var(--text); line-height:1.35;
-    margin:36px 0 4px; padding-inline-start:12px; border-inline-start:4px solid var(--accent2);}
-.challenge-level:first-of-type .level-head{margin-top:22px;}
+    margin:0; padding-inline-start:12px; border-inline-start:4px solid var(--accent2);
+    display:inline;}
 .level-blurb{color:var(--muted); font-size:.92rem; margin:0 0 16px; padding-inline-start:16px;}
+
+/* Each level is a disclosure. The marker sits with the heading rather than on
+   its own line, and the count tells the reader what opening it will cost. */
+.challenge-level{margin:22px 0 0;}
+.challenge-level>summary{cursor:pointer; list-style:none; display:flex; align-items:baseline;
+    gap:10px; flex-wrap:wrap; padding:10px 0; border-radius:10px;}
+.challenge-level>summary::-webkit-details-marker{display:none;}
+.challenge-level>summary::after{content:'▸'; color:var(--muted); font-size:.85rem; margin-inline-start:auto;
+    transition:transform .2s ease;}
+.challenge-level[open]>summary::after{transform:rotate(90deg);}
+.challenge-level>summary:hover .level-head{color:var(--accent);}
+.challenge-level>summary:focus-visible{outline:3px solid var(--accent2); outline-offset:2px;}
+.level-count{font-size:.8rem; color:var(--muted); font-weight:700; white-space:nowrap;}
+@media (prefers-reduced-motion: reduce){.challenge-level>summary::after{transition:none;}}
 .agent-box h4{margin:0 0 8px; font-size:1.08rem; font-weight:700; color:var(--accent);}
 
 /* Interview questions. The question itself is the control, so it renders as a
