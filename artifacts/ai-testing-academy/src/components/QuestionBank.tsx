@@ -5,6 +5,7 @@ import { useReveal } from '../hooks/useReveal';
 import { QuestionCard } from './QuestionCard';
 import { EN_BANK, HE_BANK } from '../lib/questionBank';
 import { useProgress } from '../context/ProgressContext';
+import { sectionNum } from '../lib/sections';
 
 const SEED_KEYWORDS =
   'AI dev, AI test automation, Playwright, pytest, Page Object Model, flaky tests, CI/CD, Docker, API testing, SDET, AI/LLM testing';
@@ -57,13 +58,16 @@ export function QuestionBank() {
       setEnrichedHeading(bank.enrichHeading);
     } catch (e) {
       setEnrichErr((e as Error).message);
+    } finally {
+      setEnriching(false);
     }
-    setEnriching(false);
   }, [keywords, bank, callGrounded, extractJSON]);
 
   return (
     <section id="interview-questions" ref={sectionRef}>
-      <h2>{bank.title}</h2>
+      <h2>
+        <span className="num">{sectionNum('interview-questions')}</span> {bank.title}
+      </h2>
       <p className="lead reveal">{bank.lead}</p>
 
       {/* Hebrew-only video embed */}
@@ -96,7 +100,12 @@ export function QuestionBank() {
               target="_blank"
               rel="noopener noreferrer"
               className="ghost"
-              style={{ display: 'inline-block', marginTop: '10px', marginInlineStart: '10px', textDecoration: 'none' }}
+              style={{
+                display: 'inline-block',
+                marginTop: '10px',
+                marginInlineStart: '10px',
+                textDecoration: 'none',
+              }}
             >
               {bank.videoInterviewGuideBtn}
             </a>

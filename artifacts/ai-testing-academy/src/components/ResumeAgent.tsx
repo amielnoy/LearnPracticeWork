@@ -5,6 +5,7 @@ import { isRtlText, linkifyHtml, pdfItemsToText } from '../lib/domUtils';
 import { pdfFromText, pdfFromRtlText, type JsPdfInstance } from '../lib/resumePdf';
 import { useReveal } from '../hooks/useReveal';
 import { useProgress } from '../context/ProgressContext';
+import { sectionNum } from '../lib/sections';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { readText, writeRaw } from '../lib/storage';
 
@@ -203,15 +204,19 @@ export function ResumeAgent() {
     setImprovedHtml('');
   }, [jobDesc]);
 
+  // Drafts are kept so a reload does not lose a pasted résumé, and that is all
+  // they are for — so they do not need per-character fidelity. Three effects
+  // each firing a synchronous sessionStorage write on every keystroke meant
+  // serialising a résumé (commonly 5–10 KB) three times per typed character.
+  // One debounced write covers the same ground.
   useEffect(() => {
-    writeRaw(sessionStorage, draftPrefix + 'resume', resumeText);
-  }, [draftPrefix, resumeText]);
-  useEffect(() => {
-    writeRaw(sessionStorage, draftPrefix + 'role', targetRole);
-  }, [draftPrefix, targetRole]);
-  useEffect(() => {
-    writeRaw(sessionStorage, draftPrefix + 'job', jobDesc);
-  }, [draftPrefix, jobDesc]);
+    const timer = window.setTimeout(() => {
+      writeRaw(sessionStorage, draftPrefix + 'resume', resumeText);
+      writeRaw(sessionStorage, draftPrefix + 'role', targetRole);
+      writeRaw(sessionStorage, draftPrefix + 'job', jobDesc);
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [draftPrefix, resumeText, targetRole, jobDesc]);
 
   const processFile = useCallback(
     async (file: File | undefined | null) => {
@@ -278,8 +283,9 @@ export function ResumeAgent() {
         completeResume();
       } catch (e) {
         setResumeErr((e as Error).message);
+      } finally {
+        setEvaluating(false);
       }
-      setEvaluating(false);
     },
     [
       resumeText,
@@ -347,8 +353,9 @@ export function ResumeAgent() {
       );
     } catch (e) {
       setImprovedErr((e as Error).message);
+    } finally {
+      setImproving(false);
     }
-    setImproving(false);
   }, [ensureImprovedResume]);
 
   const downloadImprovedPdf = useCallback(async () => {
@@ -366,8 +373,9 @@ export function ResumeAgent() {
       pdf.save(filename);
     } catch (e) {
       setImprovedErr((e as Error).message);
+    } finally {
+      setDownloadingPdf(false);
     }
-    setDownloadingPdf(false);
   }, [ensureImprovedResume, lastEval]);
 
   const scoreColor = evalResult
@@ -381,7 +389,7 @@ export function ResumeAgent() {
   return (
     <section id="resume" ref={sectionRef}>
       <h2>
-        <span className="num">{t.num}</span> {t.title}
+        <span className="num">{sectionNum('resume')}</span> {t.title}
       </h2>
       <p className="lead reveal">{t.lead}</p>
 
