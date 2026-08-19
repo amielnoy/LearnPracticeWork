@@ -16,6 +16,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 - **Tests**: Playwright — unit, component, API, contract and e2e (`tests/`)
+- **Lint**: ESLint 10 flat config (`eslint.config.mjs`) + Prettier for formatting
 - **Reporting**: Allure 3 (`allure-report/`, one report across all five layers)
 - **CI**: GitHub Actions — tests on every push/PR, nightly at 05:00 Israel time, and
   GitHub Pages publishing from `main`
@@ -23,7 +24,8 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
+- `pnpm run lint` — ESLint across the workspace (`lint:fix` to apply fixes)
+- `pnpm run build` — typecheck + lint + build all packages
 - `./run-all-tests.sh` — every layer plus the Allure report; does **not** fail fast
 - `pnpm run test` — every layer in order (stops at the first failure)
 - `pnpm run test:unit` / `test:component` / `test:api` / `test:contract` / `test:e2e` — one layer
@@ -33,6 +35,47 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+## Server environment
+
+`artifacts/api-server` reads these. Everything except `PORT` is optional, and each one that is
+absent disables a feature rather than breaking the server — which is what lets the suite run
+three differently-configured instances side by side.
+
+| Variable | Effect when set | Effect when absent |
+| --- | --- | --- |
+| `PORT` | The port to listen on | The server refuses to start |
+| `DATABASE_URL` | Stripe sync and purchase records work | Both are skipped; `/api/entitlements/*` answers 503 |
+| `GEMINI_API_KEY` | `/api/ai/generate` proxies with a server-held key | The route answers 503 and the client offers BYOK |
+| `ADMIN_API_TOKEN` | `POST /api/stripe/seed` accepts `Authorization: Bearer <token>` | The route answers 404 — it fails closed, never open |
+| `GOOGLE_CLIENT_ID` | Google ID tokens are verified server-side | Sign-in-backed routes answer 503 |
+| `ALLOWED_ORIGINS` | Comma-separated CORS allowlist | Only same-origin and Replit-domain requests |
+| `TRUST_PROXY_HOPS` | Proxy hops to trust in production | Defaults to 1 |
+
+`GOOGLE_CLIENT_ID` must be the same OAuth client the academy is built with as
+`VITE_GOOGLE_CLIENT_ID`; the server compares it against the token's `aud` claim.
+
+`ADMIN_API_TOKEN` is a secret you choose — any long random string. Rotate it by setting a new
+value; there is nothing else to update.
+
+### Purchases
+
+`checkout.session.completed` webhooks write a row into `course_purchases` (see
+`lib/db/src/schema/coursePurchases.ts`), which is what ties a Stripe payment to a person.
+`GET /api/entitlements/course` reads it back for the caller's verified Google identity.
+
+**TODO — the table has not been created anywhere yet.** It needs a live `DATABASE_URL` and one
+run of the command below, which is also what to run after any later change to that schema:
+
+```bash
+pnpm --filter @workspace/db run push
+```
+
+Until that runs, the server degrades rather than failing: a completed checkout logs a warning
+instead of writing a row, and `/api/entitlements/course` answers 503 rather than guessing.
+
+Note that no UI calls `POST /api/stripe/checkout` yet — the route and the record it produces
+are in place, but the purchase flow itself is still to be built.
 
 ## Testing
 
@@ -63,11 +106,14 @@ pnpm --filter @workspace/tests run test:browsers
 
 Every config starts whatever server it needs, so nothing has to be running first:
 
-- **api / contract** — two `api-server` instances via `tests/support/start-api-servers.ts`
-  (ports 8788 and 8789). One has no Gemini key and one has a throwaway key that only ever
-  receives invalid requests, so no test can reach a model vendor. Both start with
-  `DATABASE_URL` and the Replit connector variables blanked, so the suite does not depend on
-  the developer's shell.
+- **api / contract** — three `api-server` instances via `tests/support/start-api-servers.ts`
+  (ports 8788, 8789 and 8790). One has no Gemini key, one has a throwaway key that only ever
+  receives invalid requests, and one has a deliberately tiny quota for the rate-limit spec, so
+  no test can reach a model vendor. The keyed instance also carries a test `ADMIN_API_TOKEN`
+  and `GOOGLE_CLIENT_ID` so the authenticated branches are reachable, while the keyless one
+  carries neither and exercises the "not configured" branches. All start with `DATABASE_URL`
+  and the Replit connector variables blanked, so the suite does not depend on the developer's
+  shell.
 - **e2e** — the academy's own Vite dev server on port 5273 with `BASE_PATH=/`. Its `/api`
   proxy has nothing behind it, so Connection Setup falls back to bring-your-own-key, which is
   the state these UI flows exercise.

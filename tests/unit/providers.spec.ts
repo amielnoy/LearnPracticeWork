@@ -8,7 +8,19 @@ import {
   type ServerDefaults,
 } from '@academy/lib/providers';
 import { en } from '@academy/lib/locales';
-import { stubFetch, jsonResponse, textResponse, type FetchStub } from '../support/fetchStub';
+import { stubFetch, jsonResponse, type FetchStub } from '../support/fetchStub';
+
+/**
+ * Reads one field out of a request body a provider built.
+ *
+ * `build` types its body as `unknown` on purpose — the shape is whatever the
+ * provider's API wants, and pinning it here would only duplicate their docs.
+ * Narrowing once, by name, is what an `any` at each assertion was standing in
+ * for.
+ */
+function field<T = unknown>(body: unknown, name: string): T {
+  return (body as Record<string, unknown>)[name] as T;
+}
 
 /**
  * The provider layer is where a visitor's own API key meets three different
@@ -78,7 +90,7 @@ test.describe('groq request building', () => {
       100,
     );
 
-    expect((body as any).messages).toEqual([
+    expect(field(body, 'messages')).toEqual([
       { role: 'system', content: 'sys' },
       { role: 'user', content: 'hi' },
       { role: 'assistant', content: 'hello' },
@@ -90,12 +102,12 @@ test.describe('groq request building', () => {
     // before the visible answer; without this a small maxTokens (e.g. the
     // settings "test connection" ping) can come back with empty content.
     const { body } = PROVIDERS.groq!.build('gsk_KEY', 'openai/gpt-oss-120b', '', [], 100);
-    expect((body as any).reasoning_effort).toBe('low');
+    expect(field(body, 'reasoning_effort')).toBe('low');
   });
 
   test('passes the token ceiling through', () => {
     const { body } = PROVIDERS.groq!.build('gsk_KEY', 'openai/gpt-oss-120b', '', [], 1234);
-    expect((body as any).max_tokens).toBe(1234);
+    expect(field(body, 'max_tokens')).toBe(1234);
   });
 });
 
@@ -191,8 +203,8 @@ test.describe('openai', () => {
 
     expect(url).toBe('https://api.openai.com/v1/chat/completions');
     expect(headers['Authorization']).toBe('Bearer sk-proj-abc');
-    expect((body as any).max_completion_tokens).toBe(64);
-    expect((body as any).messages).toEqual([
+    expect(field(body, 'max_completion_tokens')).toBe(64);
+    expect(field(body, 'messages')).toEqual([
       { role: 'system', content: 'be brief' },
       { role: 'user', content: 'hi' },
     ]);
@@ -435,8 +447,8 @@ test.describe('callGeminiGrounded', () => {
     expect(reply).toBe('grounded');
     const call = fetchStub.only();
     expect(call.url).toBe('/api/ai/generate');
-    expect((call.body as any).grounded).toBe(true);
-    expect((call.body as any).messages).toEqual([{ role: 'user', content: 'q' }]);
+    expect(field(call.body, 'grounded')).toBe(true);
+    expect(field(call.body, 'messages')).toEqual([{ role: 'user', content: 'q' }]);
   });
 
   test('turns on Google Search grounding when calling Gemini directly', async () => {
@@ -447,7 +459,7 @@ test.describe('callGeminiGrounded', () => {
     const reply = await callGeminiGrounded('AIzaKEY', {}, S, 'sys', 'q');
 
     expect(reply).toBe('sourced');
-    expect((fetchStub.only().body as any).tools).toEqual([{ google_search: {} }]);
+    expect(field(fetchStub.only().body, 'tools')).toEqual([{ google_search: {} }]);
   });
 
   test('asks for a key when neither the visitor nor the server has one', async () => {

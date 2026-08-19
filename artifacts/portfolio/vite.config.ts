@@ -53,11 +53,8 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: resolve(import.meta.dirname, "index.html"),
-        "ai-test-transformation": resolve(
-          import.meta.dirname,
-          "ai-test-transformation/index.html",
-        ),
+        main: resolve(import.meta.dirname, 'index.html'),
+        'ai-test-transformation': resolve(import.meta.dirname, 'ai-test-transformation/index.html'),
       },
     },
   },

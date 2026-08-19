@@ -102,23 +102,31 @@ carries `if: !cancelled()` so a failure in one layer still leaves the others in 
 
 ### api / contract
 
-`support/start-api-servers.ts` builds `artifacts/api-server` once and starts two instances:
+`support/start-api-servers.ts` builds `artifacts/api-server` once and starts three instances:
 
-| Port | Gemini key | Why |
+| Port | Configured with | Why |
 | --- | --- | --- |
-| 8788 | none | `baseURL` for the api and contract projects; exercises the "no server key" branches |
-| 8789 | a throwaway string | Reaches the request-validation branches, which sit behind the key check |
+| 8788 | nothing — no Gemini key, no admin token, no OAuth client | `baseURL` for the api and contract projects. Every "not configured" branch runs here: `503` from the AI proxy, `404` from the seed route, `503` from entitlements |
+| 8789 | a throwaway Gemini key, `ADMIN_API_TOKEN`, `GOOGLE_CLIENT_ID` | The branches that sit *behind* a configuration check — request validation, `401` on a bad admin token, `401` on a bad ID token |
+| 8790 | the same, with `AI_DAILY_QUOTA=2` | The rate-limit spec, which needs a quota small enough to exhaust |
 
-Two are needed because `routes/ai.ts` answers `503` for a missing key *before* it validates the
-body — on a keyless server the `400 messages is required` branch is unreachable.
+More than one is needed because most of these routes answer "not configured" *before* they
+validate anything: on a keyless server the AI proxy's `400` branch is unreachable, and on a
+server with no `ADMIN_API_TOKEN` the seed route's `401` branch is too. Splitting the
+configuration across instances is what makes both sides reachable without a mock.
 
 The keyed instance is only ever sent invalid requests, so **no test can reach a model vendor**.
-Both instances start with `DATABASE_URL`, `REPLIT_CONNECTORS_HOSTNAME` and friends blanked, so
-a developer's shell or a deployment's secrets cannot change the result — and so the Stripe
-routes fail predictably as JSON, which is what `api/stripe.spec.ts` asserts.
+All three start with `DATABASE_URL`, `REPLIT_CONNECTORS_HOSTNAME` and friends blanked, so a
+developer's shell or a deployment's secrets cannot change the result — and so the Stripe routes
+fail predictably as JSON, which is what `api/stripe.spec.ts` asserts.
 
-`/api/stripe/seed` is listed in the contract suite's inventory but deliberately never called: a
-test suite should not be able to create products.
+Neither the admin token nor the client ID is a credential. The token guards a route that then
+fails on absent Stripe credentials, so no test can create a product; the client ID is only ever
+compared against an `aud` claim on tokens that are rejected before a signature is checked.
+
+`/api/stripe/seed` is still listed in the contract suite's inventory and still never called
+there — it is a write endpoint. What keeps it safe is no longer that list, though: it is behind
+an admin token, and `api/adminAuth.spec.ts` is what asserts so.
 
 ### e2e
 
@@ -147,7 +155,13 @@ and a plain `docker run` needs `--shm-size=1g`.
 ## Adding tests
 
 - **Pure function** → `unit/`. Stub browser globals with `support/fakeBrowser.ts` and network
-  calls with `support/fetchStub.ts` rather than adding jsdom.
+  calls with `support/fetchStub.ts` rather than adding jsdom. Server-side logic is reachable
+  here too, through `@api-server/…`, as long as the module has no Express import — which is why
+  `lib/googleAuth.ts` and `middlewares/requireGoogleUser.ts` are two files rather than one.
+- **Anything that decides whether to accept something** → assert the *acceptance* first. A
+  verifier that refuses everything passes every rejection test ever written;
+  `unit/googleAuth.spec.ts` signs a real token with a keypair generated in the test process so
+  that "a valid token is accepted" is a case that can fail.
 - **Component** → `component/`. Import it through `@academy/…`; wrap in `LocaleProvider` (and
   `ProviderContextProvider` if it reads provider state). Intercept `/api/ai/config` with
   `page.route` instead of relying on a server.

@@ -33,7 +33,7 @@ const BUTTON_OPTIONS: Omit<GoogleButtonOptions, 'locale'> = {
 
 /** The credential kept from a previous visit, if it is still worth anything. */
 function restoreUser(): GoogleUser | null {
-  let stored: string | null = null;
+  let stored: string | null;
   try {
     stored = localStorage.getItem(CREDENTIAL_STORAGE_KEY);
   } catch {

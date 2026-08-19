@@ -8,7 +8,10 @@ import { writeFileSync } from 'node:fs';
 import { EN_BANK, HE_BANK } from '../../artifacts/ai-testing-academy/src/lib/questionBank';
 import { en } from '../../artifacts/ai-testing-academy/src/lib/locales/en';
 import { he } from '../../artifacts/ai-testing-academy/src/lib/locales/he';
-import { EN as LECTURE_EN, HE as LECTURE_HE } from '../../artifacts/ai-testing-academy/src/components/LectureSeries';
+import {
+  EN as LECTURE_EN,
+  HE as LECTURE_HE,
+} from '../../artifacts/ai-testing-academy/src/components/LectureSeries';
 
 const out = {
   questionBank: {

@@ -12,7 +12,9 @@ type ChallengeLevel = { label: string; blurb: string; items: Challenge[] };
 type LectureItem = { num: number; ready: boolean; title: string; desc: string; url?: string };
 type Track = { title: string; lead: string; lectures: LectureItem[] };
 
-const data = JSON.parse(readFileSync(new URL('./academy-content.json', import.meta.url), 'utf-8')) as {
+const data = JSON.parse(
+  readFileSync(new URL('./academy-content.json', import.meta.url), 'utf-8'),
+) as {
   questionBank: { en: StageData[]; he: StageData[] };
   codingChallenges: { en: ChallengeLevel[]; he: ChallengeLevel[] };
   lectureSeries: { en: Track[]; he: Track[] };
@@ -28,7 +30,9 @@ function escArray(arr: string[]): string {
 
 const lines: string[] = [];
 lines.push('begin;');
-lines.push('truncate table question_bank_items, question_bank_stages, coding_challenges, coding_challenge_levels, lecture_items, lecture_tracks restart identity cascade;');
+lines.push(
+  'truncate table question_bank_items, question_bank_stages, coding_challenges, coding_challenge_levels, lecture_items, lecture_tracks restart identity cascade;',
+);
 
 // Question bank
 let stageId = 0;
@@ -37,12 +41,12 @@ for (const lang of ['en', 'he'] as const) {
   data.questionBank[lang].forEach((stage, sIdx) => {
     stageId += 1;
     lines.push(
-      `insert into question_bank_stages (id, lang, position, icon, title) values (${stageId}, ${esc(lang)}, ${sIdx}, ${esc(stage.icon)}, ${esc(stage.title)});`
+      `insert into question_bank_stages (id, lang, position, icon, title) values (${stageId}, ${esc(lang)}, ${sIdx}, ${esc(stage.icon)}, ${esc(stage.title)});`,
     );
     stage.items.forEach((item, iIdx) => {
       itemId += 1;
       lines.push(
-        `insert into question_bank_items (id, stage_id, position, question, hint, answer) values (${itemId}, ${stageId}, ${iIdx}, ${esc(item.q)}, ${esc(item.hint)}, ${escArray(item.answer)});`
+        `insert into question_bank_items (id, stage_id, position, question, hint, answer) values (${itemId}, ${stageId}, ${iIdx}, ${esc(item.q)}, ${esc(item.hint)}, ${escArray(item.answer)});`,
       );
     });
   });
@@ -55,12 +59,12 @@ for (const lang of ['en', 'he'] as const) {
   data.codingChallenges[lang].forEach((level, lIdx) => {
     levelId += 1;
     lines.push(
-      `insert into coding_challenge_levels (id, lang, position, label, blurb) values (${levelId}, ${esc(lang)}, ${lIdx}, ${esc(level.label)}, ${esc(level.blurb)});`
+      `insert into coding_challenge_levels (id, lang, position, label, blurb) values (${levelId}, ${esc(lang)}, ${lIdx}, ${esc(level.label)}, ${esc(level.blurb)});`,
     );
     level.items.forEach((c, cIdx) => {
       challengeId += 1;
       lines.push(
-        `insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (${challengeId}, ${levelId}, ${cIdx}, ${esc(c.title)}, ${esc(c.prompt)}, ${esc(c.hint)}, ${esc(c.code)}, ${esc(c.complexity)});`
+        `insert into coding_challenges (id, level_id, position, title, prompt, hint, code, complexity) values (${challengeId}, ${levelId}, ${cIdx}, ${esc(c.title)}, ${esc(c.prompt)}, ${esc(c.hint)}, ${esc(c.code)}, ${esc(c.complexity)});`,
       );
     });
   });
@@ -73,13 +77,13 @@ for (const lang of ['en', 'he'] as const) {
   data.lectureSeries[lang].forEach((track, tIdx) => {
     trackId += 1;
     lines.push(
-      `insert into lecture_tracks (id, lang, position, title, lead) values (${trackId}, ${esc(lang)}, ${tIdx}, ${esc(track.title)}, ${esc(track.lead)});`
+      `insert into lecture_tracks (id, lang, position, title, lead) values (${trackId}, ${esc(lang)}, ${tIdx}, ${esc(track.title)}, ${esc(track.lead)});`,
     );
     track.lectures.forEach((lec, lIdx) => {
       lectureId += 1;
       const url = lec.url ? esc(lec.url) : 'null';
       lines.push(
-        `insert into lecture_items (id, track_id, position, num, ready, title, description, url) values (${lectureId}, ${trackId}, ${lIdx}, ${lec.num}, ${lec.ready}, ${esc(lec.title)}, ${esc(lec.desc)}, ${url});`
+        `insert into lecture_items (id, track_id, position, num, ready, title, description, url) values (${lectureId}, ${trackId}, ${lIdx}, ${lec.num}, ${lec.ready}, ${esc(lec.title)}, ${esc(lec.desc)}, ${url});`,
       );
     });
   });
@@ -103,6 +107,9 @@ const CHUNK_SIZE = 8;
 const contentLines = lines.filter(l => l !== 'begin;' && l !== 'commit;');
 for (let i = 0; i < contentLines.length; i += CHUNK_SIZE) {
   const chunk = contentLines.slice(i, i + CHUNK_SIZE);
-  writeFileSync(new URL(`./seed-chunk-${String(i / CHUNK_SIZE).padStart(2, '0')}.sql`, import.meta.url), chunk.join('\n'));
+  writeFileSync(
+    new URL(`./seed-chunk-${String(i / CHUNK_SIZE).padStart(2, '0')}.sql`, import.meta.url),
+    chunk.join('\n'),
+  );
 }
 console.log(`Wrote ${Math.ceil(contentLines.length / CHUNK_SIZE)} chunk files`);

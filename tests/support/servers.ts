@@ -31,6 +31,21 @@ export const LIMITED_URL = `http://127.0.0.1:${LIMITED_PORT}`;
 export const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
 
 /**
+ * The admin token and OAuth client the *keyed* server is started with.
+ *
+ * Only that one, deliberately. The keyless server is left without either, so
+ * the "not configured" branches — a seed route that answers 404 rather than
+ * running, an entitlements route that answers 503 rather than guessing — are
+ * reachable by a test instead of only by a misconfigured deployment.
+ *
+ * Neither is a credential. The admin token guards a route that then fails on
+ * absent Stripe credentials, and the client ID is only ever compared against an
+ * `aud` claim on tokens that never get as far as a signature check.
+ */
+export const ADMIN_TOKEN = 'test-admin-token-not-a-real-secret';
+export const GOOGLE_CLIENT_ID = '000000000000-test.apps.googleusercontent.com';
+
+/**
  * Not a real credential. It only has to be non-empty so `resolveGroqKey()`
  * reports a key exists; the keyed instance is only ever sent invalid
  * requests, so no test can reach Groq for real.

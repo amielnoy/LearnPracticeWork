@@ -3,8 +3,9 @@
  *
  * Builds `artifacts/api-server` once, then runs two instances of it:
  *
- *   1. keyed   — has a (throwaway) Gemini key, so body-validation branches run
- *   2. keyless — has none, so the "no server-side key" branches run
+ *   1. keyed   — has a (throwaway) Gemini key, an admin token and an OAuth
+ *                client ID, so the body-validation and authenticated branches run
+ *   2. keyless — has none of them, so the "not configured" branches run
  *
  * They are started in that order and the keyless one is what Playwright polls,
  * so by the time the health check passes both are listening. Building here
@@ -30,6 +31,8 @@ const KEYLESS_PORT = process.env.TEST_API_PORT ?? '8788';
 const KEYED_PORT = process.env.TEST_API_PORT_KEYED ?? '8789';
 const LIMITED_PORT = process.env.TEST_API_PORT_LIMITED ?? '8790';
 const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
+const ADMIN_TOKEN = 'test-admin-token-not-a-real-secret';
+const GOOGLE_CLIENT_ID = '000000000000-test.apps.googleusercontent.com';
 const DUMMY_GROQ_KEY = 'gsk_TEST-not-a-real-key-000000000000000';
 
 /** Env that must look the same on every machine for the assertions to hold. */
@@ -46,6 +49,17 @@ const PINNED: Readonly<Record<string, string>> = {
   // Quieter output; the servers' logs are only interesting when a test fails.
   LOG_LEVEL: 'warn',
   ALLOWED_ORIGINS: 'https://academy.example',
+  // Unset by default, so the keyless server exercises the branches an
+  // unconfigured deployment takes. The keyed server below sets both.
+  ADMIN_API_TOKEN: '',
+  GOOGLE_CLIENT_ID: '',
+  // Same reason as DATABASE_URL above: the Supabase-backed content route and
+  // the Stripe connection string are expected to be unavailable, and a
+  // developer who happens to have these exported must not get a different
+  // result from CI.
+  SUPABASE_DB_PASSWORD: '',
+  SUPABASE_URL: '',
+  SUPABASE_ANON_KEY: '',
   AI_RATE_LIMIT_MAX: '1000',
   AI_DAILY_QUOTA: '1000',
 };
@@ -106,6 +120,8 @@ await new Promise<void>((resolve, reject) => {
 startServer(KEYED_PORT, {
   GEMINI_API_KEY: DUMMY_GEMINI_KEY,
   GEMINI_API_KEY_B64: '',
+  ADMIN_API_TOKEN: ADMIN_TOKEN,
+  GOOGLE_CLIENT_ID,
   GROQ_API_KEY: DUMMY_GROQ_KEY,
 });
 await waitForHealth(KEYED_PORT);

@@ -58,6 +58,67 @@ test.describe('POST /api/stripe/webhook', () => {
   });
 });
 
+test.describe('POST /api/stripe/checkout — request validation', () => {
+  /**
+   * These run before the Stripe client is reached, so they are the same on a
+   * server with credentials and one without. Everything below is a 400 rather
+   * than the 500 the integration-less routes give, which is what proves the
+   * body was rejected on its own terms.
+   */
+  test('refuses a body with no priceId', async ({ api }) => {
+    const response = await api.post('/api/stripe/checkout', { data: {} });
+
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.error).toBe('Invalid request body');
+    expect(JSON.stringify(body.issues)).toContain('priceId');
+  });
+
+  test('refuses an empty priceId', async ({ api }) => {
+    const response = await api.post('/api/stripe/checkout', { data: { priceId: '' } });
+
+    expect(response.status()).toBe(400);
+  });
+
+  test('refuses a priceId that is not a string', async ({ api }) => {
+    const response = await api.post('/api/stripe/checkout', { data: { priceId: 42 } });
+
+    expect(response.status()).toBe(400);
+  });
+
+  test('refuses an email that is not an address', async ({ api }) => {
+    const response = await api.post('/api/stripe/checkout', {
+      data: { priceId: 'price_test', email: 'not-an-address' },
+    });
+
+    expect(response.status()).toBe(400);
+  });
+
+  test('refuses an unexpected field rather than ignoring it', async ({ api }) => {
+    // The schema is strict. A caller that thinks it can set `googleSubject`
+    // itself should be told no — that field is set from a verified token and
+    // from nowhere else.
+    const response = await api.post('/api/stripe/checkout', {
+      data: { priceId: 'price_test', googleSubject: 'someone-elses-account' },
+    });
+
+    expect(response.status()).toBe(400);
+  });
+
+  test('a forged bearer token does not make the caller signed in', async ({ api }) => {
+    // The body is valid, so this gets past validation and dies on the missing
+    // Stripe integration — a 500, not a 401. The point is what did *not*
+    // happen: an unverifiable token is treated as signed out rather than
+    // rejected outright, because buying the course never required an account.
+    const response = await api.post('/api/stripe/checkout', {
+      headers: { authorization: 'Bearer not.a.token' },
+      data: { priceId: 'price_test' },
+    });
+
+    expect(response.status()).toBe(500);
+  });
+});
+
 test.describe('Stripe routes without a connected integration', () => {
   test('reports a price lookup failure as JSON', async ({ api }) => {
     const response = await api.get('/api/stripe/prices');

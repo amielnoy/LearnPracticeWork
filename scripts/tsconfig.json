@@ -2,8 +2,16 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
-    "types": ["node"]
+    "types": ["node"],
+    // `extract-academy-content.ts` reaches into the academy package to read its
+    // content, including one `.tsx` component. That is deliberate — it is a
+    // one-off extraction run by hand, not part of any build — but it drags the
+    // academy's own sources in with it. So there is no `rootDir` of `src` that
+    // can hold them, JSX has to be configured the way the academy configures
+    // it, and the DOM lib has to be present for the browser modules those
+    // components import in turn.
+    "jsx": "react-jsx",
+    "lib": ["esnext", "dom", "dom.iterable"]
   },
   "include": ["src"]
 }

@@ -48,6 +48,26 @@ test.describe('CORS', () => {
     expect(response.status()).toBe(204);
     expect(response.headers()['access-control-allow-origin']).toBe('https://academy.example');
   });
+
+  test('allows the Authorization header a signed-in caller has to send', async ({ api }) => {
+    // Entitlements and checkout both read a Google ID token off `Authorization`.
+    // If the preflight does not list it, the browser drops the header before the
+    // request is ever made — and it fails only in a browser, only in production,
+    // while every server-side test still passes.
+    const response = await api.fetch('/api/entitlements/course', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://academy.example',
+        'Access-Control-Request-Method': 'GET',
+        'Access-Control-Request-Headers': 'authorization',
+      },
+    });
+
+    expect(response.status()).toBe(204);
+    expect(response.headers()['access-control-allow-headers']?.toLowerCase()).toContain(
+      'authorization',
+    );
+  });
 });
 
 test.describe('request handling', () => {

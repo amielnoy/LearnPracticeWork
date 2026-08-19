@@ -62,10 +62,23 @@ async function initStripe() {
 
 await initStripe();
 
-app.listen(port, err => {
-  if (err) {
-    logger.error({ err }, 'Error listening on port');
-    process.exit(1);
-  }
+/**
+ * Listening is wired through the two events rather than a listen callback.
+ *
+ * Express 5 registers that callback on both 'listening' and 'error' (see
+ * `app.listen` in express/lib/application.js), so it fires either way and the
+ * caller has to branch on an argument whose type says it is optional. Splitting
+ * the two apart means the success path cannot run on a failure — which is
+ * exactly what a one-line version of this got wrong: ignoring the argument
+ * logged "Server listening" a millisecond before EADDRINUSE.
+ */
+const server = app.listen(port);
+
+server.on('listening', () => {
   logger.info({ port }, 'Server listening');
+});
+
+server.on('error', (err: NodeJS.ErrnoException) => {
+  logger.error({ err, port, code: err.code }, 'Server failed to listen');
+  process.exit(1);
 });

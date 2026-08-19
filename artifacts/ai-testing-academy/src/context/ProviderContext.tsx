@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 import {
   PROVIDERS,
   loadServerConfig,
@@ -9,6 +17,7 @@ import {
   type ServerDefaults,
 } from '../lib/providers';
 import { useLocale } from './LocaleContext';
+import { readOneOf, readRaw, removeRaw, writeRaw } from '../lib/storage';
 
 interface ProviderContextValue {
   provider: string;
@@ -46,15 +55,24 @@ const PROVIDER_SESSION_KEY_PREFIX = 'ata_session_key_';
 const PROVIDER_REMEMBER_PREFIX = 'ata_remember_key_';
 const PROVIDER_STORE_KEY = 'ata_provider';
 
+/** The providers a stored preference is allowed to name. */
+const PROVIDER_IDS = Object.keys(PROVIDERS);
+
+/** An API key is a bounded string; anything longer did not come from a provider. */
+const MAX_KEY_LENGTH = 512;
+
 function loadStoredKey(provider: string): { key: string; remember: boolean } {
-  const remember = localStorage.getItem(PROVIDER_REMEMBER_PREFIX + provider) === 'true';
-  let persistentKey = localStorage.getItem(PROVIDER_KEY_PREFIX + provider) || '';
+  const remember = readRaw(localStorage, PROVIDER_REMEMBER_PREFIX + provider) === 'true';
+  let persistentKey = (readRaw(localStorage, PROVIDER_KEY_PREFIX + provider) ?? '').slice(
+    0,
+    MAX_KEY_LENGTH,
+  );
 
   // One-time migration: keys saved by older versions become session-only and
   // are removed from persistent storage unless the user explicitly opts in.
   if (persistentKey && !remember) {
-    sessionStorage.setItem(PROVIDER_SESSION_KEY_PREFIX + provider, persistentKey);
-    localStorage.removeItem(PROVIDER_KEY_PREFIX + provider);
+    writeRaw(sessionStorage, PROVIDER_SESSION_KEY_PREFIX + provider, persistentKey);
+    removeRaw(localStorage, PROVIDER_KEY_PREFIX + provider);
     persistentKey = '';
   }
 
@@ -62,19 +80,23 @@ function loadStoredKey(provider: string): { key: string; remember: boolean } {
     remember,
     key: remember
       ? persistentKey
-      : sessionStorage.getItem(PROVIDER_SESSION_KEY_PREFIX + provider) || '',
+      : (readRaw(sessionStorage, PROVIDER_SESSION_KEY_PREFIX + provider) ?? '').slice(
+          0,
+          MAX_KEY_LENGTH,
+        ),
   };
 }
 
 export function ProviderContextProvider({ children }: { children: React.ReactNode }) {
   const { S } = useLocale();
 
-  const [provider, setProviderState] = useState<string>(() => {
-    // Gemini is no longer a selectable chat provider (search-only now); a
-    // visitor with an old preference stored falls back to the new default.
-    const stored = localStorage.getItem(PROVIDER_STORE_KEY);
-    return stored && PROVIDERS[stored] ? stored : 'groq';
-  });
+  // Checked against the providers that exist, which is also what retires an old
+  // stored preference: Gemini is search-only now and not a selectable chat
+  // provider, so a visitor holding one falls back to the current default.
+  // `readOneOf` is the same guard the rest of the stored keys use.
+  const [provider, setProviderState] = useState<string>(
+    () => readOneOf(localStorage, PROVIDER_STORE_KEY, PROVIDER_IDS) ?? 'groq',
+  );
   const [model, setModelState] = useState<string>(() => PROVIDERS['groq'].models[0]);
   const [apiKey, setApiKeyState] = useState<string>('');
   const [rememberKey, setRememberKeyState] = useState<boolean>(false);
@@ -97,33 +119,6 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
   const hasServerDefault = useCallback(
     (p: string) => !!serverDefaults[p]?.available,
     [serverDefaults],
-  );
-
-  // Compute effective key mode based on state and server defaults
-  const applyKeyMode = useCallback(
-    (
-      currentProvider: string,
-      currentServerDefaults: ServerDefaults,
-      touchedByUser: boolean,
-      currentApiKey: string,
-      currentUseOwnKey: boolean,
-    ) => {
-      const prov = PROVIDERS[currentProvider];
-      const hasDefault = !!currentServerDefaults[currentProvider]?.available;
-      const storedKey = loadStoredKey(currentProvider).key;
-
-      let shouldUseOwn = currentUseOwnKey;
-      if (!touchedByUser) {
-        shouldUseOwn = !!storedKey || !hasDefault;
-      }
-
-      const newApiKey = shouldUseOwn ? storedKey || currentApiKey : '';
-      const newPlaceholder = shouldUseOwn ? prov.placeholder : S.placeholderEnvKey;
-      void newPlaceholder; // used by the component UI
-
-      return { shouldUseOwn, newApiKey, hasDefault };
-    },
-    [S],
   );
 
   // Load server config on mount
@@ -155,52 +150,57 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
   // When provider changes, update model and key state
   const setProvider = useCallback((p: string) => {
     setProviderState(p);
-    localStorage.setItem(PROVIDER_STORE_KEY, p);
+    writeRaw(localStorage, PROVIDER_STORE_KEY, p);
     setOwnKeyTouchedState(false);
     const prov = PROVIDERS[p];
     setModelState(prov.models[0]);
   }, []);
 
-  // After server defaults load or provider changes, re-evaluate key mode
+  /**
+   * Whether the visitor has taken the key mode into their own hands.
+   *
+   * Held in a ref as well as in state because the effect below has to *read* it
+   * without *re-running* on it: it exists to re-evaluate the default when the
+   * provider changes or the server config lands, and firing it because someone
+   * just flipped the toggle would undo the flip. The `// eslint-disable-next-line
+   * react-hooks/exhaustive-deps` that used to stand in for this suppressed
+   * nothing — at the time there was no ESLint in the workspace for it to talk
+   * to, and the dependencies below are honest now rather than silenced.
+   */
+  const ownKeyTouchedRef = useRef(ownKeyTouched);
+  useEffect(() => {
+    ownKeyTouchedRef.current = ownKeyTouched;
+  }, [ownKeyTouched]);
+
+  // After server defaults load or the provider changes, re-evaluate key mode.
   useEffect(() => {
     const prov = PROVIDERS[provider];
     if (!prov) return;
-    const hasDefault = !!serverDefaults[provider]?.available;
+
     const stored = loadStoredKey(provider);
-    const storedKey = stored.key;
     setRememberKeyState(stored.remember);
 
-    // Use function-form to get current ownKeyTouched without depending on it
-    setUseOwnKeyState(currentUseOwn => {
-      if (!ownKeyTouched) {
-        const shouldUseOwn = !!storedKey || !hasDefault;
-        setApiKeyState(shouldUseOwn ? storedKey : '');
-        return shouldUseOwn;
-      }
-      return currentUseOwn;
-    });
-
-    // Apply server default model
-    const defModel = serverDefaults[provider]?.defaultModel;
-    if (defModel && !ownKeyTouched) {
-      setModelState(defModel);
-    } else {
+    if (ownKeyTouchedRef.current) {
       setModelState(prov.models[0]);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // Own key when there is one saved, or when the server has no default to
+    // fall back on. Set flat rather than from inside another setter's updater:
+    // an updater must be a pure function of its argument, and queueing a second
+    // state change from inside one runs it again under StrictMode.
+    const hasDefault = !!serverDefaults[provider]?.available;
+    const shouldUseOwn = !!stored.key || !hasDefault;
+    setUseOwnKeyState(shouldUseOwn);
+    setApiKeyState(shouldUseOwn ? stored.key : '');
+    setModelState(serverDefaults[provider]?.defaultModel ?? prov.models[0]);
   }, [provider, serverDefaults]);
 
   const setUseOwnKey = useCallback(
     (v: boolean) => {
       setOwnKeyTouchedState(true);
       setUseOwnKeyState(v);
-      const prov = PROVIDERS[provider];
-      if (v) {
-        setApiKeyState(loadStoredKey(provider).key);
-      } else {
-        setApiKeyState('');
-      }
-      void prov;
+      setApiKeyState(v ? loadStoredKey(provider).key : '');
     },
     [provider],
   );
@@ -212,7 +212,7 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
         const key = k.trim();
         const destination = rememberKey ? localStorage : sessionStorage;
         const destinationPrefix = rememberKey ? PROVIDER_KEY_PREFIX : PROVIDER_SESSION_KEY_PREFIX;
-        destination.setItem(destinationPrefix + provider, key);
+        writeRaw(destination, destinationPrefix + provider, key);
       }
     },
     [provider, rememberKey, useOwnKey],
@@ -223,13 +223,13 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
       setRememberKeyState(remember);
       const key = apiKey.trim();
       if (remember) {
-        localStorage.setItem(PROVIDER_REMEMBER_PREFIX + provider, 'true');
-        if (key) localStorage.setItem(PROVIDER_KEY_PREFIX + provider, key);
-        sessionStorage.removeItem(PROVIDER_SESSION_KEY_PREFIX + provider);
+        writeRaw(localStorage, PROVIDER_REMEMBER_PREFIX + provider, 'true');
+        if (key) writeRaw(localStorage, PROVIDER_KEY_PREFIX + provider, key);
+        removeRaw(sessionStorage, PROVIDER_SESSION_KEY_PREFIX + provider);
       } else {
-        localStorage.removeItem(PROVIDER_REMEMBER_PREFIX + provider);
-        localStorage.removeItem(PROVIDER_KEY_PREFIX + provider);
-        if (key) sessionStorage.setItem(PROVIDER_SESSION_KEY_PREFIX + provider, key);
+        removeRaw(localStorage, PROVIDER_REMEMBER_PREFIX + provider);
+        removeRaw(localStorage, PROVIDER_KEY_PREFIX + provider);
+        if (key) writeRaw(sessionStorage, PROVIDER_SESSION_KEY_PREFIX + provider, key);
       }
     },
     [apiKey, provider],
@@ -270,22 +270,29 @@ export function ProviderContextProvider({ children }: { children: React.ReactNod
 
   const resetSettings = useCallback(() => {
     // Resetting provider preferences must not erase progress, interview
-    // history, or resume drafts.
-    Object.keys(localStorage)
+    // history, or resume drafts. Enumerating can itself throw when storage is
+    // denied, in which case there is nothing stored to clear.
+    const keysOf = (storage: Storage): string[] => {
+      try {
+        return Object.keys(storage);
+      } catch {
+        return [];
+      }
+    };
+
+    keysOf(localStorage)
       .filter(
         k =>
           k === PROVIDER_STORE_KEY ||
           k.startsWith(PROVIDER_KEY_PREFIX) ||
           k.startsWith(PROVIDER_REMEMBER_PREFIX),
       )
-      .forEach(k => localStorage.removeItem(k));
-    Object.keys(sessionStorage)
+      .forEach(k => removeRaw(localStorage, k));
+    keysOf(sessionStorage)
       .filter(k => k.startsWith(PROVIDER_SESSION_KEY_PREFIX))
-      .forEach(k => sessionStorage.removeItem(k));
+      .forEach(k => removeRaw(sessionStorage, k));
     window.location.reload();
   }, []);
-
-  void applyKeyMode; // suppress unused warning
 
   const value = useMemo<ProviderContextValue>(
     () => ({

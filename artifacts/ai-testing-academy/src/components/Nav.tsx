@@ -9,7 +9,7 @@ interface NavProps {
   onToggleTheme: () => void;
 }
 
-export function Nav({ navOpen, setNavOpen, theme, onToggleTheme }: NavProps) {
+export function Nav({ setNavOpen, theme, onToggleTheme }: NavProps) {
   const { locale, lang: _lang, switchLang: doSwitchLang, S } = useLocale();
   const [activeSection, setActiveSection] = useState<string>('');
   const [sectionNums, setSectionNums] = useState<Record<string, string>>({});

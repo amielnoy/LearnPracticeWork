@@ -1,4 +1,3 @@
-import { useRef, useEffect } from 'react';
 import { useLocale } from '../context/LocaleContext';
 import { useProviderContext } from '../context/ProviderContext';
 import { PROVIDERS } from '../lib/providers';

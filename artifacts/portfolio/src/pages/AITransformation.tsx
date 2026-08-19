@@ -122,7 +122,7 @@ export default function AITransformation() {
       let el = document.querySelector<HTMLMetaElement>(selector);
       if (!el) {
         el = document.createElement('meta');
-        const [attrName, attrValue] = selector.replace(/[\[\]"]/g, '').split('=');
+        const [attrName, attrValue] = selector.replace(/[[\]"]/g, '').split('=');
         el.setAttribute(attrName, attrValue);
         document.head.appendChild(el);
       }

@@ -13,16 +13,28 @@ import { QuestionBank } from '../components/QuestionBank';
 import { CodingChallenges } from '../components/CodingChallenges';
 import { ToolLauncher } from '../components/ToolLauncher';
 import { useProviderContext } from '../context/ProviderContext';
+import { readOneOf, writeRaw } from '../lib/storage';
 
 const THEME_KEY = 'ata_theme';
+
+/**
+ * The only two values that may reach `data-theme`.
+ *
+ * Whatever is in storage ends up as an attribute on the document element, and
+ * storage is editable, so an unchecked read means any string at all can be
+ * written there — with no way back short of clearing site data, since the
+ * toggle below only ever flips between these two.
+ */
+const THEMES = ['light', 'dark'] as const;
+type Theme = (typeof THEMES)[number];
 
 export function HomePage() {
   const { locale } = useLocale();
   const { quotaExhausted, serverConfigLoaded, hasServerDefault } = useProviderContext();
 
   // Theme
-  const [theme, setTheme] = useState<string>(() => {
-    const saved = localStorage.getItem(THEME_KEY);
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = readOneOf(localStorage, THEME_KEY, THEMES);
     if (saved) return saved;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
@@ -37,8 +49,8 @@ export function HomePage() {
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      localStorage.setItem(THEME_KEY, next);
+      const next: Theme = prev === 'dark' ? 'light' : 'dark';
+      writeRaw(localStorage, THEME_KEY, next);
       return next;
     });
   }, []);

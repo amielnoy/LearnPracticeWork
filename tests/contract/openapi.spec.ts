@@ -154,7 +154,10 @@ test.describe('spec ↔ running server', () => {
  * not that it is silently tolerated.
  *
  * `/stripe/seed` and nothing else is omitted from the probe below — it is a
- * write endpoint, and a test suite should not be able to create products.
+ * write endpoint, and a test suite should not be able to create products. What
+ * keeps it from being called is no longer this list, though: the route is
+ * behind an admin token now, and `tests/api/adminAuth.spec.ts` is what asserts
+ * that. This entry is back to being about spec drift and nothing else.
  */
 const UNDOCUMENTED_ROUTES: Array<{ method: 'GET' | 'POST'; route: string; probe?: boolean }> = [
   { method: 'GET', route: '/ai/config' },
@@ -163,6 +166,7 @@ const UNDOCUMENTED_ROUTES: Array<{ method: 'GET' | 'POST'; route: string; probe?
   { method: 'POST', route: '/stripe/checkout' },
   { method: 'POST', route: '/stripe/webhook' },
   { method: 'POST', route: '/stripe/seed', probe: false },
+  { method: 'GET', route: '/entitlements/course' },
 ];
 
 test.describe('undocumented routes', () => {
