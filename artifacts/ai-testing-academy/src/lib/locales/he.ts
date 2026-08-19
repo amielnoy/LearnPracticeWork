@@ -163,7 +163,7 @@ export const he: Locale = {
     downloadPdfBtn: '⬇️ הורד כ-PDF',
   },
   interview: {
-    num: '02',
+    num: '03',
     title: 'סוכן 2 — ראיון סימולציה',
     lead: 'הריצו ראיון QA Automation ריאליסטי עם מראיין AI — חמישה שלבים, מ-HR ועד לבדיקות AI.',
     boxTitle: '🎙️ התחל ראיון סימולציה',

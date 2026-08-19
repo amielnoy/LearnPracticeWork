@@ -384,7 +384,7 @@ export function LectureSeries() {
   return (
     <section id="lecture-series" ref={sectionRef}>
       <h2>
-        <span className="num">03</span> {bank.title}
+        <span className="num">02</span> {bank.title}
       </h2>
       <p className="lead reveal">{bank.lead}</p>
       {bank.tracks.map((track, idx) => (

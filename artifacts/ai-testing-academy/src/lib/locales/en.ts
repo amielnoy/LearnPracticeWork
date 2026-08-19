@@ -161,7 +161,7 @@ export const en = {
     downloadPdfBtn: '⬇️ Download as PDF',
   },
   interview: {
-    num: '02',
+    num: '03',
     title: 'Agent 2 — Mock Interview',
     lead: 'Run a realistic QA-Automation interview with an AI interviewer — five stages, from HR to AI testing.',
     boxTitle: '🎙️ Start your mock interview',
