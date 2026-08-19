@@ -4,31 +4,35 @@ export const en = {
   ui: {
     skip: 'Skip to main content',
     navOpen: 'Open navigation menu',
+    navClose: 'Close navigation menu',
     toTop: 'Back to top',
   },
   nav: {
     logo: 'AI Testing Academy',
     agentsGroup: 'Agents',
-    links: [
-      { href: '#setup', label: '⚙️ Settings' },
-      { href: '#resume', label: '📄 Resume & CV' },
-      { href: '#lecture-series', label: '🎓 Lecture Series' },
-      { href: '#interview-talk', label: '🎙️ Mock Interview' },
-      { href: '#interview-questions', label: '❓ Interview Questions' },
-      { href: '#coding-challenges', label: '🐍 Python Coding Challenges' },
-    ],
+    // Keyed by section id, not ordered: the order lives in `lib/sections.ts`,
+    // which is what both the nav and the page render from. Only the words are
+    // translated.
+    labels: {
+      resume: '📄 Resume & CV',
+      'lecture-series': '🎓 Lecture Series',
+      'interview-talk': '🎙️ Mock Interview',
+      'interview-questions': '❓ Interview Questions',
+      'coding-challenges': '🐍 Python Coding Challenges',
+      setup: '⚙️ Settings',
+    } as Record<string, string>,
     communityGroup: 'Community',
     community: [
       {
         href: 'https://www.youtube.com/@amielnoy',
         label: '▶ YouTube',
-        cls: 'github-btn',
+        cls: 'youtube-btn',
         target: '_blank',
       },
       {
         href: 'https://www.linkedin.com/in/amiel-peled/',
         label: '💼 LinkedIn',
-        cls: 'telegram-btn',
+        cls: 'linkedin-btn',
         target: '_blank',
       },
       {
@@ -86,7 +90,6 @@ export const en = {
     },
   },
   setup: {
-    num: '01',
     title: 'Connection Setup',
     settingsTitle: 'AI provider settings',
     settingsHint: 'Optional while free usage is available',
@@ -137,7 +140,6 @@ export const en = {
     quotaLabel: '{remaining} of {limit} free AI requests remaining in your current allowance',
   },
   resume: {
-    num: '01',
     title: 'Agent 1 — Resume & Cover Letter',
     lead: 'Upload your CV and get a scored evaluation with strengths, gaps, and an AI-rewritten version tailored to any QA or SDET role.',
     boxTitle: '📄 Evaluate & improve your resume',
@@ -159,26 +161,26 @@ export const en = {
     buildResumeBtn: '✨ Build improved resume',
     improvedTitle: '✨ Improved resume',
     downloadPdfBtn: '⬇️ Download as PDF',
-    tipsTitle: '📋 Resume Do\'s & Don\'ts',
+    tipsTitle: "📋 Resume Do's & Don'ts",
     tipsLead:
       "The biggest mistake job seekers make: assuming that if they're a fit for the role, recruiters will figure it out on their own. They won't. Spell it out.",
     doTitle: '✅ Do',
-    dontTitle: '🚫 Don\'t',
+    dontTitle: "🚫 Don't",
     dos: [
-      'Understand the job posting deeply — what actually matters to them and what they\'re looking for.',
+      "Understand the job posting deeply — what actually matters to them and what they're looking for.",
       'Match your titles precisely to what the recruiter is searching for, not just what was on your email signature.',
       'Weave keywords straight from the job description into the resume, so it clears the automated screen.',
       'Show a clear employment timeline and fill any gaps in it.',
-      'Chew through what you did and spoon-feed it to the reader — don\'t expect anyone to dig your relevant experience out of the bullets.',
-      'Make the formula obvious on every line: this is what I did >> this is what they\'re looking for >> this is why I\'m the right fit.',
+      "Chew through what you did and spoon-feed it to the reader — don't expect anyone to dig your relevant experience out of the bullets.",
+      "Make the formula obvious on every line: this is what I did >> this is what they're looking for >> this is why I'm the right fit.",
     ],
     donts: [
-      'If you did something but didn\'t write it down, as far as the recruiter is concerned, you didn\'t do it.',
-      'Don\'t leave your most relevant experience buried in a role from 10 years ago and expect anyone to reach it.',
+      "If you did something but didn't write it down, as far as the recruiter is concerned, you didn't do it.",
+      "Don't leave your most relevant experience buried in a role from 10 years ago and expect anyone to reach it.",
       'Don\'t rely on "if they read closely, they\'ll get it" — in most cases no one reads closely, and an ATS scans the file before a human ever sees it.',
-      'Don\'t leave a generic title that doesn\'t tell the recruiter you\'re a fit for this specific role.',
-      'Don\'t count on explaining the fit out loud — you might never get to that stage.',
-      'Don\'t assume the reader will guess the connection between your experience and the job\'s requirements — spell it out.',
+      "Don't leave a generic title that doesn't tell the recruiter you're a fit for this specific role.",
+      "Don't count on explaining the fit out loud — you might never get to that stage.",
+      "Don't assume the reader will guess the connection between your experience and the job's requirements — spell it out.",
     ],
     tipsSourceLabel: '💡 Inspired by this LinkedIn post',
     tipsSourceUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7495691019024400384/',
@@ -186,7 +188,6 @@ export const en = {
     tipsExpertUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7495691019024400384/',
   },
   interview: {
-    num: '03',
     title: 'Agent 2 — Mock Interview',
     lead: 'Run a realistic QA-Automation interview with an AI interviewer — five stages, from HR to AI testing.',
     boxTitle: '🎙️ Start your mock interview',
@@ -295,6 +296,7 @@ export const en = {
     showHintBtn: 'Show hint',
     showSolutionBtn: 'Show solution',
     hideBtn: 'Hide',
+    challengeCountLabel: '{count} challenges',
     levels: [
       {
         label: 'Level 1 — Fundamentals',
