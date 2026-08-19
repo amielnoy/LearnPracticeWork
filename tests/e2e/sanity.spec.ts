@@ -34,6 +34,8 @@ test('renders the footer with a safe external author link', async ({ footer }) =
 });
 
 test('a coding challenge reveals its solution on the second click', async ({ challenges }) => {
+  // The levels ship closed so forty cards cannot bury the sections below them.
+  await challenges.openLevel(0);
   const button = challenges.button(0);
 
   await expect(button).toHaveAttribute('aria-expanded', 'false');
