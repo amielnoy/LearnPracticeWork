@@ -185,7 +185,7 @@ export const he: Locale = {
     tipsSourceLabel: '💡 בהשראת הפוסט הזה בלינקדאין',
     tipsSourceUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7495691019024400384/',
     tipsExpertBtn: '👩‍💼 עקבו אחרי נועה ליבוביץ בלינקדאין',
-    tipsExpertUrl: 'https://il.linkedin.com/in/noa-lebovich',
+    tipsExpertUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7495691019024400384/',
   },
   interview: {
     num: '03',

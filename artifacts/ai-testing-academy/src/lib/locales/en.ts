@@ -183,7 +183,7 @@ export const en = {
     tipsSourceLabel: '💡 Inspired by this LinkedIn post',
     tipsSourceUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7495691019024400384/',
     tipsExpertBtn: '👩‍💼 Follow resume expert Noa Lebovich on LinkedIn',
-    tipsExpertUrl: 'https://il.linkedin.com/in/noa-lebovich',
+    tipsExpertUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7495691019024400384/',
   },
   interview: {
     num: '03',
