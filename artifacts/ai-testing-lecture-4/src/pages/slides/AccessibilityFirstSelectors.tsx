@@ -115,11 +115,18 @@ export default function AccessibilityFirstSelectors() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('getByRole() — semantic and stable', 'getByRole() — סמנטי ויציב')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '1vh' }}
+            >
               {t(
                 'Targets elements by their ARIA role. Survives visual redesigns and text rewrites because it describes what the element does, not what it says.',
                 'מכוון לאלמנטים לפי תפקיד ARIA שלהם. שורד עיצובים מחדש ויזואליים וכתיבות טקסט מחדש כי הוא מתאר מה האלמנט עושה, לא מה הוא אומר.',
@@ -140,11 +147,18 @@ export default function AccessibilityFirstSelectors() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('getByLabel() — form inputs', 'getByLabel() — שדות טופס')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '1vh' }}
+            >
               {t(
                 'Finds the input associated with a visible label. Works even when the AI rephrases label text — as long as the label element is semantically linked.',
                 'מוצא את הקלט המשויך לתווית גלויה. עובד גם כשה-AI מנסח מחדש את טקסט התווית — כל עוד אלמנט התווית מקושר סמנטית.',
@@ -196,13 +210,36 @@ export default function AccessibilityFirstSelectors() {
           >
             {t('Selector Priority Order', 'סדר עדיפות סלקטורים')}
           </div>
-          {[
-            { rank: '1', label: t('getByRole()', 'getByRole()'), note: t('Semantic + a11y', 'סמנטי + a11y') },
-            { rank: '2', label: t('getByLabel()', 'getByLabel()'), note: t('Form inputs', 'שדות טופס') },
-            { rank: '3', label: t('getByTestId()', 'getByTestId()'), note: t('Explicit hook', 'עוגן מפורש') },
-            { rank: '4', label: t('getByPlaceholder()', 'getByPlaceholder()'), note: t('Last resort', 'מוצא אחרון') },
-            { rank: '✗', label: t('getByText() on AI content', 'getByText() על תוכן AI'), note: t('Avoid', 'הימנעו'), bad: true },
-          ].map((item, i) => (
+          {(
+            [
+              {
+                rank: '1',
+                label: t('getByRole()', 'getByRole()'),
+                note: t('Semantic + a11y', 'סמנטי + a11y'),
+              },
+              {
+                rank: '2',
+                label: t('getByLabel()', 'getByLabel()'),
+                note: t('Form inputs', 'שדות טופס'),
+              },
+              {
+                rank: '3',
+                label: t('getByTestId()', 'getByTestId()'),
+                note: t('Explicit hook', 'עוגן מפורש'),
+              },
+              {
+                rank: '4',
+                label: t('getByPlaceholder()', 'getByPlaceholder()'),
+                note: t('Last resort', 'מוצא אחרון'),
+              },
+              {
+                rank: '✗',
+                label: t('getByText() on AI content', 'getByText() על תוכן AI'),
+                note: t('Avoid', 'הימנעו'),
+                bad: true,
+              },
+            ] as Array<{ rank: string; label: string; note: string; bad?: boolean }>
+          ).map((item, i) => (
             <div
               key={i}
               style={{
@@ -216,8 +253,8 @@ export default function AccessibilityFirstSelectors() {
                   width: '2.4vw',
                   height: '2.4vw',
                   minWidth: '2.4vw',
-                  backgroundColor: (item as any).bad ? 'rgba(239,68,68,0.1)' : 'rgba(13,148,136,0.1)',
-                  color: (item as any).bad ? '#EF4444' : '#0D9488',
+                  backgroundColor: item.bad ? 'rgba(239,68,68,0.1)' : 'rgba(13,148,136,0.1)',
+                  color: item.bad ? '#EF4444' : '#0D9488',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
