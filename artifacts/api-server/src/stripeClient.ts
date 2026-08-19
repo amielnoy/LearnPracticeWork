@@ -62,6 +62,26 @@ export async function getUncachableStripeClient(): Promise<Stripe> {
   return new Stripe(secretKey);
 }
 
+/**
+ * A client and the webhook secret together, for the one caller that needs both.
+ *
+ * The webhook path has to verify the signature itself before it can look at an
+ * event — `stripe-replit-sync` verifies internally but keeps the parsed event
+ * to itself, and the application's own record of who bought what is built from
+ * that event. Fetching the credentials once and returning both is what keeps
+ * that from being two round trips to the connector API.
+ */
+export async function getStripeClientWithWebhookSecret(): Promise<{
+  stripe: Stripe;
+  webhookSecret: string;
+}> {
+  const { secretKey, webhookSecret } = await getStripeCredentials();
+  if (!webhookSecret) {
+    throw new Error('Stripe integration is connected but supplied no webhook secret.');
+  }
+  return { stripe: new Stripe(secretKey), webhookSecret };
+}
+
 export async function getStripeSync(): Promise<StripeSync> {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {

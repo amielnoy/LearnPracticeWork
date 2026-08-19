@@ -166,6 +166,7 @@ const UNDOCUMENTED_ROUTES: Array<{ method: 'GET' | 'POST'; route: string; probe?
   { method: 'POST', route: '/stripe/checkout' },
   { method: 'POST', route: '/stripe/webhook' },
   { method: 'POST', route: '/stripe/seed', probe: false },
+  { method: 'GET', route: '/entitlements/course' },
 ];
 
 test.describe('undocumented routes', () => {

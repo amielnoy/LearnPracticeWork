@@ -77,7 +77,9 @@ app.use(
       return callback(null, allowedOrigins.has(normalized) || localDevelopment);
     },
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Stripe-Signature'],
+    // Authorization carries the Google ID token that /entitlements and
+    // /stripe/checkout verify; without it here the browser never sends one.
+    allowedHeaders: ['Content-Type', 'Authorization', 'Stripe-Signature'],
     maxAge: 600,
   }),
 );

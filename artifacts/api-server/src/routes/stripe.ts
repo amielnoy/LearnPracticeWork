@@ -1,6 +1,8 @@
 import { Router, type IRouter } from 'express';
+import { z } from 'zod';
 import { getUncachableStripeClient } from '../stripeClient';
 import { adminRateLimiter, requireAdminToken } from '../middlewares/requireAdminToken';
+import { verifiedGoogleUser } from '../lib/googleAuth';
 
 const router: IRouter = Router();
 
@@ -60,16 +62,37 @@ router.post('/stripe/seed', adminRateLimiter, requireAdminToken, async (_req, re
   }
 });
 
+const CheckoutRequestSchema = z
+  .object({
+    priceId: z.string().min(1).max(255),
+    // Only used when the caller is not signed in. A signed-in caller's address
+    // comes from their verified token instead, so this cannot be used to buy
+    // access on someone else's behalf.
+    email: z.string().email().max(320).optional(),
+  })
+  .strict();
+
 // Create checkout session
 router.post('/stripe/checkout', async (req, res) => {
   try {
-    const stripe = await getUncachableStripeClient();
-    const { priceId, email } = req.body as { priceId: string; email?: string };
-
-    if (!priceId) {
-      res.status(400).json({ error: 'priceId is required' });
+    const parsed = CheckoutRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: 'Invalid request body',
+        issues: parsed.error.issues.map(issue => ({ path: issue.path, message: issue.message })),
+      });
       return;
     }
+
+    // Buying the course does not require an account, so a missing or unusable
+    // token is not an error here — it just means the purchase is recorded
+    // against the email alone. What a token cannot do is be taken at face
+    // value: `googleSubject` below is only ever set from a verified one.
+    const signedIn = await verifiedGoogleUser(req);
+    const { priceId } = parsed.data;
+    const email = signedIn?.email ?? parsed.data.email;
+
+    const stripe = await getUncachableStripeClient();
 
     const origin = `${req.protocol}://${req.get('host')}`;
     const sessionParams: import('stripe').Stripe.Checkout.SessionCreateParams = {
@@ -87,6 +110,12 @@ router.post('/stripe/checkout', async (req, res) => {
 
     if (email) {
       sessionParams.customer_email = email;
+    }
+
+    if (signedIn) {
+      // Comes back on the webhook, which is how a purchase gets tied to an
+      // account rather than only to whatever address was typed at checkout.
+      sessionParams.metadata = { googleSubject: signedIn.subject };
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
