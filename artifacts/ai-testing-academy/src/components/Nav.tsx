@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, type RefObject } from 'react';
+import { useEffect, useState, useCallback, useRef, type RefObject } from 'react';
 import { useLocale } from '../context/LocaleContext';
 import { GoogleSignIn } from './GoogleSignIn';
 import { SECTIONS } from '../lib/sections';
@@ -89,13 +89,26 @@ export function Nav({ navOpen, setNavOpen, theme, onToggleTheme, toggleRef }: Na
   // Focus follows the drawer: into it on open, back to the button that opened
   // it on close. Without the second half, dismissing the drawer drops focus on
   // <body> and the next Tab restarts from the top of the document.
+  //
+  // The return is keyed off the open -> closed transition rather than off where
+  // focus currently is. By the time this effect runs React has already applied
+  // `inert`, and the browser blurs whatever was inside the subtree when it
+  // does, so there is nothing left to recognise as "focus was in the drawer" —
+  // testing for it is why the return silently did nothing. Tracking the
+  // transition also keeps a drawer that was never open from stealing focus on
+  // mount, and from stealing it again on every unrelated re-render.
+  const wasOpen = useRef(false);
   useEffect(() => {
-    if (!drawerMode) return;
+    if (!drawerMode) {
+      wasOpen.current = navOpen;
+      return;
+    }
     if (navOpen) {
       document.querySelector<HTMLAnchorElement>('#nav a.link')?.focus();
-    } else if (document.activeElement === document.body) {
+    } else if (wasOpen.current) {
       toggleRef.current?.focus();
     }
+    wasOpen.current = navOpen;
   }, [navOpen, drawerMode, toggleRef]);
 
   const handleNavLinkClick = useCallback(() => {
