@@ -37,6 +37,8 @@ export interface BankData {
   lead: string;
   note: string;
   videoHeading?: string;
+  videoMentorBtn?: string;
+  videoMentorUrl?: string;
   enrichCta: string;
   enrichPlaceholder: string;
   enrichHint: string;
@@ -818,6 +820,8 @@ export const HE_BANK: BankData = {
   lead: 'השאלות שמועמדי QA Automation באמת נשאלים, מחולקות לחמשת שלבי הראיון. לחיצה אחת על שאלה חושפת רמז, לחיצה שנייה חושפת תשובה מלאה, ואז אפשר להריץ סימולציה חיה עם הסוכן למעלה.',
   note: '💡 תרגלו בקול רם, ואז הריצו אותן באמת מול סוכן 2 בראיון סימולציה.',
   videoHeading: '🎥 צפו בראיון אמיתי לפני שמתחילים',
+  videoMentorBtn: '👨‍💻 עקבו אחרי ניב יצחקי, מנטור בקאנד, בלינקדאין',
+  videoMentorUrl: 'https://linkedin.com/in/nivitzhaky',
   enrichCta: '✨ העשר עם AI',
   enrichPlaceholder: 'תפקיד או מילות מפתח (למשל SDET, Playwright, CI/CD)',
   enrichHint:

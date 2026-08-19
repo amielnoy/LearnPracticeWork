@@ -79,6 +79,17 @@ export function QuestionBank() {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             />
           </div>
+          {bank.videoMentorBtn && bank.videoMentorUrl && (
+            <a
+              href={bank.videoMentorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ghost"
+              style={{ display: 'inline-block', marginTop: '10px', textDecoration: 'none' }}
+            >
+              {bank.videoMentorBtn}
+            </a>
+          )}
         </>
       )}
 
