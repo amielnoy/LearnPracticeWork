@@ -29,3 +29,15 @@ export const LIMITED_URL = `http://127.0.0.1:${LIMITED_PORT}`;
  * in production.
  */
 export const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
+
+/**
+ * The admin token the *keyed* server is started with.
+ *
+ * Only that one, deliberately. The keyless server is left without it, so the
+ * "not configured" branch — a seed route that answers 404 rather than running —
+ * is reachable by a test instead of only by a misconfigured deployment.
+ *
+ * Not a credential: it guards a route that then fails on absent Stripe
+ * credentials.
+ */
+export const ADMIN_TOKEN = 'test-admin-token-not-a-real-secret';

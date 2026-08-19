@@ -30,6 +30,7 @@ const KEYLESS_PORT = process.env.TEST_API_PORT ?? '8788';
 const KEYED_PORT = process.env.TEST_API_PORT_KEYED ?? '8789';
 const LIMITED_PORT = process.env.TEST_API_PORT_LIMITED ?? '8790';
 const DUMMY_GEMINI_KEY = 'AIzaSyTEST-not-a-real-key-000000000000000';
+const ADMIN_TOKEN = 'test-admin-token-not-a-real-secret';
 
 /** Env that must look the same on every machine for the assertions to hold. */
 const PINNED: Readonly<Record<string, string>> = {
@@ -45,6 +46,9 @@ const PINNED: Readonly<Record<string, string>> = {
   // Quieter output; the servers' logs are only interesting when a test fails.
   LOG_LEVEL: 'warn',
   ALLOWED_ORIGINS: 'https://academy.example',
+  // Unset by default, so the keyless server exercises the branch an
+  // unconfigured deployment takes. The keyed server below sets it.
+  ADMIN_API_TOKEN: '',
   AI_RATE_LIMIT_MAX: '1000',
   AI_DAILY_QUOTA: '1000',
 };
@@ -102,7 +106,11 @@ await new Promise<void>((resolve, reject) => {
   );
 });
 
-startServer(KEYED_PORT, { GEMINI_API_KEY: DUMMY_GEMINI_KEY, GEMINI_API_KEY_B64: '' });
+startServer(KEYED_PORT, {
+  GEMINI_API_KEY: DUMMY_GEMINI_KEY,
+  GEMINI_API_KEY_B64: '',
+  ADMIN_API_TOKEN: ADMIN_TOKEN,
+});
 await waitForHealth(KEYED_PORT);
 
 startServer(LIMITED_PORT, {

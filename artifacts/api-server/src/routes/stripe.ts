@@ -1,5 +1,6 @@
 import { Router, type IRouter } from 'express';
 import { getUncachableStripeClient } from '../stripeClient';
+import { adminRateLimiter, requireAdminToken } from '../middlewares/requireAdminToken';
 
 const router: IRouter = Router();
 
@@ -14,8 +15,14 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-// One-time admin endpoint to seed the course product
-router.post('/stripe/seed', async (_req, res) => {
+/**
+ * Creates the course product and its price.
+ *
+ * Admin-only, and enforced rather than described: this writes to a live Stripe
+ * account, so an unauthenticated caller could mint products in it all day. See
+ * `middlewares/requireAdminToken` for what "admin" means here.
+ */
+router.post('/stripe/seed', adminRateLimiter, requireAdminToken, async (_req, res) => {
   try {
     const stripe = await getUncachableStripeClient();
 
