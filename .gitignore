@@ -16,6 +16,10 @@ test-results
 playwright-report
 blob-report
 playwright/.cache
+# Console logs, page snapshots and screenshots dropped by the Playwright MCP
+# browser tools. One directory per debugging session, none of it reproducible
+# and none of it worth reviewing.
+.playwright-mcp
 
 # Allure (results are generated per-run; report is generated from them)
 allure-results
