@@ -358,7 +358,7 @@ export default function TitleSlide() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 1 of 18', 'שקופית 1 מתוך 18')}</span>
+          <span>{t('Slide 1 of 21', 'שקופית 1 מתוך 21')}</span>
         </div>
       </div>
     </div>

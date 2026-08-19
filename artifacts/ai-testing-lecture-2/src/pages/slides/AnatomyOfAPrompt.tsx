@@ -117,7 +117,7 @@ export default function AnatomyOfAPrompt() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 4 of 18', 'שקופית 4 מתוך 18')}</span>
+          <span>{t('Slide 4 of 21', 'שקופית 4 מתוך 21')}</span>
         </div>
       </div>
     </div>

@@ -308,7 +308,7 @@ export default function CommonPitfalls() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 17 of 19', 'שקופית 17 מתוך 19')}</span>
+          <span>{t('Slide 20 of 22', 'שקופית 20 מתוך 22')}</span>
         </div>
       </div>
     </div>

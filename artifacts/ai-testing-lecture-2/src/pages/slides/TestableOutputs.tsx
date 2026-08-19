@@ -88,7 +88,7 @@ export default function TestableOutputs() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 8 of 18', 'שקופית 8 מתוך 18')}</span>
+          <span>{t('Slide 9 of 21', 'שקופית 9 מתוך 21')}</span>
         </div>
       </div>
     </div>

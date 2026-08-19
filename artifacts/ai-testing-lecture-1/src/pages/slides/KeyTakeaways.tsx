@@ -193,7 +193,7 @@ export default function KeyTakeaways() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 18 of 19', 'שקופית 18 מתוך 19')}</span>
+          <span>{t('Slide 21 of 22', 'שקופית 21 מתוך 22')}</span>
         </div>
       </div>
     </div>

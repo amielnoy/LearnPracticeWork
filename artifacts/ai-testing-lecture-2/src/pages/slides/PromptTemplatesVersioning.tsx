@@ -97,7 +97,7 @@ export default function PromptTemplatesVersioning() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 10 of 18', 'שקופית 10 מתוך 18')}</span>
+          <span>{t('Slide 12 of 21', 'שקופית 12 מתוך 21')}</span>
         </div>
       </div>
     </div>

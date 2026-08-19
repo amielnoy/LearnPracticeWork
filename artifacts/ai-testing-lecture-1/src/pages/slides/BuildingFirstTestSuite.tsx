@@ -327,7 +327,7 @@ export default function BuildingFirstTestSuite() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 16 of 19', 'שקופית 16 מתוך 19')}</span>
+          <span>{t('Slide 19 of 22', 'שקופית 19 מתוך 22')}</span>
         </div>
       </div>
     </div>

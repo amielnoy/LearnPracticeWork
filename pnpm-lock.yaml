@@ -405,6 +405,10 @@ importers:
         version: 3.25.76
 
   artifacts/ai-testing-lecture-1:
+    dependencies:
+      '@supabase/supabase-js':
+        specifier: ^2.112.3
+        version: 2.112.3
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'
@@ -456,6 +460,10 @@ importers:
         version: 3.25.76
 
   artifacts/ai-testing-lecture-2:
+    dependencies:
+      '@supabase/supabase-js':
+        specifier: ^2.112.3
+        version: 2.112.3
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'

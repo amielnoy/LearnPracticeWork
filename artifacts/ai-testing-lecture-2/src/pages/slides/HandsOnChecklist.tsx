@@ -96,7 +96,7 @@ export default function HandsOnChecklist() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 16 of 18', 'שקופית 16 מתוך 18')}</span>
+          <span>{t('Slide 19 of 21', 'שקופית 19 מתוך 21')}</span>
         </div>
       </div>
     </div>

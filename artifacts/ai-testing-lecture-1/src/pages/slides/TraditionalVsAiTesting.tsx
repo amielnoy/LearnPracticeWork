@@ -215,7 +215,7 @@ export default function TraditionalVsAiTesting() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 5 of 19', 'שקופית 5 מתוך 19')}</span>
+          <span>{t('Slide 5 of 22', 'שקופית 5 מתוך 22')}</span>
         </div>
       </div>
     </div>

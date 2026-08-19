@@ -299,7 +299,7 @@ export default function GoldenDatasets() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 10 of 19', 'שקופית 10 מתוך 19')}</span>
+          <span>{t('Slide 10 of 22', 'שקופית 10 מתוך 22')}</span>
         </div>
       </div>
     </div>

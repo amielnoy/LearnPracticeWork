@@ -413,7 +413,7 @@ export default function LearningObjectives() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 2 of 19', 'שקופית 2 מתוך 19')}</span>
+          <span>{t('Slide 2 of 22', 'שקופית 2 מתוך 22')}</span>
         </div>
       </div>
     </div>

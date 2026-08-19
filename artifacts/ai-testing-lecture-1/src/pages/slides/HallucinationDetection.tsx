@@ -302,7 +302,7 @@ export default function HallucinationDetection() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 13 of 19', 'שקופית 13 מתוך 19')}</span>
+          <span>{t('Slide 15 of 22', 'שקופית 15 מתוך 22')}</span>
         </div>
       </div>
     </div>

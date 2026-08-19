@@ -92,7 +92,7 @@ export default function CommonFailureModes() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 11 of 18', 'שקופית 11 מתוך 18')}</span>
+          <span>{t('Slide 13 of 21', 'שקופית 13 מתוך 21')}</span>
         </div>
       </div>
     </div>

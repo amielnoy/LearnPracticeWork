@@ -85,7 +85,7 @@ export default function PromptInjectionBasics() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 12 of 18', 'שקופית 12 מתוך 18')}</span>
+          <span>{t('Slide 14 of 21', 'שקופית 14 מתוך 21')}</span>
         </div>
       </div>
     </div>

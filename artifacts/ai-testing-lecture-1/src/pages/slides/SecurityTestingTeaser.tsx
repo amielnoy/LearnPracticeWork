@@ -167,7 +167,7 @@ export default function SecurityTestingTeaser() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 14 of 19', 'שקופית 14 מתוך 19')}</span>
+          <span>{t('Slide 17 of 22', 'שקופית 17 מתוך 22')}</span>
         </div>
       </div>
     </div>

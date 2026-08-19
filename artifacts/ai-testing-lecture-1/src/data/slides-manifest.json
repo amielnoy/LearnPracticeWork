@@ -90,8 +90,17 @@
     "speakerNotes": ""
   },
   {
-    "id": "24686bfc-c59c-4e44-b9d8-5fe3b6f0d2e4",
+    "id": "a1e11111-1111-4111-8111-111111111111",
     "position": 11,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleGoldenDataset.tsx",
+    "title": "Worked Example: A Golden Dataset Test Case",
+    "description": "Concrete golden-dataset input/expected/actual/verdict example",
+    "speakerNotes": ""
+  },
+  {
+    "id": "24686bfc-c59c-4e44-b9d8-5fe3b6f0d2e4",
+    "position": 12,
     "kind": "jsx",
     "filepath": "src/pages/slides/LlmAsJudge.tsx",
     "title": "LLM-as-Judge",
@@ -99,8 +108,17 @@
     "speakerNotes": ""
   },
   {
+    "id": "a2e22222-2222-4222-8222-222222222222",
+    "position": 13,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleLlmAsJudge.tsx",
+    "title": "Worked Example: Grading With an LLM Judge",
+    "description": "Concrete judge prompt, candidate answer and JSON verdict",
+    "speakerNotes": ""
+  },
+  {
     "id": "160fe525-0189-4f60-b498-065e4c44f439",
-    "position": 12,
+    "position": 14,
     "kind": "jsx",
     "filepath": "src/pages/slides/SemanticSimilarityChecks.tsx",
     "title": "Similarity & Automated Checks",
@@ -109,7 +127,7 @@
   },
   {
     "id": "033c119d-c95e-432e-ab7d-eb8bb8d87dec",
-    "position": 13,
+    "position": 15,
     "kind": "jsx",
     "filepath": "src/pages/slides/HallucinationDetection.tsx",
     "title": "Detecting Hallucinated Answers",
@@ -117,8 +135,17 @@
     "speakerNotes": ""
   },
   {
+    "id": "a3e33333-3333-4333-8333-333333333333",
+    "position": 16,
+    "kind": "jsx",
+    "filepath": "src/pages/slides/WorkedExampleHallucination.tsx",
+    "title": "Worked Example: Catching a Hallucinated Answer",
+    "description": "Concrete hallucination catch with schema cross-check",
+    "speakerNotes": ""
+  },
+  {
     "id": "3ecacba3-ce95-4229-828f-fe3001ab6ff2",
-    "position": 14,
+    "position": 17,
     "kind": "jsx",
     "filepath": "src/pages/slides/SecurityTestingTeaser.tsx",
     "title": "Testing Isn't Just About Correctness",
@@ -127,7 +154,7 @@
   },
   {
     "id": "36bfc50a-d356-4b07-834a-d5ecfd780646",
-    "position": 15,
+    "position": 18,
     "kind": "jsx",
     "filepath": "src/pages/slides/ModernAiTestingToolbox.tsx",
     "title": "The Modern AI Testing Toolbox",
@@ -136,7 +163,7 @@
   },
   {
     "id": "4d235a9c-481b-48a5-929f-80d506f59218",
-    "position": 16,
+    "position": 19,
     "kind": "jsx",
     "filepath": "src/pages/slides/BuildingFirstTestSuite.tsx",
     "title": "Building Your First AI Test Suite",
@@ -145,7 +172,7 @@
   },
   {
     "id": "9893e019-ea1d-494d-a4a1-4ba5ea08cb77",
-    "position": 17,
+    "position": 20,
     "kind": "jsx",
     "filepath": "src/pages/slides/CommonPitfalls.tsx",
     "title": "Common Pitfalls to Avoid",
@@ -154,7 +181,7 @@
   },
   {
     "id": "03822159-cad3-4c72-88ca-8ad148b6cb9d",
-    "position": 18,
+    "position": 21,
     "kind": "jsx",
     "filepath": "src/pages/slides/KeyTakeaways.tsx",
     "title": "Key Takeaways",
@@ -163,7 +190,7 @@
   },
   {
     "id": "79f62da9-c60d-4511-9698-c7b2113d170f",
-    "position": 19,
+    "position": 22,
     "kind": "jsx",
     "filepath": "src/pages/slides/WhatsNextTeaser.tsx",
     "title": "What's Next: Lecture 2",

@@ -93,7 +93,7 @@ export default function DeterminismVsVariability() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 7 of 18', 'שקופית 7 מתוך 18')}</span>
+          <span>{t('Slide 8 of 21', 'שקופית 8 מתוך 21')}</span>
         </div>
       </div>
     </div>

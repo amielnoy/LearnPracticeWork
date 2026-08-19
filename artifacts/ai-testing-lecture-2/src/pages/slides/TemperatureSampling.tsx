@@ -93,7 +93,7 @@ export default function TemperatureSampling() {
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>
           <span>&bull;</span>
-          <span>{t('Slide 6 of 18', 'שקופית 6 מתוך 18')}</span>
+          <span>{t('Slide 7 of 21', 'שקופית 7 מתוך 21')}</span>
         </div>
       </div>
     </div>
