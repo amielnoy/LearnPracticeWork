@@ -421,6 +421,15 @@ export function ResumeAgent() {
             {t.tipsSourceLabel}
           </a>
         </p>
+        <a
+          href={t.tipsExpertUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ghost"
+          style={{ display: 'inline-block', marginTop: '10px', textDecoration: 'none' }}
+        >
+          {t.tipsExpertBtn}
+        </a>
       </div>
 
       <div className="agent-box reveal">
