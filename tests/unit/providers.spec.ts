@@ -8,7 +8,7 @@ import {
   type ServerDefaults,
 } from '@academy/lib/providers';
 import { en } from '@academy/lib/locales';
-import { stubFetch, jsonResponse, textResponse, type FetchStub } from '../support/fetchStub';
+import { stubFetch, jsonResponse, type FetchStub } from '../support/fetchStub';
 
 /**
  * Reads one field out of a request body a provider built.
@@ -90,31 +90,7 @@ test.describe('groq request building', () => {
       100,
     );
 
-    const contents = field<Array<{ role: string; parts: [{ text: string }] }>>(body, 'contents');
-    expect(contents.map(c => c.role)).toEqual(['user', 'model']);
-    expect(contents[1]!.parts[0]!.text).toBe('hello');
-  });
-
-  test('disables thinking on flash models to keep replies fast', () => {
-    const { body } = PROVIDERS.gemini!.build('k', 'gemini-2.5-flash', '', [], 100);
-    expect(field<{ thinkingConfig?: unknown }>(body, 'generationConfig').thinkingConfig).toEqual({
-      thinkingBudget: 0,
-    });
-  });
-
-  test('leaves thinking enabled on pro models', () => {
-    const { body } = PROVIDERS.gemini!.build('k', 'gemini-2.5-pro', '', [], 100);
-    expect(
-      field<{ thinkingConfig?: unknown }>(body, 'generationConfig').thinkingConfig,
-    ).toBeUndefined();
-  });
-
-  test('passes the token ceiling through', () => {
-    const { body } = PROVIDERS.gemini!.build('k', 'gemini-2.5-pro', '', [], 1234);
-    expect(field<{ maxOutputTokens?: unknown }>(body, 'generationConfig').maxOutputTokens).toBe(
-      1234,
-    );
-    expect((body as any).messages).toEqual([
+    expect(field(body, 'messages')).toEqual([
       { role: 'system', content: 'sys' },
       { role: 'user', content: 'hi' },
       { role: 'assistant', content: 'hello' },
@@ -126,12 +102,12 @@ test.describe('groq request building', () => {
     // before the visible answer; without this a small maxTokens (e.g. the
     // settings "test connection" ping) can come back with empty content.
     const { body } = PROVIDERS.groq!.build('gsk_KEY', 'openai/gpt-oss-120b', '', [], 100);
-    expect((body as any).reasoning_effort).toBe('low');
+    expect(field(body, 'reasoning_effort')).toBe('low');
   });
 
   test('passes the token ceiling through', () => {
     const { body } = PROVIDERS.groq!.build('gsk_KEY', 'openai/gpt-oss-120b', '', [], 1234);
-    expect((body as any).max_tokens).toBe(1234);
+    expect(field(body, 'max_tokens')).toBe(1234);
   });
 });
 

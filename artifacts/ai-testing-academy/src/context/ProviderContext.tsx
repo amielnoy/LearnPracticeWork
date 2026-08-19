@@ -90,19 +90,13 @@ function loadStoredKey(provider: string): { key: string; remember: boolean } {
 export function ProviderContextProvider({ children }: { children: React.ReactNode }) {
   const { S } = useLocale();
 
-  // Checked against the providers that exist. An unknown name here used to
-  // reach `PROVIDERS[provider]` as undefined and every read of it needed a
-  // guard; constraining it at the boundary means the rest of the file does not.
+  // Checked against the providers that exist, which is also what retires an old
+  // stored preference: Gemini is search-only now and not a selectable chat
+  // provider, so a visitor holding one falls back to the current default.
+  // `readOneOf` is the same guard the rest of the stored keys use.
   const [provider, setProviderState] = useState<string>(
-    () => readOneOf(localStorage, PROVIDER_STORE_KEY, PROVIDER_IDS) ?? 'gemini',
+    () => readOneOf(localStorage, PROVIDER_STORE_KEY, PROVIDER_IDS) ?? 'groq',
   );
-  const [model, setModelState] = useState<string>(() => PROVIDERS['gemini'].models[0]);
-  const [provider, setProviderState] = useState<string>(() => {
-    // Gemini is no longer a selectable chat provider (search-only now); a
-    // visitor with an old preference stored falls back to the new default.
-    const stored = localStorage.getItem(PROVIDER_STORE_KEY);
-    return stored && PROVIDERS[stored] ? stored : 'groq';
-  });
   const [model, setModelState] = useState<string>(() => PROVIDERS['groq'].models[0]);
   const [apiKey, setApiKeyState] = useState<string>('');
   const [rememberKey, setRememberKeyState] = useState<boolean>(false);

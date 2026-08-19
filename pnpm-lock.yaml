@@ -968,7 +968,7 @@ importers:
         version: link:../lib/api-zod
       allure:
         specifier: ^3.14.3
-        version: 3.14.3(preact@10.29.8)(typescript@5.9.3)
+        version: 3.14.3(debug@4.4.3)(preact@10.29.8)(typescript@5.9.3)
       allure-playwright:
         specifier: ^3.10.2
         version: 3.10.2(@playwright/test@1.62.1)
@@ -5044,7 +5044,7 @@ snapshots:
     dependencies:
       d3-shape: 3.2.0
 
-  '@allurereport/core@3.14.3(preact@10.29.8)(typescript@5.9.3)':
+  '@allurereport/core@3.14.3(debug@4.4.3)(preact@10.29.8)(typescript@5.9.3)':
     dependencies:
       '@allurereport/ci': 3.14.3
       '@allurereport/core-api': 3.14.3
@@ -5055,15 +5055,15 @@ snapshots:
       '@allurereport/plugin-classic': 3.14.3(preact@10.29.8)(typescript@5.9.3)
       '@allurereport/plugin-csv': 3.14.3
       '@allurereport/plugin-dashboard': 3.14.3(preact@10.29.8)(typescript@5.9.3)
-      '@allurereport/plugin-jira': 3.14.3
+      '@allurereport/plugin-jira': 3.14.3(debug@4.4.3)
       '@allurereport/plugin-log': 3.14.3
       '@allurereport/plugin-progress': 3.14.3
       '@allurereport/plugin-slack': 3.14.3
-      '@allurereport/plugin-testops': 3.14.3
+      '@allurereport/plugin-testops': 3.14.3(debug@4.4.3)
       '@allurereport/plugin-testplan': 3.14.3
       '@allurereport/reader': 3.14.3
       '@allurereport/reader-api': 3.14.3
-      '@allurereport/service': 3.14.3
+      '@allurereport/service': 3.14.3(debug@4.4.3)
       '@allurereport/summary': 3.14.3(typescript@5.9.3)
       glob: 13.0.6
       handlebars: 4.7.9
@@ -5153,11 +5153,11 @@ snapshots:
       - preact-render-to-string
       - typescript
 
-  '@allurereport/plugin-jira@3.14.3':
+  '@allurereport/plugin-jira@3.14.3(debug@4.4.3)':
     dependencies:
       '@allurereport/core-api': 3.14.3
       '@allurereport/plugin-api': 3.14.3
-      axios: 1.19.0
+      axios: 1.19.0(debug@4.4.3)
     transitivePeerDependencies:
       - debug
       - supports-color
@@ -5184,15 +5184,15 @@ snapshots:
       '@allurereport/core-api': 3.14.3
       '@allurereport/plugin-api': 3.14.3
 
-  '@allurereport/plugin-testops@3.14.3':
+  '@allurereport/plugin-testops@3.14.3(debug@4.4.3)':
     dependencies:
       '@allurereport/ci': 3.14.3
       '@allurereport/core-api': 3.14.3
       '@allurereport/git': 3.14.3
       '@allurereport/plugin-api': 3.14.3
       '@allurereport/reader-api': 3.14.3
-      '@allurereport/service': 3.14.3
-      axios: 1.19.0
+      '@allurereport/service': 3.14.3(debug@4.4.3)
+      axios: 1.19.0(debug@4.4.3)
       form-data: 4.0.6
       lodash-es: 4.18.1
       p-limit: 7.3.1
@@ -5220,11 +5220,11 @@ snapshots:
       '@allurereport/reader-api': 3.14.3
       fast-xml-parser: 5.10.1
 
-  '@allurereport/service@3.14.3':
+  '@allurereport/service@3.14.3(debug@4.4.3)':
     dependencies:
       '@allurereport/core-api': 3.14.3
       '@allurereport/plugin-api': 3.14.3
-      axios: 1.19.0
+      axios: 1.19.0(debug@4.4.3)
       open: 11.0.0
     transitivePeerDependencies:
       - debug
@@ -7297,11 +7297,11 @@ snapshots:
       '@playwright/test': 1.62.1
       allure-js-commons: 3.10.2(allure-playwright@3.10.2(@playwright/test@1.62.1))
 
-  allure@3.14.3(preact@10.29.8)(typescript@5.9.3):
+  allure@3.14.3(debug@4.4.3)(preact@10.29.8)(typescript@5.9.3):
     dependencies:
       '@allurereport/charts-api': 3.14.3
       '@allurereport/ci': 3.14.3
-      '@allurereport/core': 3.14.3(preact@10.29.8)(typescript@5.9.3)
+      '@allurereport/core': 3.14.3(debug@4.4.3)(preact@10.29.8)(typescript@5.9.3)
       '@allurereport/core-api': 3.14.3
       '@allurereport/directory-watcher': 3.14.3
       '@allurereport/plugin-agent': 3.14.3
@@ -7311,13 +7311,13 @@ snapshots:
       '@allurereport/plugin-classic': 3.14.3(preact@10.29.8)(typescript@5.9.3)
       '@allurereport/plugin-csv': 3.14.3
       '@allurereport/plugin-dashboard': 3.14.3(preact@10.29.8)(typescript@5.9.3)
-      '@allurereport/plugin-jira': 3.14.3
+      '@allurereport/plugin-jira': 3.14.3(debug@4.4.3)
       '@allurereport/plugin-log': 3.14.3
       '@allurereport/plugin-progress': 3.14.3
       '@allurereport/plugin-server-reload': 3.14.3
       '@allurereport/plugin-slack': 3.14.3
       '@allurereport/reader-api': 3.14.3
-      '@allurereport/service': 3.14.3
+      '@allurereport/service': 3.14.3(debug@4.4.3)
       '@allurereport/static-server': 3.14.3
       adm-zip: 0.5.18
       clipanion: 4.0.0-rc.4
@@ -7357,9 +7357,9 @@ snapshots:
 
   atomic-sleep@1.0.0: {}
 
-  axios@1.19.0:
+  axios@1.19.0(debug@4.4.3):
     dependencies:
-      follow-redirects: 1.16.0
+      follow-redirects: 1.16.0(debug@4.4.3)
       form-data: 4.0.6
       https-proxy-agent: 5.0.1
       proxy-from-env: 2.1.0
