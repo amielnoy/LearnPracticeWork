@@ -53,6 +53,13 @@ const PINNED: Readonly<Record<string, string>> = {
   // unconfigured deployment takes. The keyed server below sets both.
   ADMIN_API_TOKEN: '',
   GOOGLE_CLIENT_ID: '',
+  // Same reason as DATABASE_URL above: the Supabase-backed content route and
+  // the Stripe connection string are expected to be unavailable, and a
+  // developer who happens to have these exported must not get a different
+  // result from CI.
+  SUPABASE_DB_PASSWORD: '',
+  SUPABASE_URL: '',
+  SUPABASE_ANON_KEY: '',
   AI_RATE_LIMIT_MAX: '1000',
   AI_DAILY_QUOTA: '1000',
 };
