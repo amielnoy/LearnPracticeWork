@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-7/"
+title = "Security Testing for AI — Lecture 7"
+description = "Security testing for AI-powered applications: prompt injection attacks, data leakage, jailbreaking, and adversarial testing techniques for LLM-powered features."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-7"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-7/" ]
+localPort = 22668
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-7 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-7", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-7/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22668"
+BASE_PATH = "/ai-testing-lecture-7/"

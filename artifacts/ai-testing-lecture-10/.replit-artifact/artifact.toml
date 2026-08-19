@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-10/"
+title = "Building an AI Testing Strategy — Lecture 10"
+description = "Designing a full AI testing strategy for a team, from unit to system level, with metrics, reporting, and continuous improvement."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-10"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-10/" ]
+localPort = 23962
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-10 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-10", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-10/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23962"
+BASE_PATH = "/ai-testing-lecture-10/"

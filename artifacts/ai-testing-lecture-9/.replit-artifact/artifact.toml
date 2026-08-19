@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-9/"
+title = "AI-Assisted Test Generation — Lecture 9"
+description = "Using AI agents to generate test cases, identify edge cases, and triage failures with tools like GitHub Copilot, Cursor, and custom test-generation pipelines."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-9"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-9/" ]
+localPort = 23447
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-9 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-9", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-9/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23447"
+BASE_PATH = "/ai-testing-lecture-9/"

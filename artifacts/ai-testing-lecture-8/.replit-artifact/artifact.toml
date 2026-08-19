@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/ai-testing-lecture-8/"
+title = "Performance Testing AI Features — Lecture 8"
+description = "Performance testing for AI features: latency benchmarking, throughput testing, token-cost optimization, load testing AI endpoints, and establishing performance baselines."
+version = "1.0.0"
+id = "artifacts/ai-testing-lecture-8"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/ai-testing-lecture-8/" ]
+localPort = 20622
+
+[services.development]
+run = "pnpm --filter @workspace/ai-testing-lecture-8 run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-testing-lecture-8", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-testing-lecture-8/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20622"
+BASE_PATH = "/ai-testing-lecture-8/"
