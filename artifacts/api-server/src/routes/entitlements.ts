@@ -2,6 +2,7 @@ import { Router, type IRouter } from 'express';
 import { requireGoogleUser, type AuthenticatedRequest } from '../middlewares/requireGoogleUser';
 import { findCourseAccess } from '../lib/purchases';
 import { logger } from '../lib/logger';
+import { HttpStatus } from '../lib/httpStatus';
 
 const router: IRouter = Router();
 
@@ -29,14 +30,16 @@ router.get('/entitlements/course', requireGoogleUser, async (req, res) => {
     if (!access.checked) {
       // No database means no purchase records exist to consult. Saying "no"
       // would be a guess dressed as an answer.
-      res.status(503).json({ error: 'Purchase records are unavailable on this server.' });
+      res
+        .status(HttpStatus.SERVICE_UNAVAILABLE)
+        .json({ error: 'Purchase records are unavailable on this server.' });
       return;
     }
 
     res.json({ hasAccess: access.hasAccess, purchasedAt: access.purchasedAt });
   } catch (err) {
     logger.error({ err, requestId: req.id }, 'Entitlement lookup failed');
-    res.status(500).json({ error: 'Could not check entitlements' });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Could not check entitlements' });
   }
 });
 

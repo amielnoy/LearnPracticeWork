@@ -12,6 +12,8 @@ import { InterviewAgent } from '../components/InterviewAgent';
 import { QuestionBank } from '../components/QuestionBank';
 import { CodingChallenges } from '../components/CodingChallenges';
 import { ToolLauncher } from '../components/ToolLauncher';
+import { WhatsNew } from '../components/WhatsNew';
+import { ProgressTracker } from '../components/ProgressTracker';
 import { useProviderContext } from '../context/ProviderContext';
 import { readOneOf, writeRaw } from '../lib/storage';
 
@@ -90,6 +92,8 @@ export function HomePage() {
       <Hero />
 
       <main id="main-content">
+        <WhatsNew />
+        <ProgressTracker />
         <ToolLauncher />
         <ResumeAgent />
         <InterviewAgent />

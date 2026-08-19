@@ -5,6 +5,8 @@ import { useReveal } from '../hooks/useReveal';
 import { QuestionCard } from './QuestionCard';
 import { EN_BANK, HE_BANK } from '../lib/questionBank';
 import { useProgress } from '../context/ProgressContext';
+import { useRemoteContent } from '../hooks/useRemoteContent';
+import { fetchQuestionBankStages } from '../lib/contentClient';
 
 const SEED_KEYWORDS =
   'AI dev, AI test automation, Playwright, pytest, Page Object Model, flaky tests, CI/CD, Docker, API testing, SDET, AI/LLM testing';
@@ -26,6 +28,9 @@ export function QuestionBank() {
   const { callGrounded, extractJSON } = useProviderContext();
   const { completePracticeItem } = useProgress();
   const sectionRef = useReveal();
+  const contentLang = lang === 'he' ? 'he' : 'en';
+  const remoteStages = useRemoteContent(() => fetchQuestionBankStages(contentLang), [contentLang]);
+  const stages = remoteStages ?? bank.stages;
 
   const [keywords, setKeywords] = useState('');
   const [enriching, setEnriching] = useState(false);
@@ -168,7 +173,7 @@ export function QuestionBank() {
       {/* Curated stages — every question is a card that reveals a hint, then a
           full answer. Stages stay collapsed by default so the section is
           skimmable before it is studied. */}
-      {bank.stages.map((stage, stageIndex) => (
+      {stages.map((stage, stageIndex) => (
         <details key={stageIndex} className="agent-box reveal">
           <summary>
             <h3 style={{ display: 'inline', margin: 0 }}>

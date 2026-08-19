@@ -2,6 +2,7 @@ import { Router, type IRouter, type NextFunction, type Request, type Response } 
 import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
+import { HttpStatus } from '../lib/httpStatus';
 
 const router: IRouter = Router();
 
@@ -65,7 +66,7 @@ function rateLimitHandler(window: 'burst' | 'daily') {
       res.setHeader('X-AI-Quota-Limit', String(DAILY_QUOTA));
       res.setHeader('X-AI-Quota-Remaining', '0');
     }
-    res.status(429).json({
+    res.status(HttpStatus.TOO_MANY_REQUESTS).json({
       error:
         window === 'daily'
           ? 'Daily AI request quota exceeded. Please try again tomorrow.'
@@ -256,7 +257,7 @@ router.post(
         },
         'Rejected invalid AI proxy request',
       );
-      res.status(400).json({
+      res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Invalid request body',
         issues: parsed.error.issues.map(issue => ({ path: issue.path, message: issue.message })),
       });
@@ -274,7 +275,7 @@ router.post(
         ? await callGemini(resolvedModel, system, messages, maxTokens, true)
         : await callGroq(resolvedModel, system, messages, maxTokens);
 
-      if (result.status !== 200) {
+      if (result.status !== HttpStatus.OK) {
         res.status(result.status).json({ error: result.error || `${provider} request failed` });
         return;
       }
@@ -285,7 +286,7 @@ router.post(
         { err, requestId: req.id, provider, model: resolvedModel, timedOut },
         timedOut ? `${provider} request timed out` : `${provider} request failed`,
       );
-      res.status(timedOut ? 504 : 502).json({
+      res.status(timedOut ? HttpStatus.GATEWAY_TIMEOUT : HttpStatus.BAD_GATEWAY).json({
         error: timedOut ? `${provider} request timed out` : `Failed to reach ${provider}`,
       });
     }

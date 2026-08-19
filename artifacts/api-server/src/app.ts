@@ -4,6 +4,7 @@ import pinoHttp from 'pino-http';
 import router from './routes';
 import { logger } from './lib/logger';
 import { WebhookHandlers } from './webhookHandlers';
+import { HttpStatus } from './lib/httpStatus';
 
 const app: Express = express();
 
@@ -42,16 +43,16 @@ app.post(
   async (req, res): Promise<void> => {
     const signature = req.headers['stripe-signature'];
     if (!signature) {
-      res.status(400).json({ error: 'Missing stripe-signature header' });
+      res.status(HttpStatus.BAD_REQUEST).json({ error: 'Missing stripe-signature header' });
       return;
     }
     try {
       const sig = Array.isArray(signature) ? signature[0] : signature;
       await WebhookHandlers.processWebhook(req.body as Buffer, sig);
-      res.status(200).json({ received: true });
+      res.status(HttpStatus.OK).json({ received: true });
     } catch (err) {
       logger.error({ err }, 'Stripe webhook error');
-      res.status(400).json({ error: 'Webhook processing error' });
+      res.status(HttpStatus.BAD_REQUEST).json({ error: 'Webhook processing error' });
     }
   },
 );
@@ -91,7 +92,7 @@ app.use('/api', router);
 const jsonErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if ((err as { type?: string }).type === 'entity.too.large') {
     logger.warn({ requestId: req.id, ip: req.ip, path: req.path }, 'Rejected oversized request');
-    res.status(413).json({ error: 'Request body is too large' });
+    res.status(HttpStatus.REQUEST_ENTITY_TOO_LARGE).json({ error: 'Request body is too large' });
     return;
   }
   next(err);

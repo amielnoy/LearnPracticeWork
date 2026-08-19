@@ -4,6 +4,8 @@ import { useReveal } from '../hooks/useReveal';
 import { ChallengeCard } from './ChallengeCard';
 import type { ChallengeLabels } from '../lib/challenges';
 import { useProgress } from '../context/ProgressContext';
+import { useRemoteContent } from '../hooks/useRemoteContent';
+import { fetchChallengeLevels } from '../lib/contentClient';
 
 /**
  * The challenge section: three levels of increasing difficulty, each a list of
@@ -15,6 +17,9 @@ export function CodingChallenges() {
   const t = locale.codingChallenges;
   const sectionRef = useReveal();
   const { completePracticeItem } = useProgress();
+  const contentLang = lang === 'he' ? 'he' : 'en';
+  const remoteLevels = useRemoteContent(() => fetchChallengeLevels(contentLang), [contentLang]);
+  const levels = remoteLevels ?? t.levels;
 
   const labels = useMemo<ChallengeLabels>(
     () => ({
@@ -32,7 +37,7 @@ export function CodingChallenges() {
       <h2>{t.title}</h2>
       <p className="lead reveal">{t.lead}</p>
 
-      {t.levels.map((level, levelIndex) => (
+      {levels.map((level, levelIndex) => (
         <div className="challenge-level" key={level.label}>
           <h3 className="level-head">{level.label}</h3>
           <p className="level-blurb">{level.blurb}</p>

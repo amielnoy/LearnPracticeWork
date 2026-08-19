@@ -1,5 +1,9 @@
 import { test, expect } from './fixtures';
 import { EN_BANK } from '@academy/lib/questionBank';
+import { LocaleProvider } from '@academy/context/LocaleContext';
+import { ProgressProvider } from '@academy/context/ProgressContext';
+import { ProviderContextProvider } from '@academy/context/ProviderContext';
+import { QuestionBank } from '@academy/components/QuestionBank';
 
 /**
  * The section that wires the content to the cards. These tests assert the
@@ -73,5 +77,70 @@ test('gives every question both a hint and a non-empty answer', () => {
       expect(item.hint, `${item.q} has a hint`).toBeTruthy();
       expect(item.answer.length, `${item.q} has an answer`).toBeGreaterThan(0);
     }
+  }
+});
+
+/**
+ * The question bank now also tries `/api/content/question-bank` and prefers
+ * whatever it returns over the bundled `EN_BANK`/`HE_BANK` — see
+ * `lib/contentClient.ts`. These two tests are the contract that makes that
+ * safe: a working Supabase project overrides the bundled copy, and a broken
+ * or unreachable one leaves the bundled copy on screen instead of an empty
+ * or crashed section.
+ */
+test('prefers content served by /api/content/question-bank over the bundled bank', async ({
+  mount,
+  page,
+}) => {
+  const remoteStage = {
+    icon: '🛰️',
+    title: 'Remote-only stage',
+    items: [{ q: 'A question only Supabase knows about', hint: 'psst', answer: ['Because.'] }],
+  };
+  await page.route('**/api/ai/config', route =>
+    route.fulfill({ json: { groq: { available: false }, gemini: { available: false } } }),
+  );
+  await page.route('**/api/content/question-bank*', route =>
+    route.fulfill({ json: { stages: [remoteStage] } }),
+  );
+
+  const component = await mount(
+    <LocaleProvider>
+      <ProgressProvider>
+        <ProviderContextProvider>
+          <QuestionBank />
+        </ProviderContextProvider>
+      </ProgressProvider>
+    </LocaleProvider>,
+  );
+
+  await expect(component.getByRole('heading', { name: /Remote-only stage/ })).toBeVisible();
+  await expect(component.locator('.q-list')).toHaveCount(1);
+});
+
+test('falls back to the bundled bank when /api/content/question-bank fails', async ({
+  mount,
+  page,
+}) => {
+  await page.route('**/api/ai/config', route =>
+    route.fulfill({ json: { groq: { available: false }, gemini: { available: false } } }),
+  );
+  await page.route('**/api/content/question-bank*', route =>
+    route.fulfill({ status: 503, json: { error: 'Content temporarily unavailable' } }),
+  );
+
+  const component = await mount(
+    <LocaleProvider>
+      <ProgressProvider>
+        <ProviderContextProvider>
+          <QuestionBank />
+        </ProviderContextProvider>
+      </ProgressProvider>
+    </LocaleProvider>,
+  );
+
+  await expect(component.locator('.q-list')).toHaveCount(EN_BANK.stages.length);
+  for (const stage of EN_BANK.stages) {
+    await expect(component.getByRole('heading', { name: stage.title })).toBeVisible();
   }
 });

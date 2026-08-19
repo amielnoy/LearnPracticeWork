@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getUncachableStripeClient } from '../stripeClient';
 import { adminRateLimiter, requireAdminToken } from '../middlewares/requireAdminToken';
 import { verifiedGoogleUser } from '../middlewares/requireGoogleUser';
+import { HttpStatus } from '../lib/httpStatus';
 
 const router: IRouter = Router();
 
@@ -58,7 +59,7 @@ router.post('/stripe/seed', adminRateLimiter, requireAdminToken, async (_req, re
 
     res.json({ status: 'created', productId: product.id, priceId: price.id });
   } catch (err) {
-    res.status(500).json({ error: errorMessage(err) });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: errorMessage(err) });
   }
 });
 
@@ -77,7 +78,7 @@ router.post('/stripe/checkout', async (req, res) => {
   try {
     const parsed = CheckoutRequestSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({
+      res.status(HttpStatus.BAD_REQUEST).json({
         error: 'Invalid request body',
         issues: parsed.error.issues.map(issue => ({ path: issue.path, message: issue.message })),
       });
@@ -121,7 +122,7 @@ router.post('/stripe/checkout', async (req, res) => {
     const session = await stripe.checkout.sessions.create(sessionParams);
     res.json({ url: session.url });
   } catch (err) {
-    res.status(500).json({ error: errorMessage(err) });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: errorMessage(err) });
   }
 });
 
@@ -142,7 +143,7 @@ router.get('/stripe/prices', async (_req, res) => {
     });
     res.json({ data: prices.data });
   } catch (err) {
-    res.status(500).json({ error: errorMessage(err) });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: errorMessage(err) });
   }
 });
 

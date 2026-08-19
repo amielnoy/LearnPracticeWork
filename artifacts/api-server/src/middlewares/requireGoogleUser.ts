@@ -5,6 +5,7 @@ import {
   type VerifiedGoogleUser,
 } from '../lib/googleAuth';
 import { logger } from '../lib/logger';
+import { HttpStatus } from '../lib/httpStatus';
 
 /**
  * The request-shaped half of Google sign-in: pulling a bearer token off a
@@ -52,13 +53,15 @@ export async function requireGoogleUser(
   next: NextFunction,
 ): Promise<void> {
   if (!isGoogleAuthConfigured()) {
-    res.status(503).json({ error: 'Sign-in is not configured on this server.' });
+    res
+      .status(HttpStatus.SERVICE_UNAVAILABLE)
+      .json({ error: 'Sign-in is not configured on this server.' });
     return;
   }
 
   const user = await verifiedGoogleUser(req);
   if (!user) {
-    res.status(401).json({ error: 'A valid Google ID token is required.' });
+    res.status(HttpStatus.UNAUTHORIZED).json({ error: 'A valid Google ID token is required.' });
     return;
   }
 

@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { rateLimit } from 'express-rate-limit';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { logger } from '../lib/logger';
+import { HttpStatus } from '../lib/httpStatus';
 
 /**
  * The gate in front of the admin-only routes.
@@ -53,7 +54,7 @@ export const adminRateLimiter: RequestHandler = rateLimit({
   legacyHeaders: false,
   handler: (req: Request, res: Response): void => {
     logger.warn({ requestId: req.id, ip: req.ip, route: req.path }, 'Admin rate limit exceeded');
-    res.status(429).json({ error: 'Too many requests' });
+    res.status(HttpStatus.TOO_MANY_REQUESTS).json({ error: 'Too many requests' });
   },
 });
 
@@ -65,7 +66,7 @@ export function requireAdminToken(req: Request, res: Response, next: NextFunctio
       { requestId: req.id, ip: req.ip, route: req.path },
       'Admin route is disabled: ADMIN_API_TOKEN is not configured',
     );
-    res.status(404).json({ error: 'Not found' });
+    res.status(HttpStatus.NOT_FOUND).json({ error: 'Not found' });
     return;
   }
 
@@ -76,7 +77,7 @@ export function requireAdminToken(req: Request, res: Response, next: NextFunctio
       { requestId: req.id, ip: req.ip, route: req.path, presented: presented !== '' },
       'Rejected admin request',
     );
-    res.status(401).json({ error: 'Unauthorized' });
+    res.status(HttpStatus.UNAUTHORIZED).json({ error: 'Unauthorized' });
     return;
   }
 

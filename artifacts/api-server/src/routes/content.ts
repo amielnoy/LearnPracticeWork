@@ -1,6 +1,7 @@
 import { Router, type IRouter } from 'express';
 import { getSupabaseContentClient } from '../lib/supabase';
 import { logger } from '../lib/logger';
+import { HttpStatus } from '../lib/httpStatus';
 
 const router: IRouter = Router();
 
@@ -38,7 +39,7 @@ router.get('/content/question-bank', async (req, res) => {
     res.json({ stages: result });
   } catch (err) {
     logger.error({ err }, 'Failed to load question bank content');
-    res.status(503).json({ error: 'Content temporarily unavailable' });
+    res.status(HttpStatus.SERVICE_UNAVAILABLE).json({ error: 'Content temporarily unavailable' });
   }
 });
 
@@ -78,7 +79,7 @@ router.get('/content/coding-challenges', async (req, res) => {
     res.json({ levels: result });
   } catch (err) {
     logger.error({ err }, 'Failed to load coding challenges content');
-    res.status(503).json({ error: 'Content temporarily unavailable' });
+    res.status(HttpStatus.SERVICE_UNAVAILABLE).json({ error: 'Content temporarily unavailable' });
   }
 });
 
@@ -118,7 +119,7 @@ router.get('/content/lecture-series', async (req, res) => {
     res.json({ tracks: result });
   } catch (err) {
     logger.error({ err }, 'Failed to load lecture series content');
-    res.status(503).json({ error: 'Content temporarily unavailable' });
+    res.status(HttpStatus.SERVICE_UNAVAILABLE).json({ error: 'Content temporarily unavailable' });
   }
 });
 

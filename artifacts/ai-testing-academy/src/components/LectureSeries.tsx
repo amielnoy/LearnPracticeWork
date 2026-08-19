@@ -1,5 +1,8 @@
 import { useLocale } from '../context/LocaleContext';
 import { useReveal } from '../hooks/useReveal';
+import { useProgress } from '../context/ProgressContext';
+import { useRemoteContent } from '../hooks/useRemoteContent';
+import { fetchLectureTracks } from '../lib/contentClient';
 
 export interface LectureData {
   num: number;
@@ -335,7 +338,8 @@ export const HE: BankData = {
   ],
 };
 
-function LectureCard({ lec, bank }: { lec: LectureData; bank: BankData }) {
+function LectureCard({ lec, bank, id }: { lec: LectureData; bank: BankData; id: string }) {
+  const { viewLecture } = useProgress();
   return (
     <div className="card" style={lec.ready ? {} : { opacity: 0.6 }}>
       <div
@@ -384,7 +388,13 @@ function LectureCard({ lec, bank }: { lec: LectureData; bank: BankData }) {
       <h4 style={{ marginBottom: '8px', fontSize: '1rem' }}>{lec.title}</h4>
       <p style={{ fontSize: '.88rem' }}>{lec.desc}</p>
       {lec.ready && lec.url && (
-        <a className="lecture-cta" href={lec.url} target="_blank" rel="noopener noreferrer">
+        <a
+          className="lecture-cta"
+          href={lec.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => viewLecture(id)}
+        >
           {bank.openLecture}
         </a>
       )}
@@ -396,6 +406,9 @@ export function LectureSeries() {
   const { lang } = useLocale();
   const bank = lang === 'he' ? HE : EN;
   const sectionRef = useReveal();
+  const contentLang = lang === 'he' ? 'he' : 'en';
+  const remoteTracks = useRemoteContent(() => fetchLectureTracks(contentLang), [contentLang]);
+  const tracks = remoteTracks ?? bank.tracks;
 
   return (
     <section id="lecture-series" ref={sectionRef}>
@@ -403,7 +416,7 @@ export function LectureSeries() {
         <span className="num">02</span> {bank.title}
       </h2>
       <p className="lead reveal">{bank.lead}</p>
-      {bank.tracks.map((track, idx) => (
+      {tracks.map((track, idx) => (
         <div key={idx}>
           <h3
             style={{ marginTop: idx === 0 ? 0 : '48px', marginBottom: '6px', fontSize: '1.15rem' }}
@@ -415,7 +428,7 @@ export function LectureSeries() {
           </p>
           <div className="grid">
             {track.lectures.map(lec => (
-              <LectureCard key={lec.num} lec={lec} bank={bank} />
+              <LectureCard key={lec.num} lec={lec} bank={bank} id={`lecture:${idx}:${lec.num}`} />
             ))}
           </div>
         </div>

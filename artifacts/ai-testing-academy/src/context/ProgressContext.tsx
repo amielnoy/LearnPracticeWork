@@ -10,6 +10,7 @@ interface AcademyProgress {
   interviewAnswers: number;
   interviewCompleted: boolean;
   practiceCompleted: string[];
+  lecturesViewed: string[];
   lastTool: ToolId | null;
 }
 
@@ -19,6 +20,7 @@ interface ProgressContextValue extends AcademyProgress {
   recordInterviewAnswer: () => void;
   completeInterview: () => void;
   completePracticeItem: (id: string) => void;
+  viewLecture: (id: string) => void;
 }
 
 const STORAGE_KEY = 'ata_progress_v1';
@@ -29,6 +31,7 @@ const EMPTY_PROGRESS: AcademyProgress = {
   interviewAnswers: 0,
   interviewCompleted: false,
   practiceCompleted: [],
+  lecturesViewed: [],
   lastTool: null,
 };
 
@@ -49,6 +52,9 @@ function loadProgress(): AcademyProgress {
           ? parsed.practiceCompleted
               .filter((id): id is string => typeof id === 'string')
               .slice(0, 500)
+          : [],
+        lecturesViewed: Array.isArray(parsed.lecturesViewed)
+          ? parsed.lecturesViewed.filter((id): id is string => typeof id === 'string').slice(0, 500)
           : [],
         lastTool: ['resume', 'interview', 'practice'].includes(parsed.lastTool || '')
           ? (parsed.lastTool as ToolId)
@@ -127,6 +133,17 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     [update],
   );
 
+  const viewLecture = useCallback(
+    (id: string) =>
+      update(current => ({
+        ...current,
+        lecturesViewed: current.lecturesViewed.includes(id)
+          ? current.lecturesViewed
+          : [...current.lecturesViewed, id],
+      })),
+    [update],
+  );
+
   const value = useMemo<ProgressContextValue>(
     () => ({
       ...progress,
@@ -135,6 +152,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       recordInterviewAnswer,
       completeInterview,
       completePracticeItem,
+      viewLecture,
     }),
     [
       progress,
@@ -143,6 +161,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       recordInterviewAnswer,
       completeInterview,
       completePracticeItem,
+      viewLecture,
     ],
   );
 
