@@ -113,7 +113,14 @@ export default function LatencyBudgets() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Measure p95, Not Mean', 'מדדו p95, לא ממוצע')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,18 +131,32 @@ export default function LatencyBudgets() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Budget Per Endpoint', 'תקציב לכל נקודת קצה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
                 'Different endpoints have different SLAs. A background triage job can tolerate 10s; a user-facing chat completion cannot. Document the budget alongside the endpoint.',
-                'לנקודות קצה שונות יש SLAs שונים. משימת טריאז ברקע יכולה לסבול 10s; השלמת צ\'אט מול משתמש לא יכולה. תעדו את התקציב לצד נקודת הקצה.',
+                "לנקודות קצה שונות יש SLAs שונים. משימת טריאז ברקע יכולה לסבול 10s; השלמת צ'אט מול משתמש לא יכולה. תעדו את התקציב לצד נקודת הקצה.",
               )}
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Token Budget in Addition to Time', 'תקציב טוקן בנוסף לזמן')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -191,16 +212,40 @@ export default function LatencyBudgets() {
             }}
           >
             <div style={{ color: '#64748B' }}># define the budget once</div>
-            <div><span style={{ color: '#38BDF8' }}>LATENCY_BUDGET_MS</span> = <span style={{ color: '#F87171' }}>3000</span></div>
+            <div>
+              <span style={{ color: '#38BDF8' }}>LATENCY_BUDGET_MS</span> ={' '}
+              <span style={{ color: '#F87171' }}>3000</span>
+            </div>
             <div style={{ color: '#64748B', marginTop: '0.5vh' }}># time the call</div>
-            <div><span style={{ color: '#FBBF24' }}>start</span> = time.monotonic()</div>
-            <div><span style={{ color: '#38BDF8' }}>response</span> = client.summarize(ticket)</div>
-            <div><span style={{ color: '#FBBF24' }}>elapsed_ms</span> = (time.monotonic() - start) * 1000</div>
-            <div style={{ color: '#64748B', marginTop: '0.5vh' }}># fail the test if over budget</div>
-            <div><span style={{ color: '#FBBF24' }}>assert</span> elapsed_ms &lt;= LATENCY_BUDGET_MS, \</div>
-            <div style={{ color: '#4ADE80' }}>&nbsp;&nbsp;f"Latency {'{'}elapsed_ms:.0f{'}'}ms exceeds {'{'}LATENCY_BUDGET_MS{'}'}ms"</div>
+            <div>
+              <span style={{ color: '#FBBF24' }}>start</span> = time.monotonic()
+            </div>
+            <div>
+              <span style={{ color: '#38BDF8' }}>response</span> = client.summarize(ticket)
+            </div>
+            <div>
+              <span style={{ color: '#FBBF24' }}>elapsed_ms</span> = (time.monotonic() - start) *
+              1000
+            </div>
+            <div style={{ color: '#64748B', marginTop: '0.5vh' }}>
+              # fail the test if over budget
+            </div>
+            <div>
+              <span style={{ color: '#FBBF24' }}>assert</span> elapsed_ms &lt;= LATENCY_BUDGET_MS, \
+            </div>
+            <div style={{ color: '#4ADE80' }}>
+              &nbsp;&nbsp;f"Latency {'{'}elapsed_ms:.0f{'}'}ms exceeds {'{'}LATENCY_BUDGET_MS{'}'}
+              ms"
+            </div>
           </div>
-          <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5, textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              color: '#64748B',
+              lineHeight: 1.5,
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {t(
               'Wrap the same assertion around token usage: assert response.usage.total_tokens <= TOKEN_BUDGET.',
               'עטפו את אותה קביעה סביב שימוש בטוקן: assert response.usage.total_tokens <= TOKEN_BUDGET.',

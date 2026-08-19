@@ -39,14 +39,25 @@ export default function CostBudget() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -87,13 +98,20 @@ export default function CostBudget() {
         </h1>
         <p style={{ fontSize: '1.2vw', color: '#475569', margin: '0 0 3vh 0', lineHeight: 1.6 }}>
           {t(
-            'Track token and dollar spend per pipeline run, and fail the build (or alert) if a single PR\'s test run exceeds its budget.',
+            "Track token and dollar spend per pipeline run, and fail the build (or alert) if a single PR's test run exceeds its budget.",
             'עקוב אחר צריכת tokens ודולרים לכל ריצת צינור, והכשל את ה-build (או שלח התראה) אם ריצת בדיקה של PR אחד חורגת מתקציבה.',
           )}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Instrument every API call', 'מדוד כל קריאת API')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -104,7 +122,14 @@ export default function CostBudget() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Set a per-run budget threshold', 'קבע סף תקציב לכל ריצה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -115,7 +140,14 @@ export default function CostBudget() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Persist spend per run for trending', 'שמור הוצאות לכל ריצה לזיהוי מגמות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -170,15 +202,29 @@ export default function CostBudget() {
           >
             <div style={{ color: '#94A3B8' }}>total_tokens = sum(run_tokens)</div>
             <div style={{ color: '#E2E8F0' }}>cost = total_tokens * PRICE_PER_1K / 1000</div>
-            <div style={{ color: '#38BDF8', marginTop: '0.5vh' }}>BUDGET = 0.50  # USD</div>
+            <div style={{ color: '#38BDF8', marginTop: '0.5vh' }}>BUDGET = 0.50 # USD</div>
             <div style={{ color: '#FBBF24', marginTop: '0.5vh' }}>if cost {'>'} BUDGET:</div>
-            <div style={{ color: '#DC2626', paddingLeft: '1.5vw' }}>sys.exit(1)  # fail CI</div>
-            <div style={{ color: '#2DD4BF', marginTop: '0.5vh' }}>print(f"Cost: ${'{'}cost:.4f{'}'}")  # log</div>
+            <div style={{ color: '#DC2626', paddingLeft: '1.5vw' }}>sys.exit(1) # fail CI</div>
+            <div style={{ color: '#2DD4BF', marginTop: '0.5vh' }}>
+              print(f"Cost: ${'{'}cost:.4f{'}'}") # log
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1vh', textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1vh',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#64748B' }}>
               <span style={{ color: '#0D9488', fontWeight: 700 }}>&#x2192;</span>
-              <span>{t('Budget exceeded: build fails with clear message', 'תקציב חרג: build נכשל עם הודעה ברורה')}</span>
+              <span>
+                {t(
+                  'Budget exceeded: build fails with clear message',
+                  'תקציב חרג: build נכשל עם הודעה ברורה',
+                )}
+              </span>
             </div>
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#64748B' }}>
               <span style={{ color: '#0D9488', fontWeight: 700 }}>&#x2192;</span>

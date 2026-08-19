@@ -94,14 +94,25 @@ export default function ToolsRecap() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -152,8 +163,19 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: categories[0].accent, marginBottom: '0.8vh' }}>{categories[0].name}</div>
-            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>{categories[0].desc}</div>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: categories[0].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
+              {categories[0].name}
+            </div>
+            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
+              {categories[0].desc}
+            </div>
           </div>
           <div
             style={{
@@ -164,8 +186,19 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: categories[1].accent, marginBottom: '0.8vh' }}>{categories[1].name}</div>
-            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>{categories[1].desc}</div>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: categories[1].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
+              {categories[1].name}
+            </div>
+            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
+              {categories[1].desc}
+            </div>
           </div>
           <div
             style={{
@@ -176,8 +209,19 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: categories[2].accent, marginBottom: '0.8vh' }}>{categories[2].name}</div>
-            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>{categories[2].desc}</div>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: categories[2].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
+              {categories[2].name}
+            </div>
+            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
+              {categories[2].desc}
+            </div>
           </div>
           <div
             style={{
@@ -188,8 +232,19 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: categories[3].accent, marginBottom: '0.8vh' }}>{categories[3].name}</div>
-            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>{categories[3].desc}</div>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: categories[3].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
+              {categories[3].name}
+            </div>
+            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
+              {categories[3].desc}
+            </div>
           </div>
           <div
             style={{
@@ -200,8 +255,19 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: categories[4].accent, marginBottom: '0.8vh' }}>{categories[4].name}</div>
-            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>{categories[4].desc}</div>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: categories[4].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
+              {categories[4].name}
+            </div>
+            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
+              {categories[4].desc}
+            </div>
           </div>
           <div
             style={{
@@ -212,8 +278,19 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: categories[5].accent, marginBottom: '0.8vh' }}>{categories[5].name}</div>
-            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>{categories[5].desc}</div>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: categories[5].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
+              {categories[5].name}
+            </div>
+            <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
+              {categories[5].desc}
+            </div>
           </div>
         </div>
       </div>

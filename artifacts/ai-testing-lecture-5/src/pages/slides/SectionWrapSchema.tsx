@@ -57,7 +57,9 @@ export default function SectionWrapSchema() {
       </div>
 
       {/* Body */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3vh', justifyContent: 'center' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', gap: '3vh', justifyContent: 'center' }}
+      >
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
           <div
             style={{
@@ -95,7 +97,14 @@ export default function SectionWrapSchema() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.5vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.5vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.5vh',
+              }}
+            >
               {t('Key insight', 'תובנה מרכזית')}
             </div>
             <div style={{ fontSize: '1.2vw', color: '#1E3A5F', lineHeight: 1.6 }}>
@@ -115,7 +124,14 @@ export default function SectionWrapSchema() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.5vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.5vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.5vh',
+              }}
+            >
               {t('The practice', 'הפרקטיקה')}
             </div>
             <div style={{ fontSize: '1.2vw', color: '#1E3A5F', lineHeight: 1.6 }}>
@@ -138,7 +154,7 @@ export default function SectionWrapSchema() {
         >
           <div style={{ fontSize: '1.3vw', color: '#1E3A5F', lineHeight: 1.6, fontWeight: 500 }}>
             {t(
-              "Don\u2019t just eyeball it. A schema file that lives in your repo, validated in every CI run, is the only way to know your AI endpoint\u2019s contract has not silently changed.",
+              'Don\u2019t just eyeball it. A schema file that lives in your repo, validated in every CI run, is the only way to know your AI endpoint\u2019s contract has not silently changed.',
               'אל תסתכלו בלבד. קובץ סכמה שנמצא ב-repo שלכם, מאומת בכל הרצת CI, הוא הדרך היחידה לדעת שחוזה נקודת הקצה ה-AI שלכם לא השתנה בשקט.',
             )}
           </div>

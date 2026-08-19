@@ -11,7 +11,7 @@ import { he } from '../../artifacts/ai-testing-academy/src/lib/locales/he';
 import {
   EN as LECTURE_EN,
   HE as LECTURE_HE,
-} from '../../artifacts/ai-testing-academy/src/components/LectureSeries';
+} from '../../artifacts/ai-testing-academy/src/lib/lectures';
 
 const out = {
   questionBank: {

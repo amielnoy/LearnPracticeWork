@@ -22,7 +22,7 @@ function getSlideIndex(pathname: string): number {
   const match = pathname.match(/^\/slide(\d+)$/);
   if (!match) return -1;
   const position = parseInt(match[1], 10);
-  return slides.findIndex((s) => s.position === position);
+  return slides.findIndex(s => s.position === position);
 }
 
 const PARENT_OWNS_NAVIGATION =
@@ -52,9 +52,7 @@ function SlideEditor() {
 
     const consumesArrowKeys = (target: EventTarget | null) => {
       if (!(target instanceof HTMLElement)) return false;
-      return (
-        target.isContentEditable || !!target.closest(ARROW_KEY_CONSUMERS)
-      );
+      return target.isContentEditable || !!target.closest(ARROW_KEY_CONSUMERS);
     };
 
     const postNav = (type: 'advanceSlide' | 'retreatSlide') => {
@@ -74,29 +72,18 @@ function SlideEditor() {
           const isPlainLink =
             !!focused &&
             focused.tagName === 'A' &&
-            (!role ||
-              role === 'link' ||
-              role === 'none' ||
-              role === 'presentation');
+            (!role || role === 'link' || role === 'none' || role === 'presentation');
           if (focused && !isPlainLink) return;
           event.preventDefault();
           postNav('advanceSlide');
           return;
         }
         if (consumesArrowKeys(event.target)) return;
-        if (
-          event.key === 'ArrowLeft' ||
-          event.key === 'ArrowUp' ||
-          event.key === 'PageUp'
-        ) {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'PageUp') {
           event.preventDefault();
           postNav('retreatSlide');
         }
-        if (
-          event.key === 'ArrowRight' ||
-          event.key === 'ArrowDown' ||
-          event.key === 'PageDown'
-        ) {
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown' || event.key === 'PageDown') {
           event.preventDefault();
           postNav('advanceSlide');
         }
@@ -106,9 +93,7 @@ function SlideEditor() {
         event.preventDefault();
       }
       if (
-        (event.key === 'ArrowLeft' ||
-          event.key === 'ArrowUp' ||
-          event.key === 'PageUp') &&
+        (event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'PageUp') &&
         currentIndex > 0
       ) {
         navigate(`/slide${slides[currentIndex - 1].position}`);
@@ -192,10 +177,7 @@ function SlideEditor() {
   return (
     <div className="select-none">
       {slides.map((slide, index) => (
-        <div
-          key={slide.id}
-          style={{ display: index === currentIndex ? 'block' : 'none' }}
-        >
+        <div key={slide.id} style={{ display: index === currentIndex ? 'block' : 'none' }}>
           <slide.Component />
         </div>
       ))}
@@ -210,7 +192,7 @@ function SlideEditor() {
 function AllSlides() {
   return (
     <div className="bg-black">
-      {slides.map((slide) => (
+      {slides.map(slide => (
         <div
           key={slide.id}
           data-slide-id={slide.id}
@@ -293,11 +275,7 @@ export default function App() {
   // DO NOT edit this useEffect - redirects unknown routes to the first slide.
   // The "/" and "/allslides" routes are handled separately below.
   useEffect(() => {
-    if (
-      location !== '/' &&
-      location !== '/allslides' &&
-      getSlideIndex(location) === -1
-    ) {
+    if (location !== '/' && location !== '/allslides' && getSlideIndex(location) === -1) {
       if (slides.length > 0) {
         navigate(`/slide${slides[0].position}`, { replace: true });
       }
@@ -312,7 +290,7 @@ export default function App() {
       if (
         event.data?.type === 'navigateToSlide' &&
         typeof event.data.position === 'number' &&
-        slides.some((s) => s.position === event.data.position)
+        slides.some(s => s.position === event.data.position)
       ) {
         navigate(`/slide${event.data.position}`);
       }
@@ -333,7 +311,7 @@ export default function App() {
         return;
       }
       if (action.kind === 'goToSlide') {
-        const target = slides.find((slide) => slide.id === action.slideId);
+        const target = slides.find(slide => slide.id === action.slideId);
         if (target) {
           navigate(`/slide${target.position}`);
         }
@@ -342,10 +320,7 @@ export default function App() {
       if (action.kind !== 'goToRelativeSlide') {
         return;
       }
-      if (
-        PARENT_OWNS_NAVIGATION &&
-        (action.target === 'next' || action.target === 'previous')
-      ) {
+      if (PARENT_OWNS_NAVIGATION && (action.target === 'next' || action.target === 'previous')) {
         window.parent.postMessage(
           {
             type: action.target === 'next' ? 'advanceSlide' : 'retreatSlide',

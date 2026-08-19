@@ -38,10 +38,27 @@ export default function LearningObjectives() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
@@ -78,7 +95,15 @@ export default function LearningObjectives() {
         >
           {t("What You'll Be Able To Do", 'מה תוכלו לעשות')}
         </h1>
-        <p style={{ fontSize: '1.2vw', fontWeight: 400, color: '#475569', margin: '0 0 3vh 0', lineHeight: 1.6 }}>
+        <p
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 400,
+            color: '#475569',
+            margin: '0 0 3vh 0',
+            lineHeight: 1.6,
+          }}
+        >
           {t(
             'By the end of this lecture you can set up, operate, and quality-control an AI-assisted test generation pipeline that ships real value to your team.',
             'בסיום ההרצאה תוכלו להקים, להפעיל ולבקר את איכות צינור יצירת הבדיקות בסיוע AI שמעניק ערך אמיתי לצוות.',
@@ -86,19 +111,42 @@ export default function LearningObjectives() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
-              {t('Generate tests from code, specs, and user stories', 'יצירת בדיקות מקוד, מפרטים וסיפורי משתמש')}
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
+              {t(
+                'Generate tests from code, specs, and user stories',
+                'יצירת בדיקות מקוד, מפרטים וסיפורי משתמש',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Drive an AI agent to produce runnable tests from any upstream artifact.', 'הנחיית AI agent לייצר בדיקות הניתנות להרצה מכל ארטיפקט upstream.')}
+              {t(
+                'Drive an AI agent to produce runnable tests from any upstream artifact.',
+                'הנחיית AI agent לייצר בדיקות הניתנות להרצה מכל ארטיפקט upstream.',
+              )}
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Review and gate AI-generated tests', 'סקירה ושליטה בבדיקות שנוצרו על ידי AI')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Apply acceptance criteria, detect flaky and redundant tests, and track approvals in Supabase.', 'החלת קריטריוני קבלה, זיהוי בדיקות לא-יציבות ומיותרות ומעקב אחר אישורים ב-Supabase.')}
+              {t(
+                'Apply acceptance criteria, detect flaky and redundant tests, and track approvals in Supabase.',
+                'החלת קריטריוני קבלה, זיהוי בדיקות לא-יציבות ומיותרות ומעקב אחר אישורים ב-Supabase.',
+              )}
             </div>
           </div>
         </div>
@@ -133,31 +181,89 @@ export default function LearningObjectives() {
           >
             {t('Also in this lecture', 'גם בהרצאה זו')}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3vh', position: 'relative' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '3vh', position: 'relative' }}
+          >
+            <div
+              style={
+                {
+                  position: 'absolute',
+                  [isHe ? 'right' : 'left']: '0.5vw',
+                  top: '2vh',
+                  bottom: '2vh',
+                  width: '2px',
+                  backgroundColor: '#E2E8F0',
+                } as React.CSSProperties
+              }
+            />
             <div
               style={{
-                position: 'absolute',
-                [isHe ? 'right' : 'left']: '0.5vw',
-                top: '2vh',
-                bottom: '2vh',
-                width: '2px',
-                backgroundColor: '#E2E8F0',
-              } as React.CSSProperties}
-            />
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Write effective prompts for test generation', 'כתיבת פרומפטים אפקטיביים ליצירת בדיקות')}
+                {t(
+                  'Write effective prompts for test generation',
+                  'כתיבת פרומפטים אפקטיביים ליצירת בדיקות',
+                )}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
                 {t('Triage AI-assisted failure verdicts', 'סיווג פסקי דין של כשלונות בסיוע AI')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
                 {t('Build a ticket-to-PR generation pipeline', 'בניית צינור יצירה מכרטיס ל-PR')}
               </div>

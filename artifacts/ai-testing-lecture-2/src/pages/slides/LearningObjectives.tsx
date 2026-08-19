@@ -274,10 +274,7 @@ export default function LearningObjectives() {
                   {t('Core Techniques', 'טכניקות ליבה')}
                 </div>
                 <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                  {t(
-                    'Sampling, structure, and few-shot examples',
-                    'דגימה, מבנה ודוגמאות few-shot',
-                  )}
+                  {t('Sampling, structure, and few-shot examples', 'דגימה, מבנה ודוגמאות few-shot')}
                 </div>
               </div>
             </div>

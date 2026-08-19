@@ -27,15 +27,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function schemaIssueMessage(
-  issue: { path: string; message: string },
-  input: unknown,
-): string {
-  if (
-    issue.path === '/assets' &&
-    isRecord(input) &&
-    Array.isArray(input.assets)
-  ) {
+function schemaIssueMessage(issue: { path: string; message: string }, input: unknown): string {
+  if (issue.path === '/assets' && isRecord(input) && Array.isArray(input.assets)) {
     return isRepairableAssetArray(input.assets)
       ? 'assets must be an object keyed by asset id, not an array; run validate-slides to repair id-bearing asset entries'
       : 'assets must be an object keyed by unique asset ids, not an array; give every entry a unique non-blank string id, then convert the array to an id-keyed object manually';
@@ -55,10 +48,7 @@ function formatMessage(
   return `${filepath} [${code}]${ids}: ${message}`;
 }
 
-function collectWidgetModules(
-  elements: Array<Element>,
-  into: Map<string, string>,
-): void {
+function collectWidgetModules(elements: Array<Element>, into: Map<string, string>): void {
   for (const element of elements) {
     if (element.type === 'widget') {
       into.set(element.id, element.widget.module);
@@ -78,9 +68,7 @@ function widgetModuleMessages(
   if (modules.size === 0) {
     return [];
   }
-  const widgetFiles = new Set(
-    io.listFiles(WIDGETS_DIR).map((file) => file.replaceAll('\\', '/')),
-  );
+  const widgetFiles = new Set(io.listFiles(WIDGETS_DIR).map(file => file.replaceAll('\\', '/')));
   const messages: Array<string> = [];
   for (const [elementId, module] of modules) {
     const relative = module.replace(/^\.\/widgets\//, '');
@@ -177,10 +165,7 @@ function fontTokenMessage(
   elementIds: Array<string>,
   location: string,
 ): string | undefined {
-  if (
-    font?.kind !== 'token' ||
-    (theme !== undefined && Object.hasOwn(theme.fonts, font.token))
-  ) {
+  if (font?.kind !== 'token' || (theme !== undefined && Object.hasOwn(theme.fonts, font.token))) {
     return undefined;
   }
 
@@ -201,13 +186,7 @@ function collectPaintTokenMessages(
   messages: Array<string>,
 ): void {
   if (paint?.kind === 'solid') {
-    const message = colorTokenMessage(
-      filepath,
-      paint.color,
-      theme,
-      elementIds,
-      location,
-    );
+    const message = colorTokenMessage(filepath, paint.color, theme, elementIds, location);
     if (message) {
       messages.push(message);
     }
@@ -373,10 +352,7 @@ function collectElementTokenMessages(
   });
 }
 
-function themeTokenMessages(
-  filepath: string,
-  document: SlideDocument,
-): Array<string> {
+function themeTokenMessages(filepath: string, document: SlideDocument): Array<string> {
   const messages: Array<string> = [];
   collectPaintTokenMessages(
     filepath,
@@ -386,21 +362,12 @@ function themeTokenMessages(
     'background',
     messages,
   );
-  collectElementTokenMessages(
-    filepath,
-    document.elements,
-    document.theme,
-    'elements',
-    messages,
-  );
+  collectElementTokenMessages(filepath, document.elements, document.theme, 'elements', messages);
 
   return messages;
 }
 
-export function validateSdmEntries(
-  entries: Array<SlideEntry>,
-  io: SdmValidationIo,
-): Array<string> {
+export function validateSdmEntries(entries: Array<SlideEntry>, io: SdmValidationIo): Array<string> {
   const messages: Array<string> = [];
   for (const entry of entries) {
     if (!SDM_SLIDE_ID.test(entry.id)) {
@@ -472,14 +439,7 @@ export function validateSdmEntries(
       continue;
     }
     for (const issue of analyzeSlideLayout(result.document)) {
-      messages.push(
-        formatMessage(
-          entry.filepath,
-          issue.code,
-          issue.elementIds,
-          issue.message,
-        ),
-      );
+      messages.push(formatMessage(entry.filepath, issue.code, issue.elementIds, issue.message));
     }
     messages.push(...assetFileMessages(entry.filepath, result.document, io));
     messages.push(...themeTokenMessages(entry.filepath, result.document));
@@ -489,14 +449,9 @@ export function validateSdmEntries(
   return messages;
 }
 
-export function findOrphanSdmFiles(
-  entries: Array<SlideEntry>,
-  io: SdmValidationIo,
-): Array<string> {
+export function findOrphanSdmFiles(entries: Array<SlideEntry>, io: SdmValidationIo): Array<string> {
   const referenced = new Set(
-    entries
-      .filter((entry) => entry.kind === 'sdm')
-      .map((entry) => entry.filepath),
+    entries.filter(entry => entry.kind === 'sdm').map(entry => entry.filepath),
   );
   const messages: Array<string> = [];
   for (const file of io.listFiles(SDM_SLIDES_DIR)) {

@@ -113,7 +113,14 @@ export default function StrictContractConcept() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Optional-Looking Required Fields', 'שדות נדרשים הנראים אופציונליים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function StrictContractConcept() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Extra Keys in the Payload', 'מפתחות נוספים במטען')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function StrictContractConcept() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Type Drift Across Model Versions', 'סחיפת סוג בגרסאות מודל')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -190,16 +211,47 @@ export default function StrictContractConcept() {
               flex: 1,
             }}
           >
-            <div style={{ color: '#64748B' }}>{'{'}  <span style={{ color: '#38BDF8' }}>"type"</span>: <span style={{ color: '#FBBF24' }}>"object"</span>,</div>
-            <div style={{ color: '#64748B', paddingLeft: '1vw' }}><span style={{ color: '#38BDF8' }}>"required"</span>: [<span style={{ color: '#4ADE80' }}>"title"</span>, <span style={{ color: '#4ADE80' }}>"steps"</span>, <span style={{ color: '#4ADE80' }}>"prep_minutes"</span>],</div>
-            <div style={{ color: '#64748B', paddingLeft: '1vw' }}><span style={{ color: '#38BDF8' }}>"properties"</span>: {'{'}</div>
-            <div style={{ color: '#64748B', paddingLeft: '2vw' }}><span style={{ color: '#4ADE80' }}>"title"</span>: {'{'} <span style={{ color: '#38BDF8' }}>"type"</span>: <span style={{ color: '#FBBF24' }}>"string"</span> {'}'},</div>
-            <div style={{ color: '#64748B', paddingLeft: '2vw' }}><span style={{ color: '#4ADE80' }}>"steps"</span>: {'{'} <span style={{ color: '#38BDF8' }}>"type"</span>: <span style={{ color: '#FBBF24' }}>"array"</span>, <span style={{ color: '#38BDF8' }}>"minItems"</span>: 1 {'}'},</div>
-            <div style={{ color: '#64748B', paddingLeft: '2vw' }}><span style={{ color: '#4ADE80' }}>"prep_minutes"</span>: {'{'} <span style={{ color: '#38BDF8' }}>"type"</span>: <span style={{ color: '#FBBF24' }}>"integer"</span>, <span style={{ color: '#38BDF8' }}>"minimum"</span>: 0 {'}'}</div>
+            <div style={{ color: '#64748B' }}>
+              {'{'} <span style={{ color: '#38BDF8' }}>"type"</span>:{' '}
+              <span style={{ color: '#FBBF24' }}>"object"</span>,
+            </div>
+            <div style={{ color: '#64748B', paddingLeft: '1vw' }}>
+              <span style={{ color: '#38BDF8' }}>"required"</span>: [
+              <span style={{ color: '#4ADE80' }}>"title"</span>,{' '}
+              <span style={{ color: '#4ADE80' }}>"steps"</span>,{' '}
+              <span style={{ color: '#4ADE80' }}>"prep_minutes"</span>],
+            </div>
+            <div style={{ color: '#64748B', paddingLeft: '1vw' }}>
+              <span style={{ color: '#38BDF8' }}>"properties"</span>: {'{'}
+            </div>
+            <div style={{ color: '#64748B', paddingLeft: '2vw' }}>
+              <span style={{ color: '#4ADE80' }}>"title"</span>: {'{'}{' '}
+              <span style={{ color: '#38BDF8' }}>"type"</span>:{' '}
+              <span style={{ color: '#FBBF24' }}>"string"</span> {'}'},
+            </div>
+            <div style={{ color: '#64748B', paddingLeft: '2vw' }}>
+              <span style={{ color: '#4ADE80' }}>"steps"</span>: {'{'}{' '}
+              <span style={{ color: '#38BDF8' }}>"type"</span>:{' '}
+              <span style={{ color: '#FBBF24' }}>"array"</span>,{' '}
+              <span style={{ color: '#38BDF8' }}>"minItems"</span>: 1 {'}'},
+            </div>
+            <div style={{ color: '#64748B', paddingLeft: '2vw' }}>
+              <span style={{ color: '#4ADE80' }}>"prep_minutes"</span>: {'{'}{' '}
+              <span style={{ color: '#38BDF8' }}>"type"</span>:{' '}
+              <span style={{ color: '#FBBF24' }}>"integer"</span>,{' '}
+              <span style={{ color: '#38BDF8' }}>"minimum"</span>: 0 {'}'}
+            </div>
             <div style={{ color: '#64748B', paddingLeft: '1vw' }}>{'}'}</div>
             <div style={{ color: '#64748B' }}>{'}'}</div>
           </div>
-          <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5, textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              color: '#64748B',
+              lineHeight: 1.5,
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {t(
               'prep_minutes is in "required" — a model that omits it will fail validation immediately, before your code ever tries to read it.',
               'prep_minutes נמצא ב-"required" — מודל שמשמיט אותו ייכשל באימות מיידית, לפני שהקוד שלכם ינסה לקרוא אותו.',

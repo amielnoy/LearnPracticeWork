@@ -45,10 +45,22 @@ const codePanel: React.CSSProperties = {
   justifyContent: 'center',
 };
 
-function Row({ label, labelColor, children }: { label: string; labelColor: string; children: React.ReactNode }) {
+function Row({
+  label,
+  labelColor,
+  children,
+}: {
+  label: string;
+  labelColor: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6vh' }}>
-      <div style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}>{label}</div>
+      <div
+        style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}
+      >
+        {label}
+      </div>
       <div style={{ fontSize: '1.1vw', lineHeight: 1.55, color: '#E2E8F0' }}>{children}</div>
     </div>
   );
@@ -58,7 +70,10 @@ const ROW_COLORS = ['#38BDF8', '#FBBF24', '#94A3B8', '#2DD4BF', '#F87171'];
 
 const FALLBACK_ROWS = [
   { label: 'TABLE', value: 'generated_tests' },
-  { label: 'INSERT', value: "{ test_name, source_file, review_status: 'pending', generated_by: 'copilot' }" },
+  {
+    label: 'INSERT',
+    value: "{ test_name, source_file, review_status: 'pending', generated_by: 'copilot' }",
+  },
   { label: 'RESULT', value: 'Row inserted with id=uuid, created_at=now()' },
   { label: 'NEXT', value: "status: 'pending' → human reviewer approves or rejects" },
 ];
@@ -70,15 +85,30 @@ export default function WorkedExampleStoreGeneratedTests() {
   useEffect(() => {
     let cancelled = false;
     fetchLectureExample(11)
-      .then(data => { if (!cancelled) setExample(data); })
-      .catch(() => { if (!cancelled) setFailed(true); });
-    return () => { cancelled = true; };
+      .then(data => {
+        if (!cancelled) setExample(data);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const bullets = example?.bullets ?? [
-    t('Insert each AI-generated test into the generated_tests table with status "pending"', 'הכנס כל בדיקה שנוצרה על ידי AI לטבלת generated_tests עם סטטוס "pending"'),
-    t('Track source_file, generator tool, and timestamp for every row', 'עקוב אחר source_file, כלי הגנרטור וחותמת הזמן לכל שורה'),
-    t('Reviewers query pending rows and update status to approved or rejected', 'סוקרים מבצעים שאילתה לשורות pending ומעדכנים סטטוס ל-approved או rejected'),
+    t(
+      'Insert each AI-generated test into the generated_tests table with status "pending"',
+      'הכנס כל בדיקה שנוצרה על ידי AI לטבלת generated_tests עם סטטוס "pending"',
+    ),
+    t(
+      'Track source_file, generator tool, and timestamp for every row',
+      'עקוב אחר source_file, כלי הגנרטור וחותמת הזמן לכל שורה',
+    ),
+    t(
+      'Reviewers query pending rows and update status to approved or rejected',
+      'סוקרים מבצעים שאילתה לשורות pending ומעדכנים סטטוס ל-approved או rejected',
+    ),
   ];
 
   return (
@@ -94,21 +124,63 @@ export default function WorkedExampleStoreGeneratedTests() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '1vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {example?.eyebrow ?? t('Worked Example', 'דוגמה מעשית')}
         </div>
-        <h1 style={{ fontSize: '2.4vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-          {example?.title ?? t('Storing Generated Tests in Supabase', 'אחסון בדיקות שנוצרו ב-Supabase')}
+        <h1
+          style={{
+            fontSize: '2.4vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          {example?.title ??
+            t('Storing Generated Tests in Supabase', 'אחסון בדיקות שנוצרו ב-Supabase')}
         </h1>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh' }}>
           {bullets.map((bullet, i) => (
@@ -129,7 +201,9 @@ export default function WorkedExampleStoreGeneratedTests() {
                   <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>
                     {row.value}
                   </Row>
-                  {ri < FALLBACK_ROWS.length - 1 && <div style={{ height: '1px', background: '#1E293B' }} />}
+                  {ri < FALLBACK_ROWS.length - 1 && (
+                    <div style={{ height: '1px', background: '#1E293B' }} />
+                  )}
                 </Fragment>
               ))}
               <div style={{ height: '1px', background: '#1E293B' }} />
@@ -139,16 +213,24 @@ export default function WorkedExampleStoreGeneratedTests() {
               <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0' }}>
                 {'const { error } = await supabase'}
               </div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '2vw' }}>
-                {'.from(\'generated_tests\')'}
+              <div
+                style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '2vw' }}
+              >
+                {".from('generated_tests')"}
               </div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '2vw' }}>
+              <div
+                style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '2vw' }}
+              >
                 {'.insert({ test_name, source_file,'}
               </div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '4vw' }}>
+              <div
+                style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '4vw' }}
+              >
                 {"review_status: 'pending',"}
               </div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '4vw' }}>
+              <div
+                style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '4vw' }}
+              >
                 {"generated_by: 'copilot' });"}
               </div>
             </>
@@ -157,16 +239,30 @@ export default function WorkedExampleStoreGeneratedTests() {
               <div key={pi} style={{ display: 'flex', flexDirection: 'column', gap: '2.2vh' }}>
                 {panel.rows.map((row, ri) => (
                   <Fragment key={ri}>
-                    <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>{row.value}</Row>
+                    <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>
+                      {row.value}
+                    </Row>
                     <div style={{ height: '1px', background: '#1E293B' }} />
                   </Fragment>
                 ))}
                 {panel.verdict && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-                    <span style={{ background: '#059669', color: '#fff', borderRadius: '0.4vw', padding: '0.5vh 1vw', fontSize: '0.95vw', fontWeight: 700, letterSpacing: '0.05em' }}>
+                    <span
+                      style={{
+                        background: '#059669',
+                        color: '#fff',
+                        borderRadius: '0.4vw',
+                        padding: '0.5vh 1vw',
+                        fontSize: '0.95vw',
+                        fontWeight: 700,
+                        letterSpacing: '0.05em',
+                      }}
+                    >
                       {panel.verdict.status}
                     </span>
-                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>{panel.verdict.note}</span>
+                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>
+                      {panel.verdict.note}
+                    </span>
                   </div>
                 )}
               </div>

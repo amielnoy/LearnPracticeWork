@@ -111,7 +111,14 @@ export default function SemanticSimilarityConcept() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Step 1 — Embed', 'שלב 1 — הטמעה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -122,7 +129,14 @@ export default function SemanticSimilarityConcept() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Step 2 — Measure Cosine Distance', 'שלב 2 — מדידת מרחק קוסינוס')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -133,7 +147,14 @@ export default function SemanticSimilarityConcept() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Step 3 — Apply a Threshold', 'שלב 3 — החלת סף')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -267,7 +288,16 @@ export default function SemanticSimilarityConcept() {
               C
             </div>
             {/* Labels */}
-            <div style={{ position: 'absolute', bottom: '5%', left: isHe ? 'auto' : '5%', right: isHe ? '5%' : 'auto', fontSize: '0.8vw', color: '#64748B' }}>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '5%',
+                left: isHe ? 'auto' : '5%',
+                right: isHe ? '5%' : 'auto',
+                fontSize: '0.8vw',
+                color: '#64748B',
+              }}
+            >
               {t('A & B: similar meaning (cos ≈ 0.92)', 'A ו-B: משמעות דומה (cos ≈ 0.92)')}
             </div>
           </div>
@@ -283,7 +313,9 @@ export default function SemanticSimilarityConcept() {
                 fontWeight: 600,
               }}
             >
-              <div style={{ width: '1vw', height: '1vw', borderRadius: '50%', background: '#0D9488' }} />
+              <div
+                style={{ width: '1vw', height: '1vw', borderRadius: '50%', background: '#0D9488' }}
+              />
               {t('High similarity (PASS)', 'דמיון גבוה (עבר)')}
             </div>
             <div
@@ -296,7 +328,9 @@ export default function SemanticSimilarityConcept() {
                 fontWeight: 600,
               }}
             >
-              <div style={{ width: '1vw', height: '1vw', borderRadius: '50%', background: '#DC2626' }} />
+              <div
+                style={{ width: '1vw', height: '1vw', borderRadius: '50%', background: '#DC2626' }}
+              />
               {t('Low similarity (FAIL)', 'דמיון נמוך (נכשל)')}
             </div>
           </div>

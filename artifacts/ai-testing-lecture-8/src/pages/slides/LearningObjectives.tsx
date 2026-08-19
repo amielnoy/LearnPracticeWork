@@ -39,17 +39,41 @@ export default function LearningObjectives() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('PERFORMANCE TESTING', 'בדיקות ביצועים')}</div>
           <div>{t('LECTURE 08', 'הרצאה 08')}</div>
         </div>
       </div>
 
       {/* Left column */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
         <div
           style={{
             fontSize: '1.2vw',
@@ -73,7 +97,15 @@ export default function LearningObjectives() {
         >
           {t("What You'll Be Able To Do", 'מה תוכלו לעשות')}
         </h1>
-        <p style={{ fontSize: '1.2vw', fontWeight: 400, color: '#475569', margin: '0 0 3vh 0', lineHeight: 1.6 }}>
+        <p
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 400,
+            color: '#475569',
+            margin: '0 0 3vh 0',
+            lineHeight: 1.6,
+          }}
+        >
           {t(
             'By the end of this lecture you can measure, load-test, budget, and monitor production AI systems to catch performance regressions before they reach users.',
             'בסיום ההרצאה תוכלו למדוד, לבצע בדיקות עומס, לתקצב ולנטר מערכות AI בייצור כדי לתפוס רגרסיות ביצועים לפני שהן מגיעות למשתמשים.',
@@ -81,19 +113,39 @@ export default function LearningObjectives() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
-              {t('Benchmark latency end-to-end', 'בנצ\'מרק זמן אחזור מקצה לקצה')}
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
+              {t('Benchmark latency end-to-end', "בנצ'מרק זמן אחזור מקצה לקצה")}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Measure TTFT, p50, p95, p99 and compare across providers.', 'מדידת TTFT, p50, p95, p99 והשוואה בין ספקים.')}
+              {t(
+                'Measure TTFT, p50, p95, p99 and compare across providers.',
+                'מדידת TTFT, p50, p95, p99 והשוואה בין ספקים.',
+              )}
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Run concurrency load tests', 'הרצת בדיקות עומס מקבילות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Find the degradation point and understand queuing behavior.', 'מציאת נקודת הדגרדציה והבנת התנהגות התור.')}
+              {t(
+                'Find the degradation point and understand queuing behavior.',
+                'מציאת נקודת הדגרדציה והבנת התנהגות התור.',
+              )}
             </div>
           </div>
         </div>
@@ -129,33 +181,94 @@ export default function LearningObjectives() {
           >
             {t('Also in this lecture', 'גם בהרצאה זו')}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3vh', position: 'relative' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '3vh', position: 'relative' }}
+          >
+            <div
+              style={
+                {
+                  position: 'absolute',
+                  [isHe ? 'right' : 'left']: '0.5vw',
+                  top: '2vh',
+                  bottom: '2vh',
+                  width: '2px',
+                  backgroundColor: '#E2E8F0',
+                } as React.CSSProperties
+              }
+            />
             <div
               style={{
-                position: 'absolute',
-                [isHe ? 'right' : 'left']: '0.5vw',
-                top: '2vh',
-                bottom: '2vh',
-                width: '2px',
-                backgroundColor: '#E2E8F0',
-              } as React.CSSProperties}
-            />
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Token-cost budgeting and prompt optimization', 'תקצוב עלות טוקנים ואופטימיזציית פרומפטים')}
+                {t(
+                  'Token-cost budgeting and prompt optimization',
+                  'תקצוב עלות טוקנים ואופטימיזציית פרומפטים',
+                )}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
                 {t('Establishing baselines and regression alerts', 'קביעת בסיסים והתראות רגרסיה')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Storing perf results in Supabase for trending', 'שמירת תוצאות ביצועים ב-Supabase למגמות')}
+                {t(
+                  'Storing perf results in Supabase for trending',
+                  'שמירת תוצאות ביצועים ב-Supabase למגמות',
+                )}
               </div>
             </div>
           </div>

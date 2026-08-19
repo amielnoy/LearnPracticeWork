@@ -214,24 +214,74 @@ export default function TitleSlide() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8vh', marginTop: '2vh' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.6vw', height: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569' }}>{t('Why strategy matters', 'מדוע אסטרטגיה חשובה')}</div>
+              <div
+                style={{
+                  width: '0.6vw',
+                  height: '0.6vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569' }}>
+                {t('Why strategy matters', 'מדוע אסטרטגיה חשובה')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.6vw', height: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569' }}>{t('Strategy layers', 'שכבות האסטרטגיה')}</div>
+              <div
+                style={{
+                  width: '0.6vw',
+                  height: '0.6vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569' }}>
+                {t('Strategy layers', 'שכבות האסטרטגיה')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.6vw', height: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569' }}>{t('Metrics that matter', 'מדדים שחשובים')}</div>
+              <div
+                style={{
+                  width: '0.6vw',
+                  height: '0.6vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569' }}>
+                {t('Metrics that matter', 'מדדים שחשובים')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.6vw', height: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569' }}>{t('Reporting & improvement', 'דיווח ושיפור מתמיד')}</div>
+              <div
+                style={{
+                  width: '0.6vw',
+                  height: '0.6vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569' }}>
+                {t('Reporting & improvement', 'דיווח ושיפור מתמיד')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.6vw', height: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569' }}>{t('Team rollout & maturity', 'גלגול צוות ובגרות')}</div>
+              <div
+                style={{
+                  width: '0.6vw',
+                  height: '0.6vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569' }}>
+                {t('Team rollout & maturity', 'גלגול צוות ובגרות')}
+              </div>
             </div>
           </div>
         </div>

@@ -19,7 +19,14 @@ const wrap: React.CSSProperties = {
 };
 
 const bulletRow: React.CSSProperties = { display: 'flex', gap: '1.2vw', alignItems: 'flex-start' };
-const dot: React.CSSProperties = { width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', marginTop: '0.7vw' };
+const dot: React.CSSProperties = {
+  width: '0.6vw',
+  height: '0.6vw',
+  minWidth: '0.6vw',
+  borderRadius: '50%',
+  backgroundColor: '#0D9488',
+  marginTop: '0.7vw',
+};
 
 const codePanel: React.CSSProperties = {
   background: '#0F172A',
@@ -38,10 +45,22 @@ const codePanel: React.CSSProperties = {
   justifyContent: 'center',
 };
 
-function Row({ label, labelColor, children }: { label: string; labelColor: string; children: React.ReactNode }) {
+function Row({
+  label,
+  labelColor,
+  children,
+}: {
+  label: string;
+  labelColor: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6vh' }}>
-      <div style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}>{label}</div>
+      <div
+        style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}
+      >
+        {label}
+      </div>
       <div style={{ fontSize: '1.1vw', lineHeight: 1.55, color: '#E2E8F0' }}>{children}</div>
     </div>
   );
@@ -51,9 +70,13 @@ const ROW_COLORS = ['#38BDF8', '#FBBF24', '#94A3B8', '#2DD4BF', '#F87171'];
 
 const FALLBACK_ROWS = [
   { label: 'TABLE', value: 'strategy_metrics' },
-  { label: 'INSERT', value: "{ sprint_week, generated_count: 47, approved_count: 36, flaky_count: 4, real_bugs_found: 3 }" },
-  { label: 'DERIVED', value: "approval_rate: 76.6%, flaky_rate: 8.5%, bug_discovery_rate: 6.4%" },
-  { label: 'ACTION', value: "flaky_rate > 10% triggers prompt-quality review with team lead" },
+  {
+    label: 'INSERT',
+    value:
+      '{ sprint_week, generated_count: 47, approved_count: 36, flaky_count: 4, real_bugs_found: 3 }',
+  },
+  { label: 'DERIVED', value: 'approval_rate: 76.6%, flaky_rate: 8.5%, bug_discovery_rate: 6.4%' },
+  { label: 'ACTION', value: 'flaky_rate > 10% triggers prompt-quality review with team lead' },
 ];
 
 export default function WorkedExampleStrategyMetrics() {
@@ -63,15 +86,30 @@ export default function WorkedExampleStrategyMetrics() {
   useEffect(() => {
     let cancelled = false;
     fetchLectureExample(33)
-      .then(data => { if (!cancelled) setExample(data); })
-      .catch(() => { if (!cancelled) setFailed(true); });
-    return () => { cancelled = true; };
+      .then(data => {
+        if (!cancelled) setExample(data);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const bullets = example?.bullets ?? [
-    t('Roll up key pipeline metrics per sprint into strategy_metrics for executive reporting', 'צבור מדדי צינור מפתח לכל ספרינט ב-strategy_metrics לדיווח מנהלים'),
-    t('Track generated_count, approved_count, flaky_count, and real_bugs_found', 'עקוב אחר generated_count, approved_count, flaky_count, ו-real_bugs_found'),
-    t('Derived rates (approval, flaky, bug discovery) become pipeline health KPIs', 'שיעורים נגזרים (אישור, חוסר יציבות, גילוי באגים) הופכים ל-KPI של בריאות הצינור'),
+    t(
+      'Roll up key pipeline metrics per sprint into strategy_metrics for executive reporting',
+      'צבור מדדי צינור מפתח לכל ספרינט ב-strategy_metrics לדיווח מנהלים',
+    ),
+    t(
+      'Track generated_count, approved_count, flaky_count, and real_bugs_found',
+      'עקוב אחר generated_count, approved_count, flaky_count, ו-real_bugs_found',
+    ),
+    t(
+      'Derived rates (approval, flaky, bug discovery) become pipeline health KPIs',
+      'שיעורים נגזרים (אישור, חוסר יציבות, גילוי באגים) הופכים ל-KPI של בריאות הצינור',
+    ),
   ];
 
   return (
@@ -87,21 +125,63 @@ export default function WorkedExampleStrategyMetrics() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '1vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {example?.eyebrow ?? t('Worked Example', 'דוגמה מעשית')}
         </div>
-        <h1 style={{ fontSize: '2.4vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-          {example?.title ?? t('Strategy Metrics Dashboard in Supabase', 'לוח מדדי אסטרטגיה ב-Supabase')}
+        <h1
+          style={{
+            fontSize: '2.4vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          {example?.title ??
+            t('Strategy Metrics Dashboard in Supabase', 'לוח מדדי אסטרטגיה ב-Supabase')}
         </h1>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh' }}>
           {bullets.map((bullet, i) => (
@@ -119,29 +199,61 @@ export default function WorkedExampleStrategyMetrics() {
             <>
               {FALLBACK_ROWS.map((row, ri) => (
                 <Fragment key={ri}>
-                  <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>{row.value}</Row>
-                  {ri < FALLBACK_ROWS.length - 1 && <div style={{ height: '1px', background: '#1E293B' }} />}
+                  <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>
+                    {row.value}
+                  </Row>
+                  {ri < FALLBACK_ROWS.length - 1 && (
+                    <div style={{ height: '1px', background: '#1E293B' }} />
+                  )}
                 </Fragment>
               ))}
               <div style={{ height: '1px', background: '#1E293B' }} />
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#7DD3FC' }}>{'// Upsert sprint strategy metrics'}</div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0' }}>{"await supabase.from('strategy_metrics')"}</div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '2vw' }}>  {'.upsert({ sprint_week, generated_count,'}</div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '4vw' }}>{'approved_count, flaky_count, real_bugs_found });'}</div>
+              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#7DD3FC' }}>
+                {'// Upsert sprint strategy metrics'}
+              </div>
+              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0' }}>
+                {"await supabase.from('strategy_metrics')"}
+              </div>
+              <div
+                style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '2vw' }}
+              >
+                {' '}
+                {'.upsert({ sprint_week, generated_count,'}
+              </div>
+              <div
+                style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '4vw' }}
+              >
+                {'approved_count, flaky_count, real_bugs_found });'}
+              </div>
             </>
           ) : (
             example.panels.map((panel, pi) => (
               <div key={pi} style={{ display: 'flex', flexDirection: 'column', gap: '2.2vh' }}>
                 {panel.rows.map((row, ri) => (
                   <Fragment key={ri}>
-                    <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>{row.value}</Row>
+                    <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>
+                      {row.value}
+                    </Row>
                     <div style={{ height: '1px', background: '#1E293B' }} />
                   </Fragment>
                 ))}
                 {panel.verdict && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-                    <span style={{ background: '#059669', color: '#fff', borderRadius: '0.4vw', padding: '0.5vh 1vw', fontSize: '0.95vw', fontWeight: 700 }}>{panel.verdict.status}</span>
-                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>{panel.verdict.note}</span>
+                    <span
+                      style={{
+                        background: '#059669',
+                        color: '#fff',
+                        borderRadius: '0.4vw',
+                        padding: '0.5vh 1vw',
+                        fontSize: '0.95vw',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {panel.verdict.status}
+                    </span>
+                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>
+                      {panel.verdict.note}
+                    </span>
                   </div>
                 )}
               </div>

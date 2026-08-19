@@ -32,14 +32,25 @@ export default function QuarantineVsDelete() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -93,7 +104,9 @@ export default function QuarantineVsDelete() {
             boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
           }}
         >
-          <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+          <div
+            style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}
+          >
             {t('The quarantine rule', 'כלל הבידוד')}
           </div>
           <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -144,7 +157,14 @@ export default function QuarantineVsDelete() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Delete', 'מחיקה')}
             </div>
             <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -163,7 +183,14 @@ export default function QuarantineVsDelete() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Ignore failures', 'התעלמות מכשלים')}
             </div>
             <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -182,7 +209,14 @@ export default function QuarantineVsDelete() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#0D9488', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Quarantine', 'בידוד')}
             </div>
             <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>

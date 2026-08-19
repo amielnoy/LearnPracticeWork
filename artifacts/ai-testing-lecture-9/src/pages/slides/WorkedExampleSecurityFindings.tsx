@@ -19,7 +19,14 @@ const wrap: React.CSSProperties = {
 };
 
 const bulletRow: React.CSSProperties = { display: 'flex', gap: '1.2vw', alignItems: 'flex-start' };
-const dot: React.CSSProperties = { width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', marginTop: '0.7vw' };
+const dot: React.CSSProperties = {
+  width: '0.6vw',
+  height: '0.6vw',
+  minWidth: '0.6vw',
+  borderRadius: '50%',
+  backgroundColor: '#0D9488',
+  marginTop: '0.7vw',
+};
 
 const codePanel: React.CSSProperties = {
   background: '#0F172A',
@@ -38,10 +45,22 @@ const codePanel: React.CSSProperties = {
   justifyContent: 'center',
 };
 
-function Row({ label, labelColor, children }: { label: string; labelColor: string; children: React.ReactNode }) {
+function Row({
+  label,
+  labelColor,
+  children,
+}: {
+  label: string;
+  labelColor: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6vh' }}>
-      <div style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}>{label}</div>
+      <div
+        style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}
+      >
+        {label}
+      </div>
       <div style={{ fontSize: '1.1vw', lineHeight: 1.55, color: '#E2E8F0' }}>{children}</div>
     </div>
   );
@@ -51,9 +70,16 @@ const ROW_COLORS = ['#38BDF8', '#FBBF24', '#94A3B8', '#2DD4BF', '#F87171'];
 
 const FALLBACK_ROWS = [
   { label: 'TABLE', value: 'security_findings' },
-  { label: 'INSERT', value: "{ test_id, finding_type: 'injection', severity: 'high', source_file: 'auth.ts' }" },
+  {
+    label: 'INSERT',
+    value: "{ test_id, finding_type: 'injection', severity: 'high', source_file: 'auth.ts' }",
+  },
   { label: 'RESULT', value: 'finding_id=uuid, detected_at=now()' },
-  { label: 'QUERY', value: "SELECT finding_type, COUNT(*) FROM security_findings WHERE severity='high' GROUP BY finding_type" },
+  {
+    label: 'QUERY',
+    value:
+      "SELECT finding_type, COUNT(*) FROM security_findings WHERE severity='high' GROUP BY finding_type",
+  },
 ];
 
 export default function WorkedExampleSecurityFindings() {
@@ -63,15 +89,30 @@ export default function WorkedExampleSecurityFindings() {
   useEffect(() => {
     let cancelled = false;
     fetchLectureExample(31)
-      .then(data => { if (!cancelled) setExample(data); })
-      .catch(() => { if (!cancelled) setFailed(true); });
-    return () => { cancelled = true; };
+      .then(data => {
+        if (!cancelled) setExample(data);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const bullets = example?.bullets ?? [
-    t('When AI-generated security tests detect vulnerabilities, log findings to security_findings table', 'כאשר בדיקות אבטחה שנוצרו על ידי AI מגלות פרצות, רשום ממצאים לטבלת security_findings'),
-    t('Store severity, finding_type, and source_file for prioritization dashboards', 'אחסן severity, finding_type ו-source_file ללוחות מחוונים של תעדוף'),
-    t('Join with generated_tests to trace which AI tool surfaced each finding', 'קשר עם generated_tests לעקוב אחר איזה כלי AI גילה כל ממצא'),
+    t(
+      'When AI-generated security tests detect vulnerabilities, log findings to security_findings table',
+      'כאשר בדיקות אבטחה שנוצרו על ידי AI מגלות פרצות, רשום ממצאים לטבלת security_findings',
+    ),
+    t(
+      'Store severity, finding_type, and source_file for prioritization dashboards',
+      'אחסן severity, finding_type ו-source_file ללוחות מחוונים של תעדוף',
+    ),
+    t(
+      'Join with generated_tests to trace which AI tool surfaced each finding',
+      'קשר עם generated_tests לעקוב אחר איזה כלי AI גילה כל ממצא',
+    ),
   ];
 
   return (
@@ -87,21 +128,63 @@ export default function WorkedExampleSecurityFindings() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '1vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {example?.eyebrow ?? t('Worked Example', 'דוגמה מעשית')}
         </div>
-        <h1 style={{ fontSize: '2.4vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-          {example?.title ?? t('Storing Security Findings in Supabase', 'אחסון ממצאי אבטחה ב-Supabase')}
+        <h1
+          style={{
+            fontSize: '2.4vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          {example?.title ??
+            t('Storing Security Findings in Supabase', 'אחסון ממצאי אבטחה ב-Supabase')}
         </h1>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh' }}>
           {bullets.map((bullet, i) => (
@@ -119,29 +202,61 @@ export default function WorkedExampleSecurityFindings() {
             <>
               {FALLBACK_ROWS.map((row, ri) => (
                 <Fragment key={ri}>
-                  <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>{row.value}</Row>
-                  {ri < FALLBACK_ROWS.length - 1 && <div style={{ height: '1px', background: '#1E293B' }} />}
+                  <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>
+                    {row.value}
+                  </Row>
+                  {ri < FALLBACK_ROWS.length - 1 && (
+                    <div style={{ height: '1px', background: '#1E293B' }} />
+                  )}
                 </Fragment>
               ))}
               <div style={{ height: '1px', background: '#1E293B' }} />
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#7DD3FC' }}>{'// Log security finding to Supabase'}</div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0' }}>{"await supabase.from('security_findings')"}</div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '2vw' }}>  {'.insert({ test_id, finding_type,'}</div>
-              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '4vw' }}>{'severity, source_file });'}</div>
+              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#7DD3FC' }}>
+                {'// Log security finding to Supabase'}
+              </div>
+              <div style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0' }}>
+                {"await supabase.from('security_findings')"}
+              </div>
+              <div
+                style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '2vw' }}
+              >
+                {' '}
+                {'.insert({ test_id, finding_type,'}
+              </div>
+              <div
+                style={{ fontSize: '1vw', lineHeight: 1.7, color: '#E2E8F0', paddingLeft: '4vw' }}
+              >
+                {'severity, source_file });'}
+              </div>
             </>
           ) : (
             example.panels.map((panel, pi) => (
               <div key={pi} style={{ display: 'flex', flexDirection: 'column', gap: '2.2vh' }}>
                 {panel.rows.map((row, ri) => (
                   <Fragment key={ri}>
-                    <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>{row.value}</Row>
+                    <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>
+                      {row.value}
+                    </Row>
                     <div style={{ height: '1px', background: '#1E293B' }} />
                   </Fragment>
                 ))}
                 {panel.verdict && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-                    <span style={{ background: '#059669', color: '#fff', borderRadius: '0.4vw', padding: '0.5vh 1vw', fontSize: '0.95vw', fontWeight: 700 }}>{panel.verdict.status}</span>
-                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>{panel.verdict.note}</span>
+                    <span
+                      style={{
+                        background: '#059669',
+                        color: '#fff',
+                        borderRadius: '0.4vw',
+                        padding: '0.5vh 1vw',
+                        fontSize: '0.95vw',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {panel.verdict.status}
+                    </span>
+                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>
+                      {panel.verdict.note}
+                    </span>
                   </div>
                 )}
               </div>

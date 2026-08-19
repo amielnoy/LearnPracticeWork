@@ -90,9 +90,17 @@ export default function WhenSimilarityIsNotEnough() {
         >
           {t('Similarity Scores Meaning — Not Truth', 'ציון הדמיון מודד משמעות — לא אמת')}
         </h1>
-        <p style={{ fontSize: '1.4vw', color: '#475569', margin: 0, lineHeight: 1.6, maxWidth: '60vw' }}>
+        <p
+          style={{
+            fontSize: '1.4vw',
+            color: '#475569',
+            margin: 0,
+            lineHeight: 1.6,
+            maxWidth: '60vw',
+          }}
+        >
           {t(
-            'Semantic similarity tells you whether the model\'s phrasing is close to a reference. It cannot tell you whether the facts inside that phrasing are correct.',
+            "Semantic similarity tells you whether the model's phrasing is close to a reference. It cannot tell you whether the facts inside that phrasing are correct.",
             'דמיון סמנטי אומר לך אם הניסוח של המודל קרוב לייחוס. הוא אינו יכול לומר לך אם העובדות בתוך הניסוח הן נכונות.',
           )}
         </p>
@@ -108,16 +116,25 @@ export default function WhenSimilarityIsNotEnough() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Reference', 'ייחוס')}
             </div>
-            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5, fontStyle: 'italic' }}>
-              {t(
-                '"The treaty was signed in 1648."',
-                '"האמנה נחתמה בשנת 1648."',
-              )}
+            <div
+              style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5, fontStyle: 'italic' }}
+            >
+              {t('"The treaty was signed in 1648."', '"האמנה נחתמה בשנת 1648."')}
             </div>
-            <div style={{ marginTop: '1.5vh', fontSize: '0.9vw', color: '#0D9488', fontWeight: 600 }}>
+            <div
+              style={{ marginTop: '1.5vh', fontSize: '0.9vw', color: '#0D9488', fontWeight: 600 }}
+            >
               {t('✔ Factually correct', '✔ נכון עובדתית')}
             </div>
           </div>
@@ -131,16 +148,25 @@ export default function WhenSimilarityIsNotEnough() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#DC2626', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Model Output', 'פלט המודל')}
             </div>
-            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5, fontStyle: 'italic' }}>
-              {t(
-                '"The treaty was signed in 1652."',
-                '"האמנה נחתמה בשנת 1652."',
-              )}
+            <div
+              style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5, fontStyle: 'italic' }}
+            >
+              {t('"The treaty was signed in 1652."', '"האמנה נחתמה בשנת 1652."')}
             </div>
-            <div style={{ marginTop: '1.5vh', display: 'flex', flexDirection: 'column', gap: '0.5vh' }}>
+            <div
+              style={{ marginTop: '1.5vh', display: 'flex', flexDirection: 'column', gap: '0.5vh' }}
+            >
               <div style={{ fontSize: '0.9vw', color: '#0D9488', fontWeight: 600 }}>
                 {t('✔ Similarity score: 0.97 (PASS)', '✔ ציון דמיון: 0.97 (עבר)')}
               </div>

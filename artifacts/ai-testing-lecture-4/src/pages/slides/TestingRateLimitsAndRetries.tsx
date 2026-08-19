@@ -115,11 +115,18 @@ export default function TestingRateLimitsAndRetries() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Simulate 429 Too Many Requests', 'סימולציית 429 יותר מדי בקשות')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '0.8vh' }}>
+            <div
+              style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '0.8vh' }}
+            >
               {t(
                 'Route the AI endpoint to return a 429. Assert the UI shows a "rate limited" or "try again" message, and that the input field remains accessible.',
                 'נתבו את ה-endpoint של ה-AI להחזיר 429. אמתו שה-UI מציג הודעת "הגבלת קצב" או "נסו שוב", ושדה הקלט נשאר נגיש.',
@@ -140,11 +147,18 @@ export default function TestingRateLimitsAndRetries() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Simulate 5xx Server Error', 'סימולציית שגיאת שרת 5xx')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '0.8vh' }}>
+            <div
+              style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '0.8vh' }}
+            >
               {t(
                 'Return a 500 or 503 and verify the UI shows a user-friendly error state — not a blank screen or unhandled exception banner.',
                 'החזירו 500 או 503 ואמתו שה-UI מציג מצב שגיאה ידידותי למשתמש — לא מסך ריק או באנר חריגה לא מטופלת.',
@@ -165,7 +179,12 @@ export default function TestingRateLimitsAndRetries() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Verify Retry / Backoff UI', 'אימות UI של ניסיון חוזר / backoff')}
             </div>
@@ -227,9 +246,18 @@ export default function TestingRateLimitsAndRetries() {
             {[
               t('Error message is visible and meaningful', 'הודעת שגיאה גלויה ומשמעותית'),
               t('Input field stays enabled for retry', 'שדה הקלט נשאר מופעל לניסיון חוזר'),
-              t('No unhandled exception banners or blank screens', 'אין באנרי חריגות לא מטופלות או מסכים ריקים'),
-              t('Retry indicator shown when app retries automatically', 'מחוון ניסיון חוזר מוצג כשהאפליקציה מנסה שוב אוטומטית'),
-              t('UI recovers cleanly after error resolves', 'ה-UI מתאושש בצורה נקייה לאחר פתרון השגיאה'),
+              t(
+                'No unhandled exception banners or blank screens',
+                'אין באנרי חריגות לא מטופלות או מסכים ריקים',
+              ),
+              t(
+                'Retry indicator shown when app retries automatically',
+                'מחוון ניסיון חוזר מוצג כשהאפליקציה מנסה שוב אוטומטית',
+              ),
+              t(
+                'UI recovers cleanly after error resolves',
+                'ה-UI מתאושש בצורה נקייה לאחר פתרון השגיאה',
+              ),
             ].map((item, i) => (
               <div
                 key={i}

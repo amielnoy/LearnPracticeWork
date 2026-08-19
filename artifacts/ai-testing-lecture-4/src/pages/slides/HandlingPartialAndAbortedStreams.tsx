@@ -116,7 +116,12 @@ export default function HandlingPartialAndAbortedStreams() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('User-Cancelled Generation', 'ביטול יצירה על ידי משתמש')}
             </div>
@@ -129,7 +134,12 @@ export default function HandlingPartialAndAbortedStreams() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Network Drop Mid-Stream', 'נפילת רשת באמצע סטרים')}
             </div>
@@ -142,7 +152,12 @@ export default function HandlingPartialAndAbortedStreams() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Re-generation After Cancel', 'יצירה מחדש לאחר ביטול')}
             </div>
@@ -204,7 +219,10 @@ export default function HandlingPartialAndAbortedStreams() {
             {[
               t('Typing indicator gone after cancel/abort', 'מחוון הקלדה נעלם לאחר ביטול/קטיעה'),
               t('Partial content visible, not blank', 'תוכן חלקי גלוי, לא ריק'),
-              t('Error or recovery message shown on network drop', 'הודעת שגיאה או התאוששות מוצגת בנפילת רשת'),
+              t(
+                'Error or recovery message shown on network drop',
+                'הודעת שגיאה או התאוששות מוצגת בנפילת רשת',
+              ),
               t('Input re-enabled — no frozen UI', 'הקלט מופעל מחדש — ללא UI קפוא'),
               t('Subsequent request succeeds normally', 'בקשה הבאה מצליחה כרגיל'),
             ].map((item, i) => (

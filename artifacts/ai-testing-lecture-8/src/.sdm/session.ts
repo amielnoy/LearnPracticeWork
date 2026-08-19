@@ -7,15 +7,9 @@ import {
   type SdmTextSelectionFormatting,
 } from './core/protocol';
 import type { SlideDocument } from './core/schema';
-import {
-  clearActiveEditingSlide,
-  setActiveEditingSlide,
-} from './editingState';
+import { clearActiveEditingSlide, setActiveEditingSlide } from './editingState';
 
-const RUNTIME_CAPABILITIES: Array<string> = [
-  'edit',
-  'textCaret',
-];
+const RUNTIME_CAPABILITIES: Array<string> = ['edit', 'textCaret'];
 
 const TRUSTED_WORKSPACE_ORIGINS = new Set([
   'https://replit.com',
@@ -31,13 +25,7 @@ interface SessionTarget {
 
 type ForwardedKeyEvent = Pick<
   KeyboardEvent,
-  | 'altKey'
-  | 'code'
-  | 'ctrlKey'
-  | 'key'
-  | 'metaKey'
-  | 'repeat'
-  | 'shiftKey'
+  'altKey' | 'code' | 'ctrlKey' | 'key' | 'metaKey' | 'repeat' | 'shiftKey'
 >;
 
 function isTrustedWorkspaceOrigin(origin: string): boolean {
@@ -49,8 +37,7 @@ function isTrustedWorkspaceOrigin(origin: string): boolean {
     const { hostname, protocol } = new URL(origin);
 
     return (
-      (protocol === 'http:' &&
-        (hostname === 'localhost' || hostname === '127.0.0.1')) ||
+      (protocol === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1')) ||
       (protocol === 'https:' &&
         hostname.startsWith('web--') &&
         hostname.endsWith('.z.zergrush.dev'))
@@ -102,10 +89,7 @@ export function useSdmRuntimeSession({
   select: (ids: Array<string>) => void;
   activateTextCaret: (elementId: string) => boolean;
   exitTextCaret: () => void;
-  reportTextSelection: (
-    elementId: string,
-    formatting: SdmTextSelectionFormatting | null,
-  ) => void;
+  reportTextSelection: (elementId: string, formatting: SdmTextSelectionFormatting | null) => void;
   commit: (
     document: SlideDocument,
     selectedIds: Array<string>,
@@ -116,9 +100,7 @@ export function useSdmRuntimeSession({
 } {
   const [editing, setEditing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Array<string>>([]);
-  const [textCaretElementId, setTextCaretElementId] = useState<string | null>(
-    null,
-  );
+  const [textCaretElementId, setTextCaretElementId] = useState<string | null>(null);
   const documentRef = useRef(document);
   documentRef.current = document;
   const onBeforeTextCaretExitRef = useRef(onBeforeTextCaretExit);
@@ -252,12 +234,11 @@ export function useSdmRuntimeSession({
           return;
         }
         const element = documentRef.current?.elements.find(
-          (candidate) => candidate.id === message.elementId,
+          candidate => candidate.id === message.elementId,
         );
         if (
           element === undefined ||
-          (element.type !== 'text' &&
-            (element.type !== 'shape' || element.body === undefined)) ||
+          (element.type !== 'text' && (element.type !== 'shape' || element.body === undefined)) ||
           element.locked
         ) {
           return;
@@ -271,9 +252,7 @@ export function useSdmRuntimeSession({
         if (!authorityReadyRef.current) {
           return;
         }
-        const handled =
-          onTextCommandRef.current?.(message.elementId, message.command) ??
-          false;
+        const handled = onTextCommandRef.current?.(message.elementId, message.command) ?? false;
         if (!handled) {
           // Failsafe: tell the workspace this caret is gone so its
           // formatting controls fall back to whole-element updates.
@@ -330,15 +309,12 @@ export function useSdmRuntimeSession({
   const activateTextCaret = useCallback(
     (elementId: string): boolean => {
       const session = sessionRef.current;
-      const element = documentRef.current?.elements.find(
-        (candidate) => candidate.id === elementId,
-      );
+      const element = documentRef.current?.elements.find(candidate => candidate.id === elementId);
       if (
         session === null ||
         !authorityReadyRef.current ||
         element === undefined ||
-        (element.type !== 'text' &&
-          (element.type !== 'shape' || element.body === undefined)) ||
+        (element.type !== 'text' && (element.type !== 'shape' || element.body === undefined)) ||
         element.locked
       ) {
         return false;
@@ -364,10 +340,7 @@ export function useSdmRuntimeSession({
   }, []);
 
   const reportTextSelection = useCallback(
-    (
-      elementId: string,
-      formatting: SdmTextSelectionFormatting | null,
-    ): void => {
+    (elementId: string, formatting: SdmTextSelectionFormatting | null): void => {
       const session = sessionRef.current;
       if (session === null || !authorityReadyRef.current) {
         return;
@@ -386,11 +359,7 @@ export function useSdmRuntimeSession({
   );
 
   const commit = useCallback(
-    (
-      nextDocument: SlideDocument,
-      ids: Array<string>,
-      options?: { keepTextCaret?: boolean },
-    ) => {
+    (nextDocument: SlideDocument, ids: Array<string>, options?: { keepTextCaret?: boolean }) => {
       const session = sessionRef.current;
       if (session === null || !authorityReadyRef.current) {
         return;
@@ -421,11 +390,7 @@ export function useSdmRuntimeSession({
   const requestHistory = useCallback(
     (direction: 'undo' | 'redo') => {
       const session = sessionRef.current;
-      if (
-        session === null ||
-        !authorityReadyRef.current ||
-        !historyReadyRef.current
-      ) {
+      if (session === null || !authorityReadyRef.current || !historyReadyRef.current) {
         return;
       }
       authorityReadyRef.current = false;

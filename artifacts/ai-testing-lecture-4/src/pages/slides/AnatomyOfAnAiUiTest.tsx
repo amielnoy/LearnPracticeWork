@@ -140,7 +140,10 @@ export default function AnatomyOfAnAiUiTest() {
                 marginBottom: '0.5vh',
               }}
             >
-              {t('Layer 2 — The Streaming / Incremental Render', 'שכבה 2 — הרינדור ההדרגתי / הסטרימינג')}
+              {t(
+                'Layer 2 — The Streaming / Incremental Render',
+                'שכבה 2 — הרינדור ההדרגתי / הסטרימינג',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -231,7 +234,10 @@ export default function AnatomyOfAnAiUiTest() {
               {t('Layer 2: Streaming Render', 'שכבה 2: רינדור סטרימינג')}
             </div>
             <div style={{ fontSize: '0.9vw', color: 'rgba(255,255,255,0.85)', marginTop: '0.5vh' }}>
-              {t('loading indicator · partial content · completion signal', 'מחוון טעינה · תוכן חלקי · אות השלמה')}
+              {t(
+                'loading indicator · partial content · completion signal',
+                'מחוון טעינה · תוכן חלקי · אות השלמה',
+              )}
             </div>
           </div>
 

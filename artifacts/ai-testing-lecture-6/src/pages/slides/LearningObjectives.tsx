@@ -94,7 +94,7 @@ export default function LearningObjectives() {
             letterSpacing: '-0.02em',
           }}
         >
-          {t("What You\u2019ll Be Able To Do", 'מה תוכלו לעשות')}
+          {t('What You\u2019ll Be Able To Do', 'מה תוכלו לעשות')}
         </h1>
         <p
           style={{
@@ -124,7 +124,7 @@ export default function LearningObjectives() {
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
-                "Keep cost and runtime under control without sacrificing coverage.",
+                'Keep cost and runtime under control without sacrificing coverage.',
                 'שמירה על עלות וזמן ריצה תחת שליטה מבלי לוותר על כיסוי.',
               )}
             </div>
@@ -238,7 +238,10 @@ export default function LearningObjectives() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Decide what runs on every PR versus nightly', 'החלטה מה מופעל בכל PR לעומת לילי')}
+                {t(
+                  'Decide what runs on every PR versus nightly',
+                  'החלטה מה מופעל בכל PR לעומת לילי',
+                )}
               </div>
             </div>
             <div
@@ -261,7 +264,10 @@ export default function LearningObjectives() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Track cost and latency per pipeline run', 'מעקב אחר עלות וזמן אחזור לכל ריצת צינור')}
+                {t(
+                  'Track cost and latency per pipeline run',
+                  'מעקב אחר עלות וזמן אחזור לכל ריצת צינור',
+                )}
               </div>
             </div>
           </div>

@@ -113,7 +113,14 @@ export default function HallucinatedFields() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('URL Validation', 'אימות URL')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function HallucinatedFields() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('ID and Reference Cross-Checks', 'בדיקות הצלבה של ID והפניות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function HallucinatedFields() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Sample-Based Spot Checks', 'בדיקות מדגם מבוססות-מדגם')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -191,15 +212,30 @@ export default function HallucinatedFields() {
             }}
           >
             <div style={{ color: '#64748B' }}># model returned a category ID</div>
-            <div style={{ color: '#38BDF8' }}>category_id = response[<span style={{ color: '#4ADE80' }}>"category_id"</span>]</div>
+            <div style={{ color: '#38BDF8' }}>
+              category_id = response[<span style={{ color: '#4ADE80' }}>"category_id"</span>]
+            </div>
             <div style={{ color: '#64748B', marginTop: '0.5vh' }}># assert it really exists</div>
             <div style={{ color: '#FBBF24' }}>exists = db.categories.find_by_id(category_id)</div>
-            <div style={{ color: '#FBBF24' }}>assert exists <span style={{ color: '#F87171' }}>is not None</span>, \</div>
-            <div style={{ color: '#4ADE80' }}>&nbsp;&nbsp;f"Hallucinated category: {'{'}category_id{'}'}"</div>
-            <div style={{ color: '#64748B', marginTop: '0.5vh' }}># also check the URL if present</div>
-            <div style={{ color: '#FBBF24' }}>if <span style={{ color: '#38BDF8' }}>"docs_url"</span> in response:</div>
-            <div style={{ color: '#FBBF24' }}>&nbsp;&nbsp;r = requests.head(response[<span style={{ color: '#38BDF8' }}>"docs_url"</span>])</div>
-            <div style={{ color: '#FBBF24' }}>&nbsp;&nbsp;assert r.status_code == <span style={{ color: '#F87171' }}>200</span></div>
+            <div style={{ color: '#FBBF24' }}>
+              assert exists <span style={{ color: '#F87171' }}>is not None</span>, \
+            </div>
+            <div style={{ color: '#4ADE80' }}>
+              &nbsp;&nbsp;f"Hallucinated category: {'{'}category_id{'}'}"
+            </div>
+            <div style={{ color: '#64748B', marginTop: '0.5vh' }}>
+              # also check the URL if present
+            </div>
+            <div style={{ color: '#FBBF24' }}>
+              if <span style={{ color: '#38BDF8' }}>"docs_url"</span> in response:
+            </div>
+            <div style={{ color: '#FBBF24' }}>
+              &nbsp;&nbsp;r = requests.head(response[
+              <span style={{ color: '#38BDF8' }}>"docs_url"</span>])
+            </div>
+            <div style={{ color: '#FBBF24' }}>
+              &nbsp;&nbsp;assert r.status_code == <span style={{ color: '#F87171' }}>200</span>
+            </div>
           </div>
         </div>
       </div>

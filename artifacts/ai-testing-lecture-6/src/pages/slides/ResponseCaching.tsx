@@ -39,14 +39,25 @@ export default function ResponseCaching() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -93,7 +104,14 @@ export default function ResponseCaching() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Cache key = hash of prompt + fixture', 'מפתח מטמון = hash של prompt + קובע')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -104,7 +122,14 @@ export default function ResponseCaching() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Invalidate on prompt change', 'ביטול תוקף בשינוי prompt')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -115,8 +140,18 @@ export default function ResponseCaching() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
-              {t('Store cache in CI artifact or object storage', 'אחסון מטמון ב-CI artifact או אחסון אובייקטים')}
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
+              {t(
+                'Store cache in CI artifact or object storage',
+                'אחסון מטמון ב-CI artifact או אחסון אובייקטים',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -169,21 +204,44 @@ export default function ResponseCaching() {
             }}
           >
             <div style={{ color: '#94A3B8' }}>def call_model(prompt, fixture):</div>
-            <div style={{ color: '#E2E8F0', paddingLeft: '1.5vw' }}>key = hash(prompt + fixture)</div>
+            <div style={{ color: '#E2E8F0', paddingLeft: '1.5vw' }}>
+              key = hash(prompt + fixture)
+            </div>
             <div style={{ color: '#38BDF8', paddingLeft: '1.5vw' }}>if cache.exists(key):</div>
-            <div style={{ color: '#0D9488', paddingLeft: '3vw' }}>return cache.get(key)  # replay</div>
-            <div style={{ color: '#FBBF24', paddingLeft: '1.5vw' }}>response = api.call(prompt)</div>
+            <div style={{ color: '#0D9488', paddingLeft: '3vw' }}>
+              return cache.get(key) # replay
+            </div>
+            <div style={{ color: '#FBBF24', paddingLeft: '1.5vw' }}>
+              response = api.call(prompt)
+            </div>
             <div style={{ color: '#2DD4BF', paddingLeft: '1.5vw' }}>cache.set(key, response)</div>
             <div style={{ color: '#E2E8F0', paddingLeft: '1.5vw' }}>return response</div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1vh', textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1vh',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#64748B' }}>
               <span style={{ color: '#0D9488', fontWeight: 700 }}>&#x2192;</span>
-              <span>{t('Cache hit: zero API cost, near-instant', 'פגיעה במטמון: אפס עלות API, כמעט מיידי')}</span>
+              <span>
+                {t(
+                  'Cache hit: zero API cost, near-instant',
+                  'פגיעה במטמון: אפס עלות API, כמעט מיידי',
+                )}
+              </span>
             </div>
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#64748B' }}>
               <span style={{ color: '#D97706', fontWeight: 700 }}>&#x2192;</span>
-              <span>{t('Cache miss: live call, response recorded', 'החטאת מטמון: קריאה חיה, תגובה מוקלטת')}</span>
+              <span>
+                {t(
+                  'Cache miss: live call, response recorded',
+                  'החטאת מטמון: קריאה חיה, תגובה מוקלטת',
+                )}
+              </span>
             </div>
           </div>
         </div>

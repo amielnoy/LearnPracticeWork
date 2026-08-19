@@ -55,7 +55,7 @@ export default function ToolsAndLibrariesRecap() {
         {
           cat: t('LLM-as-Judge Frameworks', 'מסגרות LLM כשופט'),
           desc: t(
-            'Frameworks that prompt a second LLM to evaluate the first model\'s output against a rubric. Useful when no structured NLI model is available.',
+            "Frameworks that prompt a second LLM to evaluate the first model's output against a rubric. Useful when no structured NLI model is available.",
             'מסגרות הגורמות ל-LLM שני להעריך את פלט המודל הראשון מול רובריקה. שימושי כשאין מודל NLI מובנה זמין.',
           ),
         },
@@ -95,7 +95,7 @@ export default function ToolsAndLibrariesRecap() {
           cat: t('Test Frameworks', 'מסגרות בדיקה'),
           desc: t(
             'Standard test framework in your language stack (Jest, pytest, JUnit, etc.). Wrap each evaluation technique as a test case.',
-            'מסגרת בדיקה סטנדרטית בסטק השפה שלך (Jest, pytest, JUnit, וכו\'). עטוף כל טכניקת הערכה כמקרה בדיקה.',
+            "מסגרת בדיקה סטנדרטית בסטק השפה שלך (Jest, pytest, JUnit, וכו'). עטוף כל טכניקת הערכה כמקרה בדיקה.",
           ),
         },
         {
@@ -152,7 +152,9 @@ export default function ToolsAndLibrariesRecap() {
       </div>
 
       {/* Body */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}
+      >
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
           <div
             style={{
@@ -202,12 +204,18 @@ export default function ToolsAndLibrariesRecap() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
                 <span style={{ fontSize: '1.5vw' }}>{cat.icon}</span>
-                <div style={{ fontSize: '1.05vw', fontWeight: 700, color: cat.accent }}>{cat.technique}</div>
+                <div style={{ fontSize: '1.05vw', fontWeight: 700, color: cat.accent }}>
+                  {cat.technique}
+                </div>
               </div>
               {cat.tools.map((tool, j) => (
                 <div key={j} style={{ display: 'flex', flexDirection: 'column', gap: '0.4vh' }}>
-                  <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#1E3A5F' }}>{tool.cat}</div>
-                  <div style={{ fontSize: '0.85vw', color: '#64748B', lineHeight: 1.4 }}>{tool.desc}</div>
+                  <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#1E3A5F' }}>
+                    {tool.cat}
+                  </div>
+                  <div style={{ fontSize: '0.85vw', color: '#64748B', lineHeight: 1.4 }}>
+                    {tool.desc}
+                  </div>
                 </div>
               ))}
             </div>
@@ -227,7 +235,8 @@ export default function ToolsAndLibrariesRecap() {
             boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
           }}
         >
-          💡 {t(
+          💡{' '}
+          {t(
             'Start with the simplest tool in each category. A basic cosine similarity check and a JSON schema validator get you most of the way there before reaching for more complex frameworks.',
             'התחל בכלי הפשוט ביותר בכל קטגוריה. בדיקת דמיון קוסינוס בסיסית ומאמת JSON schema יכניסו אותך רחוק לפני שתגיע למסגרות מורכבות יותר.',
           )}

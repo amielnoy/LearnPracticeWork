@@ -113,7 +113,14 @@ export default function SemanticSimilarityConcept() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Why Cosine Similarity', 'מדוע דמיון קוסינוס')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function SemanticSimilarityConcept() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('When to Use This Technique', 'מתי להשתמש בטכניקה זו')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function SemanticSimilarityConcept() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Setting the Threshold', 'הגדרת הסף')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -190,14 +211,32 @@ export default function SemanticSimilarityConcept() {
             }}
           >
             <div style={{ color: '#64748B' }}># embed both texts</div>
-            <div><span style={{ color: '#38BDF8' }}>ref_vec</span> = embed(<span style={{ color: '#4ADE80' }}>"Customer wants a refund"</span>)</div>
-            <div><span style={{ color: '#38BDF8' }}>got_vec</span> = embed(response[<span style={{ color: '#4ADE80' }}>"summary"</span>])</div>
+            <div>
+              <span style={{ color: '#38BDF8' }}>ref_vec</span> = embed(
+              <span style={{ color: '#4ADE80' }}>"Customer wants a refund"</span>)
+            </div>
+            <div>
+              <span style={{ color: '#38BDF8' }}>got_vec</span> = embed(response[
+              <span style={{ color: '#4ADE80' }}>"summary"</span>])
+            </div>
             <div style={{ marginTop: '0.5vh', color: '#64748B' }}># compute similarity</div>
-            <div><span style={{ color: '#38BDF8' }}>score</span> = cosine_similarity(ref_vec, got_vec)</div>
+            <div>
+              <span style={{ color: '#38BDF8' }}>score</span> = cosine_similarity(ref_vec, got_vec)
+            </div>
             <div style={{ marginTop: '0.5vh', color: '#64748B' }}># assert above threshold</div>
-            <div><span style={{ color: '#FBBF24' }}>assert</span> score &gt;= <span style={{ color: '#F87171' }}>0.85</span></div>
+            <div>
+              <span style={{ color: '#FBBF24' }}>assert</span> score &gt;={' '}
+              <span style={{ color: '#F87171' }}>0.85</span>
+            </div>
           </div>
-          <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5, textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              color: '#64748B',
+              lineHeight: 1.5,
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {t(
               'This test passes whether the model writes "Customer requests refund" or "Client is asking for their money back" — both mean the same thing.',
               'בדיקה זו עוברת בין אם המודל כותב "Customer requests refund" או "Client is asking for their money back" — שניהם אומרים אותו דבר.',

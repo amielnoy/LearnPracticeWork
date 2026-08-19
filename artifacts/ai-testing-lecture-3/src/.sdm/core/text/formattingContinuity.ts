@@ -1,10 +1,5 @@
 import type { Mark, Node as ProseMirrorNode } from 'prosemirror-model';
-import {
-  Plugin,
-  PluginKey,
-  type EditorState,
-  type Transaction,
-} from 'prosemirror-state';
+import { Plugin, PluginKey, type EditorState, type Transaction } from 'prosemirror-state';
 import { Mapping } from 'prosemirror-transform';
 
 import type { RunStyle } from '../schema';
@@ -120,7 +115,7 @@ function mappedParagraphs(
     mapping.appendMapping(transaction.mapping);
   }
   const currentByPosition = new Map(
-    paragraphEntries(newState.doc).map((entry) => [entry.position, entry]),
+    paragraphEntries(newState.doc).map(entry => [entry.position, entry]),
   );
   const pairs: Array<{
     current: ParagraphEntry;
@@ -128,18 +123,12 @@ function mappedParagraphs(
   }> = [];
   for (const previous of paragraphEntries(oldState.doc)) {
     const start = mapping.mapResult(previous.position, 1);
-    const end = mapping.mapResult(
-      previous.position + previous.node.nodeSize,
-      -1,
-    );
+    const end = mapping.mapResult(previous.position + previous.node.nodeSize, -1);
     if (start.deletedAcross || end.deletedAcross || end.pos <= start.pos) {
       continue;
     }
     const current = currentByPosition.get(start.pos);
-    if (
-      current !== undefined &&
-      current.position + current.node.nodeSize === end.pos
-    ) {
+    if (current !== undefined && current.position + current.node.nodeSize === end.pos) {
       pairs.push({ current, previous });
     }
   }
@@ -168,9 +157,7 @@ function seedTransaction(state: EditorState): Transaction | undefined {
   return state.tr.setStoredMarks(marks);
 }
 
-export function initializeFormattingContinuity(
-  state: EditorState,
-): EditorState {
+export function initializeFormattingContinuity(state: EditorState): EditorState {
   const transaction = seedTransaction(state);
 
   return transaction === undefined ? state : state.apply(transaction);
@@ -181,10 +168,7 @@ export const formattingContinuityPlugin = new Plugin({
   props: {
     handleTextInput(view, from, to, text) {
       const parent = view.state.selection.$from.parent;
-      if (
-        parent.type !== sdmTextSchema.nodes.paragraph ||
-        parent.content.size !== 0
-      ) {
+      if (parent.type !== sdmTextSchema.nodes.paragraph || parent.content.size !== 0) {
         return false;
       }
       const style = defaultStyleOf(parent);
@@ -193,9 +177,7 @@ export const formattingContinuityPlugin = new Plugin({
         return false;
       }
       view.dispatch(
-        view.state.tr
-          .replaceWith(from, to, sdmTextSchema.text(text, marks))
-          .setStoredMarks(marks),
+        view.state.tr.replaceWith(from, to, sdmTextSchema.text(text, marks)).setStoredMarks(marks),
       );
 
       return true;
@@ -204,7 +186,7 @@ export const formattingContinuityPlugin = new Plugin({
   appendTransaction(transactions, oldState, newState) {
     let transaction: Transaction | undefined;
     let capturedSelectionStyle: RunStyle | undefined;
-    if (transactions.some((candidate) => candidate.docChanged)) {
+    if (transactions.some(candidate => candidate.docChanged)) {
       const clearedWholeSelection =
         oldState.selection.from <= 1 &&
         oldState.selection.to >= oldState.doc.content.size - 1 &&
@@ -225,8 +207,7 @@ export const formattingContinuityPlugin = new Plugin({
         }
         const style = canonicalizeRunStyle({
           ...defaultStyleOf(current.node),
-          ...(styleFromOldSelection(oldState, previous.position) ??
-            styleAtEnd(previous.node)),
+          ...(styleFromOldSelection(oldState, previous.position) ?? styleAtEnd(previous.node)),
         });
         if (Object.keys(style).length === 0) {
           continue;
@@ -259,21 +240,12 @@ export const formattingContinuityPlugin = new Plugin({
             ? {}
             : { defaultRunStyle: defaultRunStyleAttr(style) }),
         };
-        if (
-          JSON.stringify(nextAttrs) !== JSON.stringify(currentParagraph.attrs)
-        ) {
+        if (JSON.stringify(nextAttrs) !== JSON.stringify(currentParagraph.attrs)) {
           transaction ??= newState.tr;
-          transaction.setNodeMarkup(
-            newState.selection.$from.before(),
-            undefined,
-            nextAttrs,
-          );
+          transaction.setNodeMarkup(newState.selection.$from.before(), undefined, nextAttrs);
         }
         let continuationStyle = style;
-        if (
-          Object.keys(continuationStyle).length === 0 &&
-          source !== undefined
-        ) {
+        if (Object.keys(continuationStyle).length === 0 && source !== undefined) {
           continuationStyle = defaultStyleOf(source.node);
         }
         if (Object.keys(continuationStyle).length > 0) {

@@ -113,7 +113,14 @@ export default function VersioningContracts() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Schema File in Source Control', 'קובץ סכמה בבקרת מקור')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function VersioningContracts() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Breaking vs. Non-Breaking Changes', 'שינויים שוברים לעומת לא-שוברים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function VersioningContracts() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Validate in CI on Every PR', 'אמתו ב-CI בכל PR')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -178,7 +199,9 @@ export default function VersioningContracts() {
           >
             {t('Contract Lifecycle', 'מחזור חיי החוזה')}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', position: 'relative' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', position: 'relative' }}
+          >
             <div
               style={
                 {
@@ -191,7 +214,15 @@ export default function VersioningContracts() {
                 } as React.CSSProperties
               }
             />
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',
@@ -206,7 +237,15 @@ export default function VersioningContracts() {
                 {t('Define schema in schemas/ directory', 'הגדירו סכמה בתיקיית schemas/')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',
@@ -218,10 +257,21 @@ export default function VersioningContracts() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Reference from test suite and from API code', 'הפנו מחבילת הבדיקות ומקוד ה-API')}
+                {t(
+                  'Reference from test suite and from API code',
+                  'הפנו מחבילת הבדיקות ומקוד ה-API',
+                )}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',
@@ -236,7 +286,15 @@ export default function VersioningContracts() {
                 {t('Any schema change goes through PR review', 'כל שינוי סכמה עובר סקירת PR')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',

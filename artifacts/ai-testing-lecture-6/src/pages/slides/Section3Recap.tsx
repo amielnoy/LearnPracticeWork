@@ -31,14 +31,25 @@ export default function Section3Recap() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -85,7 +96,13 @@ export default function Section3Recap() {
             }}
           >
             <div
-              style={{ fontSize: '1vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}
+              style={{
+                fontSize: '1vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
             >
               {t('Principle 1', 'עיקרון 1')}
             </div>
@@ -110,7 +127,13 @@ export default function Section3Recap() {
             }}
           >
             <div
-              style={{ fontSize: '1vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}
+              style={{
+                fontSize: '1vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
             >
               {t('Principle 2', 'עיקרון 2')}
             </div>
@@ -135,7 +158,13 @@ export default function Section3Recap() {
             }}
           >
             <div
-              style={{ fontSize: '1vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}
+              style={{
+                fontSize: '1vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
             >
               {t('Principle 3', 'עיקרון 3')}
             </div>

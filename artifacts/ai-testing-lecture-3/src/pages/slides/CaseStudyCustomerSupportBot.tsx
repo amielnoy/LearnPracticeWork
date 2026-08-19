@@ -20,28 +20,46 @@ export default function CaseStudyCustomerSupportBot() {
   const checks = [
     {
       name: t('Semantic Similarity', 'דמיון סמנטי'),
-      purpose: t('Does the response convey the right policy information?', 'האם התגובה מעבירה את מידע המדיניות הנכון?'),
+      purpose: t(
+        'Does the response convey the right policy information?',
+        'האם התגובה מעבירה את מידע המדיניות הנכון?',
+      ),
       threshold: t('≥ 0.82 vs. gold answer', '≥ 0.82 מול תשובה זהובה'),
       outcome: t('✔ PASS — policy wording captured', '✔ עבר — ניסוח המדיניות נתפס'),
       color: '#0D9488',
     },
     {
       name: t('Factuality Check', 'בדיקת עובדתיות'),
-      purpose: t('Are the quoted return-window days and refund amount accurate?', 'האם ימי חלון ההחזרה וסכום ההחזר המצוטטים מדויקים?'),
+      purpose: t(
+        'Are the quoted return-window days and refund amount accurate?',
+        'האם ימי חלון ההחזרה וסכום ההחזר המצוטטים מדויקים?',
+      ),
       threshold: t('0 contradicted claims', '0 טענות סותרות'),
-      outcome: t('✘ FAIL — "30 days" contradicts policy (28 days)', '✘ נכשל — "30 ימים" סותר מדיניות (28 ימים)'),
+      outcome: t(
+        '✘ FAIL — "30 days" contradicts policy (28 days)',
+        '✘ נכשל — "30 ימים" סותר מדיניות (28 ימים)',
+      ),
       color: '#DC2626',
     },
     {
       name: t('Schema Validation', 'אימות סכמה'),
-      purpose: t('Does the structured payload include required fields?', 'האם המטען המובנה כולל שדות חובה?'),
+      purpose: t(
+        'Does the structured payload include required fields?',
+        'האם המטען המובנה כולל שדות חובה?',
+      ),
       threshold: t('100% required fields present', '100% שדות חובה קיימים'),
-      outcome: t('✔ PASS — all fields present, types correct', '✔ עבר — כל השדות קיימים, סוגים נכונים'),
+      outcome: t(
+        '✔ PASS — all fields present, types correct',
+        '✔ עבר — כל השדות קיימים, סוגים נכונים',
+      ),
       color: '#0D9488',
     },
     {
       name: t('Safety Screen', 'סריקת בטיחות'),
-      purpose: t('Is the response free of harmful or policy-violating content?', 'האם התגובה נקייה מתוכן מזיק או מפר מדיניות?'),
+      purpose: t(
+        'Is the response free of harmful or policy-violating content?',
+        'האם התגובה נקייה מתוכן מזיק או מפר מדיניות?',
+      ),
       threshold: t('Toxicity score < 0.05', 'ציון רעילות < 0.05'),
       outcome: t('✔ PASS — clean output', '✔ עבר — פלט נקי'),
       color: '#0D9488',
@@ -135,7 +153,9 @@ export default function CaseStudyCustomerSupportBot() {
             padding: '2vh 2vw',
           }}
         >
-          <div style={{ fontSize: '0.85vw', color: '#64748B', marginBottom: '0.8vh', fontWeight: 600 }}>
+          <div
+            style={{ fontSize: '0.85vw', color: '#64748B', marginBottom: '0.8vh', fontWeight: 600 }}
+          >
             {t('CUSTOMER QUERY', 'שאילתת לקוח')}
           </div>
           <div style={{ fontSize: '1vw', color: '#E2E8F0', lineHeight: 1.5 }}>
@@ -182,21 +202,37 @@ export default function CaseStudyCustomerSupportBot() {
             <div
               key={i}
               style={{
-                background: check.color === '#DC2626' ? 'rgba(220,38,38,0.04)' : 'rgba(13,148,136,0.04)',
+                background:
+                  check.color === '#DC2626' ? 'rgba(220,38,38,0.04)' : 'rgba(13,148,136,0.04)',
                 border: `1px solid ${check.color}25`,
                 borderRadius: '0.8vw',
                 padding: '1.5vh 1.5vw',
                 textAlign: isHe ? 'right' : 'left',
               }}
             >
-              <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+              <div
+                style={{
+                  fontSize: '1.05vw',
+                  fontWeight: 700,
+                  color: '#1E3A5F',
+                  marginBottom: '0.4vh',
+                }}
+              >
                 {check.name}
               </div>
-              <div style={{ fontSize: '0.9vw', color: '#64748B', marginBottom: '0.6vh', lineHeight: 1.3 }}>
+              <div
+                style={{
+                  fontSize: '0.9vw',
+                  color: '#64748B',
+                  marginBottom: '0.6vh',
+                  lineHeight: 1.3,
+                }}
+              >
                 {check.purpose}
               </div>
               <div style={{ fontSize: '0.85vw', color: '#94A3B8', marginBottom: '0.5vh' }}>
-                {t('Threshold: ', 'סף: ')}{check.threshold}
+                {t('Threshold: ', 'סף: ')}
+                {check.threshold}
               </div>
               <div style={{ fontSize: '0.9vw', fontWeight: 700, color: check.color }}>
                 {check.outcome}
@@ -216,7 +252,10 @@ export default function CaseStudyCustomerSupportBot() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            {t('→ PIPELINE: BLOCKED — factuality failure gates deployment', '← צינור: חסום — כישלון עובדתי עוצר פריסה')}
+            {t(
+              '→ PIPELINE: BLOCKED — factuality failure gates deployment',
+              '← צינור: חסום — כישלון עובדתי עוצר פריסה',
+            )}
           </div>
         </div>
       </div>

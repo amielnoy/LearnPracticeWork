@@ -113,7 +113,14 @@ export default function LLMAsJudge() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Why a Second Model', 'מדוע מודל שני')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function LLMAsJudge() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('The Rubric Is the Test', 'הרובריקה היא הבדיקה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function LLMAsJudge() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Cost and Speed Tradeoffs', 'פשרות עלות ומהירות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -192,14 +213,27 @@ export default function LLMAsJudge() {
           >
             <div style={{ color: '#64748B' }}># system prompt</div>
             <div style={{ color: '#4ADE80' }}>"Rate this support reply on tone (0-10).</div>
-            <div style={{ color: '#4ADE80' }}>Return JSON: {'{'}\"score\": int, \"reason\": str{'}'}"</div>
+            <div style={{ color: '#4ADE80' }}>
+              Return JSON: {'{'}\"score\": int, \"reason\": str{'}'}"
+            </div>
             <div style={{ color: '#64748B', marginTop: '1vh' }}># user message</div>
-            <div style={{ color: '#E2E8F0' }}>f"Reply: {'{'}response['reply']{'}'}"</div>
+            <div style={{ color: '#E2E8F0' }}>
+              f"Reply: {'{'}response['reply']{'}'}"
+            </div>
             <div style={{ color: '#64748B', marginTop: '1vh' }}># assert on result</div>
             <div style={{ color: '#FBBF24' }}>result = call_judge(system, user)</div>
-            <div style={{ color: '#FBBF24' }}>assert result[<span style={{ color: '#4ADE80' }}>"score"</span>] &gt;= 7</div>
+            <div style={{ color: '#FBBF24' }}>
+              assert result[<span style={{ color: '#4ADE80' }}>"score"</span>] &gt;= 7
+            </div>
           </div>
-          <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5, textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              color: '#64748B',
+              lineHeight: 1.5,
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {t(
               'The judge output itself must be schema-validated before you read the score — a judge that returns unexpected keys or the wrong type will crash the test harness.',
               'פלט השופט עצמו חייב לעבור אימות סכמה לפני שאתם קוראים את הציון — שופט שמחזיר מפתחות בלתי צפויים או סוג שגוי ישבור את מסגרת הבדיקה.',

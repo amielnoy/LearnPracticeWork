@@ -98,24 +98,38 @@ export default function BiasAndFairnessChecks() {
         </h1>
         <p style={{ fontSize: '1.2vw', color: '#475569', margin: '0 0 2.5vh 0', lineHeight: 1.6 }}>
           {t(
-            'A response can be entirely polite yet systematically unfair. Bias probes check whether the model\'s behaviour changes when the prompt\'s demographic details are varied.',
+            "A response can be entirely polite yet systematically unfair. Bias probes check whether the model's behaviour changes when the prompt's demographic details are varied.",
             'תגובה יכולה להיות מנומסת לחלוטין אך שיטתית בלתי הוגנת. בדיקות הטיה בודקות אם התנהגות המודל משתנה כשפרטים דמוגרפיים בהנחיה משתנים.',
           )}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Counterfactual Probing', 'בדיקות נגד-עובדתיות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
-                'Send the same prompt with varied demographic attributes (name, gender, nationality). Measure whether the model\'s sentiment, advice, or length changes systematically.',
+                "Send the same prompt with varied demographic attributes (name, gender, nationality). Measure whether the model's sentiment, advice, or length changes systematically.",
                 'שלח את אותה הנחיה עם מאפיינים דמוגרפיים שונים (שם, מגדר, לאום). מדוד אם הסנטימנט, העצה או האורך של המודל משתנים בצורה שיטתית.',
               )}
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Stereotype Probing', 'בדיקת סטריאוטיפים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -126,7 +140,14 @@ export default function BiasAndFairnessChecks() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Consistency Across Groups', 'עקביות בין קבוצות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -182,7 +203,10 @@ export default function BiasAndFairnessChecks() {
               {
                 title: t('Toxicity', 'רעילות'),
                 icon: '⚠️',
-                desc: t('Explicitly harmful, offensive, or violent language.', 'שפה מזיקה, פוגענית או אלימה במפורש.'),
+                desc: t(
+                  'Explicitly harmful, offensive, or violent language.',
+                  'שפה מזיקה, פוגענית או אלימה במפורש.',
+                ),
                 tag: t('Binary: YES / NO', 'בינארי: כן / לא'),
                 bg: 'rgba(220,38,38,0.05)',
                 border: 'rgba(220,38,38,0.2)',
@@ -190,7 +214,10 @@ export default function BiasAndFairnessChecks() {
               {
                 title: t('Bias', 'הטיה'),
                 icon: '⚖️',
-                desc: t('Differential treatment across demographic groups.', 'יחס שונה בין קבוצות דמוגרפיות.'),
+                desc: t(
+                  'Differential treatment across demographic groups.',
+                  'יחס שונה בין קבוצות דמוגרפיות.',
+                ),
                 tag: t('Measured: distribution', 'נמדד: התפלגות'),
                 bg: 'rgba(245,158,11,0.07)',
                 border: 'rgba(245,158,11,0.25)',
@@ -206,8 +233,26 @@ export default function BiasAndFairnessChecks() {
                 }}
               >
                 <div style={{ fontSize: '1.8vw', marginBottom: '0.8vh' }}>{item.icon}</div>
-                <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.8vh' }}>{item.title}</div>
-                <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4, marginBottom: '1vh' }}>{item.desc}</div>
+                <div
+                  style={{
+                    fontSize: '1.05vw',
+                    fontWeight: 700,
+                    color: '#1E3A5F',
+                    marginBottom: '0.8vh',
+                  }}
+                >
+                  {item.title}
+                </div>
+                <div
+                  style={{
+                    fontSize: '0.9vw',
+                    color: '#64748B',
+                    lineHeight: 1.4,
+                    marginBottom: '1vh',
+                  }}
+                >
+                  {item.desc}
+                </div>
                 <div
                   style={{
                     fontSize: '0.85vw',
@@ -239,7 +284,8 @@ export default function BiasAndFairnessChecks() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            💡 {t(
+            💡{' '}
+            {t(
               'A complete safety suite includes both toxicity classifiers and bias probe datasets — they catch different failure modes.',
               'חבילת בטיחות מלאה כוללת גם מסווגי רעילות וגם מערכי נתוני בדיקת הטיה — הם תופסים מצבי כישלון שונים.',
             )}

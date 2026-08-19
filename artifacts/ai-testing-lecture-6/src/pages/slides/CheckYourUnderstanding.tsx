@@ -31,14 +31,25 @@ export default function CheckYourUnderstanding() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -84,7 +95,15 @@ export default function CheckYourUnderstanding() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Q1', 'ש1')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', lineHeight: 1.4 }}>
@@ -104,12 +123,20 @@ export default function CheckYourUnderstanding() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#D97706', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#D97706',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Q2', 'ש2')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', lineHeight: 1.4 }}>
               {t(
-                "What is the difference between quarantining a flaky test and deleting it?",
+                'What is the difference between quarantining a flaky test and deleting it?',
                 'מה ההבדל בין בידוד בדיקה לא יציבה למחיקתה?',
               )}
             </div>
@@ -124,7 +151,15 @@ export default function CheckYourUnderstanding() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#DC2626', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Q3', 'ש3')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', lineHeight: 1.4 }}>
@@ -144,7 +179,15 @@ export default function CheckYourUnderstanding() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#1E3A5F',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Q4', 'ש4')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', lineHeight: 1.4 }}>

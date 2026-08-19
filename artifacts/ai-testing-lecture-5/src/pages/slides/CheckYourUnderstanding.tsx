@@ -110,7 +110,7 @@ export default function CheckYourUnderstanding() {
             </div>
             <div style={{ fontSize: '1.2vw', color: '#1E3A5F', lineHeight: 1.6 }}>
               {t(
-                "What is wrong with asserting response.text equals an exact string against an LLM output? Give two distinct reasons.",
+                'What is wrong with asserting response.text equals an exact string against an LLM output? Give two distinct reasons.',
                 'מה הבעיה בבדיקה ש-response.text שווה למחרוזת מדויקת מול פלט LLM? תנו שני טעמים נפרדים.',
               )}
             </div>

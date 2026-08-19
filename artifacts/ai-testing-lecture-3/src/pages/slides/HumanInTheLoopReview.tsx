@@ -26,7 +26,10 @@ const card: React.CSSProperties = {
 export default function HumanInTheLoopReview() {
   const triggers = [
     t('Factuality confidence below threshold', 'ביטחון עובדתיות מתחת לסף'),
-    t('Similarity score near the pass/fail boundary (± 0.05)', 'ציון דמיון קרוב לגבול עבר/נכשל (± 0.05)'),
+    t(
+      'Similarity score near the pass/fail boundary (± 0.05)',
+      'ציון דמיון קרוב לגבול עבר/נכשל (± 0.05)',
+    ),
     t('Safety classifier flags a borderline case', 'מסווג הבטיחות מסמן מקרה גבולי'),
     t('Novel topic not covered by the golden dataset', 'נושא חדש שאינו מכוסה במערך הנתונים הזהוב'),
   ];
@@ -110,7 +113,9 @@ export default function HumanInTheLoopReview() {
           )}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.4vh' }}>
-          <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+          <div
+            style={{ fontSize: '1.05vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.5vh' }}
+          >
             {t('What Triggers Human Review', 'מה מפעיל סקירה אנושית')}
           </div>
           {triggers.map((item, i) => (
@@ -174,7 +179,10 @@ export default function HumanInTheLoopReview() {
           {[
             {
               step: t('1. Flagged output enters queue', '1. פלט מסומן נכנס לתור'),
-              note: t('Includes checker scores, prompt, and context', 'כולל ציוני בודק, הנחיה והקשר'),
+              note: t(
+                'Includes checker scores, prompt, and context',
+                'כולל ציוני בודק, הנחיה והקשר',
+              ),
               color: '#D97706',
             },
             {
@@ -184,12 +192,18 @@ export default function HumanInTheLoopReview() {
             },
             {
               step: t('3. Label feeds back into test suite', '3. תיוג חוזר לחבילת הבדיקות'),
-              note: t('Expands golden dataset, improves future automation', 'מרחיב מערך נתונים זהוב, משפר אוטומציה עתידית'),
+              note: t(
+                'Expands golden dataset, improves future automation',
+                'מרחיב מערך נתונים זהוב, משפר אוטומציה עתידית',
+              ),
               color: '#1E3A5F',
             },
             {
               step: t('4. Monitor queue volume over time', '4. עקוב אחר נפח התור לאורך זמן'),
-              note: t('Rising queue = model or threshold needs recalibration', 'תור גדל = מודל או סף צריך כיול מחדש'),
+              note: t(
+                'Rising queue = model or threshold needs recalibration',
+                'תור גדל = מודל או סף צריך כיול מחדש',
+              ),
               color: '#64748B',
             },
           ].map((item, i) => (
@@ -213,10 +227,19 @@ export default function HumanInTheLoopReview() {
                 }}
               />
               <div>
-                <div style={{ fontSize: '1.05vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.3vh' }}>
+                <div
+                  style={{
+                    fontSize: '1.05vw',
+                    fontWeight: 600,
+                    color: '#1E3A5F',
+                    marginBottom: '0.3vh',
+                  }}
+                >
                   {item.step}
                 </div>
-                <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>{item.note}</div>
+                <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
+                  {item.note}
+                </div>
               </div>
             </div>
           ))}

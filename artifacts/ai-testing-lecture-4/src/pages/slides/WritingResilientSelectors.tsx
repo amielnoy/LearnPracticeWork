@@ -235,7 +235,10 @@ export default function WritingResilientSelectors() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Most stable \u2014 data-testid on the container', 'היציב ביותר \u2014 data-testid על המכיל')}
+                {t(
+                  'Most stable \u2014 data-testid on the container',
+                  'היציב ביותר \u2014 data-testid על המכיל',
+                )}
               </div>
             </div>
             <div
@@ -258,7 +261,10 @@ export default function WritingResilientSelectors() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Stable \u2014 ARIA role on the response region', 'יציב \u2014 ARIA role על אזור התגובה')}
+                {t(
+                  'Stable \u2014 ARIA role on the response region',
+                  'יציב \u2014 ARIA role על אזור התגובה',
+                )}
               </div>
             </div>
             <div
@@ -281,7 +287,10 @@ export default function WritingResilientSelectors() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Fragile \u2014 CSS class tied to generated markup', 'שביר \u2014 CSS class הקשורה ל-markup מיוצר')}
+                {t(
+                  'Fragile \u2014 CSS class tied to generated markup',
+                  'שביר \u2014 CSS class הקשורה ל-markup מיוצר',
+                )}
               </div>
             </div>
             <div
@@ -304,7 +313,10 @@ export default function WritingResilientSelectors() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Avoid \u2014 exact text inside AI-generated content', 'הימנעו \u2014 טקסט מדויק בתוך תוכן מיוצר AI')}
+                {t(
+                  'Avoid \u2014 exact text inside AI-generated content',
+                  'הימנעו \u2014 טקסט מדויק בתוך תוכן מיוצר AI',
+                )}
               </div>
             </div>
           </div>

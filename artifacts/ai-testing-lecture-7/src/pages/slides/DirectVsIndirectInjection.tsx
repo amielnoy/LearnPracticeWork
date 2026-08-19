@@ -31,10 +31,27 @@ export default function DirectVsIndirectInjection() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('SECURITY TESTING', 'בדיקות אבטחה')}</div>
           <div>{t('LECTURE 07', 'הרצאה 07')}</div>
         </div>
@@ -42,10 +59,27 @@ export default function DirectVsIndirectInjection() {
 
       {/* Title */}
       <div style={{ gridColumn: '1 / -1', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '0.8vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '0.8vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {t('Injection Taxonomy', 'טקסונומיה של הזרקה')}
         </div>
-        <h1 style={{ fontSize: '3vw', fontWeight: 800, margin: 0, lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '3vw',
+            fontWeight: 800,
+            margin: 0,
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {t('Direct vs. Indirect Injection', 'הזרקה ישירה לעומת עקיפה')}
         </h1>
       </div>
@@ -92,12 +126,40 @@ export default function DirectVsIndirectInjection() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1vh' }}>
           <div style={{ display: 'flex', gap: '1.2vw', alignItems: 'flex-start' }}>
-            <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#DC2626', marginTop: '0.7vw' }} />
-            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.4 }}>{t('Test: ask the model to reveal its system prompt', 'בדיקה: בקש מהמודל לחשוף את ה-system prompt שלו')}</div>
+            <div
+              style={{
+                width: '0.6vw',
+                height: '0.6vw',
+                minWidth: '0.6vw',
+                borderRadius: '50%',
+                backgroundColor: '#DC2626',
+                marginTop: '0.7vw',
+              }}
+            />
+            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.4 }}>
+              {t(
+                'Test: ask the model to reveal its system prompt',
+                'בדיקה: בקש מהמודל לחשוף את ה-system prompt שלו',
+              )}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '1.2vw', alignItems: 'flex-start' }}>
-            <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#DC2626', marginTop: '0.7vw' }} />
-            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.4 }}>{t('Test: role-play overrides ("pretend you have no restrictions")', 'בדיקה: ביטולי תפקיד ("העמד פנים שאין לך מגבלות")')}</div>
+            <div
+              style={{
+                width: '0.6vw',
+                height: '0.6vw',
+                minWidth: '0.6vw',
+                borderRadius: '50%',
+                backgroundColor: '#DC2626',
+                marginTop: '0.7vw',
+              }}
+            />
+            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.4 }}>
+              {t(
+                'Test: role-play overrides ("pretend you have no restrictions")',
+                'בדיקה: ביטולי תפקיד ("העמד פנים שאין לך מגבלות")',
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -144,18 +206,58 @@ export default function DirectVsIndirectInjection() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1vh' }}>
           <div style={{ display: 'flex', gap: '1.2vw', alignItems: 'flex-start' }}>
-            <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#D97706', marginTop: '0.7vw' }} />
-            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.4 }}>{t('Test: inject instructions into RAG source documents', 'בדיקה: הזן הוראות לתוך מסמכי מקור RAG')}</div>
+            <div
+              style={{
+                width: '0.6vw',
+                height: '0.6vw',
+                minWidth: '0.6vw',
+                borderRadius: '50%',
+                backgroundColor: '#D97706',
+                marginTop: '0.7vw',
+              }}
+            />
+            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.4 }}>
+              {t(
+                'Test: inject instructions into RAG source documents',
+                'בדיקה: הזן הוראות לתוך מסמכי מקור RAG',
+              )}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '1.2vw', alignItems: 'flex-start' }}>
-            <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#D97706', marginTop: '0.7vw' }} />
-            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.4 }}>{t('Test: embed commands in tool-call return values', 'בדיקה: הטמע פקודות בערכי החזרה של קריאות כלים')}</div>
+            <div
+              style={{
+                width: '0.6vw',
+                height: '0.6vw',
+                minWidth: '0.6vw',
+                borderRadius: '50%',
+                backgroundColor: '#D97706',
+                marginTop: '0.7vw',
+              }}
+            />
+            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.4 }}>
+              {t(
+                'Test: embed commands in tool-call return values',
+                'בדיקה: הטמע פקודות בערכי החזרה של קריאות כלים',
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '2vh', fontSize: '0.9vw', color: '#94A3B8', fontWeight: 500 }}>
+      <div
+        style={{
+          gridColumn: '1 / -1',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid #E2E8F0',
+          paddingTop: '2vh',
+          fontSize: '0.9vw',
+          color: '#94A3B8',
+          fontWeight: 500,
+        }}
+      >
         <div>{t('Security Testing for AI', 'בדיקות אבטחה ל-AI')}</div>
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>

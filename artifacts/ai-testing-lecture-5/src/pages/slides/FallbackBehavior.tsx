@@ -113,7 +113,14 @@ export default function FallbackBehavior() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Cached Response Fallback', 'נסיגה לתגובה במטמון')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function FallbackBehavior() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Simpler Non-AI Path', 'נתיב פשוט ללא AI')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function FallbackBehavior() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Clear Error Instead of a Bare 500', 'שגיאה ברורה במקום 500 גולמי')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -192,15 +213,30 @@ export default function FallbackBehavior() {
           >
             <div style={{ color: '#64748B' }}># mock the AI provider as unavailable</div>
             <div style={{ color: '#38BDF8' }}>responses.add(</div>
-            <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;method=<span style={{ color: '#4ADE80' }}>"POST"</span>, url=<span style={{ color: '#4ADE80' }}>ENDPOINT</span>,</div>
-            <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;status=<span style={{ color: '#F87171' }}>503</span>,</div>
+            <div style={{ color: '#38BDF8' }}>
+              &nbsp;&nbsp;method=<span style={{ color: '#4ADE80' }}>"POST"</span>, url=
+              <span style={{ color: '#4ADE80' }}>ENDPOINT</span>,
+            </div>
+            <div style={{ color: '#38BDF8' }}>
+              &nbsp;&nbsp;status=<span style={{ color: '#F87171' }}>503</span>,
+            </div>
             <div style={{ color: '#38BDF8' }}>)</div>
             <div style={{ color: '#64748B', marginTop: '0.5vh' }}># call your service</div>
             <div style={{ color: '#FBBF24' }}>response = client.summarize(ticket)</div>
-            <div style={{ color: '#64748B', marginTop: '0.5vh' }}># assert graceful degradation</div>
-            <div style={{ color: '#FBBF24' }}>assert response.status_code != <span style={{ color: '#F87171' }}>500</span></div>
-            <div style={{ color: '#FBBF24' }}>assert <span style={{ color: '#4ADE80' }}>"error"</span> in response.json()</div>
-            <div style={{ color: '#FBBF24' }}>assert response.json()[<span style={{ color: '#4ADE80' }}>"error"</span>][<span style={{ color: '#4ADE80' }}>"code"</span>] == <span style={{ color: '#4ADE80' }}>"AI_UNAVAILABLE"</span></div>
+            <div style={{ color: '#64748B', marginTop: '0.5vh' }}>
+              # assert graceful degradation
+            </div>
+            <div style={{ color: '#FBBF24' }}>
+              assert response.status_code != <span style={{ color: '#F87171' }}>500</span>
+            </div>
+            <div style={{ color: '#FBBF24' }}>
+              assert <span style={{ color: '#4ADE80' }}>"error"</span> in response.json()
+            </div>
+            <div style={{ color: '#FBBF24' }}>
+              assert response.json()[<span style={{ color: '#4ADE80' }}>"error"</span>][
+              <span style={{ color: '#4ADE80' }}>"code"</span>] =={' '}
+              <span style={{ color: '#4ADE80' }}>"AI_UNAVAILABLE"</span>
+            </div>
           </div>
         </div>
       </div>

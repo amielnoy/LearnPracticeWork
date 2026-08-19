@@ -95,10 +95,26 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.2vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.2vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Contract Validation', 'אימות חוזה')}
             </div>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               JSON Schema / Pydantic / Zod
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -119,10 +135,26 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.2vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.2vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Mocking', 'הדמייה')}
             </div>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               responses / VCR / WireMock
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -143,10 +175,26 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.2vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.2vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Semantic Similarity', 'דמיון סמנטי')}
             </div>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('Embedding Model', 'מודל הטמעה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -167,10 +215,26 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.2vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.2vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('LLM Judge', 'שופט LLM')}
             </div>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('LLM-as-Judge Harness', 'מסגרת LLM כשופט')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -191,10 +255,26 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.2vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.2vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Load and Latency', 'עומס וזמן תגובה')}
             </div>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               k6 / Locust
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -215,10 +295,26 @@ export default function ToolsRecap() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.2vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.2vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Cost Tracking', 'מעקב עלויות')}
             </div>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('Token Counters and Budget Assertions', 'מוני טוקן וקביעות תקציב')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>

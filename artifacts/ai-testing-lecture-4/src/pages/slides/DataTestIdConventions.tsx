@@ -151,7 +151,9 @@ export default function DataTestIdConventions() {
             padding: '2vh 1.5vw',
           }}
         >
-          <div style={{ fontSize: '1vw', fontWeight: 700, color: '#0D9488', marginBottom: '0.5vh' }}>
+          <div
+            style={{ fontSize: '1vw', fontWeight: 700, color: '#0D9488', marginBottom: '0.5vh' }}
+          >
             {t('Golden Rule', 'כלל הזהב')}
           </div>
           <div style={{ fontSize: '0.95vw', color: '#475569', lineHeight: 1.5 }}>
@@ -164,7 +166,9 @@ export default function DataTestIdConventions() {
       </div>
 
       {/* Right column — convention cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1.5vh' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1.5vh' }}
+      >
         {conventions.map((c, i) => (
           <div
             key={i}

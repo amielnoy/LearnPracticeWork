@@ -131,7 +131,14 @@ export default function BringingItTogether() {
           <div style={card}>
             <div style={badge}>1</div>
             <div>
-              <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1.15vw',
+                  fontWeight: 600,
+                  color: '#1E3A5F',
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {t('Schema Check', 'בדיקת סכמה')}
               </div>
               <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -145,7 +152,14 @@ export default function BringingItTogether() {
           <div style={card}>
             <div style={badge}>2</div>
             <div>
-              <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1.15vw',
+                  fontWeight: 600,
+                  color: '#1E3A5F',
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {t('Semantic / Judge Check', 'בדיקת סמנטיקה / שופט')}
               </div>
               <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -159,7 +173,14 @@ export default function BringingItTogether() {
           <div style={card}>
             <div style={badge}>3</div>
             <div>
-              <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1.15vw',
+                  fontWeight: 600,
+                  color: '#1E3A5F',
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {t('Latency and Cost Check', 'בדיקת זמן תגובה ועלות')}
               </div>
               <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -214,14 +235,40 @@ export default function BringingItTogether() {
             }}
           >
             <div style={{ color: '#94A3B8' }}>$ pytest tests/api/test_summarize_endpoint.py</div>
-            <div style={{ color: '#E2E8F0', marginTop: '0.5vh' }}>{t('Running 48 test cases...', 'מריץ 48 מקרי בדיקה...')}</div>
-            <div style={{ color: '#0D9488' }}>{t('\u2714 Schema        48/48 (100%)   PASS', '\u2714 סכמה          48/48 (100%)   עבר')}</div>
-            <div style={{ color: '#0D9488' }}>{t('\u2714 Semantic       46/48 (95.8%)  PASS', '\u2714 סמנטי          46/48 (95.8%)  עבר')}</div>
-            <div style={{ color: '#DC2626' }}>{t('\u2718 Latency        38/48 (79.2%)  FAIL', '\u2718 זמן תגובה       38/48 (79.2%)  נכשל')}</div>
+            <div style={{ color: '#E2E8F0', marginTop: '0.5vh' }}>
+              {t('Running 48 test cases...', 'מריץ 48 מקרי בדיקה...')}
+            </div>
+            <div style={{ color: '#0D9488' }}>
+              {t(
+                '\u2714 Schema        48/48 (100%)   PASS',
+                '\u2714 סכמה          48/48 (100%)   עבר',
+              )}
+            </div>
+            <div style={{ color: '#0D9488' }}>
+              {t(
+                '\u2714 Semantic       46/48 (95.8%)  PASS',
+                '\u2714 סמנטי          46/48 (95.8%)  עבר',
+              )}
+            </div>
+            <div style={{ color: '#DC2626' }}>
+              {t(
+                '\u2718 Latency        38/48 (79.2%)  FAIL',
+                '\u2718 זמן תגובה       38/48 (79.2%)  נכשל',
+              )}
+            </div>
             <div style={{ color: '#E2E8F0', marginTop: '0.5vh' }}>{'─'.repeat(30)}</div>
-            <div style={{ color: '#DC2626', fontWeight: 700 }}>{t('PIPELINE: BLOCKED', 'צינור: חסום')}</div>
+            <div style={{ color: '#DC2626', fontWeight: 700 }}>
+              {t('PIPELINE: BLOCKED', 'צינור: חסום')}
+            </div>
           </div>
-          <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5, textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              color: '#64748B',
+              lineHeight: 1.5,
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {t(
               'The latency check blocked the merge. 10 cases exceeded the 3s budget — traced to a new prompt template added in this PR.',
               'בדיקת זמן התגובה חסמה את המיזוג. 10 מקרים חרגו מתקציב 3s — אותר לתבנית הנחיה חדשה שנוספה ב-PR זה.',

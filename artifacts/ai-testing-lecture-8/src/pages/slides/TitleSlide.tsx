@@ -31,12 +31,27 @@ export default function TitleSlide() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('PERFORMANCE TESTING', 'בדיקות ביצועים')}</div>
           <div>{t('LECTURE 08', 'הרצאה 08')}</div>
         </div>
@@ -86,7 +101,7 @@ export default function TitleSlide() {
         >
           {t(
             'Latency benchmarking, throughput load testing, token-cost optimization, and regression monitoring for production AI systems.',
-            'בנצ\'מרקינג זמן אחזור, בדיקות עומס, אופטימיזציית עלות טוקנים וניטור רגרסיה למערכות AI בייצור.',
+            "בנצ'מרקינג זמן אחזור, בדיקות עומס, אופטימיזציית עלות טוקנים וניטור רגרסיה למערכות AI בייצור.",
           )}
         </p>
 
@@ -101,7 +116,15 @@ export default function TitleSlide() {
               boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Lecture Number', 'מספר הרצאה')}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5vw' }}>
@@ -119,7 +142,15 @@ export default function TitleSlide() {
               boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Slides', 'שקופיות')}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5vw' }}>
@@ -135,7 +166,15 @@ export default function TitleSlide() {
               flex: 1,
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 600, color: 'rgba(255,255,255,0.75)', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.75)',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Focus', 'מיקוד')}
             </div>
             <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
@@ -163,29 +202,87 @@ export default function TitleSlide() {
             boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
           }}
         >
-          <div style={{ fontSize: '1vw', fontWeight: 700, color: '#64748B', marginBottom: '2vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              fontWeight: 700,
+              color: '#64748B',
+              marginBottom: '2vh',
+              textTransform: isHe ? 'none' : 'uppercase',
+            }}
+          >
             {t('Topics Covered', 'נושאים מכוסים')}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-              <div style={{ width: '0.5vw', height: '0.5vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>{t('Why AI perf differs', 'מדוע ביצועי AI שונים')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '0.5vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>
+                {t('Why AI perf differs', 'מדוע ביצועי AI שונים')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-              <div style={{ width: '0.5vw', height: '0.5vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>{t('Latency benchmarking', 'בנצ\'מרקינג זמן אחזור')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '0.5vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>
+                {t('Latency benchmarking', "בנצ'מרקינג זמן אחזור")}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-              <div style={{ width: '0.5vw', height: '0.5vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>{t('Throughput & load testing', 'עומס ורוחב פס')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '0.5vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>
+                {t('Throughput & load testing', 'עומס ורוחב פס')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-              <div style={{ width: '0.5vw', height: '0.5vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>{t('Token-cost optimization', 'אופטימיזציית עלות טוקנים')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '0.5vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>
+                {t('Token-cost optimization', 'אופטימיזציית עלות טוקנים')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-              <div style={{ width: '0.5vw', height: '0.5vw', borderRadius: '50%', backgroundColor: '#0D9488', flexShrink: 0 }} />
-              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>{t('Baselines & monitoring', 'בסיסים וניטור')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '0.5vw',
+                  borderRadius: '50%',
+                  backgroundColor: '#0D9488',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>
+                {t('Baselines & monitoring', 'בסיסים וניטור')}
+              </div>
             </div>
           </div>
         </div>

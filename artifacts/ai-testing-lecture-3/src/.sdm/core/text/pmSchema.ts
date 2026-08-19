@@ -44,16 +44,10 @@ export interface SdmParagraphAttrs {
 }
 
 function valueAttribute(name: string, value: unknown): Record<string, string> {
-  return value === null || value === undefined
-    ? {}
-    : { [name]: JSON.stringify(value) };
+  return value === null || value === undefined ? {} : { [name]: JSON.stringify(value) };
 }
 
-function styledSpan(
-  dataName: string,
-  value: unknown,
-  style?: string,
-): DOMOutputSpec {
+function styledSpan(dataName: string, value: unknown, style?: string): DOMOutputSpec {
   return [
     'span',
     {
@@ -92,13 +86,8 @@ function parsedAttribute(node: Node | string, name: string): unknown {
   }
 }
 
-function optionalNumber(
-  value: unknown,
-  predicate: (candidate: number) => boolean,
-): number | null {
-  return typeof value === 'number' && Number.isFinite(value) && predicate(value)
-    ? value
-    : null;
+function optionalNumber(value: unknown, predicate: (candidate: number) => boolean): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && predicate(value) ? value : null;
 }
 
 function paragraphAttrsFromDOM(node: Node | string): Attrs | false {
@@ -120,28 +109,16 @@ function paragraphAttrsFromDOM(node: Node | string): Attrs | false {
     defaultRunStyle: Value.Check(RunStyleSchema, value.defaultRunStyle)
       ? value.defaultRunStyle
       : null,
-    hangingIndentPt: optionalNumber(
-      value.hangingIndentPt,
-      (candidate) => candidate >= 0,
-    ),
-    indentPt: optionalNumber(value.indentPt, (candidate) => candidate >= 0),
+    hangingIndentPt: optionalNumber(value.hangingIndentPt, candidate => candidate >= 0),
+    indentPt: optionalNumber(value.indentPt, candidate => candidate >= 0),
     level: optionalNumber(
       value.level,
-      (candidate) =>
-        Number.isInteger(candidate) && candidate >= 0 && candidate <= 8,
+      candidate => Number.isInteger(candidate) && candidate >= 0 && candidate <= 8,
     ),
-    lineHeight: optionalNumber(value.lineHeight, (candidate) => candidate > 0),
-    markerStyle: Value.Check(RunStyleSchema, value.markerStyle)
-      ? value.markerStyle
-      : null,
-    spaceAfterPt: optionalNumber(
-      value.spaceAfterPt,
-      (candidate) => candidate >= 0,
-    ),
-    spaceBeforePt: optionalNumber(
-      value.spaceBeforePt,
-      (candidate) => candidate >= 0,
-    ),
+    lineHeight: optionalNumber(value.lineHeight, candidate => candidate > 0),
+    markerStyle: Value.Check(RunStyleSchema, value.markerStyle) ? value.markerStyle : null,
+    spaceAfterPt: optionalNumber(value.spaceAfterPt, candidate => candidate >= 0),
+    spaceBeforePt: optionalNumber(value.spaceBeforePt, candidate => candidate >= 0),
     synthetic: false,
   };
 }
@@ -185,9 +162,7 @@ const paragraph: NodeSpec = {
         ? node.attrs.level
         : 0;
     const bullet: unknown = node.attrs.bullet;
-    const hasMarker =
-      isRecord(bullet) &&
-      (bullet.kind === 'character' || bullet.kind === 'number');
+    const hasMarker = isRecord(bullet) && (bullet.kind === 'character' || bullet.kind === 'number');
 
     return [
       'div',
@@ -264,9 +239,7 @@ const sizePt: MarkSpec = {
     return styledSpan(
       'data-sdm-size-pt',
       value,
-      typeof value === 'number'
-        ? `font-size: ${value * SDM_POINT_TO_UNIT}px`
-        : undefined,
+      typeof value === 'number' ? `font-size: ${value * SDM_POINT_TO_UNIT}px` : undefined,
     );
   },
 };
@@ -279,10 +252,7 @@ const weight: MarkSpec = {
       getAttrs(node) {
         const value = parsedAttribute(node, 'data-sdm-weight');
 
-        return typeof value === 'number' &&
-          Number.isInteger(value) &&
-          value >= 100 &&
-          value <= 900
+        return typeof value === 'number' && Number.isInteger(value) && value >= 100 && value <= 900
           ? { weight: value }
           : false;
       },
@@ -292,8 +262,7 @@ const weight: MarkSpec = {
     {
       style: 'font-weight',
       getAttrs(value) {
-        const parsed =
-          value === 'bold' ? 700 : Number.parseInt(String(value), 10);
+        const parsed = value === 'bold' ? 700 : Number.parseInt(String(value), 10);
 
         return Number.isInteger(parsed) ? { weight: parsed } : false;
       },
@@ -418,11 +387,7 @@ const highlight: MarkSpec = {
     const candidate: unknown = mark.attrs.color;
     const value = Value.Check(ColorSchema, candidate) ? candidate : null;
 
-    return styledSpan(
-      'data-sdm-highlight',
-      value,
-      colorStyle('background-color', value),
-    );
+    return styledSpan('data-sdm-highlight', value, colorStyle('background-color', value));
   },
 };
 
@@ -446,9 +411,7 @@ const letterSpacingPt: MarkSpec = {
     return styledSpan(
       'data-sdm-letter-spacing-pt',
       value,
-      typeof value === 'number'
-        ? `letter-spacing: ${value * SDM_POINT_TO_UNIT}px`
-        : undefined,
+      typeof value === 'number' ? `letter-spacing: ${value * SDM_POINT_TO_UNIT}px` : undefined,
     );
   },
 };
@@ -473,9 +436,7 @@ const action: MarkSpec = {
         }
         const href = node.getAttribute('href');
 
-        return href === null
-          ? false
-          : { action: { kind: 'openUrl', url: href } };
+        return href === null ? false : { action: { kind: 'openUrl', url: href } };
       },
     },
   ],

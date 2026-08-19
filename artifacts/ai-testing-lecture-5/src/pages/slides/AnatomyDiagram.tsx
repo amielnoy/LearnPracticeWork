@@ -106,14 +106,31 @@ export default function AnatomyDiagram() {
               background: 'rgba(13, 148, 136, 0.04)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Client', 'לקוח')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F' }}>
               {t('Request', 'בקשה')}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5vw', color: '#94A3B8', fontSize: '1.5vw' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 0.5vw',
+              color: '#94A3B8',
+              fontSize: '1.5vw',
+            }}
+          >
             {isHe ? '\u2190' : '\u2192'}
           </div>
           <div
@@ -124,14 +141,31 @@ export default function AnatomyDiagram() {
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#64748B', marginBottom: '1vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Your API', 'ה-API שלכם')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F' }}>
               {t('Business Logic', 'לוגיקה עסקית')}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5vw', color: '#94A3B8', fontSize: '1.5vw' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 0.5vw',
+              color: '#94A3B8',
+              fontSize: '1.5vw',
+            }}
+          >
             {isHe ? '\u2190' : '\u2192'}
           </div>
           <div
@@ -144,7 +178,16 @@ export default function AnatomyDiagram() {
               background: 'rgba(220, 38, 38, 0.03)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#DC2626', marginBottom: '1vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '1vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('AI Provider', 'ספק AI')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F' }}>
@@ -175,7 +218,15 @@ export default function AnatomyDiagram() {
               {t('Mock injection here', 'הזרקת הדמייה כאן')}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5vw', color: '#94A3B8', fontSize: '1.5vw' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 0.5vw',
+              color: '#94A3B8',
+              fontSize: '1.5vw',
+            }}
+          >
             {isHe ? '\u2190' : '\u2192'}
           </div>
           <div
@@ -188,7 +239,16 @@ export default function AnatomyDiagram() {
               background: 'rgba(13, 148, 136, 0.04)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Assembly', 'הרכבה')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F' }}>
@@ -207,7 +267,15 @@ export default function AnatomyDiagram() {
               {t('Schema check here', 'בדיקת סכמה כאן')}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5vw', color: '#94A3B8', fontSize: '1.5vw' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 0.5vw',
+              color: '#94A3B8',
+              fontSize: '1.5vw',
+            }}
+          >
             {isHe ? '\u2190' : '\u2192'}
           </div>
           <div
@@ -218,7 +286,16 @@ export default function AnatomyDiagram() {
               background: 'rgba(13, 148, 136, 0.04)',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1vh',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {t('Client', 'לקוח')}
             </div>
             <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F' }}>
@@ -239,11 +316,22 @@ export default function AnatomyDiagram() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '0.8vh', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '0.8vh',
+                textTransform: 'uppercase',
+              }}
+            >
               {t('Schema Check', 'בדיקת סכמה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Runs at response assembly — validates the payload shape before it leaves your service.', 'רץ בהרכבת התגובה — מאמת את צורת המטען לפני שהוא עוזב את השירות שלכם.')}
+              {t(
+                'Runs at response assembly — validates the payload shape before it leaves your service.',
+                'רץ בהרכבת התגובה — מאמת את צורת המטען לפני שהוא עוזב את השירות שלכם.',
+              )}
             </div>
           </div>
           <div
@@ -256,11 +344,22 @@ export default function AnatomyDiagram() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.8vh', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '0.8vh',
+                textTransform: 'uppercase',
+              }}
+            >
               {t('Latency Budget', 'תקציב זמן תגובה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Wraps the AI provider call — measures wall-clock time for the external request only.', 'עוטף את קריאת ספק ה-AI — מודד זמן שעון קיר לבקשה החיצונית בלבד.')}
+              {t(
+                'Wraps the AI provider call — measures wall-clock time for the external request only.',
+                'עוטף את קריאת ספק ה-AI — מודד זמן שעון קיר לבקשה החיצונית בלבד.',
+              )}
             </div>
           </div>
           <div
@@ -273,11 +372,22 @@ export default function AnatomyDiagram() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#D97706', marginBottom: '0.8vh', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#D97706',
+                marginBottom: '0.8vh',
+                textTransform: 'uppercase',
+              }}
+            >
               {t('Mock Injection', 'הזרקת הדמייה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Intercepts at the provider boundary — replaces the live HTTP call with a fixed fixture.', 'מיירט בגבול הספק — מחליף את קריאת ה-HTTP החיה בנקודת קיבוע קבועה.')}
+              {t(
+                'Intercepts at the provider boundary — replaces the live HTTP call with a fixed fixture.',
+                'מיירט בגבול הספק — מחליף את קריאת ה-HTTP החיה בנקודת קיבוע קבועה.',
+              )}
             </div>
           </div>
         </div>

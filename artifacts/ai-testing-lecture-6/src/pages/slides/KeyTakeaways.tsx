@@ -39,14 +39,25 @@ export default function KeyTakeaways() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -84,14 +95,22 @@ export default function KeyTakeaways() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5vw' }}>
           <div style={statCard}>
             <div
-              style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
             >
               {t('Takeaway 1', 'נקודה 1')}
             </div>
             <div style={{ fontSize: '1.8vw', fontWeight: 700, color: '#1E3A5F', lineHeight: 1.2 }}>
               {t('Shard and Cache', 'Shard ומטמון')}
             </div>
-            <div style={{ fontSize: '0.95vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}>
+            <div
+              style={{ fontSize: '0.95vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}
+            >
               {t(
                 'Keep AI tests fast and affordable enough for every PR.',
                 'שמור על בדיקות AI מהירות ומשתלמות מספיק לכל PR.',
@@ -100,14 +119,22 @@ export default function KeyTakeaways() {
           </div>
           <div style={statCard}>
             <div
-              style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
             >
               {t('Takeaway 2', 'נקודה 2')}
             </div>
             <div style={{ fontSize: '1.8vw', fontWeight: 700, color: '#1E3A5F', lineHeight: 1.2 }}>
               {t('Track Flakiness', 'עקוב אחר חוסר יציבות')}
             </div>
-            <div style={{ fontSize: '0.95vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}>
+            <div
+              style={{ fontSize: '0.95vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}
+            >
               {t(
                 "Don't silently retry past real regressions.",
                 'אל תנסה בשקט חוזר על רגרסיות אמיתיות.',
@@ -116,14 +143,22 @@ export default function KeyTakeaways() {
           </div>
           <div style={statCard}>
             <div
-              style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
             >
               {t('Takeaway 3', 'נקודה 3')}
             </div>
             <div style={{ fontSize: '1.8vw', fontWeight: 700, color: '#1E3A5F', lineHeight: 1.2 }}>
               {t('Judge Gate', 'שער שופט')}
             </div>
-            <div style={{ fontSize: '0.95vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}>
+            <div
+              style={{ fontSize: '0.95vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}
+            >
               {t(
                 'Use a rubric and a threshold, not a gut check.',
                 'השתמש ברובריקה ובסף, לא בבדיקת תחושת בטן.',
@@ -132,14 +167,22 @@ export default function KeyTakeaways() {
           </div>
           <div style={statCard}>
             <div
-              style={{ fontSize: '0.9vw', fontWeight: 600, color: '#64748B', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 600,
+                color: '#64748B',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
             >
               {t('Takeaway 4', 'נקודה 4')}
             </div>
             <div style={{ fontSize: '1.8vw', fontWeight: 700, color: '#1E3A5F', lineHeight: 1.2 }}>
               {t('Fast PR, Full Night', 'PR מהיר, לילה מלא')}
             </div>
-            <div style={{ fontSize: '0.95vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}>
+            <div
+              style={{ fontSize: '0.95vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}
+            >
               {t(
                 'Separate the fast smoke path from the full nightly suite.',
                 'הפרד את נתיב ה-smoke המהיר מהחבילה הלילית המלאה.',

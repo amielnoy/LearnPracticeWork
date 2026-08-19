@@ -117,18 +117,32 @@ export default function CaseStudyTriageAPI() {
         >
           <div style={{ color: '#64748B' }}># the endpoint</div>
           <div style={{ color: '#38BDF8' }}>POST /api/triage</div>
-          <div style={{ color: '#38BDF8' }}>{'{'} <span style={{ color: '#4ADE80' }}>"ticket_text"</span>: <span style={{ color: '#FBBF24' }}>str</span> {'}'}</div>
+          <div style={{ color: '#38BDF8' }}>
+            {'{'} <span style={{ color: '#4ADE80' }}>"ticket_text"</span>:{' '}
+            <span style={{ color: '#FBBF24' }}>str</span> {'}'}
+          </div>
           <div style={{ color: '#64748B', marginTop: '0.5vh' }}># expected response</div>
           <div style={{ color: '#38BDF8' }}>{'{'}</div>
-          <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;<span style={{ color: '#4ADE80' }}>"category"</span>: <span style={{ color: '#FBBF24' }}>str</span>,</div>
-          <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;<span style={{ color: '#4ADE80' }}>"priority"</span>: <span style={{ color: '#FBBF24' }}>"high" | "medium" | "low"</span>,</div>
-          <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;<span style={{ color: '#4ADE80' }}>"summary"</span>: <span style={{ color: '#FBBF24' }}>str</span></div>
+          <div style={{ color: '#38BDF8' }}>
+            &nbsp;&nbsp;<span style={{ color: '#4ADE80' }}>"category"</span>:{' '}
+            <span style={{ color: '#FBBF24' }}>str</span>,
+          </div>
+          <div style={{ color: '#38BDF8' }}>
+            &nbsp;&nbsp;<span style={{ color: '#4ADE80' }}>"priority"</span>:{' '}
+            <span style={{ color: '#FBBF24' }}>"high" | "medium" | "low"</span>,
+          </div>
+          <div style={{ color: '#38BDF8' }}>
+            &nbsp;&nbsp;<span style={{ color: '#4ADE80' }}>"summary"</span>:{' '}
+            <span style={{ color: '#FBBF24' }}>str</span>
+          </div>
           <div style={{ color: '#38BDF8' }}>{'}'}</div>
         </div>
       </div>
 
       {/* Right column */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}
+      >
         <div
           style={{
             background: '#FEF2F2',
@@ -138,7 +152,15 @@ export default function CaseStudyTriageAPI() {
             textAlign: isHe ? 'right' : 'left',
           }}
         >
-          <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.8vh', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              fontSize: '0.9vw',
+              fontWeight: 700,
+              color: '#DC2626',
+              marginBottom: '0.8vh',
+              textTransform: 'uppercase',
+            }}
+          >
             {t('Failure 1 \u2014 Missing Schema Field', 'כשל 1 \u2014 שדה סכמה חסר')}
           </div>
           <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
@@ -157,7 +179,15 @@ export default function CaseStudyTriageAPI() {
             textAlign: isHe ? 'right' : 'left',
           }}
         >
-          <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#D97706', marginBottom: '0.8vh', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              fontSize: '0.9vw',
+              fontWeight: 700,
+              color: '#D97706',
+              marginBottom: '0.8vh',
+              textTransform: 'uppercase',
+            }}
+          >
             {t('Failure 2 \u2014 Hallucinated Category', 'כשל 2 \u2014 קטגוריה מהלוצינציה')}
           </div>
           <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
@@ -176,8 +206,19 @@ export default function CaseStudyTriageAPI() {
             textAlign: isHe ? 'right' : 'left',
           }}
         >
-          <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.8vh', textTransform: 'uppercase' }}>
-            {t('Failure 3 \u2014 Unbudgeted Retry Loop', 'כשל 3 \u2014 לולאת ניסיון חוזר ללא תקציב')}
+          <div
+            style={{
+              fontSize: '0.9vw',
+              fontWeight: 700,
+              color: '#DC2626',
+              marginBottom: '0.8vh',
+              textTransform: 'uppercase',
+            }}
+          >
+            {t(
+              'Failure 3 \u2014 Unbudgeted Retry Loop',
+              'כשל 3 \u2014 לולאת ניסיון חוזר ללא תקציב',
+            )}
           </div>
           <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
             {t(

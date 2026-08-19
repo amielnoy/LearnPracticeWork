@@ -25,7 +25,10 @@ export default function WaitStrategiesDeepDive() {
       points: [
         t('Resolves when a specific HTTP response arrives', 'נפתר כשמגיעה תגובת HTTP ספציפית'),
         t('Synchronises at the network level, not the DOM', 'מסתנכרן ברמת הרשת, לא ה-DOM'),
-        t('Use it to gate assertions on the AI response payload', 'השתמשו בו לשערות אסרציות על מטען תגובת AI'),
+        t(
+          'Use it to gate assertions on the AI response payload',
+          'השתמשו בו לשערות אסרציות על מטען תגובת AI',
+        ),
       ],
       code: "await page.waitForResponse(r => r.url().includes('/api/chat'))",
     },
@@ -35,8 +38,14 @@ export default function WaitStrategiesDeepDive() {
       good: true,
       points: [
         t('Polls a JS predicate in the page context', 'סוקר פרדיקט JS בהקשר הדף'),
-        t('Use it to wait for a DOM attribute or text length threshold', 'השתמשו בו להמתנה ל-attribute DOM או לסף אורך טקסט'),
-        t('Respects the configured timeout — no indefinite hangs', 'מכבד את ה-timeout שהוגדר — ללא תליות בלתי מוגבלות'),
+        t(
+          'Use it to wait for a DOM attribute or text length threshold',
+          'השתמשו בו להמתנה ל-attribute DOM או לסף אורך טקסט',
+        ),
+        t(
+          'Respects the configured timeout — no indefinite hangs',
+          'מכבד את ה-timeout שהוגדר — ללא תליות בלתי מוגבלות',
+        ),
       ],
       code: "await page.waitForFunction(() => document.querySelector('[data-stream]')?.dataset.stream === 'done')",
     },
@@ -46,8 +55,14 @@ export default function WaitStrategiesDeepDive() {
       good: false,
       points: [
         t('Fixed pause: either too short or too long', 'השהייה קבועה: קצרה מדי או ארוכה מדי'),
-        t('Causes false failures on slow model responses', 'גורם לכשלים שגויים על תגובות מודל איטיות'),
-        t('Inflates suite duration needlessly on fast responses', 'מנפח את משך הסוויטה ללא צורך על תגובות מהירות'),
+        t(
+          'Causes false failures on slow model responses',
+          'גורם לכשלים שגויים על תגובות מודל איטיות',
+        ),
+        t(
+          'Inflates suite duration needlessly on fast responses',
+          'מנפח את משך הסוויטה ללא צורך על תגובות מהירות',
+        ),
       ],
       code: 'await page.waitForTimeout(3000) // ✗ avoid',
     },
@@ -149,7 +164,9 @@ export default function WaitStrategiesDeepDive() {
             padding: '2vh 1.5vw',
           }}
         >
-          <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}>
+          <div
+            style={{ fontSize: '1.1vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}
+          >
             {t('The Rule', 'הכלל')}
           </div>
           <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
@@ -162,7 +179,9 @@ export default function WaitStrategiesDeepDive() {
       </div>
 
       {/* Right column — comparison cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}
+      >
         {strategies.map((s, i) => (
           <div
             key={i}

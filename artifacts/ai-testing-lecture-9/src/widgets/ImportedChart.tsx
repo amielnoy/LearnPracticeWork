@@ -29,16 +29,7 @@ interface ImportedSeries {
 }
 
 interface ImportedChartModel {
-  type:
-    | 'bar'
-    | 'column'
-    | 'line'
-    | 'area'
-    | 'pie'
-    | 'doughnut'
-    | 'scatter'
-    | 'radar'
-    | 'bubble';
+  type: 'bar' | 'column' | 'line' | 'area' | 'pie' | 'doughnut' | 'scatter' | 'radar' | 'bubble';
   title?: string;
   series: Array<ImportedSeries>;
   grouping?: 'clustered' | 'stacked' | 'percentStacked' | 'standard';
@@ -70,11 +61,12 @@ function chartRows(chart: ImportedChartModel) {
   const percent = chart.grouping === 'percentStacked';
 
   return categories.map((category, index) => {
-    const values = chart.series.map((series) => series.values[index] ?? null);
-    const total = values.reduce(
-      (sum: number, value) => sum + Math.abs(value ?? 0),
-      0,
-    );
+    const values = chart.series.map(series => series.values[index] ?? null);
+    // Explicit generic: `values` is Array<number | null>, so with an initial
+    // value of 0 TypeScript picks the reduce overload where the accumulator
+    // is the element type — leaving `total` nullable and `100 / total` an
+    // error. Naming the result type is what pins it to a number.
+    const total = values.reduce<number>((sum, value) => sum + Math.abs(value ?? 0), 0);
     const scale = percent && total > 0 ? 100 / total : 1;
 
     return {
@@ -89,22 +81,15 @@ function chartRows(chart: ImportedChartModel) {
   });
 }
 
-export default function ImportedChart({
-  chart,
-}: {
-  chart: ImportedChartModel;
-}) {
+export default function ImportedChart({ chart }: { chart: ImportedChartModel }) {
   const isPercent = chart.grouping === 'percentStacked';
-  const stackId =
-    chart.grouping === 'stacked' || isPercent ? 'stack' : undefined;
+  const stackId = chart.grouping === 'stacked' || isPercent ? 'stack' : undefined;
   const rows = chartRows(chart);
   const common = {
     data: rows,
     margin: { top: 12, right: 20, bottom: 12, left: 4 },
   };
-  const percentTick = isPercent
-    ? (value: number) => `${value}%`
-    : undefined;
+  const percentTick = isPercent ? (value: number) => `${value}%` : undefined;
   const decorations = (
     <>
       <Tooltip animationDuration={0} />
@@ -119,9 +104,7 @@ export default function ImportedChart({
         <CartesianGrid stroke="#E2E8F0" strokeDasharray="4 4" />
         <XAxis type="number" dataKey="x" tickLine={false} axisLine={false} />
         <YAxis type="number" dataKey="y" tickLine={false} axisLine={false} />
-        {chart.type === 'bubble' ? (
-          <ZAxis dataKey="z" range={[64, 400]} />
-        ) : null}
+        {chart.type === 'bubble' ? <ZAxis dataKey="z" range={[64, 400]} /> : null}
         {decorations}
         {chart.series.map((series, index) => (
           <Scatter
@@ -131,14 +114,8 @@ export default function ImportedChart({
               const x = series.xValues?.length
                 ? (series.xValues[pointIndex] ?? null)
                 : pointIndex + 1;
-              const z = series.bubbleSizes?.length
-                ? (series.bubbleSizes[pointIndex] ?? null)
-                : 1;
-              if (
-                y === null ||
-                x === null ||
-                (chart.type === 'bubble' && z === null)
-              ) {
+              const z = series.bubbleSizes?.length ? (series.bubbleSizes[pointIndex] ?? null) : 1;
+              if (y === null || x === null || (chart.type === 'bubble' && z === null)) {
                 return [];
               }
 
@@ -153,11 +130,7 @@ export default function ImportedChart({
   } else if (chart.type === 'line') {
     graphic = (
       <LineChart {...common}>
-        <CartesianGrid
-          stroke="#E2E8F0"
-          strokeDasharray="4 4"
-          vertical={false}
-        />
+        <CartesianGrid stroke="#E2E8F0" strokeDasharray="4 4" vertical={false} />
         <XAxis dataKey="category" tickLine={false} axisLine={false} />
         <YAxis tickLine={false} axisLine={false} tickFormatter={percentTick} />
         {decorations}
@@ -177,11 +150,7 @@ export default function ImportedChart({
   } else if (chart.type === 'area') {
     graphic = (
       <AreaChart {...common}>
-        <CartesianGrid
-          stroke="#E2E8F0"
-          strokeDasharray="4 4"
-          vertical={false}
-        />
+        <CartesianGrid stroke="#E2E8F0" strokeDasharray="4 4" vertical={false} />
         <XAxis dataKey="category" tickLine={false} axisLine={false} />
         <YAxis tickLine={false} axisLine={false} tickFormatter={percentTick} />
         {decorations}
@@ -214,19 +183,12 @@ export default function ImportedChart({
           data={data}
           dataKey="value"
           nameKey="name"
-          innerRadius={
-            chart.type === 'doughnut'
-              ? `${Math.min(chart.holeSize ?? 50, 75)}%`
-              : 0
-          }
+          innerRadius={chart.type === 'doughnut' ? `${Math.min(chart.holeSize ?? 50, 75)}%` : 0}
           outerRadius="80%"
           isAnimationActive={false}
         >
           {data.map((entry, index) => (
-            <Cell
-              key={`${entry.name}-${index}`}
-              fill={palette[index % palette.length]}
-            />
+            <Cell key={`${entry.name}-${index}`} fill={palette[index % palette.length]} />
           ))}
         </Pie>
       </PieChart>
@@ -234,23 +196,9 @@ export default function ImportedChart({
   } else if (chart.type === 'bar') {
     graphic = (
       <BarChart {...common} layout="vertical">
-        <CartesianGrid
-          stroke="#E2E8F0"
-          strokeDasharray="4 4"
-          horizontal={false}
-        />
-        <XAxis
-          type="number"
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={percentTick}
-        />
-        <YAxis
-          type="category"
-          dataKey="category"
-          tickLine={false}
-          axisLine={false}
-        />
+        <CartesianGrid stroke="#E2E8F0" strokeDasharray="4 4" horizontal={false} />
+        <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={percentTick} />
+        <YAxis type="category" dataKey="category" tickLine={false} axisLine={false} />
         {decorations}
         {chart.series.map((series, index) => (
           <Bar
@@ -271,11 +219,7 @@ export default function ImportedChart({
     }
     graphic = (
       <BarChart {...common}>
-        <CartesianGrid
-          stroke="#E2E8F0"
-          strokeDasharray="4 4"
-          vertical={false}
-        />
+        <CartesianGrid stroke="#E2E8F0" strokeDasharray="4 4" vertical={false} />
         <XAxis dataKey="category" tickLine={false} axisLine={false} />
         <YAxis tickLine={false} axisLine={false} tickFormatter={percentTick} />
         {decorations}

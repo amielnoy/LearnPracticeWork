@@ -234,7 +234,10 @@ export default function WhyGradingIsHard() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Exact-match scoring rejects valid paraphrases', 'ציון התאמה מדויקת דוחה פרפרזות תקפות')}
+                {t(
+                  'Exact-match scoring rejects valid paraphrases',
+                  'ציון התאמה מדויקת דוחה פרפרזות תקפות',
+                )}
               </div>
             </div>
             <div

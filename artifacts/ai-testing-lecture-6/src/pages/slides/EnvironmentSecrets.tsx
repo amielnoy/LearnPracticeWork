@@ -39,14 +39,25 @@ export default function EnvironmentSecrets() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -93,7 +104,14 @@ export default function EnvironmentSecrets() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Encrypted repository secrets', 'סודות repository מוצפנים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -104,7 +122,14 @@ export default function EnvironmentSecrets() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Scope to the workflow that needs the key', 'הגבל scope לצינור שצריך את המפתח')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -115,7 +140,14 @@ export default function EnvironmentSecrets() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Never echo secrets into logs', 'לעולם לא להדפיס סודות ל-logs')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -173,21 +205,42 @@ export default function EnvironmentSecrets() {
             <div style={{ color: '#E2E8F0', paddingLeft: '3vw' }}>steps:</div>
             <div style={{ color: '#94A3B8', paddingLeft: '4.5vw' }}>- name: Run AI test suite</div>
             <div style={{ color: '#FBBF24', paddingLeft: '6vw' }}>env:</div>
-            <div style={{ color: '#38BDF8', paddingLeft: '7.5vw' }}>{'OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}'}</div>
+            <div style={{ color: '#38BDF8', paddingLeft: '7.5vw' }}>
+              {'OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}'}
+            </div>
             <div style={{ color: '#2DD4BF', paddingLeft: '6vw' }}>run: pytest tests/ai</div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1vh', textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1vh',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#64748B' }}>
               <span style={{ color: '#0D9488', fontWeight: 700 }}>&#x2192;</span>
-              <span>{t('Secret lives only in that step\'s environment', 'הסוד קיים רק בסביבת אותו צעד')}</span>
+              <span>
+                {t("Secret lives only in that step's environment", 'הסוד קיים רק בסביבת אותו צעד')}
+              </span>
             </div>
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#64748B' }}>
               <span style={{ color: '#0D9488', fontWeight: 700 }}>&#x2192;</span>
-              <span>{t('Other steps in the same job cannot read it', 'צעדים אחרים באותה משימה לא יכולים לקרוא אותו')}</span>
+              <span>
+                {t(
+                  'Other steps in the same job cannot read it',
+                  'צעדים אחרים באותה משימה לא יכולים לקרוא אותו',
+                )}
+              </span>
             </div>
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#DC2626' }}>
               <span style={{ fontWeight: 700 }}>&#x2717;</span>
-              <span>{t('Never: OPENAI_API_KEY: my-key-here in YAML', 'לעולם לא: OPENAI_API_KEY: my-key-here ב-YAML')}</span>
+              <span>
+                {t(
+                  'Never: OPENAI_API_KEY: my-key-here in YAML',
+                  'לעולם לא: OPENAI_API_KEY: my-key-here ב-YAML',
+                )}
+              </span>
             </div>
           </div>
         </div>

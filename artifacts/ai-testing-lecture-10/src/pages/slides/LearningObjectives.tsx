@@ -39,12 +39,27 @@ export default function LearningObjectives() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI TESTING STRATEGY', 'אסטרטגיית בדיקות AI')}</div>
           <div>{t('LECTURE 10', 'הרצאה 10')}</div>
         </div>
@@ -98,19 +113,39 @@ export default function LearningObjectives() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Design a layered testing strategy', 'תכנון אסטרטגיית בדיקות בשכבות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Map each AI feature to the right test layer — unit, integration, system, or production.', 'מיפוי כל תכונת AI לשכבת הבדיקה הנכונה — יחידה, אינטגרציה, מערכת או ייצור.')}
+              {t(
+                'Map each AI feature to the right test layer — unit, integration, system, or production.',
+                'מיפוי כל תכונת AI לשכבת הבדיקה הנכונה — יחידה, אינטגרציה, מערכת או ייצור.',
+              )}
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Build a quality scorecard', 'בניית כרטיס ניקוד איכות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Combine accuracy, cost, latency, and security into one actionable number per release.', 'שילוב דיוק, עלות, זמן אחזור ואבטחה למספר פעיל אחד לכל גרסה.')}
+              {t(
+                'Combine accuracy, cost, latency, and security into one actionable number per release.',
+                'שילוב דיוק, עלות, זמן אחזור ואבטחה למספר פעיל אחד לכל גרסה.',
+              )}
             </div>
           </div>
         </div>
@@ -146,31 +181,86 @@ export default function LearningObjectives() {
           >
             {t('Also in this lecture', 'גם בהרצאה זו')}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', position: 'relative' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', position: 'relative' }}
+          >
+            <div
+              style={
+                {
+                  position: 'absolute',
+                  [isHe ? 'right' : 'left']: '0.5vw',
+                  top: '2vh',
+                  bottom: '2vh',
+                  width: '2px',
+                  backgroundColor: '#E2E8F0',
+                } as React.CSSProperties
+              }
+            />
             <div
               style={{
-                position: 'absolute',
-                [isHe ? 'right' : 'left']: '0.5vw',
-                top: '2vh',
-                bottom: '2vh',
-                width: '2px',
-                backgroundColor: '#E2E8F0',
-              } as React.CSSProperties}
-            />
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
                 {t('Create a team-wide rollout plan', 'יצירת תוכנית גלגול לכל הצוות')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
                 {t('Operate dashboards for stakeholders', 'הפעלת לוחות מחוונים לבעלי עניין')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '1vw', height: '1vw', backgroundColor: '#0D9488', borderRadius: '50%', border: '4px solid #FFFFFF', boxShadow: '0 0 0 1px #E2E8F0' }} />
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <div
+                style={{
+                  width: '1vw',
+                  height: '1vw',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '50%',
+                  border: '4px solid #FFFFFF',
+                  boxShadow: '0 0 0 1px #E2E8F0',
+                }}
+              />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
                 {t('Assess and advance team maturity', 'הערכת בגרות הצוות והתקדמותה')}
               </div>

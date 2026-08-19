@@ -100,7 +100,7 @@ export default function TitleSlide() {
           }}
         >
           {t(
-            "Your model\u2019s answer sounds right \u2014 but how do you actually prove it\u2019s correct, safe, and well-formed?",
+            'Your model\u2019s answer sounds right \u2014 but how do you actually prove it\u2019s correct, safe, and well-formed?',
             'התשובה של המודל נשמעת נכונה \u2014 אבל כיצד מוכיחים בפועל שהיא מדויקת, בטוחה ומובנית כראוי?',
           )}
         </p>
@@ -210,7 +210,7 @@ export default function TitleSlide() {
           }}
         >
           <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#1E3A5F' }}>
-            {t("Today\u2019s Roadmap", 'מפת הדרך להיום')}
+            {t('Today\u2019s Roadmap', 'מפת הדרך להיום')}
           </div>
 
           <div

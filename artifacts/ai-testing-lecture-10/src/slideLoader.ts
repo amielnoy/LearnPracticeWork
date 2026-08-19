@@ -10,8 +10,10 @@ export interface LoadedSlide extends SlideEntry {
   Component: ComponentType;
 }
 
-const slideModules: Record<string, { default: ComponentType }> =
-  import.meta.glob('./pages/slides/*.tsx', { eager: true });
+const slideModules: Record<string, { default: ComponentType }> = import.meta.glob(
+  './pages/slides/*.tsx',
+  { eager: true },
+);
 
 const sdmModules: Record<string, { default: unknown }> = import.meta.glob(
   './data/slides/*.sdm.json',
@@ -25,9 +27,7 @@ function loadManifestSlides(): SlideEntry[] {
   }
 
   const firstIssue = parsed.issues[0];
-  const issuePath = firstIssue?.path
-    ? firstIssue.path.slice(1).replaceAll('/', '.')
-    : 'manifest';
+  const issuePath = firstIssue?.path ? firstIssue.path.slice(1).replaceAll('/', '.') : 'manifest';
   throw new Error(
     `Invalid slide manifest. Run "pnpm run validate-slides" for details. ` +
       `Invalid manifest at ${issuePath}: ${firstIssue?.message}`,
@@ -65,7 +65,7 @@ const manifestSlides = loadManifestSlides();
 
 export const slides: LoadedSlide[] = [...manifestSlides]
   .sort((a, b) => a.position - b.position)
-  .map((entry) => {
+  .map(entry => {
     if (entry.kind === 'sdm') {
       const filename = `${entry.id}.sdm.json`;
       const expectedPath = `src/data/slides/${filename}`;

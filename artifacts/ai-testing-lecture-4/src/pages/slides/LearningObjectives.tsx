@@ -162,7 +162,7 @@ export default function LearningObjectives() {
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
-                "Target stable roles and test IDs so selectors survive changing AI output, not just today\u2019s response.",
+                'Target stable roles and test IDs so selectors survive changing AI output, not just today\u2019s response.',
                 'מיקוד ב-roles ו-test IDs יציבים כך שסלקטורים שורדים שינויי פלט AI, לא רק את התגובה של היום.',
               )}
             </div>
@@ -235,7 +235,10 @@ export default function LearningObjectives() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Why traditional E2E tests fail on AI UIs', 'מדוע בדיקות E2E מסורתיות כושלות ב-UI של AI')}
+                {t(
+                  'Why traditional E2E tests fail on AI UIs',
+                  'מדוע בדיקות E2E מסורתיות כושלות ב-UI של AI',
+                )}
               </div>
             </div>
             <div
@@ -281,7 +284,10 @@ export default function LearningObjectives() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Loading, error, and edge-state assertions', 'אסרציות על מצבי טעינה, שגיאה וקצה')}
+                {t(
+                  'Loading, error, and edge-state assertions',
+                  'אסרציות על מצבי טעינה, שגיאה וקצה',
+                )}
               </div>
             </div>
             <div

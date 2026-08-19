@@ -1,10 +1,4 @@
-import type {
-  Element,
-  Frame,
-  Paragraph,
-  SlideDocument,
-  TextBody,
-} from './schema';
+import type { Element, Frame, Paragraph, SlideDocument, TextBody } from './schema';
 
 function mapElementTree(
   elements: Array<Element>,
@@ -12,7 +6,7 @@ function mapElementTree(
   update: (element: Element) => Element,
 ): { elements: Array<Element>; changed: boolean } {
   let changed = false;
-  const next = elements.map((element) => {
+  const next = elements.map(element => {
     if (element.id === elementId) {
       const updated = update(element);
       if (updated !== element) {
@@ -34,10 +28,7 @@ function mapElementTree(
   return { elements: changed ? next : elements, changed };
 }
 
-export function findElement(
-  document: SlideDocument,
-  elementId: string,
-): Element | undefined {
+export function findElement(document: SlideDocument, elementId: string): Element | undefined {
   const visit = (elements: Array<Element>): Element | undefined => {
     for (const element of elements) {
       if (element.id === elementId) {
@@ -79,12 +70,7 @@ function jsonEqual(left: unknown, right: unknown): boolean {
       left.every((item, index) => jsonEqual(item, right[index]))
     );
   }
-  if (
-    typeof left !== 'object' ||
-    typeof right !== 'object' ||
-    left === null ||
-    right === null
-  ) {
+  if (typeof left !== 'object' || typeof right !== 'object' || left === null || right === null) {
     return false;
   }
   const leftKeys = definedKeys(left);
@@ -93,20 +79,15 @@ function jsonEqual(left: unknown, right: unknown): boolean {
   return (
     leftKeys.length === rightKeys.length &&
     leftKeys.every(
-      (key) =>
+      key =>
         Object.hasOwn(right, key) &&
-        jsonEqual(
-          (left as Record<string, unknown>)[key],
-          (right as Record<string, unknown>)[key],
-        ),
+        jsonEqual((left as Record<string, unknown>)[key], (right as Record<string, unknown>)[key]),
     )
   );
 }
 
 function definedKeys(value: object): Array<string> {
-  return Object.keys(value).filter(
-    (key) => (value as Record<string, unknown>)[key] !== undefined,
-  );
+  return Object.keys(value).filter(key => (value as Record<string, unknown>)[key] !== undefined);
 }
 
 function sameFrame(left: Frame, right: Frame): boolean {
@@ -123,7 +104,7 @@ export function setElementFrame(
   elementId: string,
   frame: Frame,
 ): SlideDocument {
-  return updateElement(document, elementId, (element) =>
+  return updateElement(document, elementId, element =>
     sameFrame(element.frame, frame) ? element : { ...element, frame },
   );
 }
@@ -144,11 +125,8 @@ export function setText(
   elementId: string,
   paragraphs: Array<Paragraph>,
 ): SlideDocument {
-  return updateElement(document, elementId, (element) => {
-    if (
-      element.type === 'text' &&
-      !jsonEqual(element.body.paragraphs, paragraphs)
-    ) {
+  return updateElement(document, elementId, element => {
+    if (element.type === 'text' && !jsonEqual(element.body.paragraphs, paragraphs)) {
       return { ...element, body: { ...element.body, paragraphs } };
     }
     if (
@@ -163,20 +141,12 @@ export function setText(
   });
 }
 
-export function addElement(
-  document: SlideDocument,
-  element: Element,
-): SlideDocument {
+export function addElement(document: SlideDocument, element: Element): SlideDocument {
   return { ...document, elements: [...document.elements, element] };
 }
 
-export function removeElement(
-  document: SlideDocument,
-  elementId: string,
-): SlideDocument {
-  const remove = (
-    elements: Array<Element>,
-  ): { elements: Array<Element>; changed: boolean } => {
+export function removeElement(document: SlideDocument, elementId: string): SlideDocument {
+  const remove = (elements: Array<Element>): { elements: Array<Element>; changed: boolean } => {
     let changed = false;
     const next: Array<Element> = [];
     for (const element of elements) {
@@ -207,16 +177,11 @@ export function reorderRootElement(
   elementId: string,
   destinationIndex: number,
 ): SlideDocument {
-  const sourceIndex = document.elements.findIndex(
-    (element) => element.id === elementId,
-  );
+  const sourceIndex = document.elements.findIndex(element => element.id === elementId);
   if (sourceIndex === -1 || document.elements[sourceIndex].locked) {
     return document;
   }
-  const index = Math.max(
-    0,
-    Math.min(destinationIndex, document.elements.length - 1),
-  );
+  const index = Math.max(0, Math.min(destinationIndex, document.elements.length - 1));
   if (index === sourceIndex) {
     return document;
   }
@@ -227,17 +192,11 @@ export function reorderRootElement(
   return { ...document, elements: next };
 }
 
-export function bringToFront(
-  document: SlideDocument,
-  elementId: string,
-): SlideDocument {
+export function bringToFront(document: SlideDocument, elementId: string): SlideDocument {
   return reorderRootElement(document, elementId, document.elements.length - 1);
 }
 
-export function sendToBack(
-  document: SlideDocument,
-  elementId: string,
-): SlideDocument {
+export function sendToBack(document: SlideDocument, elementId: string): SlideDocument {
   return reorderRootElement(document, elementId, 0);
 }
 
@@ -247,9 +206,7 @@ export function normalizeRootElementIds(
 ): Array<string> {
   const requested = new Set(elementIds);
 
-  return document.elements
-    .filter((element) => requested.has(element.id))
-    .map((element) => element.id);
+  return document.elements.filter(element => requested.has(element.id)).map(element => element.id);
 }
 
 export function getRootElements(
@@ -258,15 +215,11 @@ export function getRootElements(
 ): Array<Element> {
   const normalized = new Set(normalizeRootElementIds(document, elementIds));
 
-  return document.elements.filter((element) => normalized.has(element.id));
+  return document.elements.filter(element => normalized.has(element.id));
 }
 
-export function selectAllRootElementIds(
-  document: SlideDocument,
-): Array<string> {
-  return document.elements
-    .filter((element) => !element.hidden)
-    .map((element) => element.id);
+export function selectAllRootElementIds(document: SlideDocument): Array<string> {
+  return document.elements.filter(element => !element.hidden).map(element => element.id);
 }
 
 export interface RootPointerSelectionPlan {
@@ -286,7 +239,7 @@ export function planRootPointerSelection(
   }
   if (additive) {
     const next = current.includes(clickedId)
-      ? current.filter((elementId) => elementId !== clickedId)
+      ? current.filter(elementId => elementId !== clickedId)
       : [...current, clickedId];
 
     return { selectedIds: normalizeRootElementIds(document, next) };
@@ -303,14 +256,11 @@ function mutableRootSelection(
   elementIds: Array<string>,
 ): Set<string> | null {
   const selectedElements = getRootElements(document, elementIds);
-  if (
-    selectedElements.length === 0 ||
-    selectedElements.some((element) => element.locked)
-  ) {
+  if (selectedElements.length === 0 || selectedElements.some(element => element.locked)) {
     return null;
   }
 
-  return new Set(selectedElements.map((element) => element.id));
+  return new Set(selectedElements.map(element => element.id));
 }
 
 export function translateRootElements(
@@ -329,7 +279,7 @@ export function translateRootElements(
 
   return {
     ...document,
-    elements: document.elements.map((element) =>
+    elements: document.elements.map(element =>
       selected.has(element.id)
         ? {
             ...element,
@@ -355,24 +305,16 @@ export function removeRootElements(
 
   return {
     ...document,
-    elements: document.elements.filter((element) => !selected.has(element.id)),
+    elements: document.elements.filter(element => !selected.has(element.id)),
   };
 }
 
 function sameRootOrder(left: Array<Element>, right: Array<Element>): boolean {
-  return (
-    left.length === right.length &&
-    left.every((element, index) => element === right[index])
-  );
+  return left.length === right.length && left.every((element, index) => element === right[index]);
 }
 
-function withRootOrder(
-  document: SlideDocument,
-  next: Array<Element>,
-): SlideDocument {
-  return sameRootOrder(document.elements, next)
-    ? document
-    : { ...document, elements: next };
+function withRootOrder(document: SlideDocument, next: Array<Element>): SlideDocument {
+  return sameRootOrder(document.elements, next) ? document : { ...document, elements: next };
 }
 
 export function bringRootElementsToFront(
@@ -383,12 +325,8 @@ export function bringRootElementsToFront(
   if (!selected) {
     return document;
   }
-  const unselected = document.elements.filter(
-    (element) => !selected.has(element.id),
-  );
-  const selectedInOrder = document.elements.filter((element) =>
-    selected.has(element.id),
-  );
+  const unselected = document.elements.filter(element => !selected.has(element.id));
+  const selectedInOrder = document.elements.filter(element => selected.has(element.id));
 
   return withRootOrder(document, [...unselected, ...selectedInOrder]);
 }
@@ -401,12 +339,8 @@ export function sendRootElementsToBack(
   if (!selected) {
     return document;
   }
-  const selectedInOrder = document.elements.filter((element) =>
-    selected.has(element.id),
-  );
-  const unselected = document.elements.filter(
-    (element) => !selected.has(element.id),
-  );
+  const selectedInOrder = document.elements.filter(element => selected.has(element.id));
+  const unselected = document.elements.filter(element => !selected.has(element.id));
 
   return withRootOrder(document, [...selectedInOrder, ...unselected]);
 }
@@ -499,8 +433,8 @@ export function duplicateRootElements(
     }
   };
   const clones = document.elements
-    .filter((element) => selected.has(element.id))
-    .map((source) => {
+    .filter(element => selected.has(element.id))
+    .map(source => {
       const clone = structuredClone(source);
       rename(clone);
       clone.frame = {
@@ -514,7 +448,7 @@ export function duplicateRootElements(
 
   return {
     document: { ...document, elements: [...document.elements, ...clones] },
-    newIds: clones.map((clone) => clone.id),
+    newIds: clones.map(clone => clone.id),
   };
 }
 
@@ -554,7 +488,7 @@ export function groupRootElements(
 ): { document: SlideDocument; groupId: string } | null {
   const selectedIds = normalizeRootElementIds(document, elementIds);
   const selected = getRootElements(document, selectedIds);
-  if (selected.length < 2 || selected.some((element) => element.locked)) {
+  if (selected.length < 2 || selected.some(element => element.locked)) {
     return null;
   }
   const bounds = selected.reduce(
@@ -570,7 +504,7 @@ export function groupRootElements(
     height: Math.ceil(snapNearInteger(bounds.y + bounds.height)) - top,
   };
   const groupId = nextId(document, 'group');
-  const children = selected.map((element) => ({
+  const children = selected.map(element => ({
     ...element,
     frame: {
       ...element.frame,
@@ -588,18 +522,13 @@ export function groupRootElements(
   };
   const selectedSet = new Set(selectedIds);
   const frontmostIndex = Math.max(
-    ...document.elements.map((element, index) =>
-      selectedSet.has(element.id) ? index : -1,
-    ),
+    ...document.elements.map((element, index) => (selectedSet.has(element.id) ? index : -1)),
   );
   const insertionIndex =
     frontmostIndex -
-    document.elements
-      .slice(0, frontmostIndex)
-      .filter((element) => selectedSet.has(element.id)).length;
-  const remaining = document.elements.filter(
-    (element) => !selectedSet.has(element.id),
-  );
+    document.elements.slice(0, frontmostIndex).filter(element => selectedSet.has(element.id))
+      .length;
+  const remaining = document.elements.filter(element => !selectedSet.has(element.id));
   remaining.splice(insertionIndex, 0, group);
 
   return { document: { ...document, elements: remaining }, groupId };
@@ -625,14 +554,12 @@ export function ungroupRootElement(
   document: SlideDocument,
   groupId: string,
 ): { document: SlideDocument; elementIds: Array<string> } | null {
-  const index = document.elements.findIndex(
-    (element) => element.id === groupId,
-  );
+  const index = document.elements.findIndex(element => element.id === groupId);
   const group = document.elements[index];
   if (index < 0 || !canUngroupRootElement(group) || group.type !== 'group') {
     return null;
   }
-  const children = group.children.map((child) => {
+  const children = group.children.map(child => {
     const root = {
       ...child,
       frame: {
@@ -649,6 +576,6 @@ export function ungroupRootElement(
 
   return {
     document: { ...document, elements: next },
-    elementIds: children.map((child) => child.id),
+    elementIds: children.map(child => child.id),
   };
 }

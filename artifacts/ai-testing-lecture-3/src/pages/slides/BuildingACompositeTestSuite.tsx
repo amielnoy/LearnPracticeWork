@@ -131,7 +131,14 @@ export default function BuildingACompositeTestSuite() {
           <div style={card}>
             <div style={badge}>1</div>
             <div>
-              <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1.15vw',
+                  fontWeight: 600,
+                  color: '#1E3A5F',
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {t('Semantic Similarity Check', 'בדיקת דמיון סמנטי')}
               </div>
               <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -145,7 +152,14 @@ export default function BuildingACompositeTestSuite() {
           <div style={card}>
             <div style={badge}>2</div>
             <div>
-              <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1.15vw',
+                  fontWeight: 600,
+                  color: '#1E3A5F',
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {t('Factuality Check', 'בדיקת עובדתיות')}
               </div>
               <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -159,7 +173,14 @@ export default function BuildingACompositeTestSuite() {
           <div style={card}>
             <div style={badge}>3</div>
             <div>
-              <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1.15vw',
+                  fontWeight: 600,
+                  color: '#1E3A5F',
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {t('Schema Validation', 'אימות סכמה')}
               </div>
               <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>

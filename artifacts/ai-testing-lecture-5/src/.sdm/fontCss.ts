@@ -11,9 +11,7 @@ export function ensureRegistryFontsStylesheet(): void {
   if (typeof document === 'undefined') {
     return;
   }
-  if (
-    document.head.querySelector(`link[${REGISTRY_FONTS_ATTRIBUTE}]`) !== null
-  ) {
+  if (document.head.querySelector(`link[${REGISTRY_FONTS_ATTRIBUTE}]`) !== null) {
     return;
   }
   const link = document.createElement('link');

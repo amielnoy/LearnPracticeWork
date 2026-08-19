@@ -30,13 +30,8 @@ export interface SdmTextCssStyle {
   whiteSpace?: 'pre-wrap';
 }
 
-function themeValue(
-  record: Record<string, string> | undefined,
-  token: string,
-): string | undefined {
-  return record !== undefined && Object.hasOwn(record, token)
-    ? record[token]
-    : undefined;
+function themeValue(record: Record<string, string> | undefined, token: string): string | undefined {
+  return record !== undefined && Object.hasOwn(record, token) ? record[token] : undefined;
 }
 
 export function resolveTextColor(color: Color, theme?: Theme): string {
@@ -47,15 +42,11 @@ export function resolveTextColor(color: Color, theme?: Theme): string {
   return themeValue(theme?.colors, color.token) ?? '#000000';
 }
 
-export function resolveTextFont(
-  font: Font | undefined,
-  theme?: Theme,
-): string | undefined {
+export function resolveTextFont(font: Font | undefined, theme?: Theme): string | undefined {
   if (font === undefined) {
     return undefined;
   }
-  const family =
-    font.kind === 'family' ? font.family : themeValue(theme?.fonts, font.token);
+  const family = font.kind === 'family' ? font.family : themeValue(theme?.fonts, font.token);
   if (family === undefined) {
     return undefined;
   }
@@ -63,37 +54,22 @@ export function resolveTextFont(
   return fontFamilyCss(family) ?? family;
 }
 
-export function runStylePropertyCss(
-  style: Partial<RunStyle>,
-  theme?: Theme,
-): SdmTextCssStyle {
-  const hasTextDecoration =
-    Object.hasOwn(style, 'underline') || Object.hasOwn(style, 'strike');
+export function runStylePropertyCss(style: Partial<RunStyle>, theme?: Theme): SdmTextCssStyle {
+  const hasTextDecoration = Object.hasOwn(style, 'underline') || Object.hasOwn(style, 'strike');
 
   return {
-    ...(style.color === undefined
-      ? {}
-      : { color: resolveTextColor(style.color, theme) }),
+    ...(style.color === undefined ? {} : { color: resolveTextColor(style.color, theme) }),
     ...(style.highlight === undefined
       ? {}
       : { backgroundColor: resolveTextColor(style.highlight, theme) }),
-    ...(style.font === undefined
-      ? {}
-      : { fontFamily: resolveTextFont(style.font, theme) }),
-    ...(style.sizePt === undefined
-      ? {}
-      : { fontSize: `${style.sizePt * SDM_POINT_TO_UNIT}px` }),
+    ...(style.font === undefined ? {} : { fontFamily: resolveTextFont(style.font, theme) }),
+    ...(style.sizePt === undefined ? {} : { fontSize: `${style.sizePt * SDM_POINT_TO_UNIT}px` }),
     ...(style.weight === undefined ? {} : { fontWeight: style.weight }),
-    ...(style.italic === undefined
-      ? {}
-      : { fontStyle: style.italic ? 'italic' : 'normal' }),
+    ...(style.italic === undefined ? {} : { fontStyle: style.italic ? 'italic' : 'normal' }),
     ...(hasTextDecoration
       ? {
           textDecoration:
-            [
-              style.underline ? 'underline' : '',
-              style.strike ? 'line-through' : '',
-            ]
+            [style.underline ? 'underline' : '', style.strike ? 'line-through' : '']
               .filter(Boolean)
               .join(' ') || 'none',
         }
@@ -106,10 +82,7 @@ export function runStylePropertyCss(
   };
 }
 
-export function effectiveRunStyleCss(
-  style: RunStyle,
-  theme?: Theme,
-): SdmTextCssStyle {
+export function effectiveRunStyleCss(style: RunStyle, theme?: Theme): SdmTextCssStyle {
   return {
     fontSize: `${(style.sizePt ?? SDM_DEFAULT_TEXT_SIZE_PT) * SDM_POINT_TO_UNIT}px`,
     whiteSpace: 'pre-wrap',
@@ -117,16 +90,12 @@ export function effectiveRunStyleCss(
   };
 }
 
-export function paragraphLayoutCss(
-  paragraph: EffectiveParagraph,
-): SdmTextCssStyle {
+export function paragraphLayoutCss(paragraph: EffectiveParagraph): SdmTextCssStyle {
   return {
     textAlign: paragraph.align,
     lineHeight: paragraph.lineHeight,
     paddingLeft:
-      paragraph.indentPt === 0
-        ? undefined
-        : `${paragraph.indentPt * SDM_POINT_TO_UNIT}px`,
+      paragraph.indentPt === 0 ? undefined : `${paragraph.indentPt * SDM_POINT_TO_UNIT}px`,
     textIndent:
       paragraph.hangingIndentPt === 0
         ? undefined
@@ -136,16 +105,11 @@ export function paragraphLayoutCss(
         ? undefined
         : `${paragraph.spaceBeforePt * SDM_POINT_TO_UNIT}px`,
     marginBottom:
-      paragraph.spaceAfterPt === 0
-        ? undefined
-        : `${paragraph.spaceAfterPt * SDM_POINT_TO_UNIT}px`,
+      paragraph.spaceAfterPt === 0 ? undefined : `${paragraph.spaceAfterPt * SDM_POINT_TO_UNIT}px`,
   };
 }
 
-export function paragraphMarkerCss(
-  paragraph: EffectiveParagraph,
-  theme?: Theme,
-): SdmTextCssStyle {
+export function paragraphMarkerCss(paragraph: EffectiveParagraph, theme?: Theme): SdmTextCssStyle {
   return {
     ...effectiveRunStyleCss(
       {

@@ -10,36 +10,36 @@ import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import { Value } from '@sinclair/typebox/value';
 import type { SdmTextCommand } from './core/protocol';
 import {
-    BulletSchema,
-    RunStyleSchema,
-    type Paragraph,
-    type TextBody,
-    type Theme,
+  BulletSchema,
+  RunStyleSchema,
+  type Paragraph,
+  type TextBody,
+  type Theme,
 } from './core/schema';
 import {
-    backspaceParagraphFormatting,
-    createParagraphMarkerPlugin,
-    docToTextBodyWithReuse,
-    effectiveParagraph,
-    effectiveRunStyleCss,
-    formattingContinuityPlugin,
-    indentParagraphs,
-    initializeFormattingContinuity,
-    outdentParagraphs,
-    paragraphLayoutCss,
-    runStyleFromMarks,
-    runStylePropertyCss,
-    sdmTextSchema,
-    selectionFormatting,
-    setBulletProperties,
-    setParagraphAlignment,
-    setParagraphSpacing,
-    setRunStyle,
-    splitSdmParagraph,
-    textBodyToDoc,
-    toggleCharacterBullets,
-    toggleNumberedBullets,
-    type SdmSelectionFormatting,
+  backspaceParagraphFormatting,
+  createParagraphMarkerPlugin,
+  docToTextBodyWithReuse,
+  effectiveParagraph,
+  effectiveRunStyleCss,
+  formattingContinuityPlugin,
+  indentParagraphs,
+  initializeFormattingContinuity,
+  outdentParagraphs,
+  paragraphLayoutCss,
+  runStyleFromMarks,
+  runStylePropertyCss,
+  sdmTextSchema,
+  selectionFormatting,
+  setBulletProperties,
+  setParagraphAlignment,
+  setParagraphSpacing,
+  setRunStyle,
+  splitSdmParagraph,
+  textBodyToDoc,
+  toggleCharacterBullets,
+  toggleNumberedBullets,
+  type SdmSelectionFormatting,
 } from './core/text';
 
 export interface SdmTextCaretPoint {
@@ -53,16 +53,12 @@ export interface SdmTextEditorOptions {
   onCommit: (body: TextBody) => void;
   onSelectionChange: (formatting: SdmSelectionFormatting) => void;
   registerCommitHandler: (handler: () => void) => () => void;
-  registerPlacementHandler: (
-    handler: (point: SdmTextCaretPoint) => void,
-  ) => () => void;
+  registerPlacementHandler: (handler: (point: SdmTextCaretPoint) => void) => () => void;
   /**
    * Receives the handler that applies workspace-routed text commands to the
    * live view; returns an unregister callback invoked on unmount.
    */
-  registerCommandHandler: (
-    handler: (command: SdmTextCommand) => boolean,
-  ) => () => void;
+  registerCommandHandler: (handler: (command: SdmTextCommand) => boolean) => () => void;
 }
 
 interface Props extends SdmTextEditorOptions {
@@ -71,10 +67,7 @@ interface Props extends SdmTextEditorOptions {
   theme: Theme | undefined;
 }
 
-function applyCss(
-  element: HTMLElement,
-  style: ReturnType<typeof effectiveRunStyleCss>,
-): void {
+function applyCss(element: HTMLElement, style: ReturnType<typeof effectiveRunStyleCss>): void {
   element.removeAttribute('style');
   for (const [property, value] of Object.entries(style)) {
     if (value !== undefined) {
@@ -99,9 +92,7 @@ function paragraphFromNode(node: ProseMirrorNode): Paragraph {
     attrs.level <= 8
       ? attrs.level
       : undefined;
-  const bullet = Value.Check(BulletSchema, attrs.bullet)
-    ? attrs.bullet
-    : undefined;
+  const bullet = Value.Check(BulletSchema, attrs.bullet) ? attrs.bullet : undefined;
   const defaultRunStyle = Value.Check(RunStyleSchema, attrs.defaultRunStyle)
     ? attrs.defaultRunStyle
     : undefined;
@@ -109,13 +100,9 @@ function paragraphFromNode(node: ProseMirrorNode): Paragraph {
     ? attrs.markerStyle
     : undefined;
   const lineHeight =
-    typeof attrs.lineHeight === 'number' && attrs.lineHeight > 0
-      ? attrs.lineHeight
-      : undefined;
+    typeof attrs.lineHeight === 'number' && attrs.lineHeight > 0 ? attrs.lineHeight : undefined;
   const indentPt =
-    typeof attrs.indentPt === 'number' && attrs.indentPt >= 0
-      ? attrs.indentPt
-      : undefined;
+    typeof attrs.indentPt === 'number' && attrs.indentPt >= 0 ? attrs.indentPt : undefined;
   const hangingIndentPt =
     typeof attrs.hangingIndentPt === 'number' && attrs.hangingIndentPt >= 0
       ? attrs.hangingIndentPt
@@ -152,9 +139,7 @@ function updateParagraphElement(
   const paragraph = paragraphFromNode(node);
   const effective = effectiveParagraph(paragraph);
   const defaultStyle =
-    node.content.size === 0
-      ? effectiveRunStyleCss(effective.defaultRunStyle, theme)
-      : {};
+    node.content.size === 0 ? effectiveRunStyleCss(effective.defaultRunStyle, theme) : {};
   applyCss(element, {
     ...paragraphLayoutCss(effective),
     ...defaultStyle,
@@ -169,10 +154,7 @@ function updateParagraphElement(
   element.dataset.sdmParagraphAttrs = JSON.stringify(node.attrs);
 }
 
-function paragraphNodeView(
-  node: ProseMirrorNode,
-  theme: Theme | undefined,
-) {
+function paragraphNodeView(node: ProseMirrorNode, theme: Theme | undefined) {
   const dom = document.createElement('div');
   updateParagraphElement(dom, node, theme);
 
@@ -240,22 +222,14 @@ function styleMarkView(mark: Mark, theme: Theme | undefined) {
 }
 
 const toggleWeight: Command = (state, dispatch, view) => {
-  const style = runStyleFromMarks(
-    state.storedMarks ?? state.selection.$from.marks(),
-  );
+  const style = runStyleFromMarks(state.storedMarks ?? state.selection.$from.marks());
 
-  return setRunStyle({ weight: (style.weight ?? 400) >= 600 ? 400 : 700 })(
-    state,
-    dispatch,
-    view,
-  );
+  return setRunStyle({ weight: (style.weight ?? 400) >= 600 ? 400 : 700 })(state, dispatch, view);
 };
 
 function toggleBooleanStyle(key: 'italic' | 'underline'): Command {
   return (state, dispatch, view) => {
-    const style = runStyleFromMarks(
-      state.storedMarks ?? state.selection.$from.marks(),
-    );
+    const style = runStyleFromMarks(state.storedMarks ?? state.selection.$from.marks());
 
     return setRunStyle({ [key]: !style[key] })(state, dispatch, view);
   };
@@ -272,22 +246,14 @@ function applyTextCommand(view: EditorView, command: SdmTextCommand): boolean {
       break;
     case 'setParagraphSpacing':
       pmCommand = setParagraphSpacing({
-        ...(command.lineHeight === undefined
-          ? {}
-          : { lineHeight: command.lineHeight }),
-        ...(command.spaceAfterPt === undefined
-          ? {}
-          : { spaceAfterPt: command.spaceAfterPt }),
-        ...(command.spaceBeforePt === undefined
-          ? {}
-          : { spaceBeforePt: command.spaceBeforePt }),
+        ...(command.lineHeight === undefined ? {} : { lineHeight: command.lineHeight }),
+        ...(command.spaceAfterPt === undefined ? {} : { spaceAfterPt: command.spaceAfterPt }),
+        ...(command.spaceBeforePt === undefined ? {} : { spaceBeforePt: command.spaceBeforePt }),
       });
       break;
     case 'toggleBullets':
       pmCommand =
-        command.bulletKind === 'character'
-          ? toggleCharacterBullets()
-          : toggleNumberedBullets();
+        command.bulletKind === 'character' ? toggleCharacterBullets() : toggleNumberedBullets();
       break;
     case 'setBullet':
       pmCommand = setBulletProperties(command.bullet);
@@ -309,19 +275,12 @@ function applyTextCommand(view: EditorView, command: SdmTextCommand): boolean {
   return pmCommand(view.state, view.dispatch, view);
 }
 
-function placeCaretAtPoint(
-  view: EditorView,
-  point: SdmTextCaretPoint,
-): void {
+function placeCaretAtPoint(view: EditorView, point: SdmTextCaretPoint): void {
   const rect = view.dom.getBoundingClientRect();
   const left =
-    rect.width > 0
-      ? Math.min(Math.max(point.clientX, rect.left), rect.right)
-      : point.clientX;
+    rect.width > 0 ? Math.min(Math.max(point.clientX, rect.left), rect.right) : point.clientX;
   const top =
-    rect.height > 0
-      ? Math.min(Math.max(point.clientY, rect.top), rect.bottom)
-      : point.clientY;
+    rect.height > 0 ? Math.min(Math.max(point.clientY, rect.top), rect.bottom) : point.clientY;
   const position = view.posAtCoords({ left, top });
   const selection =
     position === null
@@ -438,18 +397,18 @@ export function SdmTextEditor({
         style: 'cursor: text; min-height: 1em; outline: none; width: 100%;',
       },
       markViews: {
-        color: (mark) => styleMarkView(mark, theme),
-        font: (mark) => styleMarkView(mark, theme),
-        highlight: (mark) => styleMarkView(mark, theme),
-        italic: (mark) => styleMarkView(mark, theme),
-        letterSpacingPt: (mark) => styleMarkView(mark, theme),
-        sizePt: (mark) => styleMarkView(mark, theme),
-        strike: (mark) => styleMarkView(mark, theme),
-        underline: (mark) => styleMarkView(mark, theme),
-        weight: (mark) => styleMarkView(mark, theme),
+        color: mark => styleMarkView(mark, theme),
+        font: mark => styleMarkView(mark, theme),
+        highlight: mark => styleMarkView(mark, theme),
+        italic: mark => styleMarkView(mark, theme),
+        letterSpacingPt: mark => styleMarkView(mark, theme),
+        sizePt: mark => styleMarkView(mark, theme),
+        strike: mark => styleMarkView(mark, theme),
+        underline: mark => styleMarkView(mark, theme),
+        weight: mark => styleMarkView(mark, theme),
       },
       nodeViews: {
-        paragraph: (node) => paragraphNodeView(node, theme),
+        paragraph: node => paragraphNodeView(node, theme),
       },
       handleDOMEvents: {
         // The caret session survives blur so workspace formatting controls
@@ -475,24 +434,18 @@ export function SdmTextEditor({
       placeCaretAtPoint(view, point);
     }
     reportSelection();
-    const unregister = callbacksRef.current.registerCommandHandler(
-      (command) => {
-        const applied = applyTextCommand(view, command);
-        if (applied) {
-          view.focus();
-        }
+    const unregister = callbacksRef.current.registerCommandHandler(command => {
+      const applied = applyTextCommand(view, command);
+      if (applied) {
+        view.focus();
+      }
 
-        return command.kind === 'undo' || command.kind === 'redo'
-          ? true
-          : applied;
-      },
+      return command.kind === 'undo' || command.kind === 'redo' ? true : applied;
+    });
+    const unregisterCommit = callbacksRef.current.registerCommitHandler(commitView);
+    const unregisterPlacement = callbacksRef.current.registerPlacementHandler(nextPoint =>
+      placeCaretAtPoint(view, nextPoint),
     );
-    const unregisterCommit =
-      callbacksRef.current.registerCommitHandler(commitView);
-    const unregisterPlacement =
-      callbacksRef.current.registerPlacementHandler((nextPoint) =>
-        placeCaretAtPoint(view, nextPoint),
-      );
 
     return () => {
       unregisterPlacement();
@@ -518,9 +471,7 @@ export function SdmTextEditor({
         let state = initializeFormattingContinuity(
           EditorState.create({ doc: nextDoc, plugins: view.state.plugins }),
         );
-        state = state.apply(
-          state.tr.setSelection(TextSelection.atEnd(state.doc)),
-        );
+        state = state.apply(state.tr.setSelection(TextSelection.atEnd(state.doc)));
         view.updateState(state);
         reportSelection();
       }

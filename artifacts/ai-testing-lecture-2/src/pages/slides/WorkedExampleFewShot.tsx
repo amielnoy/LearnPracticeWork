@@ -56,7 +56,9 @@ function Row({
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5vh' }}>
-      <div style={{ fontSize: '0.8vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}>
+      <div
+        style={{ fontSize: '0.8vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}
+      >
         {label}
       </div>
       <div style={{ fontSize: '1vw', lineHeight: 1.5, color: '#E2E8F0' }}>{children}</div>
@@ -97,18 +99,40 @@ export default function WorkedExampleFewShot() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('CORE TECHNIQUES', 'טכניקות ליבה')}</div>
           <div>{t('LECTURE 02', 'הרצאה 02')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
         <div
           style={{
             fontSize: '1.2vw',
@@ -121,7 +145,15 @@ export default function WorkedExampleFewShot() {
         >
           {example?.eyebrow ?? t('Worked Example', 'דוגמה מעשית')}
         </div>
-        <h1 style={{ fontSize: '2.5vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '2.5vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {example?.title ?? '\u00A0'}
         </h1>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh' }}>
@@ -141,7 +173,9 @@ export default function WorkedExampleFewShot() {
               {t('Example content unavailable.', 'תוכן הדוגמה אינו זמין.')}
             </div>
           ) : !example ? (
-            <div style={{ fontSize: '1vw', color: '#64748B' }}>{t('Loading\u2026', 'טוען\u2026')}</div>
+            <div style={{ fontSize: '1vw', color: '#64748B' }}>
+              {t('Loading\u2026', 'טוען\u2026')}
+            </div>
           ) : (
             example.panels.map((panel, pi) =>
               panel.rows.map((row, ri) => (

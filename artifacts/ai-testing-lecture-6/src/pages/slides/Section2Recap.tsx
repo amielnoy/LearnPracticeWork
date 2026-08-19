@@ -32,14 +32,25 @@ export default function Section2Recap() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -93,7 +104,9 @@ export default function Section2Recap() {
             boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
           }}
         >
-          <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+          <div
+            style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.8vh' }}
+          >
             {t('The golden rule of flakiness', 'כלל הזהב של חוסר יציבות')}
           </div>
           <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -151,7 +164,13 @@ export default function Section2Recap() {
               }
             />
             <div
-              style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
             >
               <div
                 style={{
@@ -164,11 +183,20 @@ export default function Section2Recap() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Bounded retries with logged outcomes', 'ניסיונות חוזרים מוגבלים עם תוצאות מתועדות')}
+                {t(
+                  'Bounded retries with logged outcomes',
+                  'ניסיונות חוזרים מוגבלים עם תוצאות מתועדות',
+                )}
               </div>
             </div>
             <div
-              style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
             >
               <div
                 style={{
@@ -185,7 +213,13 @@ export default function Section2Recap() {
               </div>
             </div>
             <div
-              style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
             >
               <div
                 style={{
@@ -198,7 +232,10 @@ export default function Section2Recap() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('temperature=0 and fixed seeds for reproducibility', 'temperature=0 ו-seeds קבועים לשחזוריות')}
+                {t(
+                  'temperature=0 and fixed seeds for reproducibility',
+                  'temperature=0 ו-seeds קבועים לשחזוריות',
+                )}
               </div>
             </div>
           </div>

@@ -29,10 +29,34 @@ export default function SectionDivider1() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em', color: '#FAFBFC' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div
+            style={{
+              fontSize: '1.2vw',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              color: '#FAFBFC',
+            }}
+          >
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: 'rgba(255,255,255,0.6)',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
@@ -70,13 +94,28 @@ export default function SectionDivider1() {
         >
           {t('AI Agents Generating Tests', 'סוכני AI מייצרים בדיקות')}
         </h1>
-        <p style={{ fontSize: '1.5vw', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, maxWidth: '55vw' }}>
+        <p
+          style={{
+            fontSize: '1.5vw',
+            color: 'rgba(255,255,255,0.7)',
+            lineHeight: 1.5,
+            maxWidth: '55vw',
+          }}
+        >
           {t(
             'From code, from specs, from user stories — and the techniques that surface real edge cases rather than trivial happy paths.',
             'מקוד, ממפרטים, מסיפורי משתמש — והטכניקות שחושפות מקרי קצה אמיתיים במקום נתיבים טריוויאליים.',
           )}
         </p>
-        <div style={{ width: '6vw', height: '0.4vw', backgroundColor: '#0D9488', borderRadius: '1vw', marginTop: '3vh' }} />
+        <div
+          style={{
+            width: '6vw',
+            height: '0.4vw',
+            backgroundColor: '#0D9488',
+            borderRadius: '1vw',
+            marginTop: '3vh',
+          }}
+        />
       </div>
 
       <div

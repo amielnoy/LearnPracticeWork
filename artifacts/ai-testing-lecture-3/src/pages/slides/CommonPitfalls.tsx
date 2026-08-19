@@ -139,7 +139,10 @@ export default function CommonPitfalls() {
                 marginBottom: '0.5vh',
               }}
             >
-              {t('Treating the Factuality Checker as Ground Truth', 'התייחסות לבודק העובדתיות כאמת מוחלטת')}
+              {t(
+                'Treating the Factuality Checker as Ground Truth',
+                'התייחסות לבודק העובדתיות כאמת מוחלטת',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -157,7 +160,10 @@ export default function CommonPitfalls() {
                 marginBottom: '0.5vh',
               }}
             >
-              {t('Schema Valid but Semantically Wrong Values', 'ערכים תקפים מבחינת סכמה אך שגויים סמנטית')}
+              {t(
+                'Schema Valid but Semantically Wrong Values',
+                'ערכים תקפים מבחינת סכמה אך שגויים סמנטית',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -259,7 +265,7 @@ export default function CommonPitfalls() {
               />
               <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F' }}>
                 {t(
-                  "When did someone last spot-check the factuality checker\u2019s verdicts?",
+                  'When did someone last spot-check the factuality checker\u2019s verdicts?',
                   'מתי מישהו עשה לאחרונה בדיקת מדגם של פסיקות בודק העובדתיות?',
                 )}
               </div>

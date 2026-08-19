@@ -39,14 +39,25 @@ export default function ShardingConcept() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -93,7 +104,14 @@ export default function ShardingConcept() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Split by test file or tag', 'פיצול לפי קובץ בדיקה או תג')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -104,18 +122,32 @@ export default function ShardingConcept() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Cap concurrent shards', 'הגבלת shards מקבילים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
-                'Keep the shard count at or below the provider\'s concurrent-request limit to avoid 429 rate-limit errors.',
+                "Keep the shard count at or below the provider's concurrent-request limit to avoid 429 rate-limit errors.",
                 'שמור את מספר ה-shards ב- או מתחת למגבלת הבקשות המקבילות של הספק כדי להימנע משגיאות 429.',
               )}
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Stagger requests between shards', 'פיזור בקשות בין shards')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -174,21 +206,61 @@ export default function ShardingConcept() {
             <div style={{ color: '#E2E8F0', marginTop: '0.5vh' }}>steps:</div>
             <div style={{ color: '#94A3B8', paddingLeft: '1.5vw' }}>- name: Run shard</div>
             <div style={{ color: '#FBBF24', paddingLeft: '3vw' }}>run: pytest tests/ai</div>
-            <div style={{ color: '#2DD4BF', paddingLeft: '4.5vw' }}>--shard-id=${'${{matrix.shard}}'}</div>
+            <div style={{ color: '#2DD4BF', paddingLeft: '4.5vw' }}>
+              --shard-id=${'${{matrix.shard}}'}
+            </div>
             <div style={{ color: '#2DD4BF', paddingLeft: '4.5vw' }}>--num-shards=4</div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1vh', textAlign: isHe ? 'right' : 'left' }}>
-            <div style={{ display: 'flex', gap: '0.8vw', alignItems: 'flex-start', fontSize: '1vw', color: '#64748B' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1vh',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.8vw',
+                alignItems: 'flex-start',
+                fontSize: '1vw',
+                color: '#64748B',
+              }}
+            >
               <span style={{ color: '#0D9488', fontWeight: 700, flexShrink: 0 }}>&#x2192;</span>
               <span>{t('4 runners start simultaneously', '4 runners מתחילים בו זמנית')}</span>
             </div>
-            <div style={{ display: 'flex', gap: '0.8vw', alignItems: 'flex-start', fontSize: '1vw', color: '#64748B' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.8vw',
+                alignItems: 'flex-start',
+                fontSize: '1vw',
+                color: '#64748B',
+              }}
+            >
               <span style={{ color: '#0D9488', fontWeight: 700, flexShrink: 0 }}>&#x2192;</span>
-              <span>{t('Each runner handles one quarter of the tests', 'כל runner מטפל ברבע מהבדיקות')}</span>
+              <span>
+                {t('Each runner handles one quarter of the tests', 'כל runner מטפל ברבע מהבדיקות')}
+              </span>
             </div>
-            <div style={{ display: 'flex', gap: '0.8vw', alignItems: 'flex-start', fontSize: '1vw', color: '#64748B' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.8vw',
+                alignItems: 'flex-start',
+                fontSize: '1vw',
+                color: '#64748B',
+              }}
+            >
               <span style={{ color: '#0D9488', fontWeight: 700, flexShrink: 0 }}>&#x2192;</span>
-              <span>{t('Wall-clock time is roughly quarter of serial time', 'זמן הריצה בערך רבע מהזמן הסדרתי')}</span>
+              <span>
+                {t(
+                  'Wall-clock time is roughly quarter of serial time',
+                  'זמן הריצה בערך רבע מהזמן הסדרתי',
+                )}
+              </span>
             </div>
           </div>
         </div>

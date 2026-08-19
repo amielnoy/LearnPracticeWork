@@ -14,24 +14,13 @@ const SDM_FILEPATH = /^src\/data\/slides\/([A-Za-z0-9_-]+)\.sdm\.json$/;
 const COLOR_HEX = /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 const SDM_SCHEMA_REF = '../../.sdm/sdm.schema.json';
 const DOCUMENT_PREFIX_KEYS = ['$schema', 'format', 'version', 'size'];
-const ELEMENT_TYPES = new Set([
-  'text',
-  'shape',
-  'image',
-  'line',
-  'group',
-  'table',
-  'widget',
-]);
+const ELEMENT_TYPES = new Set(['text', 'shape', 'image', 'line', 'group', 'table', 'widget']);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function repairManifestPositions(
-  manifest: Array<unknown>,
-  changes: Array<string>,
-): void {
+function repairManifestPositions(manifest: Array<unknown>, changes: Array<string>): void {
   const positions: Array<number> = [];
   for (const entry of manifest) {
     if (
@@ -61,9 +50,7 @@ function repairManifestPositions(
     }
     const previous = entry.position;
     entry.position = index + 1;
-    changes.push(
-      `manifest[${index}].position: reindexed ${String(previous)} to ${index + 1}`,
-    );
+    changes.push(`manifest[${index}].position: reindexed ${String(previous)} to ${index + 1}`);
   });
 }
 
@@ -83,8 +70,7 @@ export function repairSlidesManifest(input: unknown): RepairResult {
       typeof title === 'string' &&
       title.trim() !== '' &&
       (entry.description === undefined ||
-        (typeof entry.description === 'string' &&
-          entry.description.trim() === ''))
+        (typeof entry.description === 'string' && entry.description.trim() === ''))
     ) {
       entry.description = title;
       changes.push(`manifest[${index}].description: copied non-blank title`);
@@ -153,9 +139,7 @@ function repairDocumentBoilerplate(
   }
   if (document.size === undefined) {
     added.size = { width: SDM_SLIDE_WIDTH, height: SDM_SLIDE_HEIGHT };
-    changes.push(
-      `size: added the ${SDM_SLIDE_WIDTH}x${SDM_SLIDE_HEIGHT} canvas`,
-    );
+    changes.push(`size: added the ${SDM_SLIDE_WIDTH}x${SDM_SLIDE_HEIGHT} canvas`);
   }
   if (Object.keys(added).length === 0) {
     return document;
@@ -177,10 +161,7 @@ function repairDocumentBoilerplate(
   return ordered;
 }
 
-function repairAssets(
-  document: Record<string, unknown>,
-  changes: Array<string>,
-): void {
+function repairAssets(document: Record<string, unknown>, changes: Array<string>): void {
   const assets = document.assets;
   if (!isRepairableAssetArray(assets)) {
     return;
@@ -206,7 +187,7 @@ function repairColor(
   }
   const value =
     color.length === 4
-      ? `#${Array.from(color.slice(1), (digit) => `${digit}${digit}`).join('')}`
+      ? `#${Array.from(color.slice(1), digit => `${digit}${digit}`).join('')}`
       : color;
   owner[key] = { kind: 'rgb', value };
   changes.push(`${path}: wrapped bare color as rgb ${value}`);
@@ -220,11 +201,7 @@ function repairFont(
   changes: Array<string>,
 ): void {
   const font = owner[key];
-  if (
-    typeof font !== 'string' ||
-    font.trim() === '' ||
-    fontTokens.has(font)
-  ) {
+  if (typeof font !== 'string' || font.trim() === '' || fontTokens.has(font)) {
     return;
   }
   owner[key] = { kind: 'family', family: font };
@@ -250,11 +227,7 @@ function repairRunStyle(
   repairColor(style, 'highlight', `${path}.highlight`, changes);
 }
 
-function repairPaint(
-  paint: unknown,
-  path: string,
-  changes: Array<string>,
-): void {
+function repairPaint(paint: unknown, path: string, changes: Array<string>): void {
   if (!isRecord(paint)) {
     return;
   }
@@ -269,11 +242,7 @@ function repairPaint(
   }
 }
 
-function repairStroke(
-  stroke: unknown,
-  path: string,
-  changes: Array<string>,
-): void {
+function repairStroke(stroke: unknown, path: string, changes: Array<string>): void {
   if (isRecord(stroke)) {
     repairColor(stroke, 'color', `${path}.color`, changes);
   }
@@ -345,12 +314,7 @@ function repairElements(
       changes.push(`${elementPath}: renamed kind to type`);
     }
     if (element.type === 'text' || element.type === 'shape') {
-      repairTextBody(
-        element.body,
-        `${elementPath}.body`,
-        fontTokens,
-        changes,
-      );
+      repairTextBody(element.body, `${elementPath}.body`, fontTokens, changes);
       repairPaint(element.fill, `${elementPath}.fill`, changes);
       repairStroke(element.stroke, `${elementPath}.stroke`, changes);
     }
@@ -358,12 +322,7 @@ function repairElements(
       repairStroke(element.stroke, `${elementPath}.stroke`, changes);
     }
     if (element.type === 'group') {
-      repairElements(
-        element.children,
-        `${elementPath}.children`,
-        fontTokens,
-        changes,
-      );
+      repairElements(element.children, `${elementPath}.children`, fontTokens, changes);
     }
     if (element.type === 'table' && Array.isArray(element.rows)) {
       element.rows.forEach((row, rowIndex) => {

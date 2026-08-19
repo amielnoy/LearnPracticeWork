@@ -28,7 +28,10 @@ export default function ConfidenceAwareFlagging() {
     {
       label: t('High Confidence + Correct', 'ביטחון גבוה + נכון'),
       action: t('✔ Auto-pass', '✔ מעבר אוטומטי'),
-      desc: t('Checker is confident and source confirms the claim.', 'הבודק בטוח והמקור מאשר את הטענה.'),
+      desc: t(
+        'Checker is confident and source confirms the claim.',
+        'הבודק בטוח והמקור מאשר את הטענה.',
+      ),
       bg: 'rgba(13,148,136,0.08)',
       border: 'rgba(13,148,136,0.3)',
       color: '#0D9488',
@@ -36,7 +39,10 @@ export default function ConfidenceAwareFlagging() {
     {
       label: t('Low Confidence (either direction)', 'ביטחון נמוך (בכל כיוון)'),
       action: t('⚑ Route to human review', '⚑ העבר לסקירה אנושית'),
-      desc: t('NLI verdict is uncertain — insufficient evidence to rule definitively.', 'פסיקת NLI אינה ודאית — אין ראיות מספיקות לפסיקה חד-משמעית.'),
+      desc: t(
+        'NLI verdict is uncertain — insufficient evidence to rule definitively.',
+        'פסיקת NLI אינה ודאית — אין ראיות מספיקות לפסיקה חד-משמעית.',
+      ),
       bg: 'rgba(245,158,11,0.07)',
       border: 'rgba(245,158,11,0.3)',
       color: '#D97706',
@@ -44,7 +50,10 @@ export default function ConfidenceAwareFlagging() {
     {
       label: t('High Confidence + Contradicted', 'ביטחון גבוה + סותר'),
       action: t('✘ Auto-fail (critical)', '✘ כישלון אוטומטי (קריטי)'),
-      desc: t('Checker is confident and source explicitly contradicts the claim.', 'הבודק בטוח והמקור סותר את הטענה במפורש.'),
+      desc: t(
+        'Checker is confident and source explicitly contradicts the claim.',
+        'הבודק בטוח והמקור סותר את הטענה במפורש.',
+      ),
       bg: 'rgba(220,38,38,0.05)',
       border: 'rgba(220,38,38,0.25)',
       color: '#DC2626',
@@ -131,7 +140,14 @@ export default function ConfidenceAwareFlagging() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Why Low Confidence Is a Signal', 'מדוע ביטחון נמוך הוא אות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -142,7 +158,14 @@ export default function ConfidenceAwareFlagging() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('The Escalation Path', 'נתיב ההסלמה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -196,10 +219,24 @@ export default function ConfidenceAwareFlagging() {
                 textAlign: isHe ? 'right' : 'left',
               }}
             >
-              <div style={{ fontSize: '1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1vw',
+                  fontWeight: 700,
+                  color: '#1E3A5F',
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {tier.label}
               </div>
-              <div style={{ fontSize: '0.95vw', fontWeight: 700, color: tier.color, marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '0.95vw',
+                  fontWeight: 700,
+                  color: tier.color,
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {tier.action}
               </div>
               <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>

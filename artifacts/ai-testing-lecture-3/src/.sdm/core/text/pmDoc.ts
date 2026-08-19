@@ -32,9 +32,7 @@ export function canonicalizeRunStyle(style: RunStyle): RunStyle {
     ...(style.strike === undefined ? {} : { strike: style.strike }),
     ...(style.color === undefined ? {} : { color: style.color }),
     ...(style.highlight === undefined ? {} : { highlight: style.highlight }),
-    ...(style.letterSpacingPt === undefined
-      ? {}
-      : { letterSpacingPt: style.letterSpacingPt }),
+    ...(style.letterSpacingPt === undefined ? {} : { letterSpacingPt: style.letterSpacingPt }),
   };
 
   return deepEqual(style, next) ? style : next;
@@ -50,9 +48,7 @@ export function runStyleFromRun(run: TextRun): RunStyle {
     ...(run.strike === undefined ? {} : { strike: run.strike }),
     ...(run.color === undefined ? {} : { color: run.color }),
     ...(run.highlight === undefined ? {} : { highlight: run.highlight }),
-    ...(run.letterSpacingPt === undefined
-      ? {}
-      : { letterSpacingPt: run.letterSpacingPt }),
+    ...(run.letterSpacingPt === undefined ? {} : { letterSpacingPt: run.letterSpacingPt }),
   });
 }
 
@@ -85,7 +81,7 @@ function sameRunMetadata(left: TextRun, right: TextRun): boolean {
     return false;
   }
 
-  return RUN_STYLE_KEYS.every((key) => deepEqual(left[key], right[key]));
+  return RUN_STYLE_KEYS.every(key => deepEqual(left[key], right[key]));
 }
 
 function canonicalizeParagraph(paragraph: Paragraph): Paragraph {
@@ -125,9 +121,7 @@ function canonicalizeParagraph(paragraph: Paragraph): Paragraph {
     defaultRunStyle = undefined;
   }
   const markerStyle =
-    paragraph.markerStyle === undefined
-      ? undefined
-      : canonicalizeRunStyle(paragraph.markerStyle);
+    paragraph.markerStyle === undefined ? undefined : canonicalizeRunStyle(paragraph.markerStyle);
 
   const next: Paragraph = {
     runs: nonemptyRuns,
@@ -136,18 +130,10 @@ function canonicalizeParagraph(paragraph: Paragraph): Paragraph {
     ...(paragraph.align === undefined ? {} : { align: paragraph.align }),
     ...(paragraph.level === undefined ? {} : { level: paragraph.level }),
     ...(paragraph.bullet === undefined ? {} : { bullet: paragraph.bullet }),
-    ...(paragraph.lineHeight === undefined
-      ? {}
-      : { lineHeight: paragraph.lineHeight }),
-    ...(paragraph.spaceBeforePt === undefined
-      ? {}
-      : { spaceBeforePt: paragraph.spaceBeforePt }),
-    ...(paragraph.spaceAfterPt === undefined
-      ? {}
-      : { spaceAfterPt: paragraph.spaceAfterPt }),
-    ...(paragraph.indentPt === undefined
-      ? {}
-      : { indentPt: paragraph.indentPt }),
+    ...(paragraph.lineHeight === undefined ? {} : { lineHeight: paragraph.lineHeight }),
+    ...(paragraph.spaceBeforePt === undefined ? {} : { spaceBeforePt: paragraph.spaceBeforePt }),
+    ...(paragraph.spaceAfterPt === undefined ? {} : { spaceAfterPt: paragraph.spaceAfterPt }),
+    ...(paragraph.indentPt === undefined ? {} : { indentPt: paragraph.indentPt }),
     ...(paragraph.hangingIndentPt === undefined
       ? {}
       : { hangingIndentPt: paragraph.hangingIndentPt }),
@@ -158,7 +144,7 @@ function canonicalizeParagraph(paragraph: Paragraph): Paragraph {
 
 export function canonicalizeTextBody(body: TextBody): TextBody {
   let changed = false;
-  const paragraphs = body.paragraphs.map((paragraph) => {
+  const paragraphs = body.paragraphs.map(paragraph => {
     const next = canonicalizeParagraph(paragraph);
     changed ||= next !== paragraph;
 
@@ -166,9 +152,7 @@ export function canonicalizeTextBody(body: TextBody): TextBody {
   });
   const next: TextBody = {
     paragraphs: changed ? paragraphs : body.paragraphs,
-    ...(body.verticalAlign === undefined
-      ? {}
-      : { verticalAlign: body.verticalAlign }),
+    ...(body.verticalAlign === undefined ? {} : { verticalAlign: body.verticalAlign }),
     ...(body.overflow === undefined ? {} : { overflow: body.overflow }),
     ...(body.insetsPt === undefined ? {} : { insetsPt: body.insetsPt }),
   };
@@ -176,10 +160,7 @@ export function canonicalizeTextBody(body: TextBody): TextBody {
   return deepEqual(body, next) ? body : next;
 }
 
-export function marksFromRunStyle(
-  style: RunStyle,
-  action?: Action,
-): Array<Mark> {
+export function marksFromRunStyle(style: RunStyle, action?: Action): Array<Mark> {
   const marks: Array<Mark> = [];
   if (style.font !== undefined) {
     marks.push(sdmTextSchema.marks.font.create({ font: style.font }));
@@ -194,9 +175,7 @@ export function marksFromRunStyle(
     marks.push(sdmTextSchema.marks.italic.create({ enabled: style.italic }));
   }
   if (style.underline !== undefined) {
-    marks.push(
-      sdmTextSchema.marks.underline.create({ enabled: style.underline }),
-    );
+    marks.push(sdmTextSchema.marks.underline.create({ enabled: style.underline }));
   }
   if (style.strike !== undefined) {
     marks.push(sdmTextSchema.marks.strike.create({ enabled: style.strike }));
@@ -205,9 +184,7 @@ export function marksFromRunStyle(
     marks.push(sdmTextSchema.marks.color.create({ color: style.color }));
   }
   if (style.highlight !== undefined) {
-    marks.push(
-      sdmTextSchema.marks.highlight.create({ color: style.highlight }),
-    );
+    marks.push(sdmTextSchema.marks.highlight.create({ color: style.highlight }));
   }
   if (style.letterSpacingPt !== undefined) {
     marks.push(
@@ -242,12 +219,7 @@ export function runStyleFromMarks(marks: ReadonlyArray<Mark>): RunStyle {
       }
     } else if (mark.type === sdmTextSchema.marks.weight) {
       const value = markAttribute(mark, 'weight');
-      if (
-        typeof value === 'number' &&
-        Number.isInteger(value) &&
-        value >= 100 &&
-        value <= 900
-      ) {
+      if (typeof value === 'number' && Number.isInteger(value) && value >= 100 && value <= 900) {
         style.weight = value;
       }
     } else if (mark.type === sdmTextSchema.marks.italic) {
@@ -278,23 +250,14 @@ export function runStyleFromMarks(marks: ReadonlyArray<Mark>): RunStyle {
 }
 
 function actionFromMarks(marks: ReadonlyArray<Mark>): Action | undefined {
-  const actionMark = marks.find(
-    (mark) => mark.type === sdmTextSchema.marks.action,
-  );
-  const value =
-    actionMark === undefined ? undefined : markAttribute(actionMark, 'action');
+  const actionMark = marks.find(mark => mark.type === sdmTextSchema.marks.action);
+  const value = actionMark === undefined ? undefined : markAttribute(actionMark, 'action');
 
   return Value.Check(ActionSchema, value) ? value : undefined;
 }
 
-function inlineNodes(
-  run: TextRun,
-  defaultRunStyle: RunStyle | undefined,
-): Array<ProseMirrorNode> {
-  const marks = marksFromRunStyle(
-    { ...defaultRunStyle, ...runStyleFromRun(run) },
-    run.action,
-  );
+function inlineNodes(run: TextRun, defaultRunStyle: RunStyle | undefined): Array<ProseMirrorNode> {
+  const marks = marksFromRunStyle({ ...defaultRunStyle, ...runStyleFromRun(run) }, run.action);
   const nodes: Array<ProseMirrorNode> = [];
   const lines = run.text.split('\n');
   for (const [index, line] of lines.entries()) {
@@ -326,9 +289,7 @@ function paragraphNode(paragraph: Paragraph): ProseMirrorNode {
       spaceBeforePt: paragraph.spaceBeforePt ?? null,
       synthetic: false,
     },
-    paragraph.runs.flatMap((run) =>
-      inlineNodes(run, effective.defaultRunStyle),
-    ),
+    paragraph.runs.flatMap(run => inlineNodes(run, effective.defaultRunStyle)),
   );
 }
 
@@ -351,7 +312,7 @@ export function textBodyToDoc(body: TextBody): ProseMirrorNode {
             synthetic: true,
           }),
         ]
-      : canonical.paragraphs.map((paragraph) => paragraphNode(paragraph));
+      : canonical.paragraphs.map(paragraph => paragraphNode(paragraph));
 
   return sdmTextSchema.nodes.doc.create(
     {
@@ -372,9 +333,7 @@ function optionalNumber(
     : undefined;
 }
 
-export function paragraphFromPmAttrs(
-  attrs: Record<string, unknown>,
-): Paragraph {
+export function paragraphFromPmAttrs(attrs: Record<string, unknown>): Paragraph {
   const defaultRunStyle = Value.Check(RunStyleSchema, attrs.defaultRunStyle)
     ? canonicalizeRunStyle(attrs.defaultRunStyle)
     : undefined;
@@ -390,25 +349,14 @@ export function paragraphFromPmAttrs(
       : undefined;
   const level = optionalNumber(
     attrs.level,
-    (value) => Number.isInteger(value) && value >= 0 && value <= 8,
+    value => Number.isInteger(value) && value >= 0 && value <= 8,
   );
-  const bullet = Value.Check(BulletSchema, attrs.bullet)
-    ? attrs.bullet
-    : undefined;
-  const lineHeight = optionalNumber(attrs.lineHeight, (value) => value > 0);
-  const indentPt = optionalNumber(attrs.indentPt, (value) => value >= 0);
-  const hangingIndentPt = optionalNumber(
-    attrs.hangingIndentPt,
-    (value) => value >= 0,
-  );
-  const spaceBeforePt = optionalNumber(
-    attrs.spaceBeforePt,
-    (value) => value >= 0,
-  );
-  const spaceAfterPt = optionalNumber(
-    attrs.spaceAfterPt,
-    (value) => value >= 0,
-  );
+  const bullet = Value.Check(BulletSchema, attrs.bullet) ? attrs.bullet : undefined;
+  const lineHeight = optionalNumber(attrs.lineHeight, value => value > 0);
+  const indentPt = optionalNumber(attrs.indentPt, value => value >= 0);
+  const hangingIndentPt = optionalNumber(attrs.hangingIndentPt, value => value >= 0);
+  const spaceBeforePt = optionalNumber(attrs.spaceBeforePt, value => value >= 0);
+  const spaceAfterPt = optionalNumber(attrs.spaceAfterPt, value => value >= 0);
 
   return {
     runs: [],
@@ -436,7 +384,7 @@ function paragraphFromNode(node: ProseMirrorNode): Paragraph | undefined {
   const overrides = paragraphFromPmAttrs(attrs);
   const effective = effectiveParagraph(overrides);
   const runs: Array<TextRun> = [];
-  node.forEach((child) => {
+  node.forEach(child => {
     let text: string | undefined;
     if (child.isText && child.text !== undefined) {
       text = child.text;
@@ -449,10 +397,7 @@ function paragraphFromNode(node: ProseMirrorNode): Paragraph | undefined {
     const action = actionFromMarks(child.marks);
     const run: TextRun = {
       text,
-      ...runStyleOverrides(
-        runStyleFromMarks(child.marks),
-        effective.defaultRunStyle,
-      ),
+      ...runStyleOverrides(runStyleFromMarks(child.marks), effective.defaultRunStyle),
       ...(action === undefined ? {} : { action }),
     };
     const previous = runs[runs.length - 1];
@@ -476,7 +421,7 @@ function paragraphFromNode(node: ProseMirrorNode): Paragraph | undefined {
 export function docToTextBody(doc: ProseMirrorNode): TextBody {
   const attrs: Record<string, unknown> = doc.attrs;
   const paragraphs: Array<Paragraph> = [];
-  doc.forEach((node) => {
+  doc.forEach(node => {
     if (node.type !== sdmTextSchema.nodes.paragraph) {
       return;
     }
@@ -492,12 +437,8 @@ export function docToTextBody(doc: ProseMirrorNode): TextBody {
       ? attrs.verticalAlign
       : undefined;
   const overflow =
-    attrs.overflow === 'clip' || attrs.overflow === 'visible'
-      ? attrs.overflow
-      : undefined;
-  const insetsPt = Value.Check(InsetsSchema, attrs.insetsPt)
-    ? attrs.insetsPt
-    : undefined;
+    attrs.overflow === 'clip' || attrs.overflow === 'visible' ? attrs.overflow : undefined;
+  const insetsPt = Value.Check(InsetsSchema, attrs.insetsPt) ? attrs.insetsPt : undefined;
 
   return canonicalizeTextBody({
     paragraphs,
@@ -507,10 +448,7 @@ export function docToTextBody(doc: ProseMirrorNode): TextBody {
   });
 }
 
-export function docToTextBodyWithReuse(
-  doc: ProseMirrorNode,
-  previous: TextBody,
-): TextBody {
+export function docToTextBodyWithReuse(doc: ProseMirrorNode, previous: TextBody): TextBody {
   const next = docToTextBody(doc);
 
   return deepEqual(next, previous) ? previous : next;

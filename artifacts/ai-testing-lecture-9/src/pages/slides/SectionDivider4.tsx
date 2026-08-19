@@ -29,29 +29,93 @@ export default function SectionDivider4() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em', color: '#FAFBFC' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div
+            style={{
+              fontSize: '1.2vw',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              color: '#FAFBFC',
+            }}
+          >
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: 'rgba(255,255,255,0.6)',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '2vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.1em' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '2vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.1em',
+          }}
+        >
           {t('Section 4 of 5', 'חלק 4 מתוך 5')}
         </div>
-        <h1 style={{ fontSize: '5vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.05, letterSpacing: '-0.02em', color: '#FAFBFC' }}>
+        <h1
+          style={{
+            fontSize: '5vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.05,
+            letterSpacing: '-0.02em',
+            color: '#FAFBFC',
+          }}
+        >
           {t('The End-to-End Pipeline', 'הצינור מקצה לקצה')}
         </h1>
-        <p style={{ fontSize: '1.5vw', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, maxWidth: '55vw' }}>
+        <p
+          style={{
+            fontSize: '1.5vw',
+            color: 'rgba(255,255,255,0.7)',
+            lineHeight: 1.5,
+            maxWidth: '55vw',
+          }}
+        >
           {t(
             'From ticket creation to PR merge — wiring together generation, review, coverage tracking, and triage into a single human-in-the-loop workflow.',
             'מיצירת כרטיס ועד מיזוג PR — חיבור יצירה, סקירה, מעקב כיסוי וסיווג לזרימת עבודה אחת עם אדם בלולאה.',
           )}
         </p>
-        <div style={{ width: '6vw', height: '0.4vw', backgroundColor: '#0D9488', borderRadius: '1vw', marginTop: '3vh' }} />
+        <div
+          style={{
+            width: '6vw',
+            height: '0.4vw',
+            backgroundColor: '#0D9488',
+            borderRadius: '1vw',
+            marginTop: '3vh',
+          }}
+        />
       </div>
 
       <div

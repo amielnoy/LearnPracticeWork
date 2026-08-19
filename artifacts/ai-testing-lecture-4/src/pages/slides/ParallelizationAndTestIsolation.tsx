@@ -115,7 +115,12 @@ export default function ParallelizationAndTestIsolation() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('One Test Account Per Worker', 'חשבון בדיקה אחד לכל Worker')}
             </div>
@@ -128,20 +133,30 @@ export default function ParallelizationAndTestIsolation() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Isolated Conversation IDs', 'IDs שיחה מבודדים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
-                'Generate a fresh conversation or session ID in each test\'s fixture setup. Never reuse a session ID across parallel tests — history from test A must not appear in test B.',
+                "Generate a fresh conversation or session ID in each test's fixture setup. Never reuse a session ID across parallel tests — history from test A must not appear in test B.",
                 'צרו ID שיחה או סשן חדש בהגדרת ה-fixture של כל בדיקה. לעולם אל תעשו שימוש חוזר ב-ID סשן בבדיקות מקביליות — ההיסטוריה מבדיקה A לא חייבת להופיע בבדיקה B.',
               )}
             </div>
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Mock by Default in Parallel Runs', 'הדמייה כברירת מחדל בהרצות מקביליות')}
             </div>
@@ -203,9 +218,18 @@ export default function ParallelizationAndTestIsolation() {
             {[
               t('Separate test account per parallel worker', 'חשבון בדיקה נפרד לכל worker מקבילי'),
               t('Unique conversation ID seeded per test', 'ID שיחה ייחודי נזרע לכל בדיקה'),
-              t('Rate limit counters reset in test teardown', 'מוני מגבלת קצב מאופסים בפירוק הבדיקה'),
-              t('Mocked by default — real model only in smoke', 'מדומה כברירת מחדל — מודל אמיתי רק בעשן'),
-              t('No shared in-memory stores between workers', 'אין מאגרים בזיכרון משותפים בין workers'),
+              t(
+                'Rate limit counters reset in test teardown',
+                'מוני מגבלת קצב מאופסים בפירוק הבדיקה',
+              ),
+              t(
+                'Mocked by default — real model only in smoke',
+                'מדומה כברירת מחדל — מודל אמיתי רק בעשן',
+              ),
+              t(
+                'No shared in-memory stores between workers',
+                'אין מאגרים בזיכרון משותפים בין workers',
+              ),
             ].map((item, i) => (
               <div
                 key={i}
