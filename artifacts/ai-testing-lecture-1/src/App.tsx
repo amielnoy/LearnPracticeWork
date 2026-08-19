@@ -204,23 +204,52 @@ function AllSlides() {
   );
 }
 
+/**
+ * How big the 1920x1080 stage can be drawn, and whether it has to be turned.
+ *
+ * A 16:9 stage laid across the short edge of a portrait phone is the problem
+ * this solves: on a 390x664 screen it comes out 390x219 — a fifth of its design
+ * size, with two thirds of the display left black. Every point of text on the
+ * slide is then scaled by 0.20, which is what makes a 40px heading render at 8.
+ *
+ * Turning the stage a quarter turn lets it span the long edge instead: 664x373,
+ * a scale of 0.35, and no black bars. That is the same result the reader gets by
+ * physically rotating the phone, so once they do, the rotation here switches off
+ * and the stage is drawn the ordinary way round.
+ *
+ * The width test is what keeps this off tablets and desktops in portrait, where
+ * the stage is already large enough to read.
+ */
+const ROTATE_BELOW_WIDTH = 700;
+
+function stageDims(): { width: number; height: number; rotated: boolean } {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const rotated = vh > vw && vw < ROTATE_BELOW_WIDTH;
+  const availableW = rotated ? vh : vw;
+  const availableH = rotated ? vw : vh;
+  return {
+    width: Math.min(availableW, availableH * (16 / 9)),
+    height: Math.min(availableH, availableW * (9 / 16)),
+    rotated,
+  };
+}
+
 // This component is used for the deployed view at `/`
 function SlideViewer() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [dims, setDims] = useState(() => ({
-    width: Math.min(window.innerWidth, window.innerHeight * (16 / 9)),
-    height: Math.min(window.innerHeight, window.innerWidth * (9 / 16)),
-  }));
-
+  const [dims, setDims] = useState(stageDims);
   useEffect(() => {
-    const update = () => {
-      setDims({
-        width: Math.min(window.innerWidth, window.innerHeight * (16 / 9)),
-        height: Math.min(window.innerHeight, window.innerWidth * (9 / 16)),
-      });
-    };
+    const update = () => setDims(stageDims());
     window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    // iOS fires orientationchange before innerWidth/innerHeight settle, so the
+    // resize that follows it is the one worth measuring; listening to both and
+    // recomputing twice is cheaper than reading stale dimensions once.
+    window.addEventListener('orientationchange', update);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+    };
   }, []);
 
   useEffect(() => {
@@ -257,7 +286,19 @@ function SlideViewer() {
       <iframe
         ref={iframeRef}
         src={`${base}/slide${firstPosition}`}
-        style={{ width: dims.width, height: dims.height, border: 'none' }}
+        style={{
+          width: dims.width,
+          height: dims.height,
+          border: 'none',
+          // The stage is a flex item, and once rotated its width is the
+          // viewport's *height* — wider than the container. Without this,
+          // flex-shrink squeezes it back to the container width and the
+          // rotation buys nothing.
+          flex: 'none',
+          // The parent centres it, so rotating about the centre keeps it there
+          // without any positioning maths.
+          transform: dims.rotated ? 'rotate(90deg)' : undefined,
+        }}
         onLoad={() => iframeRef.current?.focus()}
         title="Slide viewer"
       />
