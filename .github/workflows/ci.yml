@@ -83,20 +83,25 @@ jobs:
       - name: Install Chromium
         run: pnpm --filter @workspace/tests exec playwright install --with-deps chromium
 
-      # api-server and scripts do not compile today, for reasons that predate
-      # this pipeline: noImplicitReturns in the Express handlers, `unknown`
-      # response bodies from the Gemini and Replit connector fetches, and a
-      # MigrationConfig mismatch in stripe-replit-sync. Everything else is
-      # clean, so the gate covers everything else. Drop the exclusions — or
-      # switch back to plain `pnpm run typecheck` — once those two compile.
+      # The exclusions this step used to carry — api-server and scripts, on the
+      # grounds that neither compiled — are gone: both compile clean now, so the
+      # gate is the plain script again, which is what the note asked for.
       - name: Typecheck
-        run: |
-          pnpm run typecheck:libs
-          pnpm -r --if-present \
-            --filter "./artifacts/**" \
-            --filter "!@workspace/api-server" \
-            --filter "./tests" \
-            run typecheck
+        run: pnpm run typecheck
+
+      # The two gates that used to exist only in package.json. Without them the
+      # repository drifted exactly where it was unwatched: typecheck stayed
+      # clean because this job enforced it, while lint reached 32 errors and
+      # 590 files fell off the Prettier config. A one-day-old `style: run
+      # Prettier over the sources` commit had already been undone by the time
+      # they were added, which is why the sweep alone was not the fix.
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: pnpm run lint
+
+      - name: Format
+        if: ${{ !cancelled() }}
+        run: pnpm run format:check
 
       # Split per layer so a failure names the layer that broke, and
       # `!cancelled()` lets every later layer still run — including after the
