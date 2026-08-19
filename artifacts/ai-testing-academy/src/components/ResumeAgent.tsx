@@ -6,6 +6,17 @@ import { pdfFromText, pdfFromRtlText, type JsPdfInstance } from '../lib/resumePd
 import { useReveal } from '../hooks/useReveal';
 import { useProgress } from '../context/ProgressContext';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { readText, writeRaw } from '../lib/storage';
+
+/**
+ * Caps on what is reinstated from a saved draft.
+ *
+ * The drafts are the visitor's own text and stay in `sessionStorage`, which is
+ * the right lifetime for a résumé. The bound is about what comes back out: a
+ * stored value is editable, and these land directly in controlled inputs.
+ */
+const MAX_DRAFT_LENGTH = 100_000;
+const MAX_ROLE_LENGTH = 200;
 
 const SAMPLE_RESUMES = {
   en: {
@@ -155,13 +166,15 @@ export function ResumeAgent() {
   const sectionRef = useReveal();
 
   const draftPrefix = `ata_resume_draft_${locale.lang}_`;
-  const [resumeText, setResumeText] = useState(
-    () => sessionStorage.getItem(draftPrefix + 'resume') || '',
+  const [resumeText, setResumeText] = useState(() =>
+    readText(sessionStorage, draftPrefix + 'resume', MAX_DRAFT_LENGTH),
   );
-  const [targetRole, setTargetRole] = useState(
-    () => sessionStorage.getItem(draftPrefix + 'role') || '',
+  const [targetRole, setTargetRole] = useState(() =>
+    readText(sessionStorage, draftPrefix + 'role', MAX_ROLE_LENGTH),
   );
-  const [jobDesc, setJobDesc] = useState(() => sessionStorage.getItem(draftPrefix + 'job') || '');
+  const [jobDesc, setJobDesc] = useState(() =>
+    readText(sessionStorage, draftPrefix + 'job', MAX_DRAFT_LENGTH),
+  );
   const [uploadLabel, setUploadLabel] = useState(t.uploadPrompt);
   const [isDragging, setIsDragging] = useState(false);
   const [resumeErr, setResumeErr] = useState('');
@@ -191,13 +204,13 @@ export function ResumeAgent() {
   }, [jobDesc]);
 
   useEffect(() => {
-    sessionStorage.setItem(draftPrefix + 'resume', resumeText);
+    writeRaw(sessionStorage, draftPrefix + 'resume', resumeText);
   }, [draftPrefix, resumeText]);
   useEffect(() => {
-    sessionStorage.setItem(draftPrefix + 'role', targetRole);
+    writeRaw(sessionStorage, draftPrefix + 'role', targetRole);
   }, [draftPrefix, targetRole]);
   useEffect(() => {
-    sessionStorage.setItem(draftPrefix + 'job', jobDesc);
+    writeRaw(sessionStorage, draftPrefix + 'job', jobDesc);
   }, [draftPrefix, jobDesc]);
 
   const processFile = useCallback(

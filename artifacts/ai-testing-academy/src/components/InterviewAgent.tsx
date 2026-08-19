@@ -4,6 +4,7 @@ import { useProviderContext } from '../context/ProviderContext';
 import { useReveal } from '../hooks/useReveal';
 import type { Message } from '../lib/providers';
 import { useProgress } from '../context/ProgressContext';
+import { readValidated, removeRaw, writeValidated } from '../lib/storage';
 
 interface ChatMsg {
   cls: 'ai' | 'user' | 'sys';
@@ -12,7 +13,21 @@ interface ChatMsg {
 }
 
 let msgIdCounter = 0;
+
+/**
+ * Where a partly-finished interview lives.
+ *
+ * `sessionStorage`, not `localStorage`, and that is the point. A transcript is
+ * every answer someone gave about their own career on a machine that may not be
+ * theirs; the résumé tool next door already treats its input that way, and
+ * there was never a reason for these two to disagree. Resuming after a reload
+ * is what the feature needs, and a session is exactly that long.
+ */
 const INTERVIEW_STORAGE_KEY = 'ata_interview_session_v1';
+
+/** Bounds on what will be reinstated, so a tampered entry cannot be unbounded. */
+const MAX_SAVED_MESSAGES = 200;
+const MAX_SAVED_TEXT = 20_000;
 
 interface SavedInterview {
   lang: string;
@@ -21,22 +36,54 @@ interface SavedInterview {
   interviewOn: boolean;
 }
 
-function loadInterview(lang: string): SavedInterview | null {
-  try {
-    const parsed = JSON.parse(
-      localStorage.getItem(INTERVIEW_STORAGE_KEY) || 'null',
-    ) as SavedInterview | null;
-    if (
-      !parsed ||
-      parsed.lang !== lang ||
-      !Array.isArray(parsed.messages) ||
-      !Array.isArray(parsed.chat)
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+/**
+ * Rebuilds a transcript from storage, or gives up.
+ *
+ * Checking that the two arrays *are* arrays is not enough: what goes into them
+ * is rendered, and `cls` becomes a class name while `text` becomes a child. A
+ * stored entry whose `text` is an object is a render crash on mount, and one
+ * whose `cls` is arbitrary is a stored string in the markup. So every element
+ * is checked, not just the shape around them.
+ */
+function validateInterview(parsed: unknown, lang: string): SavedInterview | null {
+  if (!isRecord(parsed) || parsed.lang !== lang) return null;
+  if (!Array.isArray(parsed.messages) || !Array.isArray(parsed.chat)) return null;
+
+  const messages = parsed.messages
+    .filter(
+      (entry): entry is { cls: 'ai' | 'user'; text: string } =>
+        isRecord(entry) &&
+        (entry.cls === 'ai' || entry.cls === 'user') &&
+        typeof entry.text === 'string',
     )
-      return null;
-    return parsed;
-  } catch {
-    return null;
-  }
+    .slice(0, MAX_SAVED_MESSAGES)
+    .map(entry => ({ cls: entry.cls, text: entry.text.slice(0, MAX_SAVED_TEXT) }));
+
+  const chat = parsed.chat
+    .filter(
+      (entry): entry is Message =>
+        isRecord(entry) &&
+        (entry.role === 'user' || entry.role === 'assistant') &&
+        typeof entry.content === 'string',
+    )
+    .slice(0, MAX_SAVED_MESSAGES)
+    .map(entry => ({ role: entry.role, content: entry.content.slice(0, MAX_SAVED_TEXT) }));
+
+  return { lang, messages, chat, interviewOn: parsed.interviewOn === true };
+}
+
+function loadInterview(lang: string): SavedInterview | null {
+  // Earlier versions wrote this same key into `localStorage`, where it stayed
+  // forever. Those are cleared rather than migrated: moving a transcript into
+  // the session would carry the problem forward one visit, deleting it ends it.
+  removeRaw(localStorage, INTERVIEW_STORAGE_KEY);
+  return readValidated(sessionStorage, INTERVIEW_STORAGE_KEY, parsed =>
+    validateInterview(parsed, lang),
+  );
 }
 
 export function InterviewAgent() {
@@ -75,15 +122,12 @@ export function InterviewAgent() {
     const resumableMessages = messages
       .filter((message): message is ChatMsg & { cls: 'ai' | 'user' } => message.cls !== 'sys')
       .map(({ cls, text }) => ({ cls, text }));
-    localStorage.setItem(
-      INTERVIEW_STORAGE_KEY,
-      JSON.stringify({
-        lang: locale.lang,
-        messages: resumableMessages,
-        chat: chatRef.current,
-        interviewOn,
-      } satisfies SavedInterview),
-    );
+    writeValidated(sessionStorage, INTERVIEW_STORAGE_KEY, {
+      lang: locale.lang,
+      messages: resumableMessages,
+      chat: chatRef.current,
+      interviewOn,
+    } satisfies SavedInterview);
   }, [interviewOn, locale.lang, messages]);
 
   // Scroll chat to bottom when messages change
@@ -146,7 +190,7 @@ export function InterviewAgent() {
       return;
     }
     setMessages([]);
-    localStorage.removeItem(INTERVIEW_STORAGE_KEY);
+    removeRaw(sessionStorage, INTERVIEW_STORAGE_KEY);
     startTool('interview');
     chatRef.current = [{ role: 'user', content: S.interviewOpener }];
     setInterviewOn(true);

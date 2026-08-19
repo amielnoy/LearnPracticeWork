@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { readValidated, writeValidated } from '../lib/storage';
 
 export type ToolId = 'resume' | 'interview' | 'practice';
 
@@ -32,31 +33,29 @@ const EMPTY_PROGRESS: AcademyProgress = {
 };
 
 function loadProgress(): AcademyProgress {
-  try {
-    const parsed = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) || '{}',
-    ) as Partial<AcademyProgress>;
-    return {
-      resumeStarted: parsed.resumeStarted === true,
-      resumeCompleted: parsed.resumeCompleted === true,
-      interviewStarted: parsed.interviewStarted === true,
-      interviewAnswers:
-        Number.isSafeInteger(parsed.interviewAnswers) && Number(parsed.interviewAnswers) >= 0
-          ? Number(parsed.interviewAnswers)
-          : 0,
-      interviewCompleted: parsed.interviewCompleted === true,
-      practiceCompleted: Array.isArray(parsed.practiceCompleted)
-        ? parsed.practiceCompleted
-            .filter((id): id is string => typeof id === 'string')
-            .slice(0, 500)
-        : [],
-      lastTool: ['resume', 'interview', 'practice'].includes(parsed.lastTool || '')
-        ? (parsed.lastTool as ToolId)
-        : null,
-    };
-  } catch {
-    return EMPTY_PROGRESS;
-  }
+  return (
+    readValidated<AcademyProgress>(localStorage, STORAGE_KEY, raw => {
+      const parsed = (raw ?? {}) as Partial<AcademyProgress>;
+      return {
+        resumeStarted: parsed.resumeStarted === true,
+        resumeCompleted: parsed.resumeCompleted === true,
+        interviewStarted: parsed.interviewStarted === true,
+        interviewAnswers:
+          Number.isSafeInteger(parsed.interviewAnswers) && Number(parsed.interviewAnswers) >= 0
+            ? Number(parsed.interviewAnswers)
+            : 0,
+        interviewCompleted: parsed.interviewCompleted === true,
+        practiceCompleted: Array.isArray(parsed.practiceCompleted)
+          ? parsed.practiceCompleted
+              .filter((id): id is string => typeof id === 'string')
+              .slice(0, 500)
+          : [],
+        lastTool: ['resume', 'interview', 'practice'].includes(parsed.lastTool || '')
+          ? (parsed.lastTool as ToolId)
+          : null,
+      };
+    }) ?? EMPTY_PROGRESS
+  );
 }
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
@@ -67,7 +66,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   const update = useCallback((fn: (current: AcademyProgress) => AcademyProgress) => {
     setProgress(current => {
       const next = fn(current);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      writeValidated(localStorage, STORAGE_KEY, next);
       return next;
     });
   }, []);
