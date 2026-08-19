@@ -90,6 +90,17 @@ export function QuestionBank() {
               {bank.videoMentorBtn}
             </a>
           )}
+          {bank.videoInterviewGuideBtn && bank.videoInterviewGuideUrl && (
+            <a
+              href={bank.videoInterviewGuideUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ghost"
+              style={{ display: 'inline-block', marginTop: '10px', marginInlineStart: '10px', textDecoration: 'none' }}
+            >
+              {bank.videoInterviewGuideBtn}
+            </a>
+          )}
         </>
       )}
 

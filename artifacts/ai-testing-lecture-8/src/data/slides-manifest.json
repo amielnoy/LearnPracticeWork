@@ -1,1 +1,322 @@
-[]
+[
+  {
+    "id": "lecture8-slide-001",
+    "position": 1,
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Performance Testing AI Features",
+    "description": "Title slide for Lecture 8 of the AI Testing Academy series.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-002",
+    "position": 2,
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "Learning Objectives",
+    "description": "Four learning outcomes: benchmark latency, load test throughput, optimize token cost, monitor regressions.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-003",
+    "position": 3,
+    "filepath": "src/pages/slides/WhyAIPerfDiffers.tsx",
+    "title": "Why AI Perf Differs",
+    "description": "Three unique challenges: latency variance, token streaming, and cold starts.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-004",
+    "position": 4,
+    "filepath": "src/pages/slides/WorkedExampleStoreTestConfig.tsx",
+    "title": "Worked Example: Store Perf Test Configuration to Supabase",
+    "description": "Code example upserting test configuration (model, provider, concurrency, prompt sample) to Supabase before a benchmark run.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-005",
+    "position": 5,
+    "filepath": "src/pages/slides/TraditionalVsAIPerf.tsx",
+    "title": "Traditional vs. AI Performance Contracts",
+    "description": "Comparison table: latency range, variance, response size, and cost model.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-006",
+    "position": 6,
+    "filepath": "src/pages/slides/SectionDivider1.tsx",
+    "title": "Section 1 — Latency Benchmarking",
+    "description": "Dark navy section divider introducing Section 1.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-007",
+    "position": 7,
+    "filepath": "src/pages/slides/TimeToFirstToken.tsx",
+    "title": "Time-to-First-Token (TTFT)",
+    "description": "Definition, thresholds, and LLM request timeline showing TTFT vs. total completion.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-008",
+    "position": 8,
+    "filepath": "src/pages/slides/PercentileSLAs.tsx",
+    "title": "Percentile-Based SLAs",
+    "description": "p50, p95, p99 definitions with example SLA contract values.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-009",
+    "position": 9,
+    "filepath": "src/pages/slides/WorkedExampleLatencyBenchmark.tsx",
+    "title": "Worked Example: Write Latency Benchmark Results to Supabase",
+    "description": "Code example writing p50/p95/p99 latency results to a perf_runs Supabase table.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-010",
+    "position": 10,
+    "filepath": "src/pages/slides/CrossProviderLatency.tsx",
+    "title": "Comparing Latency Across Providers",
+    "description": "What to hold constant when benchmarking, with illustrative comparison table.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-011",
+    "position": 11,
+    "filepath": "src/pages/slides/Section1Recap.tsx",
+    "title": "Section 1 Recap",
+    "description": "Three principles: measure TTFT separately, define percentile SLAs, benchmark all providers.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-012",
+    "position": 12,
+    "filepath": "src/pages/slides/SectionDivider2.tsx",
+    "title": "Section 2 — Throughput & Load Testing",
+    "description": "Dark navy section divider introducing Section 2.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-013",
+    "position": 13,
+    "filepath": "src/pages/slides/ConcurrentRequestTesting.tsx",
+    "title": "Concurrent Request Testing",
+    "description": "Step-load pattern with concurrency levels, stop conditions, and latency degradation chart.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-014",
+    "position": 14,
+    "filepath": "src/pages/slides/RateLimitsAndQueuing.tsx",
+    "title": "Rate Limits & Queuing Behavior",
+    "description": "RPM vs TPM limits, queuing failure mode, and handling strategies.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-015",
+    "position": 15,
+    "filepath": "src/pages/slides/WorkedExampleThroughputResults.tsx",
+    "title": "Worked Example: Store Throughput Results and Compute Degradation",
+    "description": "Code example writing rps/p95/error_rate at each concurrency level to throughput_runs table.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-016",
+    "position": 16,
+    "filepath": "src/pages/slides/DegradationUnderLoad.tsx",
+    "title": "Reading the Degradation Curve",
+    "description": "Three phases: stable linear scaling, inflection knee, and saturation/collapse.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-017",
+    "position": 17,
+    "filepath": "src/pages/slides/WorkedExampleAggregateRunStats.tsx",
+    "title": "Worked Example: Aggregate Throughput Stats Across Concurrency Levels",
+    "description": "Code example querying throughput_runs to find the max stable concurrency where degraded=false.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-018",
+    "position": 18,
+    "filepath": "src/pages/slides/SectionDivider3.tsx",
+    "title": "Section 3 — Token-Cost Optimization",
+    "description": "Dark navy section divider introducing Section 3.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-019",
+    "position": 19,
+    "filepath": "src/pages/slides/TokenCostPerRequest.tsx",
+    "title": "Cost Per Request",
+    "description": "Input/output token cost formula and what to measure per request.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-020",
+    "position": 20,
+    "filepath": "src/pages/slides/PromptTokenBudgeting.tsx",
+    "title": "Prompt Token Budgeting",
+    "description": "System prompt audit, max_tokens cap, context window truncation, and token budget visualization.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-021",
+    "position": 21,
+    "filepath": "src/pages/slides/WorkedExampleCostRegression.tsx",
+    "title": "Worked Example: Query Cost Trends to Flag a Cost Regression",
+    "description": "Code example fetching 30-day rolling average from request_costs and failing CI on 20% cost jump.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-022",
+    "position": 22,
+    "filepath": "src/pages/slides/CachingStrategies.tsx",
+    "title": "Caching Strategies",
+    "description": "Exact-match, provider prompt cache, and semantic cache — savings percentages and when to use each.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-023",
+    "position": 23,
+    "filepath": "src/pages/slides/ModelSelectionTradeoffs.tsx",
+    "title": "Model Selection Tradeoffs",
+    "description": "Four-column matrix: small/fast, mid-tier, frontier, and rule of thumb for model sizing.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-024",
+    "position": 24,
+    "filepath": "src/pages/slides/WorkedExampleModelCostComparison.tsx",
+    "title": "Worked Example: Compare Average Cost per Model from Supabase",
+    "description": "Code example aggregating request_costs by model name via Supabase RPC to find cheapest model for a feature.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-025",
+    "position": 25,
+    "filepath": "src/pages/slides/SectionDivider4.tsx",
+    "title": "Section 4 — Baselines, Monitoring & Reporting",
+    "description": "Dark navy section divider introducing Section 4.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-026",
+    "position": 26,
+    "filepath": "src/pages/slides/EstablishingBaselines.tsx",
+    "title": "Establishing Performance Baselines",
+    "description": "What goes in a baseline, when to re-baseline, and the four-step baseline lifecycle.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-027",
+    "position": 27,
+    "filepath": "src/pages/slides/WorkedExampleBaselineComparison.tsx",
+    "title": "Worked Example: Fetch Baseline from Supabase and Fail CI on Regression",
+    "description": "Code example fetching most recent baseline and throwing if p99 exceeds +20% threshold.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-028",
+    "position": 28,
+    "filepath": "src/pages/slides/RegressionAlerts.tsx",
+    "title": "Regression Alerts",
+    "description": "Thresholds for latency, cost, and error rate regressions, with blocking vs. non-blocking alert routing.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-029",
+    "position": 29,
+    "filepath": "src/pages/slides/PerformanceDashboards.tsx",
+    "title": "Performance Dashboards",
+    "description": "Essential charts and a mock weekly latency bar chart showing regression detection.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-030",
+    "position": 30,
+    "filepath": "src/pages/slides/WorkedExampleWriteRunSummary.tsx",
+    "title": "Worked Example: Write Full CI Run Summary to Supabase",
+    "description": "Code example writing consolidated CI run summary with pass/fail and regression flags to ci_run_summaries.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-031",
+    "position": 31,
+    "filepath": "src/pages/slides/PerfTestingInCI.tsx",
+    "title": "Making Performance Testing a CI First-Class Citizen",
+    "description": "Five-stage CI pipeline: smoke benchmark, full benchmark, baseline compare, gate decision, store and trend.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-032",
+    "position": 32,
+    "filepath": "src/pages/slides/Section4Recap.tsx",
+    "title": "Section 4 Recap",
+    "description": "Three principles: tag baselines with git SHA, two-tier CI strategy, Supabase as source of truth.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-033",
+    "position": 33,
+    "filepath": "src/pages/slides/SectionDivider5.tsx",
+    "title": "Section 5 — Putting It All Together",
+    "description": "Dark navy section divider introducing Section 5 — final section.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-034",
+    "position": 34,
+    "filepath": "src/pages/slides/WorkedExampleQueryTokenTrends.tsx",
+    "title": "Worked Example: Query Token Cost Trends by Week",
+    "description": "Code example aggregating weekly average cost per request via Supabase RPC function.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-035",
+    "position": 35,
+    "filepath": "src/pages/slides/CommonPitfalls.tsx",
+    "title": "Common Pitfalls to Avoid",
+    "description": "Four pitfalls: reporting only averages, testing at c=1, toy prompts, no baseline after model upgrade.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-036",
+    "position": 36,
+    "filepath": "src/pages/slides/CheckYourUnderstanding.tsx",
+    "title": "Check Your Understanding",
+    "description": "Four discussion questions covering re-baselining, p99 causes, caching tradeoffs, and CI gate design.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-037",
+    "position": 37,
+    "filepath": "src/pages/slides/ToolsRecap.tsx",
+    "title": "Tools You Can Use Today",
+    "description": "Six tool categories: k6/Locust, openai-sdk timings, LangSmith/Helicone, GPTCache/Redis, Supabase, PagerDuty/Slack.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-038",
+    "position": 38,
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Four takeaways: TTFT/percentiles, find degradation point, token cost as perf metric, Supabase baselines.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-039",
+    "position": 39,
+    "filepath": "src/pages/slides/WorkedExampleStreamingMetrics.tsx",
+    "title": "Worked Example: Capture TTFT from a Streaming Response",
+    "description": "Code example measuring TTFT precisely from OpenAI stream and storing to perf_runs in Supabase.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture8-slide-040",
+    "position": 40,
+    "filepath": "src/pages/slides/ClosingSlide.tsx",
+    "title": "Thank You — Lecture 8 Complete",
+    "description": "Closing slide with full 10-lecture series list, lecture stats, and pointer to Lecture 9.",
+    "speakerNotes": ""
+  }
+]

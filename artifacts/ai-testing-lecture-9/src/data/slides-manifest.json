@@ -1,1 +1,322 @@
-[]
+[
+  {
+    "id": "lecture9-slide-001",
+    "position": 1,
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "AI-Assisted Test Generation",
+    "description": "Title slide for Lecture 9 of the AI Testing Academy series.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-002",
+    "position": 2,
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "Learning Objectives",
+    "description": "What students will be able to do by the end of the lecture.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-003",
+    "position": 3,
+    "filepath": "src/pages/slides/WhyAITestGeneration.tsx",
+    "title": "Coverage Gaps and Developer Time",
+    "description": "Why AI test generation matters: coverage gaps, developer time costs, and where AI helps vs. hurts.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-004",
+    "position": 4,
+    "filepath": "src/pages/slides/CoverageGapAnalysis.tsx",
+    "title": "Identifying Where Tests Are Missing",
+    "description": "Three-step process: analyze, prioritize, and generate to close coverage gaps.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-005",
+    "position": 5,
+    "filepath": "src/pages/slides/WhenNotToUseAI.tsx",
+    "title": "When Not to Use AI for Tests",
+    "description": "Guard rails: security-critical logic, regulatory compliance, complex state machines, and novel code.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-006",
+    "position": 6,
+    "filepath": "src/pages/slides/SectionDivider1.tsx",
+    "title": "Section 1 — AI Agents Generating Tests",
+    "description": "Dark navy section divider introducing Section 1.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-007",
+    "position": 7,
+    "filepath": "src/pages/slides/GeneratingFromCode.tsx",
+    "title": "Generating Tests from Source Code",
+    "description": "Technique: providing function signatures, docstrings, and existing test style examples for AI generation.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-008",
+    "position": 8,
+    "filepath": "src/pages/slides/GeneratingFromSpecs.tsx",
+    "title": "Generating Tests from Specs",
+    "description": "Using OpenAPI, AsyncAPI, and JSON Schema as sources for parameterized test generation.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-009",
+    "position": 9,
+    "filepath": "src/pages/slides/GeneratingFromUserStories.tsx",
+    "title": "Generating Tests from User Stories",
+    "description": "Extracting acceptance criteria and given/when/then patterns from user stories to generate test scenarios.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-010",
+    "position": 10,
+    "filepath": "src/pages/slides/EdgeCaseDiscovery.tsx",
+    "title": "Edge-Case Discovery",
+    "description": "Two-pass prompt strategy for discovering edge cases: happy paths first, then explicit edge-case pass.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-011",
+    "position": 11,
+    "filepath": "src/pages/slides/WorkedExampleStoreGeneratedTests.tsx",
+    "title": "Worked Example: Storing Generated Tests in Supabase",
+    "description": "Worked example: inserting AI-generated tests into the generated_tests table with review_status=pending.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-012",
+    "position": 12,
+    "filepath": "src/pages/slides/Section1Recap.tsx",
+    "title": "Section 1 Recap",
+    "description": "Three principles: source matters, ask in two passes, store in Supabase.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-013",
+    "position": 13,
+    "filepath": "src/pages/slides/SectionDivider2.tsx",
+    "title": "Section 2 — Tooling in Practice",
+    "description": "Dark navy section divider introducing Section 2.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-014",
+    "position": 14,
+    "filepath": "src/pages/slides/GitHubCopilot.tsx",
+    "title": "GitHub Copilot for Tests",
+    "description": "Using Copilot Chat /tests command and inline completions for test generation, plus limitations.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-015",
+    "position": 15,
+    "filepath": "src/pages/slides/CursorForTests.tsx",
+    "title": "Cursor for Test Generation",
+    "description": "Using Cursor @file references, Composer mode, @codebase, and .cursorrules for consistent test output.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-016",
+    "position": 16,
+    "filepath": "src/pages/slides/CustomGenerationPipelines.tsx",
+    "title": "Custom Generation Pipelines",
+    "description": "Five-stage architecture: trigger, context fetch, AI generate, Supabase store, human review.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-017",
+    "position": 17,
+    "filepath": "src/pages/slides/PromptPatternsForTests.tsx",
+    "title": "Prompt Patterns for Good Test Generation",
+    "description": "Role + framework constraint, structured output contract, negative constraints, and anti-patterns to avoid.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-018",
+    "position": 18,
+    "filepath": "src/pages/slides/WorkedExampleAcceptanceRate.tsx",
+    "title": "Worked Example: Querying Acceptance Rate from Supabase",
+    "description": "Worked example: computing acceptance rate of AI-generated tests by sprint week.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-019",
+    "position": 19,
+    "filepath": "src/pages/slides/Section2Recap.tsx",
+    "title": "Section 2 Recap",
+    "description": "Three takeaways: pick the right tool, use structured prompts, measure acceptance rate.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-020",
+    "position": 20,
+    "filepath": "src/pages/slides/SectionDivider3.tsx",
+    "title": "Section 3 — Quality Control for Generated Tests",
+    "description": "Dark navy section divider introducing Section 3.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-021",
+    "position": 21,
+    "filepath": "src/pages/slides/ReviewingGeneratedTests.tsx",
+    "title": "Reviewing AI-Generated Tests",
+    "description": "Review checklist and Supabase status workflow: pending, approved, rejected, regen.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-022",
+    "position": 22,
+    "filepath": "src/pages/slides/FlakyTestDetection.tsx",
+    "title": "Flaky Test Detection in Generated Tests",
+    "description": "Common flakiness patterns in AI-generated tests and a three-part detection strategy.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-023",
+    "position": 23,
+    "filepath": "src/pages/slides/RedundancyPruning.tsx",
+    "title": "Redundancy Pruning",
+    "description": "Why AI over-generates and three strategies: coverage diff, semantic similarity, mutation testing.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-024",
+    "position": 24,
+    "filepath": "src/pages/slides/TriagingFailuresWithAI.tsx",
+    "title": "Triaging Failures with AI",
+    "description": "Four-category triage verdict system: real_bug, flaky, env_issue, bad_test.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-025",
+    "position": 25,
+    "filepath": "src/pages/slides/WorkedExampleTriageVerdicts.tsx",
+    "title": "Worked Example: Logging Triage Verdicts to Supabase",
+    "description": "Worked example: inserting AI triage verdicts with confidence score to triage_verdicts table.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-026",
+    "position": 26,
+    "filepath": "src/pages/slides/Section3Recap.tsx",
+    "title": "Section 3 Recap",
+    "description": "Three principles: review every test, prune before merging, triage with AI and decide with humans.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-027",
+    "position": 27,
+    "filepath": "src/pages/slides/SectionDivider4.tsx",
+    "title": "Section 4 — The End-to-End Pipeline",
+    "description": "Dark navy section divider introducing Section 4.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-028",
+    "position": 28,
+    "filepath": "src/pages/slides/TicketToPRWalkthrough.tsx",
+    "title": "Ticket to PR: Step by Step",
+    "description": "Eight-step full walkthrough from ticket closure to PR merge with human review gate.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-029",
+    "position": 29,
+    "filepath": "src/pages/slides/HumanInTheLoop.tsx",
+    "title": "Human-in-the-Loop Review",
+    "description": "Why full automation creates accountability gaps and what reviewers are accountable for.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-030",
+    "position": 30,
+    "filepath": "src/pages/slides/WorkedExampleCoverageDeltas.tsx",
+    "title": "Worked Example: Coverage Deltas from Supabase",
+    "description": "Worked example: fetching sprint-over-sprint coverage growth from coverage_snapshots table.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-031",
+    "position": 31,
+    "filepath": "src/pages/slides/WorkedExampleSecurityFindings.tsx",
+    "title": "Worked Example: Storing Security Findings in Supabase",
+    "description": "Worked example: logging security findings detected by AI-generated tests to security_findings table.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-032",
+    "position": 32,
+    "filepath": "src/pages/slides/WorkedExamplePerformanceBenchmarks.tsx",
+    "title": "Worked Example: Performance Benchmarks in Supabase",
+    "description": "Worked example: storing p50/p95/p99 latencies and alerting on regressions via Edge Function.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-033",
+    "position": 33,
+    "filepath": "src/pages/slides/WorkedExampleStrategyMetrics.tsx",
+    "title": "Worked Example: Strategy Metrics Dashboard in Supabase",
+    "description": "Worked example: rolling up pipeline KPIs per sprint to strategy_metrics for executive reporting.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-034",
+    "position": 34,
+    "filepath": "src/pages/slides/WorkedExampleGeneratorComparison.tsx",
+    "title": "Worked Example: Generator Comparison Dashboard in Supabase",
+    "description": "Worked example: comparing acceptance rates across Copilot, Cursor, and custom pipeline via generator_runs table.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-035",
+    "position": 35,
+    "filepath": "src/pages/slides/WorkedExampleTestROI.tsx",
+    "title": "Worked Example: Measuring Test ROI in Supabase",
+    "description": "Worked example: computing net ROI per sprint by tracking manual time saved, bugs caught, and AI generation cost.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-036",
+    "position": 36,
+    "filepath": "src/pages/slides/WorkedExampleCIRunHistory.tsx",
+    "title": "Worked Example: CI Run History in Supabase",
+    "description": "Worked example: logging every CI pipeline run with pass/fail counts and alerting via Supabase Edge Function.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-037",
+    "position": 37,
+    "filepath": "src/pages/slides/CommonPitfalls.tsx",
+    "title": "Common Pitfalls to Avoid",
+    "description": "Five pitfalls: merging without review, coverage as quality, no prompt versioning, skipping flakiness check, no business context.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-038",
+    "position": 38,
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Four key takeaways covering the entire lecture.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-039",
+    "position": 39,
+    "filepath": "src/pages/slides/CheckYourUnderstanding.tsx",
+    "title": "Check Your Understanding",
+    "description": "Four discussion questions covering generation quality, triage, coverage vs. bugs, and acceptance rate diagnosis.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture9-slide-040",
+    "position": 40,
+    "filepath": "src/pages/slides/ClosingSlide.tsx",
+    "title": "Thank You",
+    "description": "Closing slide listing all ten lectures in the AI Testing Academy series.",
+    "speakerNotes": ""
+  }
+]

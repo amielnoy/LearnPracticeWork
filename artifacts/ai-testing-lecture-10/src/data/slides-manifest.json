@@ -1,1 +1,322 @@
-[]
+[
+  {
+    "id": "lecture10-slide-001",
+    "position": 1,
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Building an AI Testing Strategy",
+    "description": "Title slide for Lecture 10 of the AI Testing Academy series.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-002",
+    "position": 2,
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "Learning Objectives",
+    "description": "What students will be able to do by the end of the lecture.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-003",
+    "position": 3,
+    "filepath": "src/pages/slides/SeriesRecap.tsx",
+    "title": "What We Have Built So Far",
+    "description": "Recap of Lectures 1–9 and the gap that a deliberate strategy fills.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-004",
+    "position": 4,
+    "filepath": "src/pages/slides/CommonPitfalls.tsx",
+    "title": "Common Pitfalls",
+    "description": "Six pitfalls teams fall into without a deliberate AI testing strategy.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-005",
+    "position": 5,
+    "filepath": "src/pages/slides/StrategyOverview.tsx",
+    "title": "What a Strategy Covers",
+    "description": "Five pillars of an AI testing strategy: coverage, layers, metrics, reporting, and people.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-006",
+    "position": 6,
+    "filepath": "src/pages/slides/SectionDivider1.tsx",
+    "title": "Section 1 — Strategy Layers",
+    "description": "Dark navy section divider introducing Section 1.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-007",
+    "position": 7,
+    "filepath": "src/pages/slides/TestPyramid.tsx",
+    "title": "Four Test Layers",
+    "description": "The adapted AI test pyramid: unit, integration, system, and production monitoring.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-008",
+    "position": 8,
+    "filepath": "src/pages/slides/UnitLayer.tsx",
+    "title": "Unit Testing AI Features",
+    "description": "Layer 1: unit tests for deterministic AI components — no live model calls.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-009",
+    "position": 9,
+    "filepath": "src/pages/slides/IntegrationLayer.tsx",
+    "title": "Integration Tests",
+    "description": "Layer 2: integration tests on a golden set, running per PR with LLM-as-judge.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-010",
+    "position": 10,
+    "filepath": "src/pages/slides/SystemLayer.tsx",
+    "title": "System Tests (Nightly)",
+    "description": "Layer 3: nightly full eval suite with security scans and cost/latency benchmarks.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-011",
+    "position": 11,
+    "filepath": "src/pages/slides/ProductionMonitoring.tsx",
+    "title": "Production Monitoring",
+    "description": "Layer 4: shadow evals on live traffic samples for drift and cost detection.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-012",
+    "position": 12,
+    "filepath": "src/pages/slides/WorkedExampleScorecardQuery.tsx",
+    "title": "Worked Example: Querying the Quality Scorecard",
+    "description": "Supabase worked example: querying the ai_quality_scorecard table for strategy dashboard.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-013",
+    "position": 13,
+    "filepath": "src/pages/slides/WorkedExampleGoldenSetEval.tsx",
+    "title": "Worked Example: Golden-Set Eval Runs in Supabase",
+    "description": "Supabase worked example: storing integration eval runs and querying rolling mean score to gate PR merges.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-014",
+    "position": 14,
+    "filepath": "src/pages/slides/SectionDivider2.tsx",
+    "title": "Section 2 — Metrics That Matter",
+    "description": "Dark navy section divider introducing Section 2.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-015",
+    "position": 15,
+    "filepath": "src/pages/slides/AccuracyMetrics.tsx",
+    "title": "Accuracy and Quality Metrics",
+    "description": "LLM-judge pass rate, golden-set mean score, hallucination rate, and refusal rate.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-016",
+    "position": 16,
+    "filepath": "src/pages/slides/CostMetrics.tsx",
+    "title": "Cost Metrics",
+    "description": "Cost per 1k tokens, cost per invocation, and monthly projected spend vs. budget.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-017",
+    "position": 17,
+    "filepath": "src/pages/slides/LatencyMetrics.tsx",
+    "title": "Latency Metrics",
+    "description": "p50/p95/p99 latency targets and time-to-first-token (TTFT) with scoring formula.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-018",
+    "position": 18,
+    "filepath": "src/pages/slides/SecurityMetrics.tsx",
+    "title": "Security Posture",
+    "description": "Prompt injection resistance, PII leak rate, harmful content block rate — all hard gates.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-019",
+    "position": 19,
+    "filepath": "src/pages/slides/QualityScorecard.tsx",
+    "title": "The Quality Scorecard",
+    "description": "Sample scorecard table combining accuracy, cost, latency, and security per release.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-020",
+    "position": 20,
+    "filepath": "src/pages/slides/WorkedExampleMaturityAssessment.tsx",
+    "title": "Worked Example: Maturity Self-Assessment Trend",
+    "description": "Supabase worked example: storing quarterly maturity assessments and querying 4-quarter trend.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-021",
+    "position": 21,
+    "filepath": "src/pages/slides/WorkedExampleScorecardInsert.tsx",
+    "title": "Worked Example: Inserting a Scorecard Row",
+    "description": "Supabase worked example: inserting a full quality scorecard row after nightly tests and querying the release trend.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-022",
+    "position": 22,
+    "filepath": "src/pages/slides/SectionDivider3.tsx",
+    "title": "Section 3 — Reporting and Continuous Improvement",
+    "description": "Dark navy section divider introducing Section 3.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-023",
+    "position": 23,
+    "filepath": "src/pages/slides/StakeholderDashboard.tsx",
+    "title": "Stakeholder Dashboards",
+    "description": "Executive, engineering, and security dashboard views with refresh cadence.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-024",
+    "position": 24,
+    "filepath": "src/pages/slides/RetroCadence.tsx",
+    "title": "The Retro Cadence",
+    "description": "Sprint, monthly, and quarterly retro meetings covering the full improvement loop.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-025",
+    "position": 25,
+    "filepath": "src/pages/slides/WorkedExampleEvalAuditLog.tsx",
+    "title": "Worked Example: Eval-Set Audit Trail",
+    "description": "Supabase worked example: logging eval-set update events for an audit trail.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-026",
+    "position": 26,
+    "filepath": "src/pages/slides/ModelChangeTracking.tsx",
+    "title": "Tracking Model Changes",
+    "description": "Daily fingerprint probes, canary eval on hash change, and regression pinning policy.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-027",
+    "position": 27,
+    "filepath": "src/pages/slides/WorkedExampleRolloutReport.tsx",
+    "title": "Worked Example: Team-Wide Rollout Report",
+    "description": "Supabase worked example: querying rollout progress to find teams missing integration tests.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-028",
+    "position": 28,
+    "filepath": "src/pages/slides/WorkedExampleDriftAlert.tsx",
+    "title": "Worked Example: Production Drift Alerts",
+    "description": "Supabase worked example: inserting drift alerts from shadow evals, querying open incidents, and closing resolved alerts.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-029",
+    "position": 29,
+    "filepath": "src/pages/slides/SectionDivider4.tsx",
+    "title": "Section 4 — Putting It All Together",
+    "description": "Dark navy section divider introducing Section 4.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-030",
+    "position": 30,
+    "filepath": "src/pages/slides/RolloutPlan.tsx",
+    "title": "A 90-Day Rollout Plan",
+    "description": "Three-phase rollout: pilot team baseline, system tests + dashboard, full team + production monitoring.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-031",
+    "position": 31,
+    "filepath": "src/pages/slides/RolesResponsibilities.tsx",
+    "title": "Roles and Responsibilities",
+    "description": "AI Quality Lead, Team AI Quality Owner, ML/Platform Engineer, and Security Engineer.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-032",
+    "position": 32,
+    "filepath": "src/pages/slides/MaturityModel.tsx",
+    "title": "AI Testing Maturity Model",
+    "description": "Four-level maturity model: Ad Hoc, Defined, Measured, Optimized.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-033",
+    "position": 33,
+    "filepath": "src/pages/slides/WorkedExampleSecurityFindings.tsx",
+    "title": "Worked Example: Security Findings in Supabase",
+    "description": "Supabase worked example: inserting security probe results and querying to block a release.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-034",
+    "position": 34,
+    "filepath": "src/pages/slides/WorkedExamplePerformanceBenchmarks.tsx",
+    "title": "Worked Example: Latency Benchmarks in Supabase",
+    "description": "Supabase worked example: writing latency benchmarks and querying rolling p95 for regressions.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-035",
+    "position": 35,
+    "filepath": "src/pages/slides/FullStrategyWalkthrough.tsx",
+    "title": "A Full Strategy Walkthrough",
+    "description": "End-to-end walkthrough: per-commit, per-PR, nightly, post-deploy, sprint retro, and quarterly.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-036",
+    "position": 36,
+    "filepath": "src/pages/slides/WorkedExampleCostTracking.tsx",
+    "title": "Worked Example: Cost Tracking Per Feature",
+    "description": "Supabase worked example: tracking cost per feature invocation and finding over-budget releases.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-037",
+    "position": 37,
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Two key takeaways and three concrete actions to take this week.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-038",
+    "position": 38,
+    "filepath": "src/pages/slides/CheckYourUnderstanding.tsx",
+    "title": "Check Your Understanding",
+    "description": "Four discussion questions covering cost reduction, model upgrade tradeoffs, maturity-level prioritization, and canary eval thresholds.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-039",
+    "position": 39,
+    "filepath": "src/pages/slides/ToolsRecap.tsx",
+    "title": "Tools You Can Use Today",
+    "description": "Six tools: test pyramid template, Supabase scorecard schema, golden-set starter kit, fingerprint probe script, retro agenda, and maturity assessment form.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture10-slide-040",
+    "position": 40,
+    "filepath": "src/pages/slides/ClosingSlide.tsx",
+    "title": "Thank You — Series Complete",
+    "description": "Closing slide listing all ten lectures of the AI Testing Academy series.",
+    "speakerNotes": ""
+  }
+]

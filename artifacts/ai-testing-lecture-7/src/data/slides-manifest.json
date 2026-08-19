@@ -1,1 +1,322 @@
-[]
+[
+  {
+    "id": "lecture7-slide-001",
+    "position": 1,
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Security Testing for AI",
+    "description": "Title slide for Lecture 7 of the AI Testing Academy series.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-002",
+    "position": 2,
+    "filepath": "src/pages/slides/LearningObjectives.tsx",
+    "title": "Learning Objectives",
+    "description": "Five learning objectives covering attack surface, injection, data leakage, adversarial inputs, and building a security suite.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-003",
+    "position": 3,
+    "filepath": "src/pages/slides/AttackSurface.tsx",
+    "title": "The AI Attack Surface",
+    "description": "Overview of where AI systems are exposed to attack: prompts, tools, training data, and outputs.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-004",
+    "position": 4,
+    "filepath": "src/pages/slides/OWASPTop10.tsx",
+    "title": "OWASP LLM Top 10",
+    "description": "Overview of the OWASP Top 10 for Large Language Model applications.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-005",
+    "position": 5,
+    "filepath": "src/pages/slides/WhySecurityTestingMatters.tsx",
+    "title": "Why Security Testing Matters",
+    "description": "The cost of not testing AI security: real incidents and consequences.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-006",
+    "position": 6,
+    "filepath": "src/pages/slides/SectionDivider1.tsx",
+    "title": "Section 2: Prompt Injection",
+    "description": "Section divider introducing the prompt injection module.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-007",
+    "position": 7,
+    "filepath": "src/pages/slides/DirectVsIndirectInjection.tsx",
+    "title": "Direct vs. Indirect Injection",
+    "description": "Comparing direct prompt injection (user input) with indirect injection via RAG documents and tool results.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-008",
+    "position": 8,
+    "filepath": "src/pages/slides/WorkedExampleInjectionLog.tsx",
+    "title": "Worked Example: Logging Injection Attempts",
+    "description": "How to persist red-team injection test results to Supabase and query for failed guardrail rates.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-009",
+    "position": 9,
+    "filepath": "src/pages/slides/SystemPromptLeakage.tsx",
+    "title": "System Prompt Leakage",
+    "description": "How attackers extract the system prompt through direct and indirect techniques.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-010",
+    "position": 10,
+    "filepath": "src/pages/slides/JailbreakingTechniques.tsx",
+    "title": "Jailbreaking Techniques",
+    "description": "A taxonomy of jailbreaking techniques: role-play, encoding, hypothetical framing, and token smuggling.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-011",
+    "position": 11,
+    "filepath": "src/pages/slides/WorkedExampleTokenSpend.tsx",
+    "title": "Worked Example: Logging Denial-of-Wallet Test Results",
+    "description": "Recording actual token spend vs cap for DoW tests in Supabase and asserting all tests respected the cap.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-012",
+    "position": 12,
+    "filepath": "src/pages/slides/Section1Recap.tsx",
+    "title": "Section 2 Recap: Prompt Injection",
+    "description": "Key lessons from the prompt injection section.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-013",
+    "position": 13,
+    "filepath": "src/pages/slides/SectionDivider2.tsx",
+    "title": "Section 3: Data Leakage and Privacy",
+    "description": "Section divider introducing the data leakage and privacy module.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-014",
+    "position": 14,
+    "filepath": "src/pages/slides/PIILeakageInOutputs.tsx",
+    "title": "PII Leakage in Outputs",
+    "description": "How PII from training data, RAG context, and user inputs can leak into model outputs.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-015",
+    "position": 15,
+    "filepath": "src/pages/slides/WorkedExamplePIIFinding.tsx",
+    "title": "Worked Example: Detecting PII Findings",
+    "description": "Querying Supabase for PII leakage verdicts in red-team test runs and computing block rates.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-016",
+    "position": 16,
+    "filepath": "src/pages/slides/TrainingDataExtraction.tsx",
+    "title": "Training Data Extraction",
+    "description": "Techniques attackers use to reconstruct training data from model outputs, including membership inference and canary extraction.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-017",
+    "position": 17,
+    "filepath": "src/pages/slides/WorkedExampleCanaryTracking.tsx",
+    "title": "Worked Example: Canary Token Memorisation Tracking",
+    "description": "Recording canary extraction results in Supabase and computing memorisation rate per model version.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-018",
+    "position": 18,
+    "filepath": "src/pages/slides/OverPermissionedTools.tsx",
+    "title": "Over-Permissioned Tools",
+    "description": "The risk of giving LLM agents more tool permissions than required and how to test for privilege scope.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-019",
+    "position": 19,
+    "filepath": "src/pages/slides/OutputFiltering.tsx",
+    "title": "Output Filtering Strategies",
+    "description": "Regex, semantic, and LLM-judge approaches to filtering sensitive content from model outputs.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-020",
+    "position": 20,
+    "filepath": "src/pages/slides/Section2Recap.tsx",
+    "title": "Section 3 Recap: Data Leakage",
+    "description": "Key lessons from the data leakage and privacy section.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-021",
+    "position": 21,
+    "filepath": "src/pages/slides/SectionDivider3.tsx",
+    "title": "Section 4: Adversarial Inputs and Robustness",
+    "description": "Section divider introducing the adversarial inputs and robustness module.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-022",
+    "position": 22,
+    "filepath": "src/pages/slides/AdversarialInputs.tsx",
+    "title": "Adversarial Inputs",
+    "description": "Types of adversarial inputs: semantic perturbations, character substitutions, and cross-lingual attacks.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-023",
+    "position": 23,
+    "filepath": "src/pages/slides/WorkedExampleAdversarialTrend.tsx",
+    "title": "Worked Example: Adversarial Attack Trend Analysis",
+    "description": "Querying Supabase for adversarial test results over time to detect regressions in robustness.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-024",
+    "position": 24,
+    "filepath": "src/pages/slides/ModelEvasion.tsx",
+    "title": "Model Evasion",
+    "description": "How attackers evade content classifiers and guardrails with minimal perturbation.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-025",
+    "position": 25,
+    "filepath": "src/pages/slides/DenialOfWallet.tsx",
+    "title": "Denial of Wallet",
+    "description": "Resource exhaustion attacks that drive up API costs: prompt amplification and unbounded tool recursion.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-026",
+    "position": 26,
+    "filepath": "src/pages/slides/WorkedExampleRateLimitAudit.tsx",
+    "title": "Worked Example: Rate-Limit Abuse Audit",
+    "description": "Logging burst test results to Supabase and asserting that throttling triggers within the expected request count.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-027",
+    "position": 27,
+    "filepath": "src/pages/slides/Section3Recap.tsx",
+    "title": "Section 4 Recap: Adversarial Inputs",
+    "description": "Key lessons from the adversarial inputs and robustness section.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-028",
+    "position": 28,
+    "filepath": "src/pages/slides/SectionDivider4.tsx",
+    "title": "Section 5: Building a Security Test Suite",
+    "description": "Section divider introducing the security test suite construction module.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-029",
+    "position": 29,
+    "filepath": "src/pages/slides/AutomatedRedTeamHarness.tsx",
+    "title": "Automated Red-Team Harness",
+    "description": "Architecture of an automated red-team test harness: YAML prompt library, LLM judge, and Supabase persistence.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-030",
+    "position": 30,
+    "filepath": "src/pages/slides/WorkedExampleGuardrailCI.tsx",
+    "title": "Worked Example: Guardrail CI Gate",
+    "description": "Recording guardrail test results per category and build in Supabase and computing pass rates.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-031",
+    "position": 31,
+    "filepath": "src/pages/slides/GuardrailTesting.tsx",
+    "title": "Guardrail Testing Patterns",
+    "description": "How to write effective guardrail tests including positive, negative, and boundary cases.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-032",
+    "position": 32,
+    "filepath": "src/pages/slides/WorkedExampleSecurityScore.tsx",
+    "title": "Worked Example: Composite Security Score",
+    "description": "Aggregating weighted security test results from Supabase into a single composite score for the CI gate.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-033",
+    "position": 33,
+    "filepath": "src/pages/slides/CIIntegration.tsx",
+    "title": "Wiring Security Tests into CI",
+    "description": "PR vs nightly split strategy and the four-stage CI pipeline for security tests.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-034",
+    "position": 34,
+    "filepath": "src/pages/slides/IncidentResponseBasics.tsx",
+    "title": "Incident Response for AI Security Findings",
+    "description": "Four-step incident response: contain, assess, remediate, and disclose.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-035",
+    "position": 35,
+    "filepath": "src/pages/slides/WorkedExampleIncidentQuery.tsx",
+    "title": "Worked Example: Incident Scope Query",
+    "description": "Querying Supabase to find affected users and leaked prompts during a security incident window.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-036",
+    "position": 36,
+    "filepath": "src/pages/slides/WorkedExampleFindingsTrend.tsx",
+    "title": "Worked Example: Security Findings Trend Dashboard",
+    "description": "Querying Supabase for weekly security findings and computing MTTR to track team response velocity.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-037",
+    "position": 37,
+    "filepath": "src/pages/slides/Section4Recap.tsx",
+    "title": "Section 5 Recap: Building a Security Suite",
+    "description": "Three principles for building an effective AI security test suite.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-038",
+    "position": 38,
+    "filepath": "src/pages/slides/CheckYourUnderstanding.tsx",
+    "title": "Check Your Understanding",
+    "description": "Four discussion questions covering injection surfaces, score regression, incident response, and rate limiting.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-039",
+    "position": 39,
+    "filepath": "src/pages/slides/KeyTakeaways.tsx",
+    "title": "Key Takeaways",
+    "description": "Four key takeaways: cover all injection surfaces, filter outputs, persist results for trending, and cap every resource dimension.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "lecture7-slide-040",
+    "position": 40,
+    "filepath": "src/pages/slides/ClosingSlide.tsx",
+    "title": "Closing Slide",
+    "description": "Lecture complete slide with the full AI Testing Academy series overview and next lecture teaser.",
+    "speakerNotes": ""
+  }
+]

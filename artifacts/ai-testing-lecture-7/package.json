@@ -34,5 +34,8 @@
     "tsx": "catalog:",
     "vite": "catalog:",
     "wouter": "catalog:"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.3"
   }
 }
