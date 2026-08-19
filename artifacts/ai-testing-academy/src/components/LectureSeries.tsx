@@ -53,15 +53,17 @@ export const EN: BankData = {
         },
         {
           num: 3,
-          ready: false,
+          ready: true,
           title: 'Testing LLM Outputs',
           desc: 'Evaluation frameworks for LLM responses — semantic similarity, factuality checks, toxicity detection, and JSON schema validation.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-3/slide1?lang=en',
         },
         {
           num: 4,
-          ready: false,
+          ready: true,
           title: 'Playwright for AI Applications',
           desc: 'End-to-end testing of AI-powered UIs with Playwright — handling dynamic content, testing streaming responses, and building resilient selectors.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-4/slide1?lang=en',
         },
         {
           num: 5,
@@ -200,15 +202,17 @@ export const HE: BankData = {
         },
         {
           num: 3,
-          ready: false,
+          ready: true,
           title: 'בדיקת פלטי LLM',
           desc: 'מסגרות הערכה לתגובות LLM — דמיון סמנטי, בדיקות עובדתיות, זיהוי רעילות ואימות JSON schema.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-3/slide1?lang=he',
         },
         {
           num: 4,
-          ready: false,
+          ready: true,
           title: 'Playwright לאפליקציות AI',
           desc: 'בדיקות end-to-end לממשקי AI עם Playwright — טיפול בתוכן דינמי, בדיקת תגובות streaming ובניית selectors עמידים.',
+          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-4/slide1?lang=he',
         },
         {
           num: 5,
