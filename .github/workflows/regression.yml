@@ -3,7 +3,7 @@ name: Regression
 # ─────────────────────────────────────────────────────────────────────────────
 #  The wide pass. CI runs the fast one — Chromium desktop and phone — on every
 #  push, because a push should not wait on five engines. This runs the same
-#  specs on all of them, every day at 21:00 Israel time, and on demand.
+#  specs on all of them, every day at 23:59 Israel time, and on demand.
 #
 #  What "all of them" honestly means:
 #    · WebKit desktop and WebKit at an iPhone viewport. WebKit is the engine
@@ -19,11 +19,11 @@ name: Regression
 # ─────────────────────────────────────────────────────────────────────────────
 on:
   schedule:
-    # 21:00 Israel, every day. GitHub cron is UTC only and Israel moves between
-    # UTC+2 and UTC+3, so both candidate hours are scheduled and the gate below
-    # discards whichever firing is not 21:00 locally.
-    - cron: '0 18 * * *' # 21:00 IDT (UTC+3, summer)
-    - cron: '0 19 * * *' # 21:00 IST (UTC+2, winter)
+    # 23:59 Israel, every day. GitHub cron is UTC only and Israel moves between
+    # UTC+2 and UTC+3, so both candidate times are scheduled and the gate below
+    # keeps whichever one is 23:59 locally today.
+    - cron: '59 20 * * *' # 23:59 IDT (UTC+3, summer)
+    - cron: '59 21 * * *' # 23:59 IST (UTC+2, winter)
   workflow_dispatch:
 
 permissions:
@@ -47,16 +47,38 @@ jobs:
     outputs:
       run: ${{ steps.check.outputs.run }}
     steps:
+      # Which of the two firings is the real one is decided by today's UTC
+      # offset, matched against the cron that actually fired — not by reading
+      # the clock and hoping it says 23.
+      #
+      # Reading the clock is what ci.yml does, and at 05:00 it is fine. At 23:59
+      # it is not: GitHub routinely starts a scheduled run minutes late, and one
+      # late minute here rolls the local hour to 00, so the correct firing would
+      # discard itself and the run would silently never happen. Matching the
+      # cron string has no such window — it is exact whenever the job starts.
       - id: check
+        env:
+          FIRED: ${{ github.event.schedule }}
         run: |
+          set -euo pipefail
           if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "Started by ${{ github.event_name }} — running."
             echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          hour=$(TZ=Asia/Jerusalem date +%H)
-          if [ "$hour" = "21" ]; then
+
+          offset=$(TZ=Asia/Jerusalem date +%z)
+          case "$offset" in
+            +0300) wanted='59 20 * * *' ;;  # summer, UTC+3
+            +0200) wanted='59 21 * * *' ;;  # winter, UTC+2
+            *) echo "Unexpected Israel offset $offset — running rather than skipping." >&2
+               echo "run=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
+          esac
+
+          if [ "$FIRED" = "$wanted" ]; then
+            echo "Offset $offset, fired by '$FIRED' — this is the 23:59 run."
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Israel local hour is $hour, not 21 — skipping this firing."
+            echo "Offset $offset wants '$wanted'; this run was '$FIRED' — skipping."
             echo "run=false" >> "$GITHUB_OUTPUT"
           fi
 
