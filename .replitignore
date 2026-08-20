@@ -3,3 +3,8 @@
 
 # No need to store the pnpm store twice.
 .local
+
+# A removed Node API artifact can remain in an existing Replit workspace even
+# though it is no longer tracked by Git. Excluding that legacy path prevents it
+# from claiming /api and port 8080 ahead of the tracked FastAPI service.
+artifacts/api-server
