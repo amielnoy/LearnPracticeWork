@@ -7,11 +7,16 @@ import { ProviderContextProvider } from './context/ProviderContext';
 import { ProgressProvider } from './context/ProgressContext';
 import { AuthProvider } from './context/AuthContext';
 import { HomePage } from './pages/HomePage';
+import { LegalPage } from './pages/LegalPage';
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/privacy">{() => <LegalPage kind="privacy" />}</Route>
+      <Route path="/terms">{() => <LegalPage kind="terms" />}</Route>
+      <Route path="/accessibility">{() => <LegalPage kind="accessibility" />}</Route>
+      <Route path="/cancellation">{() => <LegalPage kind="cancellation" />}</Route>
       <Route component={NotFound} />
     </Switch>
   );

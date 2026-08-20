@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import hmac
+import os
 import time
 from collections import defaultdict, deque
+
+from .config import database_url, env
+from .database import hit_rate_limit
 
 
 class MemoryRateLimiter:
@@ -22,3 +28,27 @@ class MemoryRateLimiter:
                 return False, 0
             hits.append(now)
             return True, self.limit - len(hits)
+
+
+class SharedRateLimiter:
+    """Postgres-backed in production, deterministic in-memory in local/test runs."""
+
+    def __init__(self, bucket: str, limit: int, window_seconds: float) -> None:
+        self.bucket = bucket
+        self.limit = limit
+        self.window_seconds = window_seconds
+        self.memory = MemoryRateLimiter(limit, window_seconds)
+
+    async def hit(self, key: str) -> tuple[bool, int]:
+        if os.getenv("NODE_ENV") != "production":
+            return await self.memory.hit(key)
+        salt = env("RATE_LIMIT_SALT") or env("METRICS_ID_SALT")
+        if not database_url() or not salt:
+            # A production quota without a shared database and private salt is
+            # not a quota. Fail closed instead of silently exposing paid APIs.
+            return False, 0
+        digest = hmac.new(salt.encode(), key.encode(), hashlib.sha256).hexdigest()
+        try:
+            return await hit_rate_limit(self.bucket, digest, self.limit, self.window_seconds)
+        except Exception:
+            return False, 0

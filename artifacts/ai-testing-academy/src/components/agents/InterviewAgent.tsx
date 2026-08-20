@@ -7,6 +7,7 @@ import type { Message } from '../../lib/providers';
 import { useProgress } from '../../context/ProgressContext';
 import { sectionNum } from '../../lib/sections';
 import { readValidated, removeRaw, writeValidated } from '../../lib/storage';
+import { AiDataConsent } from './AiDataConsent';
 
 interface ChatMsg {
   cls: 'ai' | 'user' | 'sys';
@@ -103,6 +104,7 @@ export function InterviewAgent() {
   );
   const [chatInput, setChatInput] = useState('');
   const [chatErr, setChatErr] = useState('');
+  const [dataConsent, setDataConsent] = useState(false);
   const [interviewOn, setInterviewOn] = useState(savedInterview?.interviewOn ?? false);
   const [sendDisabled, setSendDisabled] = useState(!(savedInterview?.interviewOn ?? false));
   const [verdictDisabled, setVerdictDisabled] = useState(!(savedInterview?.interviewOn ?? false));
@@ -114,10 +116,14 @@ export function InterviewAgent() {
   const chatRef = useRef<Message[]>(savedInterview?.chat ?? []);
   const chatBoxRef = useRef<HTMLDivElement>(null);
   const interviewOnRef = useRef(interviewOn);
+  const dataConsentRef = useRef(dataConsent);
 
   useEffect(() => {
     interviewOnRef.current = interviewOn;
   }, [interviewOn]);
+  useEffect(() => {
+    dataConsentRef.current = dataConsent;
+  }, [dataConsent]);
 
   // Voice mode
   const voiceLang = S.voiceLang;
@@ -203,6 +209,7 @@ export function InterviewAgent() {
   const sendText = useCallback(
     async (val: string) => {
       if (!interviewOnRef.current) return;
+      if (!dataConsentRef.current) return;
       if (!val.trim()) return;
       setChatInput('');
       setChatErr('');
@@ -218,6 +225,14 @@ export function InterviewAgent() {
 
   const startInterview = useCallback(async () => {
     setChatErr('');
+    if (!dataConsent) {
+      setChatErr(
+        locale.lang === 'he'
+          ? 'יש לקרוא ולאשר את הודעת הפרטיות לפני תחילת הראיון.'
+          : 'Read and accept the privacy notice before starting the interview.',
+      );
+      return;
+    }
     // Check if key is available
     const hasKey = useOwnKey ? !!apiKey.trim() : true;
     if (!hasKey) {
@@ -235,7 +250,7 @@ export function InterviewAgent() {
     setStartLabel(S.btnRestartInterview);
     setMessages([{ cls: 'user', text: S.interviewOpenerMsg, id: msgIdCounter++ }]);
     await agentTurnRef.current();
-  }, [useOwnKey, apiKey, S, startTool]);
+  }, [dataConsent, useOwnKey, apiKey, S, locale.lang, startTool]);
 
   useEffect(() => {
     const startSample = () => {
@@ -291,6 +306,14 @@ export function InterviewAgent() {
         <p className="notice" style={{ marginBottom: '12px' }}>
           {t.notice}
         </p>
+        <AiDataConsent
+          id="interviewDataConsent"
+          checked={dataConsent}
+          onChange={checked => {
+            setDataConsent(checked);
+            if (interviewOn) setSendDisabled(!checked);
+          }}
+        />
         <div
           className="chat"
           id="chatBox"
@@ -362,7 +385,13 @@ export function InterviewAgent() {
           {chatErr}
         </div>
         <div style={{ marginTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button type="button" className="primary" id="startBtn" onClick={startInterview}>
+          <button
+            type="button"
+            className="primary"
+            id="startBtn"
+            disabled={!dataConsent}
+            onClick={startInterview}
+          >
             {startLabel}
           </button>
           <button

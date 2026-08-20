@@ -9,7 +9,7 @@ function LectureCard({ lec, bank, lang }: { lec: LectureData; bank: BankData; la
   // to the origin these links were pinned to before.
   const href = lectureHref(lec, lang, import.meta.env.VITE_SITE_ORIGIN);
   return (
-    <div className="card" style={lec.ready ? {} : { opacity: 0.6 }}>
+    <div className={`card${lec.ready ? '' : ' lecture-unavailable'}`}>
       <div
         style={{
           display: 'flex',

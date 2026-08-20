@@ -9,12 +9,122 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface ReadinessStatus {
+  status: string;
+  database: string;
+}
+
+export interface AiProviderConfig {
+  available: boolean;
+  defaultModel: string;
+  anonymousDailyQuota: number;
+}
+
+export interface AiConfig {
+  groq: AiProviderConfig;
+  gemini: AiProviderConfig;
+}
+
+export type AiMessageRole = (typeof AiMessageRole)[keyof typeof AiMessageRole];
+
+export const AiMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export interface AiMessage {
+  role: AiMessageRole;
+  /**
+   * @minLength 1
+   * @maxLength 50000
+   */
+  content: string;
+}
+
+export interface GenerateRequest {
+  /** @maxLength 100 */
+  model?: string;
+  /** @maxLength 12000 */
+  system?: string;
+  /**
+   * @minItems 1
+   * @maxItems 20
+   */
+  messages: AiMessage[];
+  /**
+   * @minimum 1
+   * @maximum 8192
+   */
+  maxTokens?: number;
+  grounded?: boolean;
+}
+
+export interface GenerateResponse {
+  text: string;
+  truncated: boolean;
+}
+
+export type CheckoutRequestLocale =
+  (typeof CheckoutRequestLocale)[keyof typeof CheckoutRequestLocale];
+
+export const CheckoutRequestLocale = {
+  en: 'en',
+  he: 'he',
+} as const;
+
+export interface CheckoutRequest {
+  /** @maxLength 320 */
+  email?: string;
+  acceptedTerms: true;
+  locale?: CheckoutRequestLocale;
+}
+
+export interface CheckoutResponse {
+  url: string;
+}
+
+export type CoursePricesDataItem = { [key: string]: unknown };
+
+export interface CoursePrices {
+  data: CoursePricesDataItem[];
+  salesEnabled: boolean;
+}
+
+export const WebhookResponseValue = {
+  received: true,
+} as const;
+export type WebhookResponse = typeof WebhookResponseValue;
+
+export type SeedResponseStatus = (typeof SeedResponseStatus)[keyof typeof SeedResponseStatus];
+
+export const SeedResponseStatus = {
+  created: 'created',
+  already_exists: 'already_exists',
+} as const;
+
+export interface SeedResponse {
+  status: SeedResponseStatus;
+  productId: string;
+  /** @nullable */
+  priceId: string | null;
+}
+
+export interface EntitlementResponse {
+  hasAccess: boolean;
+  /** @nullable */
+  purchasedAt: string | null;
+}
+
 export interface ContentError {
   error: string;
 }
 
+export type ErrorResponseIssuesItem = { [key: string]: unknown };
+
 export interface ErrorResponse {
   error: string;
+  issues?: ErrorResponseIssuesItem[];
+  requestId?: string;
 }
 
 export interface GoogleCredential {
@@ -99,6 +209,11 @@ export interface LectureTrack {
 export interface LectureSeries {
   tracks: LectureTrack[];
 }
+
+/**
+ * The request was refused, unavailable, or failed safely.
+ */
+export type RequestErrorResponse = ErrorResponse;
 
 /**
  * Authentication failed, is unavailable, or was rate-limited.

@@ -12,7 +12,7 @@ interface AuthContextValue {
   user: GoogleUser | null;
   authenticating: boolean;
   authError: boolean;
-  signOut: () => void;
+  signOut: () => Promise<void>;
   /**
    * Renders Google's own button into `parent`. Google draws it itself — the
    * markup is theirs, in an iframe — so the caller supplies a container and
@@ -91,11 +91,24 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
 
   // Signing out drops the credential and tells Google not to re-select the same
   // account without being asked, so the next click is a real choice.
-  const signOut = useCallback(() => {
-    void fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    window.google?.accounts.id.disableAutoSelect();
-    setUser(null);
+  const signOut = useCallback(async () => {
+    setAuthenticating(true);
     setAuthError(false);
+    // Stop Google's automatic account selection immediately. The verified
+    // local session remains visible until our server confirms deletion below.
+    window.google?.accounts.id.disableAutoSelect();
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('The server did not end the session');
+      setUser(null);
+    } catch {
+      setAuthError(true);
+    } finally {
+      setAuthenticating(false);
+    }
   }, []);
 
   // Versions before server sessions stored Google's raw credential here.
@@ -147,7 +160,7 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
     if (!user) return;
     const remaining = user.expiresAt - Date.now();
     if (remaining <= 0) {
-      signOut();
+      void signOut();
       return;
     }
     const timer = window.setTimeout(signOut, remaining);

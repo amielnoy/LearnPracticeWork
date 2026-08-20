@@ -48,15 +48,11 @@ nominate for indexing. Cloudflare rewrites them properly at 200.
 
 ## API server
 
-Fly runs the Python API because the server has two pieces of per-process state that a
-scale-to-zero host loses:
-
-- `app/main.py` owns in-memory burst, daily, login and admin rate limiters. The AI daily window
-  is 24 hours,
-  so a machine that stops and restarts hands every caller a fresh anonymous
-  allowance — the free-tier quota stops being a quota.
-- Stripe webhooks need a URL that answers immediately; a cold start inside a
-  delivery timeout becomes a retry at best.
+Fly runs the Python API. Production burst, daily, login and admin quotas are stored atomically
+in Postgres using HMAC-pseudonymized identifiers, so workers and restarts share one allowance.
+The production API fails closed if the database or rate-limit salt is unavailable. Stripe
+webhooks still benefit from a warm endpoint because a cold start inside a delivery timeout
+becomes a retry at best.
 
 The same API also serves the academy's localized content at
 `/api/content/question-bank`, `/api/content/coding-challenges`, and
@@ -99,7 +95,8 @@ fly deploy --config server/fly.toml \
 The trailing `.` matters because it is the Docker build context. The image installs uv, syncs
 the locked Python dependencies, copies `server/app`, and runs Uvicorn as a non-root user.
 
-Verify that `curl https://<app>.fly.dev/api/healthz` returns `{"status":"ok"}`, then open
+Verify that `curl https://<app>.fly.dev/api/healthz` returns `{"status":"ok"}` and
+`/api/readyz` reports the database available, then open
 `https://<app>.fly.dev/api/docs` and confirm Scalar loads the runtime OpenAPI document.
 
 The current `server/fly.toml` names the app `ata-api`. Create or rename that Fly application
@@ -124,6 +121,25 @@ Also set long, independent random `METRICS_TOKEN` and `METRICS_ID_SALT` values w
 `fly secrets set`. Prometheus supplies the token as a bearer token when scraping `/metrics`;
 production returns 404 without it. The salt HMAC-pseudonymizes verified user IDs for Grafana
 and must remain only on Fly.
+
+Set a separate random `RATE_LIMIT_SALT` as well. Before enabling paid sales, configure and
+verify all of the following, then change `SALES_ENABLED` to `true`:
+
+- `STRIPE_COURSE_PRICE_ID`, `STRIPE_COURSE_PRODUCT_ID`, `STRIPE_COURSE_AMOUNT`, and
+  `STRIPE_COURSE_CURRENCY` for one approved Stripe catalog entry;
+- `STRIPE_TAX_ENABLED=true`, with Stripe Tax and the relevant Indian/Israeli registrations
+  configured in the Stripe account;
+- `BUSINESS_LEGAL_NAME`, `BUSINESS_POSTAL_ADDRESS`, and `BUSINESS_SUPPORT_EMAIL`; and
+- `PUBLIC_APP_ORIGIN`, which must exactly match an entry in `ALLOWED_ORIGINS`.
+
+`PURCHASE_RETENTION_DAYS` defaults to 2,922 days. Set it to the accounting/consumer-law period
+confirmed for the selling entity; expired purchase rows are removed during database startup.
+
+Checkout ignores client price IDs, requires affirmative terms acceptance, uses automatic local
+payment methods and tax calculation, and records entitlement only when the signed webhook's
+price, product, amount, currency, course SKU, and terms version all match. Keep sales disabled
+until local counsel/tax advice confirms the displayed identity, cancellation, invoice, GST and
+VAT treatment for the selling entity.
 
 `SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints. Generate the
 content seed SQL with:

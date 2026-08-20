@@ -42,6 +42,7 @@ export function Nav({ navOpen, setNavOpen, theme, onToggleTheme, toggleRef }: Na
   const { locale, switchLang: doSwitchLang, S } = useLocale();
   const [activeSection, setActiveSection] = useState<string>('');
   const drawerMode = useDrawerMode();
+  const navRef = useRef<HTMLElement>(null);
 
   // Closed at drawer widths, the nav is only moved off-screen by a transform:
   // it stays visible and focusable, so a keyboard user used to travel through
@@ -80,11 +81,28 @@ export function Nav({ navOpen, setNavOpen, theme, onToggleTheme, toggleRef }: Na
       if (event.key === 'Escape') {
         event.preventDefault();
         setNavOpen(false);
+        return;
+      }
+      if (event.key === 'Tab' && drawerMode && navRef.current) {
+        const focusable = [
+          ...navRef.current.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ),
+        ];
+        const first = focusable[0];
+        const last = focusable.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [navOpen, setNavOpen]);
+  }, [navOpen, drawerMode, setNavOpen]);
 
   // Focus follows the drawer: into it on open, back to the button that opened
   // it on close. Without the second half, dismissing the drawer drops focus on
@@ -120,7 +138,14 @@ export function Nav({ navOpen, setNavOpen, theme, onToggleTheme, toggleRef }: Na
   const themeLabel = dark ? S.themeLabelLight : S.themeLabelDark;
 
   return (
-    <nav id="nav" aria-label="Primary" inert={hidden}>
+    <nav
+      ref={navRef}
+      id="nav"
+      role={drawerMode && navOpen ? 'dialog' : undefined}
+      aria-label="Primary"
+      aria-modal={drawerMode && navOpen ? true : undefined}
+      inert={hidden}
+    >
       <a
         className="logo"
         href="#"

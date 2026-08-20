@@ -58,7 +58,12 @@ export function GoogleSignIn() {
         <span className="nav-account-name" title={user.email}>
           {user.name}
         </span>
-        <button type="button" className="theme-toggle" id="googleSignOut" onClick={signOut}>
+        <button
+          type="button"
+          className="theme-toggle"
+          id="googleSignOut"
+          onClick={() => void signOut()}
+        >
           {S.signOutBtn}
         </button>
       </div>

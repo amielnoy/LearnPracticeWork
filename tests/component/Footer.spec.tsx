@@ -38,3 +38,21 @@ test('sets the document language and direction while rendering', async ({
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
 });
+
+test('exposes privacy, terms, cancellation, accessibility, and contact links', async ({
+  mountLocalized,
+}) => {
+  const component = await mountLocalized(<Footer />);
+
+  await expect(component.getByRole('link', { name: 'Privacy' })).toHaveAttribute(
+    'href',
+    /privacy$/,
+  );
+  await expect(component.getByRole('link', { name: 'Terms' })).toBeVisible();
+  await expect(component.getByRole('link', { name: 'Cancellation & refunds' })).toBeVisible();
+  await expect(component.getByRole('link', { name: 'Accessibility' })).toBeVisible();
+  await expect(component.getByRole('link', { name: 'Contact' })).toHaveAttribute(
+    'href',
+    'mailto:amielnoy@gmail.com',
+  );
+});

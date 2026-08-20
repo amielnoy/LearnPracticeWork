@@ -64,6 +64,15 @@ const read = (page: Page, where: 'local' | 'session') =>
     [where, KEY] as const,
   );
 
+test('requires affirmative data-processing consent before starting', async ({ mount, page }) => {
+  await page.route('**/api/ai/config', route => route.fulfill({ json: { gemini: {} } }));
+  const component = await mount(harness());
+
+  await expect(component.locator('#startBtn')).toBeDisabled();
+  await component.locator('#interviewDataConsent').check();
+  await expect(component.locator('#startBtn')).toBeEnabled();
+});
+
 test.describe('a transcript saved in this session', () => {
   test('is restored, so a reload does not lose the interview', async ({ mount, page }) => {
     await seed(page, 'session', SAVED);

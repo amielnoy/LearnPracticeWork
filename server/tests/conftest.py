@@ -48,6 +48,7 @@ def isolated_auth(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     monkeypatch.setenv("SESSION_SECRET", "fixture-secret-with-at-least-thirty-two-characters")
     monkeypatch.delenv("UPSTREAM_API_BASE_URL", raising=False)
     monkeypatch.delenv("METRICS_TOKEN", raising=False)
+    monkeypatch.delenv("SALES_ENABLED", raising=False)
     google_auth.reset_key_cache()
     yield
     google_auth.reset_key_cache()
@@ -235,6 +236,24 @@ def stripe_checkout_gateway(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
 
     monkeypatch.setattr(main_module, "stripe_client", client)
     return captured
+
+
+@pytest.fixture
+def course_sales_environment(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
+    values = {
+        "SALES_ENABLED": "true",
+        "STRIPE_COURSE_PRICE_ID": "price_approved_course",
+        "STRIPE_COURSE_PRODUCT_ID": "prod_approved_course",
+        "STRIPE_COURSE_AMOUNT": "5000",
+        "STRIPE_COURSE_CURRENCY": "usd",
+        "STRIPE_TAX_ENABLED": "true",
+        "BUSINESS_LEGAL_NAME": "Academy Test Fixture",
+        "BUSINESS_POSTAL_ADDRESS": "1 Test Street, Test City",
+        "BUSINESS_SUPPORT_EMAIL": "support@example.test",
+    }
+    for name, value in values.items():
+        monkeypatch.setenv(name, value)
+    return values
 
 
 @pytest.fixture

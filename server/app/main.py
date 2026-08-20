@@ -4,6 +4,7 @@ import asyncio
 import hmac
 import logging
 import os
+import secrets
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
 
@@ -16,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, ValidationError, mo
 from scalar_fastapi import AgentScalarConfig, get_scalar_api_reference
 
 from .config import env, positive_int
-from .database import find_course_access, initialize_database, record_purchase
+from .database import database_ready, find_course_access, initialize_database, record_purchase
 from .google_auth import GoogleUser, verify_google_id_token
 from .integrations import stripe_client, stripe_credentials
 from .metrics import (
@@ -26,7 +27,7 @@ from .metrics import (
     observe_login,
     prometheus_response,
 )
-from .rate_limit import MemoryRateLimiter
+from .rate_limit import SharedRateLimiter
 from .relay import relay_api_request, upstream_api_base_url
 from .sessions import COOKIE_NAME, create_session, read_session, sessions_configured
 
@@ -41,11 +42,14 @@ DAILY_QUOTA = positive_int("AI_DAILY_QUOTA", 10)
 BURST_LIMIT = positive_int("AI_RATE_LIMIT_MAX", 15)
 BURST_WINDOW = positive_int("AI_RATE_LIMIT_WINDOW_MS", 60_000) / 1000
 UPSTREAM_TIMEOUT = positive_int("AI_UPSTREAM_TIMEOUT_MS", 30_000) / 1000
+MAX_REQUEST_BODY = positive_int("MAX_REQUEST_BODY_BYTES", 96 * 1024)
+COURSE_SKU = "ai-testing-bootcamp"
+TERMS_VERSION = "2026-08-20"
 
-burst_limiter = MemoryRateLimiter(BURST_LIMIT, BURST_WINDOW)
-daily_limiter = MemoryRateLimiter(DAILY_QUOTA, 24 * 60 * 60)
-admin_limiter = MemoryRateLimiter(20, 15 * 60)
-login_limiter = MemoryRateLimiter(10, 5 * 60)
+burst_limiter = SharedRateLimiter("ai-burst", BURST_LIMIT, BURST_WINDOW)
+daily_limiter = SharedRateLimiter("ai-daily", DAILY_QUOTA, 24 * 60 * 60)
+admin_limiter = SharedRateLimiter("admin", 20, 15 * 60)
+login_limiter = SharedRateLimiter("login", 10, 5 * 60)
 
 
 @asynccontextmanager
@@ -92,12 +96,18 @@ def _configured_origins() -> set[str]:
     return origins
 
 
-def _public_origin(request: Request) -> str:
-    """Use a configured browser origin for redirects, never an arbitrary Host header."""
+def _public_origin(request: Request) -> str | None:
+    """Resolve redirects from explicit configuration, never an arbitrary Host header."""
+    if canonical := env("PUBLIC_APP_ORIGIN"):
+        candidate = canonical.rstrip("/")
+        if candidate in _configured_origins():
+            return candidate
     origin = request.headers.get("origin", "").strip().rstrip("/")
     if origin and origin in _configured_origins():
         return origin
-    return str(request.base_url).rstrip("/")
+    if os.getenv("NODE_ENV") not in {"production", "test"}:
+        return str(request.base_url).rstrip("/")
+    return None
 
 
 if os.getenv("NODE_ENV") != "production":
@@ -118,8 +128,19 @@ app.add_middleware(
 @app.middleware("http")
 async def request_size_limit(request: Request, call_next):
     length = request.headers.get("content-length")
-    if length and length.isdigit() and int(length) > 96 * 1024:
+    if length and length.isdigit() and int(length) > MAX_REQUEST_BODY:
         return JSONResponse({"error": "Request body is too large"}, status_code=413)
+    if request.method in {"POST", "PUT", "PATCH"}:
+        chunks: list[bytes] = []
+        total = 0
+        async for chunk in request.stream():
+            total += len(chunk)
+            if total > MAX_REQUEST_BODY:
+                return JSONResponse({"error": "Request body is too large"}, status_code=413)
+            chunks.append(chunk)
+        # Starlette caches this exact byte string for downstream request.json(),
+        # request.body(), and the raw Stripe webhook signature check.
+        request._body = b"".join(chunks)  # type: ignore[attr-defined]
     if request.url.path.startswith("/api/") and request.url.path != "/api/healthz":
         if upstream := upstream_api_base_url():
             return await relay_api_request(request, upstream)
@@ -178,7 +199,19 @@ def _issues(errors: list[dict]) -> list[dict]:
 
 
 def _client_ip(request: Request) -> str:
+    # Fly terminates TLS and supplies this header itself. It is accepted only in
+    # production; local/test callers cannot forge a different quota identity.
+    if os.getenv("NODE_ENV") == "production":
+        forwarded = request.headers.get("fly-client-ip", "").strip()
+        if forwarded:
+            return forwarded
     return request.client.host if request.client else "unknown"
+
+
+def _quota_key(request: Request, session: GoogleUser | None) -> str:
+    if session:
+        return f"user:{session.subject}"
+    return f"ip:{_client_ip(request)}"
 
 
 def _bearer(authorization: str | None) -> str:
@@ -204,6 +237,13 @@ async def _user_from_request(authorization: str | None, cookie: str | None) -> G
 @app.get("/api/healthz")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/readyz")
+async def readiness():
+    if not await database_ready():
+        return JSONResponse({"status": "not_ready", "database": "unavailable"}, status_code=503)
+    return {"status": "ready", "database": "available"}
 
 
 @app.get("/api/auth/config")
@@ -491,8 +531,13 @@ async def _generate(body: GenerateBody) -> tuple[int, dict]:
             upstream = await client.post(url, headers=headers, json=payload)
         data = upstream.json()
         if not upstream.is_success:
+            request_id = secrets.token_urlsafe(8)
+            logger.warning(
+                "AI provider refused request id=%s status=%s", request_id, upstream.status_code
+            )
             return upstream.status_code, {
-                "error": data.get("error", {}).get("message", "Provider request failed")
+                "error": "The AI provider could not complete this request.",
+                "requestId": request_id,
             }
         if grounded:
             candidate = (data.get("candidates") or [{}])[0]
@@ -516,14 +561,14 @@ async def _generate(body: GenerateBody) -> tuple[int, dict]:
 async def ai_generate(request: Request):
     session = read_session(request.cookies.get(COOKIE_NAME))
     email = session.email if session else None
-    ip = _client_ip(request)
-    burst_ok, _ = await burst_limiter.hit(ip)
+    quota_key = _quota_key(request, session)
+    burst_ok, _ = await burst_limiter.hit(quota_key)
     if not burst_ok:
         observe_ai(request, provider="unknown", model="unknown", email=email, status=429)
         return JSONResponse(
             {"error": "Too many AI requests. Please wait before trying again."}, status_code=429
         )
-    daily_ok, remaining = await daily_limiter.hit(ip)
+    daily_ok, remaining = await daily_limiter.hit(quota_key)
     headers = {"X-AI-Quota-Limit": str(DAILY_QUOTA), "X-AI-Quota-Remaining": str(remaining)}
     if not daily_ok:
         observe_ai(request, provider="unknown", model="unknown", email=email, status=429)
@@ -548,8 +593,33 @@ async def ai_generate(request: Request):
 
 class CheckoutBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    priceId: str = Field(min_length=1, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=320)
+    acceptedTerms: Literal[True]
+    locale: Literal["en", "he"] = "en"
+
+
+def _sales_config() -> tuple[str, str, int, str] | None:
+    if env("SALES_ENABLED") != "true":
+        return None
+    price_id = env("STRIPE_COURSE_PRICE_ID")
+    product_id = env("STRIPE_COURSE_PRODUCT_ID")
+    amount = positive_int("STRIPE_COURSE_AMOUNT", 0)
+    currency = (env("STRIPE_COURSE_CURRENCY") or "").lower()
+    compliance = (
+        env("BUSINESS_LEGAL_NAME"),
+        env("BUSINESS_POSTAL_ADDRESS"),
+        env("BUSINESS_SUPPORT_EMAIL"),
+    )
+    if (
+        not price_id
+        or not product_id
+        or amount <= 0
+        or len(currency) != 3
+        or not all(compliance)
+        or env("STRIPE_TAX_ENABLED") != "true"
+    ):
+        return None
+    return price_id, product_id, amount, currency
 
 
 async def _admin_allowed(request: Request, authorization: str | None) -> JSONResponse | None:
@@ -587,7 +657,7 @@ async def stripe_seed(request: Request, authorization: Annotated[str | None, Hea
             {
                 "name": "AI Testing Bootcamp",
                 "description": "Master AI-powered test automation, DevOps, and modern QA practices with hands-on projects.",
-                "metadata": {"category": "course", "featured": "true"},
+                "metadata": {"category": "course", "featured": "true", "sku": COURSE_SKU},
             },
         )
         price = await asyncio.to_thread(
@@ -611,21 +681,58 @@ async def stripe_checkout(
         issues = _issues(exc.errors()) if isinstance(exc, ValidationError) else []
         return JSONResponse({"error": "Invalid request body", "issues": issues}, status_code=400)
     user = await _user_from_request(authorization, ata_session)
+    sales = _sales_config()
+    if not sales:
+        return JSONResponse({"error": "Course sales are not currently available."}, status_code=503)
+    price_id, product_id, amount, currency = sales
     try:
         client = await stripe_client()
         origin = _public_origin(request)
+        if not origin:
+            return JSONResponse(
+                {"error": "Checkout return URL is not configured."}, status_code=503
+            )
         params = {
-            "payment_method_types": ["card"],
-            "line_items": [{"price": body.priceId, "quantity": 1}],
+            "automatic_payment_methods": {"enabled": True},
+            "automatic_tax": {"enabled": True},
+            "billing_address_collection": "required",
+            "consent_collection": {"terms_of_service": "required"},
+            "customer_creation": "always",
+            "invoice_creation": {"enabled": True},
+            "line_items": [{"price": price_id, "quantity": 1}],
             "mode": "payment",
+            "locale": body.locale,
             "success_url": f"{origin}/ai-testing-academy/?payment=success",
             "cancel_url": f"{origin}/ai-testing-academy/?payment=cancelled",
+            "custom_text": {
+                "submit": {
+                    "message": (
+                        f"Seller: {env('BUSINESS_LEGAL_NAME')}, "
+                        f"{env('BUSINESS_POSTAL_ADDRESS')}. Support and cancellations: "
+                        f"{env('BUSINESS_SUPPORT_EMAIL')}."
+                    )
+                },
+                "terms_of_service_acceptance": {
+                    "message": (
+                        f"I agree to the [Terms]({origin}/ai-testing-academy/terms) and "
+                        f"[Cancellation policy]({origin}/ai-testing-academy/cancellation)."
+                    )
+                },
+            },
+            "metadata": {
+                "courseSku": COURSE_SKU,
+                "productId": product_id,
+                "expectedAmount": str(amount),
+                "expectedCurrency": currency,
+                "termsVersion": TERMS_VERSION,
+                "locale": body.locale,
+            },
         }
         email = user.email if user else body.email
         if email:
             params["customer_email"] = str(email)
         if user:
-            params["metadata"] = {"googleSubject": user.subject}
+            params["metadata"]["googleSubject"] = user.subject
         session = await asyncio.to_thread(client.v1.checkout.sessions.create, params)
         return {"url": session.url}
     except Exception:
@@ -635,17 +742,23 @@ async def stripe_checkout(
 
 @app.get("/api/stripe/prices")
 async def stripe_prices():
+    sales = _sales_config()
+    if not sales:
+        return {"data": [], "salesEnabled": False}
+    price_id, product_id, amount, currency = sales
     try:
         client = await stripe_client()
-        products = await asyncio.to_thread(
-            client.v1.products.search, {"query": "name:'AI Testing Bootcamp' AND active:'true'"}
-        )
-        if not products.data:
-            return {"data": []}
-        prices = await asyncio.to_thread(
-            client.v1.prices.list, {"product": products.data[0].id, "active": True}
-        )
-        return {"data": [item.to_dict() for item in prices.data]}
+        price = await asyncio.to_thread(client.v1.prices.retrieve, price_id)
+        actual_product = price.product if isinstance(price.product, str) else price.product.id
+        if (
+            not price.active
+            or actual_product != product_id
+            or price.unit_amount != amount
+            or price.currency.lower() != currency
+        ):
+            logger.error("Configured Stripe course catalog does not match the live price")
+            return JSONResponse({"error": "Course pricing is unavailable"}, status_code=503)
+        return {"data": [price.to_dict()], "salesEnabled": True}
     except Exception:
         logger.exception("Stripe price lookup failed")
         return JSONResponse({"error": "Could not load prices"}, status_code=500)
@@ -667,6 +780,13 @@ async def stripe_webhook(
             event.type == "checkout.session.completed"
             and event.data.object.payment_status == "paid"
         ):
+            sales = _sales_config()
+            if not sales:
+                logger.error(
+                    "Ignoring paid checkout while course sales configuration is incomplete"
+                )
+                return {"received": True}
+            expected_price, expected_product, expected_amount, expected_currency = sales
             client = stripe.StripeClient(secret_key)
             full = await asyncio.to_thread(
                 client.v1.checkout.sessions.retrieve,
@@ -681,7 +801,17 @@ async def stripe_webhook(
             )
             product = price.product if price else None
             product_id = product if isinstance(product, str) else getattr(product, "id", "")
-            if email and product_id:
+            metadata = full.metadata or {}
+            valid_course = (
+                price is not None
+                and price.id == expected_price
+                and product_id == expected_product
+                and full.amount_total == expected_amount
+                and (full.currency or "").lower() == expected_currency
+                and metadata.get("courseSku") == COURSE_SKU
+                and metadata.get("termsVersion") == TERMS_VERSION
+            )
+            if email and valid_course:
                 await record_purchase(
                     {
                         "checkout_session_id": full.id,
@@ -692,12 +822,16 @@ async def stripe_webhook(
                         if isinstance(full.customer, str)
                         else None,
                         "email": email.strip().lower(),
-                        "google_subject": (full.metadata or {}).get("googleSubject"),
+                        "google_subject": metadata.get("googleSubject"),
                         "product_id": product_id,
                         "price_id": price.id if price else None,
                         "amount_total": full.amount_total or 0,
                         "currency": full.currency or "usd",
                     }
+                )
+            elif not valid_course:
+                logger.error(
+                    "Paid Stripe session %s did not match the approved course catalog", full.id
                 )
         return {"received": True}
     except Exception:
@@ -716,7 +850,12 @@ async def entitlements(
     if not user:
         return JSONResponse({"error": "A valid Google ID token is required."}, status_code=401)
     try:
-        access = await find_course_access(user.subject, user.email)
+        sales = _sales_config()
+        if not sales:
+            return JSONResponse(
+                {"error": "Course sales are not currently available."}, status_code=503
+            )
+        access = await find_course_access(user.subject, user.email, sales[1])
         if access is None:
             return JSONResponse(
                 {"error": "Purchase records are unavailable on this server."}, status_code=503

@@ -25,3 +25,15 @@ test('opens the drawer and closes it once a destination is chosen', async ({
   await expect(page).toHaveURL(/#resume$/);
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 });
+
+test('contains keyboard focus while the mobile drawer is open', async ({ nav, page, isMobile }) => {
+  test.skip(!isMobile, 'the navigation drawer is part of the mobile layout only');
+
+  await nav.toggle.click();
+  const drawer = page.locator('#nav');
+  await expect(drawer).toHaveAttribute('role', 'dialog');
+  await page.locator('#googleSignIn, #googleAccount, #langToggle').last().focus();
+  await page.keyboard.press('Tab');
+
+  await expect(drawer.locator(':focus')).toHaveCount(1);
+});

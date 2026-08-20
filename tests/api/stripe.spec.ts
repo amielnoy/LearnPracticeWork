@@ -65,30 +65,32 @@ test.describe('POST /api/stripe/checkout — request validation', () => {
    * than the 500 the integration-less routes give, which is what proves the
    * body was rejected on its own terms.
    */
-  test('refuses a body with no priceId', async ({ api }) => {
+  test('requires affirmative acceptance of the terms', async ({ api }) => {
     const response = await api.post('/api/stripe/checkout', { data: {} });
 
     expect(response.status()).toBe(400);
     const body = await response.json();
     expect(body.error).toBe('Invalid request body');
-    expect(JSON.stringify(body.issues)).toContain('priceId');
+    expect(JSON.stringify(body.issues)).toContain('acceptedTerms');
   });
 
-  test('refuses an empty priceId', async ({ api }) => {
-    const response = await api.post('/api/stripe/checkout', { data: { priceId: '' } });
+  test('refuses a false terms value', async ({ api }) => {
+    const response = await api.post('/api/stripe/checkout', { data: { acceptedTerms: false } });
 
     expect(response.status()).toBe(400);
   });
 
-  test('refuses a priceId that is not a string', async ({ api }) => {
-    const response = await api.post('/api/stripe/checkout', { data: { priceId: 42 } });
+  test('refuses a client-supplied price ID', async ({ api }) => {
+    const response = await api.post('/api/stripe/checkout', {
+      data: { acceptedTerms: true, priceId: 'price_cheaper_product' },
+    });
 
     expect(response.status()).toBe(400);
   });
 
   test('refuses an email that is not an address', async ({ api }) => {
     const response = await api.post('/api/stripe/checkout', {
-      data: { priceId: 'price_test', email: 'not-an-address' },
+      data: { acceptedTerms: true, email: 'not-an-address' },
     });
 
     expect(response.status()).toBe(400);
@@ -99,7 +101,7 @@ test.describe('POST /api/stripe/checkout — request validation', () => {
     // itself should be told no — that field is set from a verified token and
     // from nowhere else.
     const response = await api.post('/api/stripe/checkout', {
-      data: { priceId: 'price_test', googleSubject: 'someone-elses-account' },
+      data: { acceptedTerms: true, googleSubject: 'someone-elses-account' },
     });
 
     expect(response.status()).toBe(400);
@@ -112,30 +114,30 @@ test.describe('POST /api/stripe/checkout — request validation', () => {
     // rejected outright, because buying the course never required an account.
     const response = await api.post('/api/stripe/checkout', {
       headers: { authorization: 'Bearer not.a.token' },
-      data: { priceId: 'price_test' },
+      data: { acceptedTerms: true },
     });
 
-    expect(response.status()).toBe(500);
+    expect(response.status()).toBe(503);
   });
 });
 
 test.describe('Stripe routes without backend secrets', () => {
-  test('reports a price lookup failure as JSON', async ({ api }) => {
+  test('reports that sales are disabled without contacting Stripe', async ({ api }) => {
     const response = await api.get('/api/stripe/prices');
 
-    expect(response.status()).toBe(500);
+    expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toContain('application/json');
-    expect(typeof (await response.json()).error).toBe('string');
+    expect(await response.json()).toEqual({ data: [], salesEnabled: false });
   });
 
   test('reports a checkout failure as JSON', async ({ api }) => {
     // The `priceId is required` branch sits behind the Stripe client, so
     // without credentials this is a 500 rather than a 400.
     const response = await api.post('/api/stripe/checkout', {
-      data: { priceId: 'price_test' },
+      data: { acceptedTerms: true },
     });
 
-    expect(response.status()).toBe(500);
+    expect(response.status()).toBe(503);
     expect(typeof (await response.json()).error).toBe('string');
   });
 

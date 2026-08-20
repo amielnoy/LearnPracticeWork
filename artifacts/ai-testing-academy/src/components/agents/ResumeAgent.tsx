@@ -8,6 +8,7 @@ import { useProgress } from '../../context/ProgressContext';
 import { sectionNum } from '../../lib/sections';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { readText, writeRaw } from '../../lib/storage';
+import { AiDataConsent } from './AiDataConsent';
 
 /**
  * Caps on what is reinstated from a saved draft.
@@ -18,6 +19,8 @@ import { readText, writeRaw } from '../../lib/storage';
  */
 const MAX_DRAFT_LENGTH = 100_000;
 const MAX_ROLE_LENGTH = 200;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_PDF_PAGES = 25;
 
 const SAMPLE_RESUMES = {
   en: {
@@ -49,6 +52,9 @@ async function extractPdf(file: File, onProgress: PdfProgress): Promise<PdfExtra
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
   const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  if (pdf.numPages > MAX_PDF_PAGES) {
+    throw new Error(`PDF has ${pdf.numPages} pages; the maximum is ${MAX_PDF_PAGES}.`);
+  }
   const out: string[] = [];
   let textRuns = 0;
   for (let i = 1; i <= pdf.numPages; i++) {
@@ -179,6 +185,7 @@ export function ResumeAgent() {
   const [uploadLabel, setUploadLabel] = useState(t.uploadPrompt);
   const [isDragging, setIsDragging] = useState(false);
   const [resumeErr, setResumeErr] = useState('');
+  const [dataConsent, setDataConsent] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
 
   const [evalResult, setEvalResult] = useState<EvalResult | null>(null);
@@ -223,6 +230,15 @@ export function ResumeAgent() {
       if (!file) return;
       const ext = (file.name.split('.').pop() || '').toLowerCase();
       setResumeErr('');
+      if (file.size > MAX_FILE_BYTES) {
+        setUploadLabel(t.uploadPrompt);
+        setResumeErr(
+          locale.lang === 'he'
+            ? 'הקובץ גדול מדי. הגודל המרבי הוא 10MB.'
+            : 'This file is too large. The maximum size is 10 MB.',
+        );
+        return;
+      }
       // A PDF is not read the moment it is handed over: pdf.js and its worker are
       // fetched on first use, which is well over a megabyte and, on a slow
       // connection, the longest part of the wait — and all of it before there is
@@ -248,6 +264,13 @@ export function ResumeAgent() {
           .replace(/[ \t]+/g, ' ')
           .replace(/\n{3,}/g, '\n\n')
           .trim();
+        if (text.length > MAX_DRAFT_LENGTH) {
+          throw new Error(
+            locale.lang === 'he'
+              ? 'הטקסט שחולץ ארוך מדי. המגבלה היא 100,000 תווים.'
+              : 'The extracted text is too long. The limit is 100,000 characters.',
+          );
+        }
         if (text.length < 40) throw new Error(S.errExtractFail);
         setResumeText(text);
         setUploadLabel('✅ ' + file.name + S.uploadLoadedMid + text.length + S.uploadLoadedSuffix);
@@ -256,13 +279,21 @@ export function ResumeAgent() {
         setResumeErr((e as Error).message);
       }
     },
-    [S],
+    [S, locale.lang, t.uploadPrompt],
   );
 
   const evaluateResume = useCallback(
     async (textOverride?: string, roleOverride?: string) => {
       const txt = (textOverride ?? resumeText).trim();
       setResumeErr('');
+      if (!dataConsent) {
+        setResumeErr(
+          locale.lang === 'he'
+            ? 'יש לקרוא ולאשר את הודעת הפרטיות לפני שליחה ל‑AI.'
+            : 'Read and accept the privacy notice before sending data to AI.',
+        );
+        return;
+      }
       if (txt.length < 80) {
         setResumeErr(S.errResumeEmpty);
         return;
@@ -296,6 +327,8 @@ export function ResumeAgent() {
       locale.prompts.resume,
       startTool,
       completeResume,
+      dataConsent,
+      locale.lang,
     ],
   );
 
@@ -304,13 +337,26 @@ export function ResumeAgent() {
       const sample = SAMPLE_RESUMES[locale.lang === 'he' ? 'he' : 'en'];
       setResumeText(sample.text);
       setTargetRole(sample.role);
-      void evaluateResume(sample.text, sample.role);
+      if (dataConsent) void evaluateResume(sample.text, sample.role);
+      else
+        setResumeErr(
+          locale.lang === 'he'
+            ? 'קורות החיים לדוגמה נטענו. יש לאשר את הודעת הפרטיות כדי לשלוח אותם ל‑AI.'
+            : 'The sample resume is ready. Accept the privacy notice to send it to AI.',
+        );
     };
     window.addEventListener('ata:sample-resume', analyzeSample);
     return () => window.removeEventListener('ata:sample-resume', analyzeSample);
-  }, [evaluateResume, locale.lang]);
+  }, [dataConsent, evaluateResume, locale.lang]);
 
   const ensureImprovedResume = useCallback(async (): Promise<string> => {
+    if (!dataConsent) {
+      throw new Error(
+        locale.lang === 'he'
+          ? 'יש לאשר את הודעת הפרטיות לפני שליחה נוספת ל‑AI.'
+          : 'Accept the privacy notice before another AI submission.',
+      );
+    }
     if (improvedResumeRef.current) return improvedResumeRef.current;
     if (!lastEval) throw new Error(S.errNoEval);
     const jd = jobDesc.trim();
@@ -336,7 +382,7 @@ export function ResumeAgent() {
     );
     improvedResumeRef.current = reply.trim();
     return improvedResumeRef.current;
-  }, [lastEval, jobDesc, S, callClaude, locale.prompts.improve]);
+  }, [dataConsent, lastEval, jobDesc, S, callClaude, locale.lang, locale.prompts.improve]);
 
   const showImprovedResume = useCallback(async () => {
     setImprovedErr('');
@@ -394,7 +440,7 @@ export function ResumeAgent() {
       <p className="lead reveal">{t.lead}</p>
 
       <div className="card reveal" style={{ marginBottom: '22px' }}>
-        <h4>{t.tipsTitle}</h4>
+        <h3>{t.tipsTitle}</h3>
         <p style={{ color: 'var(--muted)', fontSize: '.95rem', marginTop: '-4px' }}>{t.tipsLead}</p>
         <div className="result-cols" style={{ marginTop: '14px' }}>
           <div>
@@ -451,6 +497,7 @@ export function ResumeAgent() {
           id="targetRole"
           placeholder={t.targetRolePlaceholder}
           value={targetRole}
+          maxLength={MAX_ROLE_LENGTH}
           onChange={e => setTargetRole(e.target.value)}
         />
         {/* Upload zone */}
@@ -509,6 +556,7 @@ export function ResumeAgent() {
           rows={7}
           placeholder={t.pastePlaceholder}
           value={resumeText}
+          maxLength={MAX_DRAFT_LENGTH}
           onChange={e => setResumeText(e.target.value)}
         />
         <label htmlFor="jobDesc">
@@ -520,8 +568,10 @@ export function ResumeAgent() {
           rows={4}
           placeholder={t.jobDescPlaceholder}
           value={jobDesc}
+          maxLength={MAX_DRAFT_LENGTH}
           onChange={e => setJobDesc(e.target.value)}
         />
+        <AiDataConsent id="resumeDataConsent" checked={dataConsent} onChange={setDataConsent} />
         <div id="resumeErr" className="error" role="alert">
           {resumeErr}
         </div>
@@ -529,7 +579,7 @@ export function ResumeAgent() {
           type="button"
           className="primary"
           id="resumeBtn"
-          disabled={evaluating}
+          disabled={evaluating || !dataConsent}
           onClick={() => evaluateResume()}
         >
           {evaluating ? S.btnEvaluating : t.evaluateBtn}

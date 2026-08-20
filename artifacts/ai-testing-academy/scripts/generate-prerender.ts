@@ -172,6 +172,13 @@ ${sections}
     )}" target="_blank" rel="noopener noreferrer">${esc(en.footer.authorName)}</a> ${esc(
       en.footer.suffix,
     )}</p>
+    <nav class="footer-links" aria-label="Legal information">
+      <a href="privacy">Privacy</a>
+      <a href="terms">Terms</a>
+      <a href="accessibility">Accessibility</a>
+      <a href="cancellation">Cancellation &amp; refunds</a>
+      <a href="mailto:amielnoy@gmail.com">Contact</a>
+    </nav>
   </footer>
   ${END}`;
 

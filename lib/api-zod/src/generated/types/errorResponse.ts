@@ -5,7 +5,10 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ErrorResponseIssuesItem } from './errorResponseIssuesItem';
 
 export interface ErrorResponse {
   error: string;
+  issues?: ErrorResponseIssuesItem[];
+  requestId?: string;
 }

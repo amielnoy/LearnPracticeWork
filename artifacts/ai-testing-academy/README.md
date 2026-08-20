@@ -125,12 +125,16 @@ Connection Setup lets a visitor use a **server-side default key** or **their own
   older versions are migrated out of persistent storage automatically. See
   `src/context/ProviderContext.tsx` and `src/lib/providers.ts`.
 
-The proxy enforces a short burst limit and a small 10-request daily per-IP quota by default, strict prompt validation, bounded
+The proxy enforces a short burst limit and a small 10-request daily quota by default, strict prompt validation, bounded
 output tokens, request-body limits, and an upstream timeout. Production cross-origin access is
 deny-by-default: set `ALLOWED_ORIGINS` to a comma-separated list when an additional frontend
 origin must call the API. `REPLIT_DOMAINS` is included automatically. The quota and timeout
 defaults can be overridden with `AI_RATE_LIMIT_WINDOW_MS`, `AI_RATE_LIMIT_MAX`,
 `AI_DAILY_QUOTA`, and `AI_UPSTREAM_TIMEOUT_MS`.
+
+Signed-in visitors are quota-keyed by verified Google subject; anonymous visitors use their
+network identity. Production counters are atomic Postgres rows keyed by an HMAC digest and
+require `RATE_LIMIT_SALT`, so values are shared across workers without storing raw IPs.
 
 Groq and Gemini each have a server-side default, scoped to different purposes (general chat vs.
 search grounding, respectively). Anthropic and OpenAI are own-key or nothing, and when no
