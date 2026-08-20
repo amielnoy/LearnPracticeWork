@@ -10,6 +10,7 @@ dependencies = [
   "prometheus-client>=0.22.0,<1",
   "psycopg[binary]>=3.2.0,<4",
   "pydantic[email]>=2.11.0,<3",
+  "scalar-fastapi>=1.8.2,<2",
   "stripe>=12.4.0,<15",
   "uvicorn[standard]>=0.35.0,<1",
 ]

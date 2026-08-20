@@ -13,6 +13,7 @@ from fastapi import Cookie, FastAPI, Header, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, ValidationError, model_validator
+from scalar_fastapi import AgentScalarConfig, get_scalar_api_reference
 
 from .config import env, positive_int
 from .database import find_course_access, initialize_database, record_purchase
@@ -56,7 +57,14 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(
+    title="AI Testing Academy API",
+    version="0.1.0",
+    lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url="/api/openapi.json",
+)
 allowed_origins = [
     origin.strip().rstrip("/")
     for origin in (env("ALLOWED_ORIGINS") or "").split(",")
@@ -112,6 +120,22 @@ async def metrics(authorization: Annotated[str | None, Header()] = None):
     if not metrics_authorized(authorization):
         return JSONResponse({"error": "Not found"}, status_code=404)
     return prometheus_response()
+
+
+@app.get("/api/docs", include_in_schema=False)
+async def scalar_api_reference():
+    return get_scalar_api_reference(
+        openapi_url=app.openapi_url,
+        title="AI Testing Academy API Reference",
+        scalar_js_url="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.63.0",
+        scalar_proxy_url="",
+        scalar_favicon_url="",
+        persist_auth=False,
+        show_developer_tools="never",
+        telemetry=False,
+        with_default_fonts=False,
+        agent=AgentScalarConfig(disabled=True),
+    )
 
 
 @app.exception_handler(ValidationError)

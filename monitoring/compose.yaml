@@ -20,7 +20,7 @@ services:
       PORT: '9108'
       PROBE_INTERVAL_SECONDS: '30'
       MONITORED_SERVERS: >-
-        {"fly-api":"https://ata-api.fly.dev/api/healthz","replit-root":"https://free-tier-insights--amielpeled.replit.app/","replit-academy":"https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/","github-pages":"https://amielnoy.github.io/LearnPracticeWork/"}
+        {"local-scalar":"http://api:8080/api/docs","fly-api":"https://ata-api.fly.dev/api/healthz","replit-root":"https://free-tier-insights--amielpeled.replit.app/","replit-academy":"https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/","github-pages":"https://amielnoy.github.io/LearnPracticeWork/"}
     ports:
       - 127.0.0.1:9108:9108
     restart: unless-stopped
