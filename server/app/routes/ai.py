@@ -48,9 +48,21 @@ async def ai_generate(request: Request, ai: Ai, session: SessionUser):
         issues = validation_issues(exc.errors()) if isinstance(exc, ValidationError) else []
         return error_response("Invalid request body", 400, issues=issues, headers=headers)
 
-    provider, model = ai.target(body)
     outcome = await ai.generate(body)
-    observe_ai(request, provider=provider, model=model, email=email, status=outcome.status)
+    if outcome.status != 200:
+        # The caller received nothing, so the allowance they just spent buys
+        # them nothing either. Retrying stays bounded by the burst limiter.
+        if (remaining := await daily_limiter.release(key)) is not None:
+            headers["X-AI-Quota-Remaining"] = str(remaining)
+    # Labelled with whoever actually answered, which after a fallback is not the
+    # provider the request started with.
+    observe_ai(
+        request,
+        provider=outcome.provider,
+        model=outcome.model,
+        email=email,
+        status=outcome.status,
+    )
     return JSONResponse(outcome.payload, status_code=outcome.status, headers=headers)
 
 

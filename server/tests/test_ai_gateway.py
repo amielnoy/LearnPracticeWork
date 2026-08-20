@@ -281,3 +281,129 @@ def _json_body(request: httpx.Request) -> dict:
     import json
 
     return json.loads(request.content)
+
+
+@pytest.fixture
+def upstreams(monkeypatch: pytest.MonkeyPatch):
+    """Answer each provider's host differently, and record who was called."""
+
+    def install(*, groq: httpx.Response | None, gemini: httpx.Response | None) -> list[str]:
+        called: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            name = "groq" if "groq" in request.url.host else "gemini"
+            called.append(name)
+            reply = groq if name == "groq" else gemini
+            if reply is None:
+                raise AssertionError(f"{name} should not have been called")
+            return httpx.Response(reply.status_code, content=reply.content, request=request)
+
+        original = httpx.AsyncClient
+        monkeypatch.setattr(
+            "app.ai_gateway.httpx.AsyncClient",
+            lambda **kwargs: original(transport=httpx.MockTransport(handler), **kwargs),
+        )
+        return called
+
+    return install
+
+
+@pytest.fixture
+def both_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GROQ_API_KEY", "gsk_fixture")
+    monkeypatch.setenv("GEMINI_API_KEY", "AIza_fixture")
+
+
+def gemini_ok() -> httpx.Response:
+    return httpx.Response(
+        200, json={"candidates": [{"content": {"parts": [{"text": "from gemini"}]}}]}
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_rate_limited_provider_hands_the_request_to_the_other(both_keys, upstreams) -> None:
+    """The reported case: Groq refuses a large request on tokens-per-minute."""
+    called = upstreams(groq=httpx.Response(429, json={"error": "rate"}), gemini=gemini_ok())
+
+    outcome = await AiGateway().generate(body())
+
+    assert outcome.status == 200
+    assert outcome.payload["text"] == "from gemini"
+    assert called == ["groq", "gemini"]
+
+
+@pytest.mark.asyncio
+async def test_the_outcome_names_the_provider_that_actually_answered(both_keys, upstreams) -> None:
+    """Metrics label the real one, or a fallback would look like a Groq success."""
+    upstreams(groq=httpx.Response(503, json={"error": "down"}), gemini=gemini_ok())
+
+    outcome = await AiGateway().generate(body())
+
+    assert outcome.provider == "gemini"
+    assert outcome.model in GeminiProvider.models
+
+
+@pytest.mark.asyncio
+async def test_a_bad_request_is_not_offered_to_a_second_provider(both_keys, upstreams) -> None:
+    """400 is the request being wrong; the other provider would only agree."""
+    called = upstreams(groq=httpx.Response(400, json={"error": "malformed"}), gemini=None)
+
+    outcome = await AiGateway().generate(body())
+
+    assert outcome.status == 400
+    assert called == ["groq"]
+
+
+@pytest.mark.asyncio
+async def test_a_grounded_request_is_never_handed_to_a_provider_without_search(
+    both_keys, upstreams
+) -> None:
+    """Answering it without grounding would answer a different question."""
+    called = upstreams(groq=None, gemini=httpx.Response(429, json={"error": "rate"}))
+
+    outcome = await AiGateway().generate(body(grounded=True))
+
+    assert outcome.status == 429
+    assert called == ["gemini"]
+
+
+@pytest.mark.asyncio
+async def test_an_unconfigured_fallback_leaves_the_original_failure_showing(
+    monkeypatch: pytest.MonkeyPatch, upstreams
+) -> None:
+    """Reporting the fallback's missing key would hide why the request failed."""
+    monkeypatch.setenv("GROQ_API_KEY", "gsk_fixture")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    upstreams(groq=httpx.Response(429, json={"error": "rate"}), gemini=None)
+
+    outcome = await AiGateway().generate(body())
+
+    assert outcome.status == 429
+
+
+@pytest.mark.asyncio
+async def test_when_every_provider_refuses_the_first_refusal_is_reported(
+    both_keys, upstreams
+) -> None:
+    called = upstreams(
+        groq=httpx.Response(429, json={"error": "rate"}),
+        gemini=httpx.Response(500, json={"error": "boom"}),
+    )
+
+    outcome = await AiGateway().generate(body())
+
+    assert outcome.status == 429
+    assert called == ["groq", "gemini"]
+
+
+@pytest.mark.asyncio
+async def test_gemini_only_searches_when_the_request_asked_it_to(
+    both_keys, monkeypatch: pytest.MonkeyPatch, upstream
+) -> None:
+    """Serving an ordinary request as a fallback must not turn it into a search."""
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    sent = upstream(httpx.Response(200, json={"candidates": [{"content": {"parts": []}}]}))
+
+    await AiGateway().generate(body())
+
+    assert "tools" not in _json_body(sent[0])
