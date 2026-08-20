@@ -219,6 +219,8 @@ export default function ProblemStatement() {
                 color: '#475569',
                 lineHeight: 1.5,
                 fontFamily: 'monospace',
+                direction: 'ltr',
+                textAlign: 'left',
               }}
             >
               {t('assert response.status_code == 200', 'assert response.status_code == 200')}
@@ -244,6 +246,8 @@ export default function ProblemStatement() {
                 color: '#475569',
                 lineHeight: 1.8,
                 fontFamily: 'monospace',
+                direction: 'ltr',
+                textAlign: 'left',
               }}
             >
               <div>

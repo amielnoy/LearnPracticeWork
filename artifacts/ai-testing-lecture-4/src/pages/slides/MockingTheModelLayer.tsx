@@ -138,6 +138,8 @@ export default function MockingTheModelLayer() {
                 borderRadius: '0.5vw',
                 padding: '0.8vh 1vw',
                 fontFamily: 'monospace',
+                direction: 'ltr',
+                textAlign: 'left',
                 fontSize: '0.85vw',
                 color: '#7DD3C8',
               }}

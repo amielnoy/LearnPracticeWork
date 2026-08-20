@@ -147,6 +147,8 @@ export default function NonDeterminismInPractice() {
               fontSize: '1.1vw',
               color: '#E2E8F0',
               fontFamily: 'monospace',
+              direction: 'ltr',
+              textAlign: 'left',
               lineHeight: 1.5,
             }}
           >

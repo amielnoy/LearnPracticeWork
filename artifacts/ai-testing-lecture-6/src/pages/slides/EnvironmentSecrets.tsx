@@ -196,6 +196,8 @@ export default function EnvironmentSecrets() {
               borderRadius: '0.8vw',
               padding: '2vh 2vw',
               fontFamily: 'monospace',
+              direction: 'ltr',
+              textAlign: 'left',
               fontSize: '0.85vw',
               lineHeight: 1.8,
             }}
