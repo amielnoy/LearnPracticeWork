@@ -21,7 +21,7 @@ server/tests/    pytest fixtures for Google verification, sessions, and integrat
 
 ```bash
 ./run-all-tests.sh        # everything + the Allure report, from the repo root
-pnpm test                 # Python fixtures + Playwright, stopping at the first failure
+pnpm test                 # the same full parallel run through the package script
 pnpm test:unit            # Python fixtures + TS unit tests, no live server/browser
 pnpm test:component       # needs a browser, see below
 pnpm test:api
@@ -29,12 +29,25 @@ pnpm test:contract
 pnpm test:e2e
 ```
 
-`run-all-tests.sh` is the one to reach for when you want a report: unlike `pnpm test` it does
-**not** fail fast, so every layer contributes to the Allure output even after one fails, and it
-still exits non-zero if anything did. It typechecks first, because Playwright transpiles specs
-without type-checking them — a type error in a spec runs fine locally and then fails CI. It calls the Playwright binaries directly out of
-`node_modules`, so it behaves the same on a dev Mac (where corepack's pnpm is broken) and
-inside the Docker image.
+`run-all-tests.sh` and `pnpm test` are equivalent. The script prepares the locked Python
+environment once, then starts five independent workers together: TypeScript test typechecking,
+pytest, unit/API/contract, component, and E2E/deck. It waits for every worker, prints each
+worker's captured log as one readable block, and exits non-zero if any worker failed. That means
+one failure does not hide the other layers or leave an incomplete Allure report.
+
+Each Playwright config has its own `test-results/<layer>/` and `blob-report/<layer>/` directory.
+This isolation is required: concurrently sharing Playwright's output directory can let one
+process delete another process's trace or teardown files. Browser suites default to two workers
+each, and pytest-xdist defaults to two workers, which gives useful concurrency without flooding
+a developer laptop or GitHub runner. Tune either cap when the machine has more or less capacity:
+
+```bash
+PW_SUITE_WORKERS=1 PYTEST_XDIST_AUTO_NUM_WORKERS=1 pnpm test
+PW_SUITE_WORKERS=4 PYTEST_XDIST_AUTO_NUM_WORKERS=4 pnpm test
+```
+
+The script calls the Playwright binaries directly out of `node_modules`, so it behaves the same
+on a development Mac and inside the Docker image.
 
 Browsers are downloaded once:
 
@@ -153,9 +166,11 @@ turned on a portrait phone, and really left alone once the phone is turned.
 
 ### e2e
 
-The academy's own Vite dev server on port 5273 with `BASE_PATH=/`. No API server is started:
-the `/api` proxy has nothing behind it, so Connection Setup falls back to bring-your-own-key,
-which is the state these flows exercise.
+The academy's own Vite dev server runs on port 5273 with `BASE_PATH=/`. No backend process is
+needed for these flows: the automatic `academyApi` fixture installs deterministic routes for
+the AI configuration and content endpoints before navigation. It keeps Connection Setup in the
+bring-your-own-key state and makes the app exercise its bundled-content fallback without a late
+network response replacing an already-open card.
 
 ## The wide pass
 
@@ -209,17 +224,21 @@ also needs a roomy `/dev/shm`: compose sets `shm_size: 1gb`, and a plain `docker
   network calls with `support/fetchStub.ts` rather than adding jsdom.
 - **Python backend rule** → `server/tests/`. Prefer fixtures in `conftest.py`; use
   `httpx.MockTransport` for upstreams and `ASGITransport` for routes so tests never need a real
-  Google, Stripe, model-vendor, or database connection.
+  Google, Stripe, model-vendor, or database connection. Reuse `authenticated_client`,
+  `client_headers`, `stripe_checkout_gateway`, `relay_requests`, and `allure_result_factory`
+  instead of rebuilding those states in individual modules.
 - **Anything that decides whether to accept something** → assert the *acceptance* first. A
   verifier that refuses everything passes every rejection test ever written;
   `server/tests/test_google_auth.py` signs a real token with a fixture keypair so
   that "a valid token is accepted" is a case that can fail.
-- **Component** → `component/`. Import it through `@academy/…`; wrap in `LocaleProvider` (and
-  `ProviderContextProvider` if it reads provider state). Intercept `/api/ai/config` with
-  `page.route` instead of relying on a server.
+- **Component** → `component/`. Import it through `@academy/…`; use `mountLocalized` for locale
+  context and add a focused harness fixture when several specs repeat the same mounting or
+  disclosure setup. Intercept `/api/ai/config` with `page.route` instead of relying on a server.
 - **New route** → `api/`, add its request and response shape to `lib/api-spec/openapi.yaml`,
   regenerate with `pnpm --filter @workspace/api-spec run codegen`, and add focused API coverage.
   The contract suite will then reject undocumented routes automatically.
 - **User flow** → `e2e/`. Put selectors in a page or component object, never in the spec, and
-  reach the nav through `NavComponent.reveal()` so the same test works on both viewports. Guard
-  layout-specific tests with the `isMobile` fixture rather than writing two specs.
+  reach the nav through `NavComponent.reveal()` so the same test works on both viewports. Use
+  the `storage` fixture for preferences and persisted progress; use `academyApi` for assertions
+  about content requests. Guard layout-specific tests with the `isMobile` fixture rather than
+  writing two specs.
