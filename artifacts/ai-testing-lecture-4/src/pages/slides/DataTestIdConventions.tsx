@@ -208,6 +208,8 @@ export default function DataTestIdConventions() {
                 borderRadius: '0.4vw',
                 padding: '0.6vh 0.8vw',
                 fontFamily: 'monospace',
+                direction: 'ltr',
+                textAlign: 'left',
                 fontSize: '0.85vw',
                 color: '#7DD3C8',
                 marginBottom: '0.8vh',

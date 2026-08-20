@@ -205,6 +205,8 @@ export default function LatencyMetrics() {
                 borderRadius: '0.8vw',
                 padding: '2vh 2vw',
                 fontFamily: "'SFMono-Regular', monospace",
+                direction: 'ltr',
+                textAlign: 'left',
                 fontSize: '1.1vw',
                 color: '#1E3A5F',
               }}

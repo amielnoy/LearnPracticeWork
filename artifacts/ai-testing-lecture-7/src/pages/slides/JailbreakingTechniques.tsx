@@ -114,6 +114,8 @@ export default function JailbreakingTechniques() {
             borderRadius: '0.5vw',
             padding: '1.2vh 1.2vw',
             fontFamily: "'SFMono-Regular', Consolas, monospace",
+            direction: 'ltr',
+            textAlign: 'left',
             fontSize: '0.9vw',
             color: '#F87171',
           }}
@@ -151,6 +153,8 @@ export default function JailbreakingTechniques() {
             borderRadius: '0.5vw',
             padding: '1.2vh 1.2vw',
             fontFamily: "'SFMono-Regular', Consolas, monospace",
+            direction: 'ltr',
+            textAlign: 'left',
             fontSize: '0.9vw',
             color: '#FBBF24',
           }}
@@ -191,6 +195,8 @@ export default function JailbreakingTechniques() {
             borderRadius: '0.5vw',
             padding: '1.2vh 1.2vw',
             fontFamily: "'SFMono-Regular', Consolas, monospace",
+            direction: 'ltr',
+            textAlign: 'left',
             fontSize: '0.9vw',
             color: '#C4B5FD',
           }}

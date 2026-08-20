@@ -27,6 +27,8 @@ const dot: React.CSSProperties = {
 };
 const codeLine: React.CSSProperties = {
   fontFamily: "'Menlo', 'Consolas', monospace",
+  direction: 'ltr',
+  textAlign: 'left',
   fontSize: '0.95vw',
   color: '#1E3A5F',
 };
