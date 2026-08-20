@@ -120,6 +120,22 @@ export async function loadServerConfig(): Promise<ServerDefaults> {
   }
 }
 
+/**
+ * What a proxy failure means to the reader, rather than what the wire said.
+ *
+ * The two statuses a visitor actually meets have an answer they can act on, and
+ * "API error (429)" is not it — it names a protocol they did not know they were
+ * speaking. Both point at the same way forward, because connecting a key of
+ * their own is what lets them carry on either way. Anything else keeps the
+ * status and the server's text, which is the useful thing to paste into a bug
+ * report; the prefix is translated, as it already is on the direct-call paths.
+ */
+function proxyFailure(status: number, body: string, S: Locale['s']): string {
+  if (status === 429) return S.errProxyBusy;
+  if (status === 503) return S.errProxyUnavailable;
+  return S.errApiPrefix + status + '): ' + body.slice(0, 300);
+}
+
 async function callServerProxy(
   model: string,
   system: string,
@@ -135,7 +151,7 @@ async function callServerProxy(
   });
   publishAnonymousQuota(res);
   const data = (await res.json()) as { text?: string; error?: string; truncated?: boolean };
-  if (!res.ok) throw new Error(`API error (${res.status}): ${(data.error || '').slice(0, 300)}`);
+  if (!res.ok) throw new Error(proxyFailure(res.status, data.error || '', S));
   // A truncated answer is not a shorter answer — it stops mid-sentence, and the
   // JSON repair downstream will happily patch the half-written object into
   // something that renders as if it were complete. Fail instead.

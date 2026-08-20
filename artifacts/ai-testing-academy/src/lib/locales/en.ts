@@ -235,6 +235,10 @@ export const en = {
     errBlockedTry: 'Try switching to a different provider.\n',
     errBlockedOpenUrl: '',
     errApiPrefix: 'API error (',
+    errProxyBusy:
+      'The free AI allowance is used up for now. Wait a little, or connect your own provider key in Settings to keep going.',
+    errProxyUnavailable:
+      'The academy’s own AI key is unavailable right now. Connect your own provider key in Settings to keep going.',
     errNoJson: 'Could not parse JSON from the model response. Please try again.',
     uploadReading: '⏳ Reading ',
     uploadPreparing: '⏳ Preparing to read ',
