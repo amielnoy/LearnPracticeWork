@@ -6,12 +6,23 @@ import {
   type GoogleUser,
 } from '../lib/googleIdentity';
 
+/**
+ * Why a sign-in did not complete.
+ *
+ * The three are not interchangeable to the person reading them: `busy` will
+ * pass on its own and is worth waiting out, `unavailable` is the server's
+ * problem and no amount of retrying helps, and `failed` is everything else.
+ * Collapsing them into one line is how a server-side outage looked to a
+ * visitor like their own sign-in going wrong.
+ */
+export type AuthFailure = 'busy' | 'unavailable' | 'failed';
+
 interface AuthContextValue {
   /** False when the site was built without a client ID; sign-in stays hidden. */
   configured: boolean;
   user: GoogleUser | null;
   authenticating: boolean;
-  authError: boolean;
+  authError: AuthFailure | null;
   signOut: () => Promise<void>;
   /**
    * Renders Google's own button into `parent`. Google draws it itself — the
@@ -22,6 +33,20 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+/**
+ * What the server's status code means for the person who just clicked.
+ *
+ * 429 is the one that matters: the API refuses sign-in when its rate limiter
+ * cannot count, which is a server misconfiguration that presents as a quota.
+ * Telling the visitor to simply try again sends them round a loop that cannot
+ * succeed; telling them it is busy at least matches what they are seeing.
+ */
+function failureFor(status: number): AuthFailure {
+  if (status === 429) return 'busy';
+  if (status >= 500) return 'unavailable';
+  return 'failed';
+}
 
 const BUTTON_OPTIONS: Omit<GoogleButtonOptions, 'locale'> = {
   type: 'standard',
@@ -47,7 +72,7 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
   const configured = resolvedClientId !== '';
   const [user, setUser] = useState<GoogleUser | null>(null);
   const [authenticating, setAuthenticating] = useState(false);
-  const [authError, setAuthError] = useState(false);
+  const [authError, setAuthError] = useState<AuthFailure | null>(null);
 
   // A build-time client ID remains supported for local/offline builds. When it
   // is absent, ask the same-origin API for the public ID at runtime so static
@@ -70,7 +95,7 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
 
   const handleCredential = useCallback(async (credential: string) => {
     setAuthenticating(true);
-    setAuthError(false);
+    setAuthError(null);
     try {
       const response = await fetch('/api/auth/google', {
         method: 'POST',
@@ -78,12 +103,15 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ credential }),
       });
-      if (!response.ok) throw new Error('The server did not accept the Google credential');
+      if (!response.ok) {
+        setAuthError(failureFor(response.status));
+        return;
+      }
       const body = (await response.json()) as { user?: GoogleUser };
       if (!body.user) throw new Error('The server returned no signed-in user');
       setUser(body.user);
     } catch {
-      setAuthError(true);
+      setAuthError('failed');
     } finally {
       setAuthenticating(false);
     }
@@ -93,7 +121,7 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
   // account without being asked, so the next click is a real choice.
   const signOut = useCallback(async () => {
     setAuthenticating(true);
-    setAuthError(false);
+    setAuthError(null);
     // Stop Google's automatic account selection immediately. The verified
     // local session remains visible until our server confirms deletion below.
     window.google?.accounts.id.disableAutoSelect();
@@ -105,7 +133,7 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
       if (!response.ok) throw new Error('The server did not end the session');
       setUser(null);
     } catch {
-      setAuthError(true);
+      setAuthError('failed');
     } finally {
       setAuthenticating(false);
     }

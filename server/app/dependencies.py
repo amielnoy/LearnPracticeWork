@@ -11,6 +11,7 @@ from __future__ import annotations
 import hmac
 import logging
 import os
+from collections.abc import Awaitable, Callable
 from typing import Annotated
 
 from fastapi import Cookie, Depends, Header, Request
@@ -20,7 +21,7 @@ from .catalog import CourseCatalog, course_catalog
 from .commerce import PurchaseRecorder, StripeGateway
 from .config import env
 from .content_store import ContentService, SupabaseContentStore
-from .database import find_course_access, record_purchase
+from .database import database_ready, find_course_access, record_purchase
 from .entitlements import EntitlementService
 from .errors import ServiceError
 from .google_auth import GoogleUser, verify_google_id_token
@@ -30,10 +31,17 @@ from .settings import BURST_LIMIT, BURST_WINDOW, DAILY_QUOTA
 
 logger = logging.getLogger(__name__)
 
+DatabaseProbeFn = Callable[[], Awaitable[bool]]
+
+# The two AI quotas guard a key that is billed per call, so they refuse rather
+# than guess when the shared store is unavailable. The two credential quotas
+# guard secrets that are verified independently — a Google signature, an admin
+# token compared in constant time — where refusing everyone is an authentication
+# outage that protects nothing, so they fall back to a per-worker bound.
 burst_limiter = SharedRateLimiter("ai-burst", BURST_LIMIT, BURST_WINDOW)
 daily_limiter = SharedRateLimiter("ai-daily", DAILY_QUOTA, 24 * 60 * 60)
-admin_limiter = SharedRateLimiter("admin", 20, 15 * 60)
-login_limiter = SharedRateLimiter("login", 10, 5 * 60)
+admin_limiter = SharedRateLimiter("admin", 20, 15 * 60, when_unavailable="degrade")
+login_limiter = SharedRateLimiter("login", 10, 5 * 60, when_unavailable="degrade")
 
 
 def bearer_token(authorization: str | None) -> str:
@@ -97,6 +105,10 @@ def get_catalog() -> CourseCatalog | None:
     return course_catalog()
 
 
+def get_database_probe() -> DatabaseProbeFn:
+    return database_ready
+
+
 def get_ai_gateway() -> AiGateway:
     return AiGateway()
 
@@ -125,4 +137,5 @@ Content = Annotated[ContentService, Depends(get_content_service)]
 Stripe = Annotated[StripeGateway, Depends(get_stripe_gateway)]
 Purchases = Annotated[PurchaseRecorder, Depends(get_purchase_recorder)]
 Entitlements = Annotated[EntitlementService, Depends(get_entitlement_service)]
+DatabaseProbe = Annotated[DatabaseProbeFn, Depends(get_database_probe)]
 AdminOnly = Depends(require_admin)

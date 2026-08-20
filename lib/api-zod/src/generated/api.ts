@@ -21,6 +21,12 @@ export const HealthCheckResponse = zod.object({
 export const ReadinessCheckResponse = zod.object({
   status: zod.string(),
   database: zod.string(),
+  rateLimiting: zod
+    .string()
+    .optional()
+    .describe(
+      'Why production rate limiting cannot count, when it cannot. Absent on a healthy deployment. Present means every rate-limited route — sign-in and the AI proxy included — is refusing with 429 regardless of actual usage, so it is reported here rather than only in the logs.',
+    ),
 });
 
 /**

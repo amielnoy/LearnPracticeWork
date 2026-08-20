@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, type AuthFailure } from '../../context/AuthContext';
 import { useLocale } from '../../context/LocaleContext';
 
 /**
@@ -16,6 +16,11 @@ export function GoogleSignIn() {
   const { configured, user, authenticating, authError, signOut, renderButton } = useAuth();
   const { lang, S } = useLocale();
   const buttonHost = useRef<HTMLDivElement>(null);
+  const errorText: Record<AuthFailure, string> = {
+    busy: S.signInBusy,
+    unavailable: S.signInUnavailable,
+    failed: S.signInError,
+  };
 
   useEffect(() => {
     const host = buttonHost.current;
@@ -89,7 +94,7 @@ export function GoogleSignIn() {
       />
       {authError && (
         <p className="nav-account-error" role="alert">
-          {S.signInError}
+          {errorText[authError]}
         </p>
       )}
     </div>
