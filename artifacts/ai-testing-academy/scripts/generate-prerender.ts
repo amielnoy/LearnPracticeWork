@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { en } from '../src/lib/locales/en';
-import { EN as LECTURES } from '../src/lib/lectures';
+import { EN as LECTURES, lectureHref } from '../src/lib/lectures';
 import { EN_BANK } from '../src/lib/questionBank';
 import { SECTIONS } from '../src/lib/sections';
 
@@ -76,9 +76,14 @@ const tracks = LECTURES.tracks
         const head = `<b>${esc(LECTURES.lectureLabel)} ${lec.num} — ${esc(lec.title)}</b> (${
           lec.ready ? esc(LECTURES.liveLabel) : esc(LECTURES.comingSoon)
         })`;
+        // Same resolution the component uses. Node has no `import.meta.env`,
+        // so the value comes from the process environment instead — set
+        // VITE_SITE_ORIGIN for both and the prerender cannot disagree with the
+        // rendered page about where a lecture lives.
+        const href = lectureHref(lec, 'en', process.env.VITE_SITE_ORIGIN);
         const link =
-          lec.ready && lec.url
-            ? `\n          <a href="${esc(lec.url)}" target="_blank" rel="noopener noreferrer">${esc(
+          lec.ready && href
+            ? `\n          <a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(
                 LECTURES.openLecture,
               )}</a>`
             : '';

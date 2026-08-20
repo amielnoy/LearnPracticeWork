@@ -14,3 +14,101 @@ import * as zod from 'zod';
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Stages of interview questions, in reading order. Served from the content store so the bank can change without a redeploy.
+
+ * @summary Interview question bank
+ */
+export const getQuestionBankQueryLangDefault = `en`;
+
+export const GetQuestionBankQueryParams = zod.object({
+  lang: zod
+    .enum(['en', 'he'])
+    .default(getQuestionBankQueryLangDefault)
+    .describe(
+      'Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.\n',
+    ),
+});
+
+export const GetQuestionBankResponse = zod.object({
+  stages: zod.array(
+    zod.object({
+      icon: zod.string(),
+      title: zod.string(),
+      items: zod.array(
+        zod.object({
+          q: zod.string(),
+          hint: zod.string(),
+          answer: zod.string(),
+        }),
+      ),
+    }),
+  ),
+});
+
+/**
+ * Challenge levels, each holding its own challenges in order.
+ * @summary Coding challenges
+ */
+export const getCodingChallengesQueryLangDefault = `en`;
+
+export const GetCodingChallengesQueryParams = zod.object({
+  lang: zod
+    .enum(['en', 'he'])
+    .default(getCodingChallengesQueryLangDefault)
+    .describe(
+      'Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.\n',
+    ),
+});
+
+export const GetCodingChallengesResponse = zod.object({
+  levels: zod.array(
+    zod.object({
+      label: zod.string(),
+      blurb: zod.string(),
+      items: zod.array(
+        zod.object({
+          title: zod.string(),
+          prompt: zod.string(),
+          hint: zod.string(),
+          code: zod.string(),
+          complexity: zod.string(),
+        }),
+      ),
+    }),
+  ),
+});
+
+/**
+ * Tracks, each holding its lectures in order.
+ * @summary Lecture series
+ */
+export const getLectureSeriesQueryLangDefault = `en`;
+
+export const GetLectureSeriesQueryParams = zod.object({
+  lang: zod
+    .enum(['en', 'he'])
+    .default(getLectureSeriesQueryLangDefault)
+    .describe(
+      'Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.\n',
+    ),
+});
+
+export const GetLectureSeriesResponse = zod.object({
+  tracks: zod.array(
+    zod.object({
+      title: zod.string(),
+      lead: zod.string(),
+      lectures: zod.array(
+        zod.object({
+          num: zod.number(),
+          ready: zod.boolean(),
+          title: zod.string(),
+          desc: zod.string(),
+          url: zod.string().optional().describe('Present only once the lecture is published.'),
+        }),
+      ),
+    }),
+  ),
+});

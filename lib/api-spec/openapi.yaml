@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: content
+    description: Academy teaching content, served from the content store
 paths:
   /healthz:
     get:
@@ -24,7 +26,82 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /content/question-bank:
+    get:
+      operationId: getQuestionBank
+      tags: [content]
+      summary: Interview question bank
+      description: >
+        Stages of interview questions, in reading order. Served from the content
+        store so the bank can change without a redeploy.
+      parameters:
+        - $ref: "#/components/parameters/Lang"
+      responses:
+        "200":
+          description: The bank
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionBank"
+        "503":
+          $ref: "#/components/responses/ContentUnavailable"
+  /content/coding-challenges:
+    get:
+      operationId: getCodingChallenges
+      tags: [content]
+      summary: Coding challenges
+      description: Challenge levels, each holding its own challenges in order.
+      parameters:
+        - $ref: "#/components/parameters/Lang"
+      responses:
+        "200":
+          description: The challenges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CodingChallenges"
+        "503":
+          $ref: "#/components/responses/ContentUnavailable"
+  /content/lecture-series:
+    get:
+      operationId: getLectureSeries
+      tags: [content]
+      summary: Lecture series
+      description: Tracks, each holding its lectures in order.
+      parameters:
+        - $ref: "#/components/parameters/Lang"
+      responses:
+        "200":
+          description: The series
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LectureSeries"
+        "503":
+          $ref: "#/components/responses/ContentUnavailable"
 components:
+  parameters:
+    Lang:
+      name: lang
+      in: query
+      required: false
+      description: >
+        Which language to serve. Anything other than the two below is treated as
+        `en` rather than refused, because this parameter travels in links.
+      schema:
+        type: string
+        enum: [en, he]
+        default: en
+  responses:
+    ContentUnavailable:
+      description: >
+        The content store could not be reached. Deliberately a 503 and not a
+        500: the request was fine, the dependency was not, and the message is
+        fixed so nothing about the store leaks to an unauthenticated caller.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ContentError"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +110,110 @@ components:
           type: string
       required:
         - status
+    ContentError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    QuestionBankItem:
+      type: object
+      properties:
+        q:
+          type: string
+        hint:
+          type: string
+        answer:
+          type: string
+      required: [q, hint, answer]
+    QuestionBankStage:
+      type: object
+      properties:
+        icon:
+          type: string
+        title:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionBankItem"
+      required: [icon, title, items]
+    QuestionBank:
+      type: object
+      properties:
+        stages:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionBankStage"
+      required: [stages]
+    CodingChallenge:
+      type: object
+      properties:
+        title:
+          type: string
+        prompt:
+          type: string
+        hint:
+          type: string
+        code:
+          type: string
+        complexity:
+          type: string
+      required: [title, prompt, hint, code, complexity]
+    CodingChallengeLevel:
+      type: object
+      properties:
+        label:
+          type: string
+        blurb:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CodingChallenge"
+      required: [label, blurb, items]
+    CodingChallenges:
+      type: object
+      properties:
+        levels:
+          type: array
+          items:
+            $ref: "#/components/schemas/CodingChallengeLevel"
+      required: [levels]
+    Lecture:
+      type: object
+      properties:
+        num:
+          type: integer
+        ready:
+          type: boolean
+        title:
+          type: string
+        desc:
+          type: string
+        url:
+          type: string
+          description: Present only once the lecture is published.
+      required: [num, ready, title, desc]
+    LectureTrack:
+      type: object
+      properties:
+        title:
+          type: string
+        lead:
+          type: string
+        lectures:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lecture"
+      required: [title, lead, lectures]
+    LectureSeries:
+      type: object
+      properties:
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/LectureTrack"
+      required: [tracks]
 

@@ -22,12 +22,20 @@ interface OpenApiSpec {
   openapi: string;
   servers: Array<{ url: string }>;
   paths: Record<string, Record<string, OpenApiOperation>>;
-  components: { schemas: Record<string, OpenApiSchema> };
+  components: {
+    schemas: Record<string, OpenApiSchema>;
+    responses?: Record<string, OpenApiResponse>;
+  };
+}
+
+interface OpenApiResponse {
+  $ref?: string;
+  content?: Record<string, { schema?: { $ref?: string } }>;
 }
 
 interface OpenApiOperation {
   operationId: string;
-  responses: Record<string, { content?: Record<string, { schema?: { $ref?: string } }> }>;
+  responses: Record<string, OpenApiResponse>;
 }
 
 interface OpenApiSchema {
@@ -61,6 +69,47 @@ const documented: DocumentedOperation[] = Object.entries(spec.paths).flatMap(([r
 function generatedSchemaFor(operationId: string): unknown {
   const name = `${operationId[0]!.toUpperCase()}${operationId.slice(1)}Response`;
   return (apiZod as Record<string, unknown>)[name];
+}
+
+/** Follows one `#/components/<kind>/<Name>` pointer. */
+function deref<T>(ref: string | undefined, kind: 'schemas' | 'responses'): T | undefined {
+  if (!ref) return undefined;
+  const name = ref.split('/').pop()!;
+  return (spec.components[kind] as Record<string, unknown> | undefined)?.[name] as T | undefined;
+}
+
+/**
+ * The schema the spec documents for the status that actually came back.
+ *
+ * Not the 200 schema. Orval emits one schema per operation — the success one —
+ * so validating every reply against it says "the error body is not a question
+ * bank", which is true and useless. `/healthz` hid this for as long as it was
+ * the only documented route, because it has no other status to return.
+ */
+function specSchemaForStatus(
+  operation: OpenApiOperation,
+  status: number,
+): OpenApiSchema | undefined {
+  let response: OpenApiResponse | undefined = operation.responses[String(status)];
+  if (response?.$ref) response = deref<OpenApiResponse>(response.$ref, 'responses');
+  return deref<OpenApiSchema>(response?.content?.['application/json']?.schema?.$ref, 'schemas');
+}
+
+/** Reports what the spec's schema says is wrong with `body`, at the top level. */
+function violations(schema: OpenApiSchema, body: unknown): string[] {
+  if (schema.type !== 'object') return [];
+  if (typeof body !== 'object' || body === null) return ['body is not an object'];
+  const record = body as Record<string, unknown>;
+  const problems: string[] = [];
+  for (const key of schema.required ?? []) {
+    if (!(key in record)) problems.push(`missing required property "${key}"`);
+  }
+  for (const key of Object.keys(record)) {
+    if (schema.properties && !(key in schema.properties)) {
+      problems.push(`undocumented property "${key}"`);
+    }
+  }
+  return problems;
 }
 
 function isZodObject(value: unknown): value is {
@@ -133,17 +182,27 @@ test.describe('spec ↔ running server', () => {
     });
 
     test(`${method.toUpperCase()} ${route} returns a body its schema accepts`, async ({ api }) => {
-      const schema = generatedSchemaFor(operation.operationId);
-      test.skip(!isZodObject(schema), 'no generated object schema for this operation');
-
       const response = await api.fetch(url, { method: method.toUpperCase() });
+      const status = response.status();
       const body = await response.json();
 
-      // Strict: an undocumented extra field is drift too, and clients that
-      // round-trip the payload will silently drop it.
-      expect(() =>
-        (schema as { strict(): { parse(d: unknown): unknown } }).strict().parse(body),
-      ).not.toThrow();
+      const specSchema = specSchemaForStatus(operation, status);
+      test.skip(!specSchema, `no JSON schema documented for ${status}`);
+
+      // Checked against the status that came back, so an error reply is judged
+      // by the error schema and not by the success one.
+      expect(violations(specSchema!, body), `body does not match the ${status} schema`).toEqual([]);
+
+      // On success, also run orval's generated schema, which is the stricter of
+      // the two: it types every field and every nested one, where the check
+      // above only sees the top level. An undocumented extra field is drift too,
+      // and a client round-tripping the payload will silently drop it.
+      const generated = generatedSchemaFor(operation.operationId);
+      if (status === 200 && isZodObject(generated)) {
+        expect(() =>
+          (generated as { strict(): { parse(d: unknown): unknown } }).strict().parse(body),
+        ).not.toThrow();
+      }
     });
   }
 });

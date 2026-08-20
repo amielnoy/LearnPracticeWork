@@ -13,12 +13,48 @@
  * them, and a generator cannot import from a component.
  */
 
+/**
+ * The origin the decks are served from when nothing overrides it.
+ *
+ * These links used to be twenty absolute URLs pinned to the Replit deployment,
+ * written out one per lecture per language. Every deck builds and publishes
+ * alongside this app on each static host now, so pinning them meant the copies
+ * on the host the visitor was already on could never be reached.
+ *
+ * `VITE_SITE_ORIGIN` moves all of them at once. The default is the origin they
+ * already pointed at, so a build that does not set it is byte-identical to the
+ * one before this change — moving hosts is a config flip, not an edit to
+ * twenty strings.
+ */
+export const DEFAULT_SITE_ORIGIN = 'https://free-tier-insights--amielpeled.replit.app';
+
 export interface LectureData {
   num: number;
   ready: boolean;
   title: string;
   desc: string;
+  /**
+   * One of our own decks, by number. The href is derived from the site origin
+   * rather than stored, which is what lets it follow the deployment.
+   */
+  deck?: number;
+  /** An external lecture. The cybersecurity track is hosted on gamma.site. */
   url?: string;
+}
+
+/**
+ * Where a lecture's "open" link points, or null when there is nothing to open.
+ *
+ * The origin is passed in rather than read here because this module has two
+ * importers in two runtimes: the component, where Vite substitutes
+ * `import.meta.env`, and `scripts/generate-prerender.ts`, which runs under
+ * Node where that does not exist.
+ */
+export function lectureHref(lec: LectureData, lang: string, origin?: string): string | null {
+  if (lec.url) return lec.url;
+  if (lec.deck === undefined) return null;
+  const base = (origin || DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
+  return `${base}/ai-testing-lecture-${lec.deck}/slide1?lang=${lang}`;
 }
 
 export interface TrackData {
@@ -59,70 +95,70 @@ export const EN: BankData = {
           ready: true,
           title: 'Introduction to AI Testing',
           desc: 'What is AI testing, why it matters, and how it differs from traditional software testing. Covers LLMs, non-determinism, evaluation strategies, and the modern AI testing landscape.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=en',
+          deck: 1,
         },
         {
           num: 2,
           ready: true,
           title: 'Prompt Engineering for Testers',
           desc: 'How to write prompts that produce consistent, testable outputs. Covers prompt structure, system messages, temperature, and prompt injection basics.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-2/slide1?lang=en',
+          deck: 2,
         },
         {
           num: 3,
           ready: true,
           title: 'Testing LLM Outputs',
           desc: 'Evaluation frameworks for LLM responses — semantic similarity, factuality checks, toxicity detection, and JSON schema validation.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-3/slide1?lang=en',
+          deck: 3,
         },
         {
           num: 4,
           ready: true,
           title: 'Playwright for AI Applications',
           desc: 'End-to-end testing of AI-powered UIs with Playwright — handling dynamic content, testing streaming responses, and building resilient selectors.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-4/slide1?lang=en',
+          deck: 4,
         },
         {
           num: 5,
           ready: true,
           title: 'API Testing with AI Features',
           desc: 'Testing AI APIs with pytest and Requests — mocking LLM responses, testing edge cases, and validating structured outputs.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-5/slide1?lang=en',
+          deck: 5,
         },
         {
           num: 6,
           ready: true,
           title: 'CI/CD for AI Test Suites',
           desc: 'Running AI tests in GitHub Actions — parallelism, flakiness handling, cost management, and integrating LLM-as-judge into pipelines.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-6/slide1?lang=en',
+          deck: 6,
         },
         {
           num: 7,
           ready: true,
           title: 'Security Testing for AI',
           desc: 'Prompt injection attacks, data leakage, jailbreaking, and adversarial testing. How to write security tests for LLM-powered features.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-7/slide1?lang=en',
+          deck: 7,
         },
         {
           num: 8,
           ready: true,
           title: 'Performance Testing AI Features',
           desc: 'Latency benchmarking, throughput testing, and token-cost optimization. Load testing AI endpoints and establishing performance baselines.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-8/slide1?lang=en',
+          deck: 8,
         },
         {
           num: 9,
           ready: true,
           title: 'AI-Assisted Test Generation',
           desc: 'Using AI agents to generate test cases, identify edge cases, and triage failures. GitHub Copilot, Cursor, and custom test-generation pipelines.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-9/slide1?lang=en',
+          deck: 9,
         },
         {
           num: 10,
           ready: true,
           title: 'Building an AI Testing Strategy',
           desc: 'Putting it all together — designing a full AI testing strategy for your team, from unit to system level, with metrics, reporting, and continuous improvement.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-10/slide1?lang=en',
+          deck: 10,
         },
       ],
     },
@@ -215,70 +251,70 @@ export const HE: BankData = {
           ready: true,
           title: 'מבוא לבדיקות AI',
           desc: 'מהן בדיקות AI, למה הן חשובות, וכיצד הן שונות מבדיקות תוכנה מסורתיות. מכסה LLMs, אי-דטרמיניזם, אסטרטגיות הערכה ונוף בדיקות ה-AI המודרני.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1?lang=he',
+          deck: 1,
         },
         {
           num: 2,
           ready: true,
           title: 'הנדסת Prompt לבודקים',
           desc: 'כיצד לכתוב prompts שמייצרים תוצאות עקביות וניתנות לבדיקה. מכסה מבנה prompt, system messages, temperature ויסודות prompt injection.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-2/slide1?lang=he',
+          deck: 2,
         },
         {
           num: 3,
           ready: true,
           title: 'בדיקת פלטי LLM',
           desc: 'מסגרות הערכה לתגובות LLM — דמיון סמנטי, בדיקות עובדתיות, זיהוי רעילות ואימות JSON schema.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-3/slide1?lang=he',
+          deck: 3,
         },
         {
           num: 4,
           ready: true,
           title: 'Playwright לאפליקציות AI',
           desc: 'בדיקות end-to-end לממשקי AI עם Playwright — טיפול בתוכן דינמי, בדיקת תגובות streaming ובניית selectors עמידים.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-4/slide1?lang=he',
+          deck: 4,
         },
         {
           num: 5,
           ready: true,
           title: "בדיקות API עם פיצ'רים של AI",
           desc: 'בדיקת AI APIs עם pytest ו-Requests — הדמיית תגובות LLM, בדיקת מקרי קצה ואימות פלטים מובנים.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-5/slide1?lang=he',
+          deck: 5,
         },
         {
           num: 6,
           ready: true,
           title: 'CI/CD לסוויטות בדיקות AI',
           desc: 'הרצת בדיקות AI ב-GitHub Actions — מקביליות, טיפול ב-flakiness, ניהול עלויות ושילוב LLM-as-judge ב-pipelines.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-6/slide1?lang=he',
+          deck: 6,
         },
         {
           num: 7,
           ready: true,
           title: 'בדיקות אבטחה ל-AI',
           desc: "התקפות prompt injection, דליפת נתונים, jailbreaking ובדיקות adversarial. כיצד לכתוב בדיקות אבטחה לפיצ'רים מבוססי LLM.",
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-7/slide1?lang=he',
+          deck: 7,
         },
         {
           num: 8,
           ready: true,
           title: "בדיקות ביצועים לפיצ'רים של AI",
           desc: 'ניתוח latency, בדיקות throughput ואופטימיזציית עלות-token. בדיקות עומס על AI endpoints וקביעת baselines של ביצועים.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-8/slide1?lang=he',
+          deck: 8,
         },
         {
           num: 9,
           ready: true,
           title: 'יצירת בדיקות בעזרת AI',
           desc: 'שימוש בסוכני AI ליצירת test cases, זיהוי מקרי קצה וסיווג כשלים. GitHub Copilot, Cursor ו-pipelines מותאמים ליצירת בדיקות.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-9/slide1?lang=he',
+          deck: 9,
         },
         {
           num: 10,
           ready: true,
           title: 'בניית אסטרטגיית בדיקות AI',
           desc: 'הכל ביחד — עיצוב אסטרטגיית בדיקות AI מלאה לצוות שלכם, מיחידה לרמת מערכת, עם מדדים, דיווח ושיפור מתמיד.',
-          url: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-10/slide1?lang=he',
+          deck: 10,
         },
       ],
     },

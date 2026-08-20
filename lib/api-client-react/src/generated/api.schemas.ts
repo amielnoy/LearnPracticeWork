@@ -8,3 +8,97 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface ContentError {
+  error: string;
+}
+
+export interface QuestionBankItem {
+  q: string;
+  hint: string;
+  answer: string;
+}
+
+export interface QuestionBankStage {
+  icon: string;
+  title: string;
+  items: QuestionBankItem[];
+}
+
+export interface QuestionBank {
+  stages: QuestionBankStage[];
+}
+
+export interface CodingChallenge {
+  title: string;
+  prompt: string;
+  hint: string;
+  code: string;
+  complexity: string;
+}
+
+export interface CodingChallengeLevel {
+  label: string;
+  blurb: string;
+  items: CodingChallenge[];
+}
+
+export interface CodingChallenges {
+  levels: CodingChallengeLevel[];
+}
+
+export interface Lecture {
+  num: number;
+  ready: boolean;
+  title: string;
+  desc: string;
+  /** Present only once the lecture is published. */
+  url?: string;
+}
+
+export interface LectureTrack {
+  title: string;
+  lead: string;
+  lectures: Lecture[];
+}
+
+export interface LectureSeries {
+  tracks: LectureTrack[];
+}
+
+/**
+ * The content store could not be reached. Deliberately a 503 and not a 500: the request was fine, the dependency was not, and the message is fixed so nothing about the store leaks to an unauthenticated caller.
+
+ */
+export type ContentUnavailableResponse = ContentError;
+
+export type LangParameter = (typeof LangParameter)[keyof typeof LangParameter];
+
+export const LangParameter = {
+  en: 'en',
+  he: 'he',
+} as const;
+
+export type GetQuestionBankParams = {
+  /**
+ * Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.
+
+ */
+  lang?: LangParameter;
+};
+
+export type GetCodingChallengesParams = {
+  /**
+ * Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.
+
+ */
+  lang?: LangParameter;
+};
+
+export type GetLectureSeriesParams = {
+  /**
+ * Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.
+
+ */
+  lang?: LangParameter;
+};

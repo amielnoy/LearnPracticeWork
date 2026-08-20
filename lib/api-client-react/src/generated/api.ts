@@ -13,7 +13,16 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { HealthStatus } from './api.schemas';
+import type {
+  CodingChallenges,
+  ContentUnavailableResponse,
+  GetCodingChallengesParams,
+  GetLectureSeriesParams,
+  GetQuestionBankParams,
+  HealthStatus,
+  LectureSeries,
+  QuestionBank,
+} from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
 import type { ErrorType } from '../custom-fetch';
@@ -80,9 +89,256 @@ export function useHealthCheck<
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Stages of interview questions, in reading order. Served from the content store so the bank can change without a redeploy.
+
+ * @summary Interview question bank
+ */
+export const getGetQuestionBankUrl = (params?: GetQuestionBankParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/content/question-bank?${stringifiedParams}`
+    : `/api/content/question-bank`;
+};
+
+export const getQuestionBank = async (
+  params?: GetQuestionBankParams,
+  options?: RequestInit,
+): Promise<QuestionBank> => {
+  return customFetch<QuestionBank>(getGetQuestionBankUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetQuestionBankQueryKey = (params?: GetQuestionBankParams) => {
+  return [`/api/content/question-bank`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetQuestionBankQueryOptions = <
+  TData = Awaited<ReturnType<typeof getQuestionBank>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetQuestionBankParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getQuestionBank>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetQuestionBankQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getQuestionBank>>> = ({ signal }) =>
+    getQuestionBank(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getQuestionBank>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetQuestionBankQueryResult = NonNullable<Awaited<ReturnType<typeof getQuestionBank>>>;
+export type GetQuestionBankQueryError = ErrorType<ContentUnavailableResponse>;
+
+/**
+ * @summary Interview question bank
+ */
+
+export function useGetQuestionBank<
+  TData = Awaited<ReturnType<typeof getQuestionBank>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetQuestionBankParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getQuestionBank>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetQuestionBankQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Challenge levels, each holding its own challenges in order.
+ * @summary Coding challenges
+ */
+export const getGetCodingChallengesUrl = (params?: GetCodingChallengesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/content/coding-challenges?${stringifiedParams}`
+    : `/api/content/coding-challenges`;
+};
+
+export const getCodingChallenges = async (
+  params?: GetCodingChallengesParams,
+  options?: RequestInit,
+): Promise<CodingChallenges> => {
+  return customFetch<CodingChallenges>(getGetCodingChallengesUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetCodingChallengesQueryKey = (params?: GetCodingChallengesParams) => {
+  return [`/api/content/coding-challenges`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetCodingChallengesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCodingChallenges>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetCodingChallengesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getCodingChallenges>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCodingChallengesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCodingChallenges>>> = ({ signal }) =>
+    getCodingChallenges(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCodingChallenges>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCodingChallengesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCodingChallenges>>
+>;
+export type GetCodingChallengesQueryError = ErrorType<ContentUnavailableResponse>;
+
+/**
+ * @summary Coding challenges
+ */
+
+export function useGetCodingChallenges<
+  TData = Awaited<ReturnType<typeof getCodingChallenges>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetCodingChallengesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getCodingChallenges>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCodingChallengesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Tracks, each holding its lectures in order.
+ * @summary Lecture series
+ */
+export const getGetLectureSeriesUrl = (params?: GetLectureSeriesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/content/lecture-series?${stringifiedParams}`
+    : `/api/content/lecture-series`;
+};
+
+export const getLectureSeries = async (
+  params?: GetLectureSeriesParams,
+  options?: RequestInit,
+): Promise<LectureSeries> => {
+  return customFetch<LectureSeries>(getGetLectureSeriesUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetLectureSeriesQueryKey = (params?: GetLectureSeriesParams) => {
+  return [`/api/content/lecture-series`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetLectureSeriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLectureSeries>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetLectureSeriesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getLectureSeries>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetLectureSeriesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getLectureSeries>>> = ({ signal }) =>
+    getLectureSeries(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLectureSeries>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLectureSeriesQueryResult = NonNullable<Awaited<ReturnType<typeof getLectureSeries>>>;
+export type GetLectureSeriesQueryError = ErrorType<ContentUnavailableResponse>;
+
+/**
+ * @summary Lecture series
+ */
+
+export function useGetLectureSeries<
+  TData = Awaited<ReturnType<typeof getLectureSeries>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetLectureSeriesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getLectureSeries>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLectureSeriesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }

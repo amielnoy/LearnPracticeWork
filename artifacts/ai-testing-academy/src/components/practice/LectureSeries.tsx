@@ -1,9 +1,13 @@
 import { useLocale } from '../../context/LocaleContext';
 import { useReveal } from '../../hooks/useReveal';
 import { sectionNum } from '../../lib/sections';
-import { EN, HE, type BankData, type LectureData } from '../../lib/lectures';
+import { EN, HE, lectureHref, type BankData, type LectureData } from '../../lib/lectures';
 
-function LectureCard({ lec, bank }: { lec: LectureData; bank: BankData }) {
+function LectureCard({ lec, bank, lang }: { lec: LectureData; bank: BankData; lang: string }) {
+  // Derived rather than stored, so the link follows whichever host this build
+  // is for. VITE_SITE_ORIGIN is substituted at build time; unset, it falls back
+  // to the origin these links were pinned to before.
+  const href = lectureHref(lec, lang, import.meta.env.VITE_SITE_ORIGIN);
   return (
     <div className="card" style={lec.ready ? {} : { opacity: 0.6 }}>
       <div
@@ -29,8 +33,8 @@ function LectureCard({ lec, bank }: { lec: LectureData; bank: BankData }) {
       </div>
       <h4 style={{ marginBottom: '8px', fontSize: '1rem' }}>{lec.title}</h4>
       <p style={{ fontSize: '.88rem' }}>{lec.desc}</p>
-      {lec.ready && lec.url && (
-        <a className="lecture-cta" href={lec.url} target="_blank" rel="noopener noreferrer">
+      {lec.ready && href && (
+        <a className="lecture-cta" href={href} target="_blank" rel="noopener noreferrer">
           {bank.openLecture}
         </a>
       )}
@@ -61,7 +65,7 @@ export function LectureSeries() {
           </p>
           <div className="grid">
             {track.lectures.map(lec => (
-              <LectureCard key={lec.num} lec={lec} bank={bank} />
+              <LectureCard key={lec.num} lec={lec} bank={bank} lang={lang} />
             ))}
           </div>
         </div>
