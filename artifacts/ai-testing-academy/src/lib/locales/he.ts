@@ -264,6 +264,10 @@ export const he: Locale = {
     errBlockedTry: 'נסה לעבור לספק אחר.\n',
     errBlockedOpenUrl: '',
     errApiPrefix: 'שגיאת API (',
+    errProxyBusy:
+      'שירות ה-AI המשותף עמוס כרגע, או שהמכסה החינמית נוצלה. המתינו רגע ונסו שוב, או חברו מפתח ספק משלכם בהגדרות כדי להמשיך.',
+    errProxyUnavailable:
+      'מפתח ה-AI של האקדמיה אינו זמין כרגע. חברו מפתח ספק משלכם בהגדרות כדי להמשיך.',
     errNoJson: 'לא ניתן לנתח JSON מתגובת המודל. נסה שוב.',
     uploadReading: '⏳ קורא ',
     uploadPreparing: '⏳ מתכונן לקרוא את ',

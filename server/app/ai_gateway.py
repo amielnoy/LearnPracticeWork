@@ -35,12 +35,21 @@ class Completion:
     truncated: bool
 
 
+UNKNOWN = "unknown"
+
+
 @dataclass(frozen=True)
 class AiOutcome:
-    """A proxied result: the upstream status travels with the body deliberately."""
+    """A proxied result: the upstream status travels with the body deliberately.
+
+    `provider` and `model` name whoever actually answered, which after a
+    fallback is not the one the request started with.
+    """
 
     status: int
     payload: dict
+    provider: str = UNKNOWN
+    model: str = UNKNOWN
 
 
 class AiProvider(Protocol):
@@ -122,23 +131,29 @@ class GeminiProvider(_Provider):
     supports_grounding = True
 
     def build_request(self, model: str, key: str, body: GenerateBody) -> UpstreamRequest:
+        payload: dict = {
+            "system_instruction": {"parts": [{"text": body.system}]},
+            "contents": [
+                {
+                    "role": "model" if message.role == "assistant" else "user",
+                    "parts": [{"text": message.content}],
+                }
+                for message in body.messages
+            ],
+            "generationConfig": {"maxOutputTokens": body.maxTokens},
+        }
+        # Search grounding is what the caller asked for, not what this provider
+        # is. It was unconditional while Gemini only ever served grounded
+        # requests; as a fallback it also serves ordinary ones, and those must
+        # not quietly become searches.
+        if body.grounded:
+            payload["tools"] = [{"google_search": {}}]
         return UpstreamRequest(
             url=(
                 f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
             ),
             headers={"content-type": "application/json", "x-goog-api-key": key},
-            payload={
-                "system_instruction": {"parts": [{"text": body.system}]},
-                "contents": [
-                    {
-                        "role": "model" if message.role == "assistant" else "user",
-                        "parts": [{"text": message.content}],
-                    }
-                    for message in body.messages
-                ],
-                "generationConfig": {"maxOutputTokens": body.maxTokens},
-                "tools": [{"google_search": {}}],
-            },
+            payload=payload,
         )
 
     def read_completion(self, data: dict) -> Completion:
@@ -179,12 +194,49 @@ class AiGateway:
             for provider in self._providers
         }
 
+    def candidates(self, body: GenerateBody) -> tuple[_Provider, ...]:
+        """The provider for this request, then any other that could also serve it.
+
+        A grounded request has no alternative: search grounding is the reason it
+        chose that provider, and a provider without it would answer a different
+        question. An ordinary request can be served by any of them.
+        """
+        primary = self.provider_for(body)
+        if body.grounded:
+            return (primary,)
+        return (primary, *(p for p in self._providers if p is not primary))
+
+    @staticmethod
+    def _worth_another_provider(status: int) -> bool:
+        """Whether the refusal was about this provider rather than the request.
+
+        A rate limit or a fault is the provider saying "not me, not now", and
+        another one may well answer. A 4xx below that is the request itself
+        being wrong, and every provider will say the same thing — retrying it
+        elsewhere only spends a second call to be told so twice.
+        """
+        return status == 429 or status >= 500
+
     async def generate(self, body: GenerateBody) -> AiOutcome:
-        provider = self.provider_for(body)
+        outcome: AiOutcome | None = None
+        for provider in self.candidates(body):
+            attempt = await self._attempt(provider, body)
+            if attempt.status == 200 or not self._worth_another_provider(attempt.status):
+                return attempt
+            outcome = outcome or attempt
+            logger.warning(
+                "%s could not serve the request (status %s); trying the next provider",
+                provider.name,
+                attempt.status,
+            )
+        return outcome or AiOutcome(503, {"error": "No AI provider is configured."})
+
+    async def _attempt(self, provider: _Provider, body: GenerateBody) -> AiOutcome:
+        model = provider.resolve_model(body.model)
         key = provider.api_key()
         if not key:
-            return AiOutcome(503, {"error": provider.missing_key_message()})
-        request = provider.build_request(provider.resolve_model(body.model), key, body)
+            return AiOutcome(503, {"error": provider.missing_key_message()}, provider.name, model)
+        request = provider.build_request(model, key, body)
         try:
             async with httpx.AsyncClient(timeout=UPSTREAM_TIMEOUT) as client:
                 upstream = await client.post(
@@ -192,23 +244,32 @@ class AiGateway:
                 )
             data = upstream.json()
             if not upstream.is_success:
-                return self._refused(upstream.status_code)
+                return self._refused(upstream.status_code, provider.name, model)
             completion = provider.read_completion(data)
-            return AiOutcome(200, {"text": completion.text, "truncated": completion.truncated})
+            return AiOutcome(
+                200,
+                {"text": completion.text, "truncated": completion.truncated},
+                provider.name,
+                model,
+            )
         except httpx.TimeoutException:
-            return AiOutcome(504, {"error": "Provider request timed out"})
+            return AiOutcome(504, {"error": "Provider request timed out"}, provider.name, model)
         except Exception:
             logger.exception("AI provider request failed")
-            return AiOutcome(502, {"error": "Failed to reach provider"})
+            return AiOutcome(502, {"error": "Failed to reach provider"}, provider.name, model)
 
-    def _refused(self, status: int) -> AiOutcome:
+    def _refused(self, status: int, provider: str, model: str) -> AiOutcome:
         """Upstream detail stays in the log; the caller gets a correlation id."""
         request_id = secrets.token_urlsafe(8)
-        logger.warning("AI provider refused request id=%s status=%s", request_id, status)
+        logger.warning(
+            "AI provider %s refused request id=%s status=%s", provider, request_id, status
+        )
         return AiOutcome(
             status,
             {
                 "error": "The AI provider could not complete this request.",
                 "requestId": request_id,
             },
+            provider,
+            model,
         )

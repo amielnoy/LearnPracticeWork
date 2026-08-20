@@ -7,7 +7,7 @@ import {
   extractJSON,
   type ServerDefaults,
 } from '@academy/lib/providers';
-import { en } from '@academy/lib/locales';
+import { en, he } from '@academy/lib/locales';
 import { stubFetch, jsonResponse, type FetchStub } from '../support/fetchStub';
 
 /**
@@ -507,5 +507,55 @@ test.describe('callGeminiGrounded', () => {
 
     await expect(callGeminiGrounded('', {}, S, 'sys', 'q')).rejects.toThrow(S.errNoKey);
     expect(fetchStub.calls).toHaveLength(0);
+  });
+});
+
+test.describe('a failure from the academy’s own proxy', () => {
+  const serverHasGroq: ServerDefaults = { groq: { available: true } };
+
+  /**
+   * The reader meets two of these in practice, and "API error (429): Too many
+   * AI requests" is not an answer to either — it names a protocol they did not
+   * know they were speaking, in English, inside a Hebrew page. Both have the
+   * same way forward, which is to connect a key of their own, so both say so.
+   */
+  test('a spent allowance says what to do, not which status arrived', async () => {
+    fetchStub = stubFetch(() => jsonResponse({ error: 'Too many AI requests.' }, 429));
+
+    await expect(
+      callAI('groq', 'openai/gpt-oss-120b', '', false, serverHasGroq, S, 'sys', [
+        { role: 'user', content: 'hi' },
+      ]),
+    ).rejects.toThrow(S.errProxyBusy);
+  });
+
+  test('an unconfigured server key says so, rather than blaming usage', async () => {
+    fetchStub = stubFetch(() => jsonResponse({ error: 'No server-side Groq key' }, 503));
+
+    await expect(
+      callAI('groq', 'openai/gpt-oss-120b', '', false, serverHasGroq, S, 'sys', [
+        { role: 'user', content: 'hi' },
+      ]),
+    ).rejects.toThrow(S.errProxyUnavailable);
+  });
+
+  test('anything else keeps the status and the server’s own text', async () => {
+    // Worth pasting into a bug report, which the two above deliberately are not.
+    fetchStub = stubFetch(() => jsonResponse({ error: 'upstream exploded' }, 502));
+
+    await expect(
+      callAI('groq', 'openai/gpt-oss-120b', '', false, serverHasGroq, S, 'sys', [
+        { role: 'user', content: 'hi' },
+      ]),
+    ).rejects.toThrow(/502.*upstream exploded/);
+  });
+
+  test('the prefix is translated, as it is on the direct-call paths', () => {
+    // It was hardcoded English here while the two BYOK call sites used the
+    // locale, so a Hebrew reader got "API error (" from one path and
+    // "שגיאת API (" from the others.
+    expect(S.errApiPrefix).toBeTruthy();
+    expect(en.s.errApiPrefix).toBe('API error (');
+    expect(he.s.errApiPrefix).toBe('שגיאת API (');
   });
 });

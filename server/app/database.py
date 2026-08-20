@@ -127,6 +127,22 @@ def _hit_rate_limit(
     return hits <= limit, max(0, limit - hits)
 
 
+async def release_rate_limit(bucket: str, key_hash: str) -> int:
+    """Give back one hit, and report what is left. Never goes below zero."""
+    return await asyncio.to_thread(_release_rate_limit, bucket, key_hash)
+
+
+def _release_rate_limit(bucket: str, key_hash: str) -> int:
+    with psycopg.connect(database_url()) as connection:
+        row = connection.execute(
+            """UPDATE api_rate_limits SET hits = GREATEST(0, hits - 1)
+               WHERE bucket = %s AND key_hash = %s
+               RETURNING hits""",
+            (bucket, key_hash),
+        ).fetchone()
+    return int(row[0]) if row else 0
+
+
 async def find_course_access(
     subject: str | None,
     email: str | None,

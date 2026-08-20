@@ -210,3 +210,94 @@ async def test_the_ai_proxy_still_refuses_when_the_quota_cannot_count(
     )
 
     assert response.status_code == 429
+
+
+@pytest.mark.asyncio
+async def test_a_hit_can_be_given_back(production) -> None:
+    """Outside a shared store this is the in-memory path, which tests exercise."""
+    production.setenv("NODE_ENV", "development")
+    limiter = SharedRateLimiter("ai-daily", 10, 86_400)
+
+    await limiter.hit("ip:198.51.100.4")
+    remaining = await limiter.release("ip:198.51.100.4")
+
+    assert remaining == 10
+
+
+@pytest.mark.asyncio
+async def test_giving_back_more_than_was_taken_cannot_go_negative(production) -> None:
+    production.setenv("NODE_ENV", "development")
+    limiter = SharedRateLimiter("ai-daily", 10, 86_400)
+
+    await limiter.release("ip:198.51.100.4")
+    await limiter.release("ip:198.51.100.4")
+
+    assert (await limiter.hit("ip:198.51.100.4"))[1] == 9
+
+
+@pytest.mark.asyncio
+async def test_a_refused_provider_does_not_spend_the_daily_allowance(
+    api_client, override_dependency
+) -> None:
+    """The reported case: Groq refuses a large request, and ten a day is not many.
+
+    A caller who receives nothing must not be charged for it. Retrying is still
+    bounded by the burst limiter, so handing the allowance back cannot become a
+    way around the quota.
+    """
+    from app.ai_gateway import AiOutcome
+    from app.dependencies import get_ai_gateway
+
+    class RefusingGateway:
+        def target(self, body):
+            return "groq", "openai/gpt-oss-120b"
+
+        def advertised_config(self):
+            return {}
+
+        async def generate(self, body) -> AiOutcome:
+            return AiOutcome(429, {"error": "The AI provider could not complete this request."})
+
+    override_dependency(get_ai_gateway, RefusingGateway)
+
+    first = await api_client.post(
+        "/api/ai/generate", json={"messages": [{"role": "user", "content": "hi"}]}
+    )
+    second = await api_client.post(
+        "/api/ai/generate", json={"messages": [{"role": "user", "content": "hi"}]}
+    )
+
+    assert first.status_code == 429
+    assert first.headers["X-AI-Quota-Remaining"] == second.headers["X-AI-Quota-Remaining"], (
+        "two refused requests in a row must leave the allowance where it started"
+    )
+
+
+@pytest.mark.asyncio
+async def test_an_answered_request_does_spend_the_allowance(
+    api_client, override_dependency
+) -> None:
+    """The other half: a request that returns text is charged for, as it should be."""
+    from app.ai_gateway import AiOutcome
+    from app.dependencies import get_ai_gateway
+
+    class AnsweringGateway:
+        def target(self, body):
+            return "groq", "openai/gpt-oss-120b"
+
+        def advertised_config(self):
+            return {}
+
+        async def generate(self, body) -> AiOutcome:
+            return AiOutcome(200, {"text": "answer", "truncated": False})
+
+    override_dependency(get_ai_gateway, AnsweringGateway)
+
+    first = await api_client.post(
+        "/api/ai/generate", json={"messages": [{"role": "user", "content": "hi"}]}
+    )
+    second = await api_client.post(
+        "/api/ai/generate", json={"messages": [{"role": "user", "content": "hi"}]}
+    )
+
+    assert int(second.headers["X-AI-Quota-Remaining"]) < int(first.headers["X-AI-Quota-Remaining"])

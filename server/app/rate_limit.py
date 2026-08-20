@@ -10,7 +10,7 @@ from collections import defaultdict, deque
 from typing import Literal
 
 from .config import database_url, env
-from .database import hit_rate_limit
+from .database import hit_rate_limit, release_rate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,13 @@ class MemoryRateLimiter:
             hits.append(now)
             return True, self.limit - len(hits)
 
+    async def release(self, key: str) -> int:
+        async with self._lock:
+            hits = self._hits[key]
+            if hits:
+                hits.pop()
+            return max(0, self.limit - len(hits))
+
 
 WhenUnavailable = Literal["refuse", "degrade"]
 
@@ -87,6 +94,28 @@ class SharedRateLimiter:
         self.when_unavailable = when_unavailable
         self.memory = MemoryRateLimiter(limit, window_seconds)
         self._warned: set[str] = set()
+
+    async def release(self, key: str) -> int | None:
+        """Give back a hit that bought the caller nothing, or None if it could not.
+
+        A quota exists to ration what the caller receives. Charging for a request
+        the provider refused spends an allowance on nothing, and with ten a day
+        that is most of a visit. Retrying is still bounded by the burst limiter,
+        so giving one back cannot become a way around the quota.
+        """
+        if os.getenv("NODE_ENV") != "production":
+            return await self.memory.release(key)
+        if shared_quota_problem():
+            return None
+        salt = env("RATE_LIMIT_SALT") or env("METRICS_ID_SALT")
+        assert salt is not None
+        digest = hmac.new(salt.encode(), key.encode(), hashlib.sha256).hexdigest()
+        try:
+            hits = await release_rate_limit(self.bucket, digest)
+        except Exception:
+            logger.exception("Could not release a rate limit hit for bucket %r", self.bucket)
+            return None
+        return max(0, self.limit - hits)
 
     async def hit(self, key: str) -> tuple[bool, int]:
         if os.getenv("NODE_ENV") != "production":
