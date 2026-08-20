@@ -64,7 +64,7 @@ The `@academy/*` alias is declared twice, in `tsconfig.json` for the type checke
 
 ## Reports
 
-Two reports come out of a full run, both covering all five layers.
+Two reports come out of a full run, both covering all six layers.
 
 **Allure.** Every config appends its results to a single `allure-results/` at the repo root, so
 one report covers the whole run however it was invoked:

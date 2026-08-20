@@ -25,20 +25,34 @@ src/
 │   └── ui/                   tooltip.tsx, the one shadcn primitive still used
 ├── context/
 │   ├── LocaleContext.tsx     resolves the language once, exposes locale + switcher
-│   └── ProviderContext.tsx   provider/model/key state and the AI call surface
+│   ├── ProviderContext.tsx   provider/model/key state and the AI call surface
+│   ├── AuthContext.tsx       Google sign-in; identity only, gates nothing
+│   └── ProgressContext.tsx   per-tool progress, so the launcher can offer to resume
 ├── hooks/                    useDisclosure, useReveal, useVoice
+├── scripts/
+│   └── generate-prerender.ts rewrites the static block in index.html from the data below
 └── lib/
     ├── locales/{en,he}.ts    every user-visible string, typed so the two stay in step
+    ├── sections.ts           section order and numbering — the one list, see below
     ├── i18n.ts               language resolution, switching, <html lang/dir>
     ├── providers.ts          the provider registry and callAI
     ├── domUtils.ts           escaping, linkifying, markdown → plain text
     ├── challenges.ts         the challenge content model (types only)
+    ├── lectures.ts           the lecture catalogue, EN + HE, both tracks
     └── questionBank.ts       interview questions, EN + HE, with hints and answers
 ```
 
-Sections render in the order `HomePage.tsx` lists them. Adding one means writing a component,
-adding a line there, and adding a `nav.links` entry to both locales — scroll-spy and the reveal
-animation both derive from the DOM, so neither needs editing.
+`lib/sections.ts` is the order of the page, and `HomePage.tsx` and `Nav.tsx` both render from
+it. Adding a section means writing the component, adding an entry to `SECTIONS`, adding a
+label per locale under `nav.labels`, and adding one line to `HomePage.tsx` — the nav, the
+scroll-spy and the heading numbers all follow from the first of those, and the reveal
+animation derives from the DOM.
+
+There used to be three answers to “what order are the sections in” — the array in
+`nav.links`, the JSX in `HomePage`, and the static prerender in `index.html` — and none of
+them agreed, which is how the page ended up numbering its headings 01 → 03 → 02 with three
+sections carrying no number at all. After changing the order or the catalogue, run
+`pnpm run generate-prerender` so the crawler-facing shell follows.
 
 ## Progressive reveal
 
@@ -133,7 +147,7 @@ AI panel decides no server key exists and offers bring-your-own-key only.
 
 ## Tests
 
-Covered by the workspace suite in `tests/`, not by a per-package runner. Three of the five
+Covered by the workspace suite in `tests/`, not by a per-package runner. Three of the six
 layers point at this package:
 
 ```bash
@@ -163,3 +177,10 @@ nav, and `#setup`, `#resume`, `#lecture-series`, `#interview-talk`, `#interview-
   as the API server.
 - **GitHub Pages** — `.github/workflows/ci.yml`, mounted at `/<repo>/ai-testing-academy/`.
   Static only, so the AI panel is bring-your-own-key there.
+- **Cloudflare Pages** — the same artifact. `deploy/cloudflare/_redirects` and `_headers` are
+  copied into the site root by the same job and GitHub Pages ignores both, so one build
+  deploys to either host. Cloudflare is the one that rewrites deep links at 200 rather than
+  serving them through a 404 shell.
+
+The API this app calls is deployed separately, to Fly — see `deploy/README.md` for what runs
+where, what it costs, and the first-deploy commands.

@@ -600,7 +600,7 @@
   <code>lib/locales/{en,he}.ts</code>. Bodies of content large enough to drown a locale file
   get their own module — <code>lib/questionBank.ts</code> and <code>lib/lectures.ts</code> —
   exporting an <code>EN</code>/<code>HE</code> pair with the same compiler-checked shape.
-  The lecture catalogue lived inside <code>components/LectureSeries.tsx</code> until it did
+  The lecture catalogue lived inside <code>components/practice/LectureSeries.tsx</code> until it did
   not: 336 of that file's 425 lines were the two data objects, which made editing a blurb an
   edit to a component and left the catalogue with no importer other than the thing that
   rendered it. Moving it out is also what lets the prerender generator read it, since a build
@@ -1040,8 +1040,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers six layers — 503 cases at the time of
-  writing (221 unit, 152 component, 49 api, 19 contract, 62 e2e and deck). Playwright is used as
+  One Playwright package at <code>tests/</code> covers six layers — 504 cases at the time of
+  writing (221 unit, 152 component, 49 api, 19 contract, 58 e2e, 5 deck). Playwright is used as
   the runner throughout, not just as a browser driver: the unit project never launches a browser,
   it executes the same TypeScript modules the app imports — the academy's, and the server's too,
   wherever a module has no Express import to drag in.

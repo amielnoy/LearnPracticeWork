@@ -34,13 +34,17 @@ migration unchanged.
 The site originally shipped with client-side code that did
 `fetch('../.env')` to read a default AI API key — meaning any site visitor
 could see the key via devtools/view source. This was replaced with a
-backend proxy: `server` holds `GEMINI_API_KEY` as a Replit
-Secret and exposes `GET /api/ai/config` (availability only) and
-`POST /api/ai/generate` (does the actual call). The client only proxies
-through the backend when the visitor has not supplied their own key: BYOK
-requests still go straight from the visitor's browser to the provider's API
-using a key stored in their own `localStorage`, which is fine since it's
+backend proxy: `server` holds the keys as Replit Secrets and exposes
+`GET /api/ai/config` (availability only) and `POST /api/ai/generate` (does the
+actual call). The client only proxies through the backend when the visitor has
+not supplied their own key: BYOK requests still go straight from the visitor's
+browser to the provider's API using their own key, which is fine since it's
 their own credential.
+
+That key is kept in `sessionStorage` by default, so it does not outlive the
+tab; a clearly labelled opt-in moves it to `localStorage` for a private device,
+and keys written to `localStorage` by older versions are migrated back out on
+first read.
 
 **Why:** a fetchable `.env` in a static/public directory is not a secret
 boundary — anything the browser can request, any visitor can request.
@@ -48,4 +52,12 @@ boundary — anything the browser can request, any visitor can request.
 **How to apply:** if asked to "store an AI key" or "add a default key" for
 this site (or a similarly-shaped static site), route it through a real
 backend endpoint plus `requestSecrets`, not a plaintext file served to the
-client. Only Gemini has a default key today; Anthropic/OpenAI are BYOK-only.
+client.
+
+Two server-side defaults exist today, scoped to different jobs: **Groq**
+(`GROQ_API_KEY`) is the default chat provider behind resume scoring and the
+mock interview, and **Gemini** (`GEMINI_API_KEY`) is search-only — it backs the
+Google Search grounding in question-bank enrichment and is not offered as a
+general chat provider any more. Anthropic and OpenAI are BYOK-only. An earlier
+version of this note said Gemini was the only default and implied it served
+chat; it does not.

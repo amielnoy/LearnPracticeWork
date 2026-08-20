@@ -17,7 +17,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Build**: esbuild (CJS bundle)
 - **Tests**: Playwright — unit, component, API, contract and e2e (`tests/`)
 - **Lint**: ESLint 10 flat config (`eslint.config.mjs`) + Prettier for formatting
-- **Reporting**: Allure 3 (`allure-report/`, one report across all five layers)
+- **Reporting**: Allure 3 (`allure-report/`, one report across all six layers)
 - **CI**: GitHub Actions — tests on every push/PR, nightly at 05:00 Israel time, and
   GitHub Pages publishing from `main`
 
@@ -79,7 +79,7 @@ are in place, but the purchase flow itself is still to be built.
 
 ## Testing
 
-`tests/` is one workspace package holding all five layers. The Playwright runner is used
+`tests/` is one workspace package holding all six layers. The Playwright runner is used
 throughout — the unit project executes TypeScript in Node without launching a browser.
 
 | Layer | Runs in | Covers |
@@ -124,7 +124,7 @@ between the two fails to link.
 
 ### Reports
 
-All five layers write Allure results into one `allure-results/` at the repo root, so a single
+All six layers write Allure results into one `allure-results/` at the repo root, so a single
 report covers the whole run:
 
 ```bash
@@ -158,20 +158,35 @@ the e2e layer — would not boot. Chromium also needs a roomy `/dev/shm`; compos
 
 ### Known gap
 
-`pnpm run typecheck` currently fails in `server` and `scripts` — pre-existing
-errors unrelated to the tests. CI typechecks everything else; see the comment in `ci.yml`.
+`pnpm run typecheck` covers the whole workspace and passes. It used to fail in `server` and
+`scripts`, and CI carried exclusions for both; they compile clean now, so the exclusions are
+gone and the CI step is the plain script again. `pnpm run lint` and `pnpm run format:check`
+are also CI gates now — they were defined here but invoked nowhere, which is precisely where
+the repository drifted: typecheck stayed clean because it was enforced, while lint reached 32
+errors and 590 files fell off the Prettier config.
 
 ## Deployment
 
-Two targets from the same build:
+Static and API are deployed separately, because only one of them costs anything to run.
+`deploy/README.md` is the runbook; the summary:
 
 - **Replit** — `.replit-artifact/artifact.toml` per artifact. The site and `api-server` share
   one origin, so relative `/api` calls work.
 - **GitHub Pages** — `.github/workflows/ci.yml` publishes from `main`: the portfolio at the
-  site root, `ai-testing-academy/` and `ai-testing-lecture-1/` beneath it, and
+  site root, `ai-testing-academy/` and **all ten** `ai-testing-lecture-N/` beneath it, and
   `architecture.html` alongside. Static only, so the academy's AI panel falls back to
   bring-your-own-key. The Allure report is **not** part of this site — it is published to its
   own reports repository, with its own Pages URL.
+- **Cloudflare Pages** — the same artifact, unchanged. `deploy/cloudflare/_redirects` and
+  `_headers` are copied into the site root by the same job and Pages ignores both. The reason
+  to prefer it is rewrites: every app here is a single-page app, and GitHub Pages has no
+  rewrite rules, so a deep link like `/ai-testing-lecture-3/slide5` is served through the
+  nearest `404.html` — the right page carrying a 404 status, on URLs the academy's own
+  hreflang tags nominate for indexing.
+- **Fly.io** — `server/{Dockerfile,fly.toml}` for the API. It keeps one machine running
+  rather than scaling to zero, because `routes/ai.ts` builds its rate limiters on an
+  in-memory store with a 24-hour window: a machine that stops and restarts hands every caller
+  a fresh anonymous allowance.
 
   Publishing runs **even when the test job fails** — that is when the Allure report is most
   worth reading. The site job overrides the skip-on-failed-dependency default with

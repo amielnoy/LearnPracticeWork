@@ -8,10 +8,12 @@ name: CI
 #                 schedule fires twice and this drops the firing that is not
 #                 05:00 in Israel. Everything else waits on its answer.
 #
-#  test           Every push and every PR. Typecheck, lint, format, then the six
-#                 test layers as separate steps so a failure names the layer.
-#                 One job, not six: each would pay for its own install and its
-#                 own browser download, which costs more than the layers take.
+#  test           Every push and every PR. Typecheck, lint, format, then the test
+#                 layers as separate steps so a failure names the layer. Five
+#                 steps for six layers: `deck` is a third project inside the e2e
+#                 config, so `test:e2e` runs it alongside desktop and mobile.
+#                 One job, not several: each would pay for its own install and
+#                 its own browser download, which costs more than the layers take.
 #
 #  build-pages    main only. Builds the portfolio at the site root and mounts
 #                 the academy and all ten decks underneath it.
