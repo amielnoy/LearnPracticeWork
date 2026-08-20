@@ -90,6 +90,10 @@ Two consequences worth knowing before editing:
 
 - **Adding an AI provider** is a class in `ai_gateway.py` plus an entry in `PROVIDERS`.
   Dispatch, `/api/ai/config` and the routes all follow from the registry.
+- **An ordinary request falls through to the next provider** when the first answers 429 or
+  5xx — a provider saying "not me, not now". A 4xx below that is the request being wrong, so
+  it is not retried elsewhere. A grounded request has no fallback: search grounding is why it
+  chose that provider. The outcome names whoever answered, so metrics stay truthful.
 - **Tests substitute collaborators through `app.dependency_overrides`**, not by patching module
   globals. `server/tests/conftest.py` exposes `override_dependency` for this.
 
