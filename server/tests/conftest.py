@@ -17,7 +17,7 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256
 
 from app import google_auth, relay
-from app import main as main_module
+from app.dependencies import get_purchase_recorder, get_stripe_gateway
 from app.main import app
 
 CLIENT_ID = "000000000000-test.apps.googleusercontent.com"
@@ -221,21 +221,60 @@ def stripe_environment(monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
 
 
 @pytest.fixture
-def stripe_checkout_gateway(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
-    """A Stripe checkout client that records parameters and returns a harmless URL."""
+def override_dependency() -> Iterator[Callable[[Callable[..., Any], Callable[..., Any]], None]]:
+    """Swap a `Depends` provider for the duration of one test, then put it back."""
+    installed: list[Callable[..., Any]] = []
+
+    def override(dependency: Callable[..., Any], provider: Callable[..., Any]) -> None:
+        app.dependency_overrides[dependency] = provider
+        installed.append(dependency)
+
+    yield override
+    for dependency in installed:
+        app.dependency_overrides.pop(dependency, None)
+
+
+@pytest.fixture
+def stripe_checkout_gateway(override_dependency) -> dict[str, Any]:
+    """A Stripe checkout gateway that records parameters and returns a harmless URL."""
     captured: dict[str, Any] = {}
 
-    class Sessions:
-        @staticmethod
-        def create(params: dict[str, Any]) -> SimpleNamespace:
+    class RecordingGateway:
+        async def create_checkout_session(self, params: dict[str, Any]) -> SimpleNamespace:
             captured.update(params)
             return SimpleNamespace(url="https://checkout.stripe.test/session")
 
-    async def client() -> SimpleNamespace:
-        return SimpleNamespace(v1=SimpleNamespace(checkout=SimpleNamespace(sessions=Sessions())))
-
-    monkeypatch.setattr(main_module, "stripe_client", client)
+    override_dependency(get_stripe_gateway, RecordingGateway)
     return captured
+
+
+@pytest.fixture
+def stripe_webhook_gateway(override_dependency) -> Callable[..., list[dict]]:
+    """Install a fake signed-event gateway and return the list of recorded purchases."""
+
+    def install(*, event: Any, checkout_session: Any) -> list[dict]:
+        recorded: list[dict] = []
+
+        class SignedEventGateway:
+            async def credentials(self) -> tuple[str, str]:
+                return "sk_test_fixture", "whsec_fixture"
+
+            def construct_event(self, payload: bytes, signature: str, secret: str) -> Any:
+                return event
+
+            async def retrieve_checkout_session(
+                self, session_id: str, params: dict[str, Any]
+            ) -> Any:
+                return checkout_session
+
+        async def record(values: dict) -> None:
+            recorded.append(values)
+
+        override_dependency(get_stripe_gateway, SignedEventGateway)
+        override_dependency(get_purchase_recorder, lambda: record)
+        return recorded
+
+    return install
 
 
 @pytest.fixture
