@@ -34,6 +34,8 @@ const codePanel: React.CSSProperties = {
   border: '1px solid #1E293B',
   padding: '2.6vh 2.2vw',
   fontFamily: "'SFMono-Regular', Menlo, Consolas, monospace",
+  direction: 'ltr',
+  textAlign: 'left',
   color: '#E2E8F0',
   width: '100%',
   height: '100%',

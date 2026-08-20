@@ -177,6 +177,8 @@ export default function UnitLayer() {
             border: '1px solid #1E293B',
             padding: '3vh 2.4vw',
             fontFamily: "'SFMono-Regular', Menlo, Consolas, monospace",
+            direction: 'ltr',
+            textAlign: 'left',
             color: '#E2E8F0',
             height: '100%',
             boxSizing: 'border-box',

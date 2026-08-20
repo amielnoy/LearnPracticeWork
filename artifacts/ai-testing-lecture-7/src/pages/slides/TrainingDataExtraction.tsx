@@ -121,6 +121,8 @@ export default function TrainingDataExtraction() {
             borderRadius: '0.6vw',
             padding: '1.5vh 1.5vw',
             fontFamily: "'SFMono-Regular', Consolas, monospace",
+            direction: 'ltr',
+            textAlign: 'left',
             fontSize: '1vw',
             color: '#F87171',
             lineHeight: 1.6,

@@ -185,6 +185,8 @@ export default function EdgeCaseDiscovery() {
                 borderRadius: '0.8vw',
                 padding: '2.5vh 2vw',
                 fontFamily: "'SFMono-Regular', Menlo, Consolas, monospace",
+                direction: 'ltr',
+                textAlign: 'left',
                 fontSize: '1.05vw',
                 lineHeight: 1.6,
                 color: '#E2E8F0',

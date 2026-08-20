@@ -174,6 +174,8 @@ export default function ToolsAndLibrariesRecap() {
                   borderRadius: '0.4vw',
                   padding: '0.5vh 0.7vw',
                   fontFamily: 'monospace',
+                  direction: 'ltr',
+                  textAlign: 'left',
                   fontSize: '0.85vw',
                   color: '#7DD3C8',
                   display: 'inline-block',

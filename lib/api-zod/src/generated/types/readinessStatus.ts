@@ -9,4 +9,6 @@
 export interface ReadinessStatus {
   status: string;
   database: string;
+  /** Why production rate limiting cannot count, when it cannot. Absent on a healthy deployment. Present means every rate-limited route — sign-in and the AI proxy included — is refusing with 429 regardless of actual usage, so it is reported here rather than only in the logs. */
+  rateLimiting?: string;
 }

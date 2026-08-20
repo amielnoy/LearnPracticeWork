@@ -118,6 +118,8 @@ export default function TokenCostPerRequest() {
           <div
             style={{
               fontFamily: "'Fira Code', monospace",
+              direction: 'ltr',
+              textAlign: 'left',
               fontSize: '1.15vw',
               color: '#1E3A5F',
               lineHeight: 1.8,

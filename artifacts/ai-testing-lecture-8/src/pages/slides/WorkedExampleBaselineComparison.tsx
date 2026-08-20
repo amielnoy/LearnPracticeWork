@@ -21,6 +21,8 @@ const codeBlock: React.CSSProperties = {
   borderRadius: '0.8vw',
   padding: '2.5vh 2vw',
   fontFamily: "'Fira Code', 'Fira Mono', 'Courier New', monospace",
+  direction: 'ltr',
+  textAlign: 'left',
   fontSize: '1vw',
   lineHeight: 1.7,
   color: '#E2E8F0',
@@ -144,7 +146,15 @@ export default function WorkedExampleBaselineComparison() {
             >
               {t('Table', 'טבלה')}
             </div>
-            <div style={{ fontSize: '0.95vw', color: '#CBD5E1', fontFamily: 'monospace' }}>
+            <div
+              style={{
+                fontSize: '0.95vw',
+                color: '#CBD5E1',
+                fontFamily: 'monospace',
+                direction: 'ltr',
+                textAlign: 'left',
+              }}
+            >
               perf_baselines
             </div>
           </div>
@@ -171,6 +181,8 @@ export default function WorkedExampleBaselineComparison() {
                 fontSize: '0.95vw',
                 color: '#CBD5E1',
                 fontFamily: 'monospace',
+                direction: 'ltr',
+                textAlign: 'left',
                 lineHeight: 1.6,
               }}
             >

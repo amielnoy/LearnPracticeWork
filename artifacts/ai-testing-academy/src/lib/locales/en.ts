@@ -278,6 +278,8 @@ export const en = {
     signInAria: 'Sign in with Google',
     signingInStatus: 'Signing in…',
     signInError: 'Sign-in failed. Please try again.',
+    signInBusy: 'Too many sign-in attempts right now. Please wait a minute and try again.',
+    signInUnavailable: 'Sign-in is temporarily unavailable on this server.',
     signOutBtn: 'Sign out',
     uploadPrompt: '📁 Click or drag your resume here — PDF, DOCX, or TXT',
     uploadLoadedMid: ' · ',

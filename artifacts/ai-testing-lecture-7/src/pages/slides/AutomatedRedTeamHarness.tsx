@@ -249,6 +249,8 @@ export default function AutomatedRedTeamHarness() {
         <div
           style={{
             fontFamily: "'SFMono-Regular', Consolas, monospace",
+            direction: 'ltr',
+            textAlign: 'left',
             fontSize: '1.05vw',
             color: '#E2E8F0',
             lineHeight: 1.7,

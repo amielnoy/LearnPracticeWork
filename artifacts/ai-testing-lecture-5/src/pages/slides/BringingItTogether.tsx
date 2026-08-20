@@ -230,6 +230,8 @@ export default function BringingItTogether() {
               borderRadius: '0.8vw',
               padding: '2vh 2vw',
               fontFamily: 'monospace',
+              direction: 'ltr',
+              textAlign: 'left',
               fontSize: '0.9vw',
               lineHeight: 1.8,
             }}

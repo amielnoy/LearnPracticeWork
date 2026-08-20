@@ -26,6 +26,21 @@ _HOP_BY_HOP = {
     "upgrade",
 }
 
+# Headers that name who the caller is. The origin trusts `fly-client-ip` to key
+# its quotas, so a visitor who can set it through this relay picks their own
+# quota identity and never runs out. They are dropped here for the same reason
+# `x-academy-client-country` is: an inbound value is the visitor's claim about
+# themselves, not an observation of them.
+_CLIENT_IDENTITY = {
+    "cf-connecting-ip",
+    "fly-client-ip",
+    "true-client-ip",
+    "x-academy-client-country",
+    "x-client-ip",
+    "x-forwarded-for",
+    "x-real-ip",
+}
+
 
 def upstream_api_base_url() -> str | None:
     value = os.getenv("UPSTREAM_API_BASE_URL", "").strip().rstrip("/")
@@ -53,7 +68,7 @@ async def relay_api_request(request: Request, upstream: str) -> Response:
     headers = {
         name: value
         for name, value in request.headers.items()
-        if name.lower() not in _HOP_BY_HOP and name.lower() != "x-academy-client-country"
+        if name.lower() not in _HOP_BY_HOP and name.lower() not in _CLIENT_IDENTITY
     }
     headers["x-forwarded-host"] = request.headers.get("host", "")
     headers["x-forwarded-proto"] = request.url.scheme

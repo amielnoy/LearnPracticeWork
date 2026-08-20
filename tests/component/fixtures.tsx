@@ -86,6 +86,8 @@ type GoogleSignInHarness = {
   /** Seeds the API session and a legacy browser credential before mounting. */
   seedCredential: (credential: string) => Promise<void>;
   /** Clicks Google's button, which hands `credential` back through its callback. */
+  /** Make the next credential POST fail with this status, as a broken server would. */
+  refuseNextSignInWith: (status: number) => void;
   signInWith: (credential: string) => Promise<void>;
   /** Starts sign-in and holds the API response until the returned function runs. */
   beginSignInWith: (credential: string) => Promise<() => Promise<void>>;
@@ -268,7 +270,14 @@ export const test = base.extend<ComponentFixtures>({
     await page.route('**/api/auth/config', route =>
       route.fulfill({ status: 200, json: { clientId: runtimeClientId } }),
     );
+    let refuseNextLoginWith: number | null = null;
     await page.route('**/api/auth/google', async route => {
+      if (refuseNextLoginWith !== null) {
+        const status = refuseNextLoginWith;
+        refuseNextLoginWith = null;
+        await route.fulfill({ status, json: { error: 'refused by the fixture' } });
+        return;
+      }
       const body = route.request().postDataJSON() as { credential?: string };
       sessionUser = body.credential ? verifiedUser(body.credential) : null;
       if (pauseNextLogin) {
@@ -311,6 +320,9 @@ export const test = base.extend<ComponentFixtures>({
       seedCredential: async credential => {
         sessionUser = verifiedUser(credential);
         await setBeforeMount('ata_google_credential', credential);
+      },
+      refuseNextSignInWith: (status: number) => {
+        refuseNextLoginWith = status;
       },
       signInWith: async credential => {
         await page.evaluate(value => {

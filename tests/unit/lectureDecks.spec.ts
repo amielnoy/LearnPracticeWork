@@ -29,6 +29,50 @@ const deckNames = readdirSync(artifactsDir)
 const appSource = (deck: string): string =>
   readFileSync(path.join(artifactsDir, deck, 'src', 'App.tsx'), 'utf8');
 
+/** Every slide component in a deck, as `[name, source]`. */
+function slideSources(deck: string): Array<[string, string]> {
+  const dir = path.join(artifactsDir, deck, 'src', 'pages', 'slides');
+  return readdirSync(dir)
+    .filter(name => name.endsWith('.tsx'))
+    .map(name => [name, readFileSync(path.join(dir, name), 'utf8')]);
+}
+
+/**
+ * A style object that sets a monospace family — a code panel, chip or line.
+ *
+ * No trailing comma is required: Prettier omits it on a single-line object, and
+ * requiring one is exactly how ten of these were missed the first time.
+ */
+const MONOSPACE = /fontFamily:\s*(?:"[^"]*monospace[^"]*"|'[^']*monospace[^']*')/g;
+
+/**
+ * The object literal that directly contains `index`, brace-balanced both ways,
+ * so a nested object cannot be mistaken for the declaration's own scope.
+ */
+function enclosingObject(source: string, index: number): string {
+  let depth = 0;
+  let start = -1;
+  for (let i = index - 1; i >= 0; i--) {
+    const c = source[i];
+    if (c === '}') depth++;
+    else if (c === '{') {
+      if (depth === 0) {
+        start = i;
+        break;
+      }
+      depth--;
+    }
+  }
+  if (start === -1) return '';
+  depth = 0;
+  for (let i = start; i < source.length; i++) {
+    const c = source[i];
+    if (c === '{') depth++;
+    else if (c === '}' && --depth === 0) return source.slice(start, i + 1);
+  }
+  return '';
+}
+
 /** The stage block, sliced out so the decks can be compared on it alone. */
 function stageBlock(source: string): string | null {
   const start = source.indexOf('function stageDims');
@@ -71,6 +115,57 @@ test.describe('the stage logic', () => {
     for (const deck of deckNames) {
       expect(appSource(deck), `${deck} is back on the old formula`).not.toContain(old);
     }
+  });
+});
+
+test.describe('code panels inside a right-to-left slide', () => {
+  /**
+   * A slide's root carries `dir={dir}`, which is `rtl` in Hebrew, and a code
+   * panel inside it used to inherit that. The bidi algorithm then resolved the
+   * trailing neutrals of a line — `():`, `()`, `)` — against an RTL paragraph
+   * and moved them to the front, so `def f():` rendered as `:()def f`. It is
+   * unreadable and it is wrong in every deck at once, because the panels are
+   * copy-shared. Code is left-to-right whatever the prose around it is, so the
+   * panel has to say so rather than inherit an answer.
+   */
+  test('there are code panels to check', () => {
+    // Same reason as the deck count above: a regex that stops matching would
+    // turn the two assertions below green by iterating over nothing.
+    const total = deckNames.reduce(
+      (sum, deck) =>
+        sum + slideSources(deck).reduce((n, [, src]) => n + [...src.matchAll(MONOSPACE)].length, 0),
+      0,
+    );
+    expect(total).toBeGreaterThanOrEqual(100);
+  });
+
+  test('every one of them sets its own direction', () => {
+    const offenders: string[] = [];
+    for (const deck of deckNames) {
+      for (const [name, source] of slideSources(deck)) {
+        for (const match of source.matchAll(MONOSPACE)) {
+          const block = enclosingObject(source, match.index!);
+          if (!/\bdirection:\s*'ltr'/.test(block)) offenders.push(`${deck}/${name}`);
+        }
+      }
+    }
+    expect(offenders, 'these code panels would inherit rtl from the slide').toEqual([]);
+  });
+
+  test('every one of them aligns left, whatever the slide around it does', () => {
+    // `direction` alone leaves `text-align: start`, which an ancestor's explicit
+    // `textAlign: 'right'` still overrides — several slides set exactly that on
+    // the column holding the panel.
+    const offenders: string[] = [];
+    for (const deck of deckNames) {
+      for (const [name, source] of slideSources(deck)) {
+        for (const match of source.matchAll(MONOSPACE)) {
+          const block = enclosingObject(source, match.index!);
+          if (!/\btextAlign:\s*'left'/.test(block)) offenders.push(`${deck}/${name}`);
+        }
+      }
+    }
+    expect(offenders, 'these code panels could be right-aligned').toEqual([]);
   });
 });
 

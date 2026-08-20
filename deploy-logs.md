@@ -1,0 +1,406 @@
+- generic [ref=f61e5579]:
+  - generic [ref=f61e5580]:
+    - checkbox "Select all log lines" [ref=f61e5584] [cursor=pointer]
+    - generic [ref=f61e5585]: Time
+    - generic [ref=f61e5591]: Log
+  - button "Select log line 08-20 14:36:41 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5592]:
+    - checkbox "Select log line" [ref=f61e5595] [cursor=pointer]
+    - generic [ref=f61e5596]: 08-20 14:36:41
+    - generic [ref=f61e5597]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:41 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5599]:
+    - checkbox "Select log line" [ref=f61e5602] [cursor=pointer]
+    - generic [ref=f61e5603]: 08-20 14:36:41
+    - generic [ref=f61e5604]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:41 artifact process started pid=22 artifact=artifacts/api-server" [ref=f61e5606]:
+    - checkbox "Select log line" [ref=f61e5609] [cursor=pointer]
+    - generic [ref=f61e5610]: 08-20 14:36:41
+    - generic [ref=f61e5611]: artifact process started pid=22 artifact=artifacts/api-server
+  - button "Select log line 08-20 14:36:41 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5612]:
+    - checkbox "Select log line" [ref=f61e5615] [cursor=pointer]
+    - generic [ref=f61e5616]: 08-20 14:36:41
+    - generic [ref=f61e5617]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:41 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5619]:
+    - checkbox "Select log line" [ref=f61e5622] [cursor=pointer]
+    - generic [ref=f61e5623]: 08-20 14:36:41
+    - generic [ref=f61e5624]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:44 File \"/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/uvicorn/importer.py\", line 19, in import_from_string" [ref=f61e5626]:
+    - checkbox "Select log line" [ref=f61e5629] [cursor=pointer]
+    - generic [ref=f61e5630]: 08-20 14:36:44
+    - generic [ref=f61e5631]: File "/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+  - button "Select log line 08-20 14:36:44 ^" [ref=f61e5633]:
+    - checkbox "Select log line" [ref=f61e5636] [cursor=pointer]
+    - generic [ref=f61e5637]: 08-20 14:36:44
+    - generic [ref=f61e5638]: ^
+  - button "Select log line 08-20 14:36:44 config.load_app()" [ref=f61e5640]:
+    - checkbox "Select log line" [ref=f61e5643] [cursor=pointer]
+    - generic [ref=f61e5644]: 08-20 14:36:44
+    - generic [ref=f61e5645]: config.load_app()
+  - button "Select log line 08-20 14:36:44 File \"/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/uvicorn/config.py\", line 428, in load_app" [ref=f61e5647]:
+    - checkbox "Select log line" [ref=f61e5650] [cursor=pointer]
+    - generic [ref=f61e5651]: 08-20 14:36:44
+    - generic [ref=f61e5652]: File "/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/uvicorn/config.py", line 428, in load_app
+  - button "Select log line 08-20 14:36:44 raise exc from None" [ref=f61e5654]:
+    - checkbox "Select log line" [ref=f61e5657] [cursor=pointer]
+    - generic [ref=f61e5658]: 08-20 14:36:44
+    - generic [ref=f61e5659]: raise exc from None
+  - button "Select log line 08-20 14:36:44 File \"/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/uvicorn/main.py\", line 609, in run" [ref=f61e5661]:
+    - checkbox "Select log line" [ref=f61e5664] [cursor=pointer]
+    - generic [ref=f61e5665]: 08-20 14:36:44
+    - generic [ref=f61e5666]: File "/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/uvicorn/main.py", line 609, in run
+  - button "Select log line 08-20 14:36:44 File \"/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/uvicorn/importer.py\", line 22, in import_from_string" [ref=f61e5668]:
+    - checkbox "Select log line" [ref=f61e5671] [cursor=pointer]
+    - generic [ref=f61e5672]: 08-20 14:36:44
+    - generic [ref=f61e5673]: File "/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/uvicorn/importer.py", line 22, in import_from_string
+  - button "Select log line 08-20 14:36:44 module = importlib.import_module(module_str)" [ref=f61e5675]:
+    - checkbox "Select log line" [ref=f61e5678] [cursor=pointer]
+    - generic [ref=f61e5679]: 08-20 14:36:44
+    - generic [ref=f61e5680]: module = importlib.import_module(module_str)
+  - button "Select log line 08-20 14:36:44 )" [ref=f61e5682]:
+    - checkbox "Select log line" [ref=f61e5685] [cursor=pointer]
+    - generic [ref=f61e5686]: 08-20 14:36:44
+    - generic [ref=f61e5687]: )
+  - button "Select log line 08-20 14:36:44 ~~~~~~~~~~~~~~~^^" [ref=f61e5689]:
+    - checkbox "Select log line" [ref=f61e5692] [cursor=pointer]
+    - generic [ref=f61e5693]: 08-20 14:36:44
+    - generic [ref=f61e5694]: ~~~~~~~~~~~~~~~^^
+  - button "Select log line 08-20 14:36:44 return _bootstrap._gcd_import(name[level:], package, level)" [ref=f61e5696]:
+    - checkbox "Select log line" [ref=f61e5699] [cursor=pointer]
+    - generic [ref=f61e5700]: 08-20 14:36:44
+    - generic [ref=f61e5701]: return _bootstrap._gcd_import(name[level:], package, level)
+  - button "Select log line 08-20 14:36:44 app," [ref=f61e5703]:
+    - checkbox "Select log line" [ref=f61e5706] [cursor=pointer]
+    - generic [ref=f61e5707]: 08-20 14:36:44
+    - generic [ref=f61e5708]: app,
+  - button "Select log line 08-20 14:36:44 return import_from_string(self.app)" [ref=f61e5710]:
+    - checkbox "Select log line" [ref=f61e5713] [cursor=pointer]
+    - generic [ref=f61e5714]: 08-20 14:36:44
+    - generic [ref=f61e5715]: return import_from_string(self.app)
+  - button "Select log line 08-20 14:36:44 File \"/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/click/core.py\", line 907, in invoke" [ref=f61e5717]:
+    - checkbox "Select log line" [ref=f61e5720] [cursor=pointer]
+    - generic [ref=f61e5721]: 08-20 14:36:44
+    - generic [ref=f61e5722]: File "/home/runner/workspace/.pythonlibs/lib/python3.13/site-packages/click/core.py", line 907, in invoke
+  - button "Select log line 08-20 14:36:44 File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import" [ref=f61e5724]:
+    - checkbox "Select log line" [ref=f61e5727] [cursor=pointer]
+    - generic [ref=f61e5728]: 08-20 14:36:44
+    - generic [ref=f61e5729]: File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  - button "Select log line 08-20 14:36:44 ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" [ref=f61e5731]:
+    - checkbox "Select log line" [ref=f61e5734] [cursor=pointer]
+    - generic [ref=f61e5735]: 08-20 14:36:44
+    - generic [ref=f61e5736]: ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  - button "Select log line 08-20 14:36:44 ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" [ref=f61e5738]:
+    - checkbox "Select log line" [ref=f61e5741] [cursor=pointer]
+    - generic [ref=f61e5742]: 08-20 14:36:44
+    - generic [ref=f61e5743]: ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  - button "Select log line 08-20 14:36:46 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5745]:
+    - checkbox "Select log line" [ref=f61e5748] [cursor=pointer]
+    - generic [ref=f61e5749]: 08-20 14:36:46
+    - generic [ref=f61e5750]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:47 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5752]:
+    - checkbox "Select log line" [ref=f61e5755] [cursor=pointer]
+    - generic [ref=f61e5756]: 08-20 14:36:47
+    - generic [ref=f61e5757]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:49 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5759]:
+    - checkbox "Select log line" [ref=f61e5762] [cursor=pointer]
+    - generic [ref=f61e5763]: 08-20 14:36:49
+    - generic [ref=f61e5764]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:50 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5766]:
+    - checkbox "Select log line" [ref=f61e5769] [cursor=pointer]
+    - generic [ref=f61e5770]: 08-20 14:36:50
+    - generic [ref=f61e5771]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:52 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5773]:
+    - checkbox "Select log line" [ref=f61e5776] [cursor=pointer]
+    - generic [ref=f61e5777]: 08-20 14:36:52
+    - generic [ref=f61e5778]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:53 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5780]:
+    - checkbox "Select log line" [ref=f61e5783] [cursor=pointer]
+    - generic [ref=f61e5784]: 08-20 14:36:53
+    - generic [ref=f61e5785]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:55 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5787]:
+    - checkbox "Select log line" [ref=f61e5790] [cursor=pointer]
+    - generic [ref=f61e5791]: 08-20 14:36:55
+    - generic [ref=f61e5792]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:55 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5794]:
+    - checkbox "Select log line" [ref=f61e5797] [cursor=pointer]
+    - generic [ref=f61e5798]: 08-20 14:36:55
+    - generic [ref=f61e5799]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:55 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5801]:
+    - checkbox "Select log line" [ref=f61e5804] [cursor=pointer]
+    - generic [ref=f61e5805]: 08-20 14:36:55
+    - generic [ref=f61e5806]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:57 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5808]:
+    - checkbox "Select log line" [ref=f61e5811] [cursor=pointer]
+    - generic [ref=f61e5812]: 08-20 14:36:57
+    - generic [ref=f61e5813]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:57 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5815]:
+    - checkbox "Select log line" [ref=f61e5818] [cursor=pointer]
+    - generic [ref=f61e5819]: 08-20 14:36:57
+    - generic [ref=f61e5820]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:58 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5822]:
+    - checkbox "Select log line" [ref=f61e5825] [cursor=pointer]
+    - generic [ref=f61e5826]: 08-20 14:36:58
+    - generic [ref=f61e5827]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:36:58 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5829]:
+    - checkbox "Select log line" [ref=f61e5832] [cursor=pointer]
+    - generic [ref=f61e5833]: 08-20 14:36:58
+    - generic [ref=f61e5834]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:00 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5836]:
+    - checkbox "Select log line" [ref=f61e5839] [cursor=pointer]
+    - generic [ref=f61e5840]: 08-20 14:37:00
+    - generic [ref=f61e5841]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:00 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5843]:
+    - checkbox "Select log line" [ref=f61e5846] [cursor=pointer]
+    - generic [ref=f61e5847]: 08-20 14:37:00
+    - generic [ref=f61e5848]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:00 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5850]:
+    - checkbox "Select log line" [ref=f61e5853] [cursor=pointer]
+    - generic [ref=f61e5854]: 08-20 14:37:00
+    - generic [ref=f61e5855]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:02 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5857]:
+    - checkbox "Select log line" [ref=f61e5860] [cursor=pointer]
+    - generic [ref=f61e5861]: 08-20 14:37:02
+    - generic [ref=f61e5862]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:04 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5864]:
+    - checkbox "Select log line" [ref=f61e5867] [cursor=pointer]
+    - generic [ref=f61e5868]: 08-20 14:37:04
+    - generic [ref=f61e5869]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:06 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5871]:
+    - checkbox "Select log line" [ref=f61e5874] [cursor=pointer]
+    - generic [ref=f61e5875]: 08-20 14:37:06
+    - generic [ref=f61e5876]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:06 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5878]:
+    - checkbox "Select log line" [ref=f61e5881] [cursor=pointer]
+    - generic [ref=f61e5882]: 08-20 14:37:06
+    - generic [ref=f61e5883]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:08 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5885]:
+    - checkbox "Select log line" [ref=f61e5888] [cursor=pointer]
+    - generic [ref=f61e5889]: 08-20 14:37:08
+    - generic [ref=f61e5890]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:10 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5892]:
+    - checkbox "Select log line" [ref=f61e5895] [cursor=pointer]
+    - generic [ref=f61e5896]: 08-20 14:37:10
+    - generic [ref=f61e5897]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:10 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5899]:
+    - checkbox "Select log line" [ref=f61e5902] [cursor=pointer]
+    - generic [ref=f61e5903]: 08-20 14:37:10
+    - generic [ref=f61e5904]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:10 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5906]:
+    - checkbox "Select log line" [ref=f61e5909] [cursor=pointer]
+    - generic [ref=f61e5910]: 08-20 14:37:10
+    - generic [ref=f61e5911]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:12 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5913]:
+    - checkbox "Select log line" [ref=f61e5916] [cursor=pointer]
+    - generic [ref=f61e5917]: 08-20 14:37:12
+    - generic [ref=f61e5918]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:12 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5920]:
+    - checkbox "Select log line" [ref=f61e5923] [cursor=pointer]
+    - generic [ref=f61e5924]: 08-20 14:37:12
+    - generic [ref=f61e5925]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:14 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5927]:
+    - checkbox "Select log line" [ref=f61e5930] [cursor=pointer]
+    - generic [ref=f61e5931]: 08-20 14:37:14
+    - generic [ref=f61e5932]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:14 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5934]:
+    - checkbox "Select log line" [ref=f61e5937] [cursor=pointer]
+    - generic [ref=f61e5938]: 08-20 14:37:14
+    - generic [ref=f61e5939]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:14 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5941]:
+    - checkbox "Select log line" [ref=f61e5944] [cursor=pointer]
+    - generic [ref=f61e5945]: 08-20 14:37:14
+    - generic [ref=f61e5946]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:15 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5948]:
+    - checkbox "Select log line" [ref=f61e5951] [cursor=pointer]
+    - generic [ref=f61e5952]: 08-20 14:37:15
+    - generic [ref=f61e5953]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:16 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5955]:
+    - checkbox "Select log line" [ref=f61e5958] [cursor=pointer]
+    - generic [ref=f61e5959]: 08-20 14:37:16
+    - generic [ref=f61e5960]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:16 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5962]:
+    - checkbox "Select log line" [ref=f61e5965] [cursor=pointer]
+    - generic [ref=f61e5966]: 08-20 14:37:16
+    - generic [ref=f61e5967]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:17 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5969]:
+    - checkbox "Select log line" [ref=f61e5972] [cursor=pointer]
+    - generic [ref=f61e5973]: 08-20 14:37:17
+    - generic [ref=f61e5974]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:18 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5976]:
+    - checkbox "Select log line" [ref=f61e5979] [cursor=pointer]
+    - generic [ref=f61e5980]: 08-20 14:37:18
+    - generic [ref=f61e5981]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:19 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5983]:
+    - checkbox "Select log line" [ref=f61e5986] [cursor=pointer]
+    - generic [ref=f61e5987]: 08-20 14:37:19
+    - generic [ref=f61e5988]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:19 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5990]:
+    - checkbox "Select log line" [ref=f61e5993] [cursor=pointer]
+    - generic [ref=f61e5994]: 08-20 14:37:19
+    - generic [ref=f61e5995]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:20 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e5997]:
+    - checkbox "Select log line" [ref=f61e6000] [cursor=pointer]
+    - generic [ref=f61e6001]: 08-20 14:37:20
+    - generic [ref=f61e6002]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:21 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6004]:
+    - checkbox "Select log line" [ref=f61e6007] [cursor=pointer]
+    - generic [ref=f61e6008]: 08-20 14:37:21
+    - generic [ref=f61e6009]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:22 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6011]:
+    - checkbox "Select log line" [ref=f61e6014] [cursor=pointer]
+    - generic [ref=f61e6015]: 08-20 14:37:22
+    - generic [ref=f61e6016]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:22 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6018]:
+    - checkbox "Select log line" [ref=f61e6021] [cursor=pointer]
+    - generic [ref=f61e6022]: 08-20 14:37:22
+    - generic [ref=f61e6023]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:24 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6025]:
+    - checkbox "Select log line" [ref=f61e6028] [cursor=pointer]
+    - generic [ref=f61e6029]: 08-20 14:37:24
+    - generic [ref=f61e6030]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:25 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6032]:
+    - checkbox "Select log line" [ref=f61e6035] [cursor=pointer]
+    - generic [ref=f61e6036]: 08-20 14:37:25
+    - generic [ref=f61e6037]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:27 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6039]:
+    - checkbox "Select log line" [ref=f61e6042] [cursor=pointer]
+    - generic [ref=f61e6043]: 08-20 14:37:27
+    - generic [ref=f61e6044]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:28 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6046]:
+    - checkbox "Select log line" [ref=f61e6049] [cursor=pointer]
+    - generic [ref=f61e6050]: 08-20 14:37:28
+    - generic [ref=f61e6051]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:29 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6053]:
+    - checkbox "Select log line" [ref=f61e6056] [cursor=pointer]
+    - generic [ref=f61e6057]: 08-20 14:37:29
+    - generic [ref=f61e6058]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:31 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6060]:
+    - checkbox "Select log line" [ref=f61e6063] [cursor=pointer]
+    - generic [ref=f61e6064]: 08-20 14:37:31
+    - generic [ref=f61e6065]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:32 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6067]:
+    - checkbox "Select log line" [ref=f61e6070] [cursor=pointer]
+    - generic [ref=f61e6071]: 08-20 14:37:32
+    - generic [ref=f61e6072]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:33 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6074]:
+    - checkbox "Select log line" [ref=f61e6077] [cursor=pointer]
+    - generic [ref=f61e6078]: 08-20 14:37:33
+    - generic [ref=f61e6079]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:34 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6081]:
+    - checkbox "Select log line" [ref=f61e6084] [cursor=pointer]
+    - generic [ref=f61e6085]: 08-20 14:37:34
+    - generic [ref=f61e6086]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:36 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6088]:
+    - checkbox "Select log line" [ref=f61e6091] [cursor=pointer]
+    - generic [ref=f61e6092]: 08-20 14:37:36
+    - generic [ref=f61e6093]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:37 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6095]:
+    - checkbox "Select log line" [ref=f61e6098] [cursor=pointer]
+    - generic [ref=f61e6099]: 08-20 14:37:37
+    - generic [ref=f61e6100]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:38 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6102]:
+    - checkbox "Select log line" [ref=f61e6105] [cursor=pointer]
+    - generic [ref=f61e6106]: 08-20 14:37:38
+    - generic [ref=f61e6107]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:40 healthcheck failed error=healthcheck /api returned status 500" [ref=f61e6109]:
+    - checkbox "Select log line" [ref=f61e6112] [cursor=pointer]
+    - generic [ref=f61e6113]: 08-20 14:37:40
+    - generic [ref=f61e6114]: healthcheck failed error=healthcheck /api returned status 500
+  - button "Select log line 08-20 14:37:41 seccomp port detection incomplete, trying /proc/net/tcp fallback expected=[8080] seccompDetected=0" [ref=f61e6116]:
+    - checkbox "Select log line" [ref=f61e6119] [cursor=pointer]
+    - generic [ref=f61e6120]: 08-20 14:37:41
+    - generic [ref=f61e6121]: seccomp port detection incomplete, trying /proc/net/tcp fallback expected=[8080] seccompDetected=0
+  - button "Select log line 08-20 14:37:41 sending SIGTERM to artifact process artifact=artifacts/api-server" [ref=f61e6122]:
+    - checkbox "Select log line" [ref=f61e6125] [cursor=pointer]
+    - generic [ref=f61e6126]: 08-20 14:37:41
+    - generic [ref=f61e6127]: sending SIGTERM to artifact process artifact=artifacts/api-server
+  - button "Select log line 08-20 14:37:41 all artifact processes stopped" [ref=f61e6128]:
+    - checkbox "Select log line" [ref=f61e6131] [cursor=pointer]
+    - generic [ref=f61e6132]: 08-20 14:37:41
+    - generic [ref=f61e6133]: all artifact processes stopped
+  - button "Select log line 08-20 14:37:41 not all artifact ports opened within timeout expected=[8080] detected=0" [ref=f61e6134]:
+    - checkbox "Select log line" [ref=f61e6137] [cursor=pointer]
+    - generic [ref=f61e6138]: 08-20 14:37:41
+    - generic [ref=f61e6139]: not all artifact ports opened within timeout expected=[8080] detected=0
+  - button "Select log line 08-20 14:37:41 a port configuration was specified but the required port was never opened" [ref=f61e6141]:
+    - checkbox "Select log line" [ref=f61e6144] [cursor=pointer]
+    - generic [ref=f61e6145]: 08-20 14:37:41
+    - generic [ref=f61e6146]: a port configuration was specified but the required port was never opened
+  - button "Select log line 08-20 16:36:56 received signal, shutting down signal=terminated" [ref=f61e6148]:
+    - checkbox "Select log line" [ref=f61e6151] [cursor=pointer]
+    - generic [ref=f61e6152]: 08-20 16:36:56
+    - generic [ref=f61e6153]: received signal, shutting down signal=terminated
+  - button "Select log line 08-20 16:36:56 main done, exiting" [ref=f61e6154]:
+    - checkbox "Select log line" [ref=f61e6157] [cursor=pointer]
+    - generic [ref=f61e6158]: 08-20 16:36:56
+    - generic [ref=f61e6159]: main done, exiting
+  - button "Select log line 08-20 16:45:15 starting up user application" [ref=f61e6160]:
+    - checkbox "Select log line" [ref=f61e6163] [cursor=pointer]
+    - generic [ref=f61e6164]: 08-20 16:45:15
+    - generic [ref=f61e6165]: starting up user application
+  - 'button "Select log line 08-20 16:45:15 metasidecar: loaded enterprise status from environment is_enterprise=false" [ref=f61e6166]':
+    - checkbox "Select log line" [ref=f61e6169] [cursor=pointer]
+    - generic [ref=f61e6170]: 08-20 16:45:15
+    - generic [ref=f61e6171]: "metasidecar: loaded enterprise status from environment is_enterprise=false"
+  - button "Select log line 08-20 16:45:15 artifact mode enabled runnable=0 static=12" [ref=f61e6172]:
+    - checkbox "Select log line" [ref=f61e6175] [cursor=pointer]
+    - generic [ref=f61e6176]: 08-20 16:45:15
+    - generic [ref=f61e6177]: artifact mode enabled runnable=0 static=12
+  - button "Select log line 08-20 16:45:15 starting artifact processes for monorepo deployment" [ref=f61e6178]:
+    - checkbox "Select log line" [ref=f61e6181] [cursor=pointer]
+    - generic [ref=f61e6182]: 08-20 16:45:15
+    - generic [ref=f61e6183]: starting artifact processes for monorepo deployment
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-lecture-1/ publicDir=artifacts/ai-testing-lecture-1/dist/public" [ref=f61e6184]:
+    - checkbox "Select log line" [ref=f61e6187] [cursor=pointer]
+    - generic [ref=f61e6188]: 08-20 16:45:15
+    - generic [ref=f61e6189]: registered static handler for artifact path=/ai-testing-lecture-1/ publicDir=artifacts/ai-testing-lecture-1/dist/public
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-lecture-10/ publicDir=artifacts/ai-testing-lecture-10/dist/public" [ref=f61e6190]:
+    - checkbox "Select log line" [ref=f61e6193] [cursor=pointer]
+    - generic [ref=f61e6194]: 08-20 16:45:15
+    - generic [ref=f61e6195]: registered static handler for artifact path=/ai-testing-lecture-10/ publicDir=artifacts/ai-testing-lecture-10/dist/public
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact publicDir=artifacts/ai-testing-lecture-5/dist/public path=/ai-testing-lecture-5/" [ref=f61e6196]:
+    - checkbox "Select log line" [ref=f61e6199] [cursor=pointer]
+    - generic [ref=f61e6200]: 08-20 16:45:15
+    - generic [ref=f61e6201]: registered static handler for artifact publicDir=artifacts/ai-testing-lecture-5/dist/public path=/ai-testing-lecture-5/
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-lecture-2/ publicDir=artifacts/ai-testing-lecture-2/dist/public" [ref=f61e6202]:
+    - checkbox "Select log line" [ref=f61e6205] [cursor=pointer]
+    - generic [ref=f61e6206]: 08-20 16:45:15
+    - generic [ref=f61e6207]: registered static handler for artifact path=/ai-testing-lecture-2/ publicDir=artifacts/ai-testing-lecture-2/dist/public
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-lecture-3/ publicDir=artifacts/ai-testing-lecture-3/dist/public Copy" [ref=f61e6208]:
+    - checkbox "Select log line" [ref=f61e6211] [cursor=pointer]
+    - generic [ref=f61e6212]: 08-20 16:45:15
+    - generic [ref=f61e6213]: registered static handler for artifact path=/ai-testing-lecture-3/ publicDir=artifacts/ai-testing-lecture-3/dist/public
+    - button "Copy" [ref=f61e6214] [cursor=pointer]
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-lecture-7/ publicDir=artifacts/ai-testing-lecture-7/dist/public" [ref=f61e6218]:
+    - checkbox "Select log line" [ref=f61e6221] [cursor=pointer]
+    - generic [ref=f61e6222]: 08-20 16:45:15
+    - generic [ref=f61e6223]: registered static handler for artifact path=/ai-testing-lecture-7/ publicDir=artifacts/ai-testing-lecture-7/dist/public
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact publicDir=artifacts/ai-testing-lecture-6/dist/public path=/ai-testing-lecture-6/" [ref=f61e6224]:
+    - checkbox "Select log line" [ref=f61e6227] [cursor=pointer]
+    - generic [ref=f61e6228]: 08-20 16:45:15
+    - generic [ref=f61e6229]: registered static handler for artifact publicDir=artifacts/ai-testing-lecture-6/dist/public path=/ai-testing-lecture-6/
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-lecture-4/ publicDir=artifacts/ai-testing-lecture-4/dist/public" [ref=f61e6230]:
+    - checkbox "Select log line" [ref=f61e6233] [cursor=pointer]
+    - generic [ref=f61e6234]: 08-20 16:45:15
+    - generic [ref=f61e6235]: registered static handler for artifact path=/ai-testing-lecture-4/ publicDir=artifacts/ai-testing-lecture-4/dist/public
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-lecture-8/ publicDir=artifacts/ai-testing-lecture-8/dist/public" [ref=f61e6236]:
+    - checkbox "Select log line" [ref=f61e6239] [cursor=pointer]
+    - generic [ref=f61e6240]: 08-20 16:45:15
+    - generic [ref=f61e6241]: registered static handler for artifact path=/ai-testing-lecture-8/ publicDir=artifacts/ai-testing-lecture-8/dist/public
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-lecture-9/ publicDir=artifacts/ai-testing-lecture-9/dist/public" [ref=f61e6242]:
+    - checkbox "Select log line" [ref=f61e6245] [cursor=pointer]
+    - generic [ref=f61e6246]: 08-20 16:45:15
+    - generic [ref=f61e6247]: registered static handler for artifact path=/ai-testing-lecture-9/ publicDir=artifacts/ai-testing-lecture-9/dist/public
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ai-testing-academy/ publicDir=artifacts/ai-testing-academy/dist/public" [ref=f61e6248]:
+    - checkbox "Select log line" [ref=f61e6251] [cursor=pointer]
+    - generic [ref=f61e6252]: 08-20 16:45:15
+    - generic [ref=f61e6253]: registered static handler for artifact path=/ai-testing-academy/ publicDir=artifacts/ai-testing-academy/dist/public
+  - button "Select log line 08-20 16:45:15 forwarding local port 0 to external port 80 (mapped as 1104)" [ref=f61e6254]:
+    - checkbox "Select log line" [ref=f61e6257] [cursor=pointer]
+    - generic [ref=f61e6258]: 08-20 16:45:15
+    - generic [ref=f61e6259]: forwarding local port 0 to external port 80 (mapped as 1104)
+  - button "Select log line 08-20 16:45:15 registered static handler for artifact path=/ publicDir=artifacts/portfolio/dist/public" [ref=f61e6260]:
+    - checkbox "Select log line" [ref=f61e6263] [cursor=pointer]
+    - generic [ref=f61e6264]: 08-20 16:45:15
+    - generic [ref=f61e6265]: registered static handler for artifact path=/ publicDir=artifacts/portfolio/dist/public
+  - button "Select log line 08-20 16:45:15 static-only deployment, waiting for signal" [ref=f61e6266]:
+    - checkbox "Select log line" [ref=f61e6269] [cursor=pointer]
+    - generic [ref=f61e6270]: 08-20 16:45:15
+    - generic [ref=f61e6271]: static-only deployment, waiting for signal

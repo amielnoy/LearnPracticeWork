@@ -222,6 +222,8 @@ export default function NonDeterminismContracts() {
             <div
               style={{
                 fontFamily: 'monospace',
+                direction: 'ltr',
+                textAlign: 'left',
                 fontSize: '0.95vw',
                 color: '#475569',
                 lineHeight: 1.7,
@@ -254,6 +256,8 @@ export default function NonDeterminismContracts() {
             <div
               style={{
                 fontFamily: 'monospace',
+                direction: 'ltr',
+                textAlign: 'left',
                 fontSize: '0.95vw',
                 color: '#475569',
                 lineHeight: 1.7,

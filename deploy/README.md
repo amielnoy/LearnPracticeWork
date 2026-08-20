@@ -87,6 +87,7 @@ fly secrets set \
   GEMINI_API_KEY=... \
   GOOGLE_CLIENT_ID=... \
   SESSION_SECRET=... \
+  RATE_LIMIT_SALT=... \
   SUPABASE_DB_PASSWORD=... \
   SUPABASE_URL=... \
   SUPABASE_ANON_KEY=... \
@@ -100,8 +101,16 @@ fly deploy --config server/fly.toml \
 The trailing `.` matters because it is the Docker build context. The image installs uv, syncs
 the locked Python dependencies, copies `server/app`, and runs Uvicorn as a non-root user.
 
+`RATE_LIMIT_SALT` is not optional, and it is the one whose absence is easiest to miss. In
+production every quota is counted in Postgres keyed by an HMAC of the caller's identity, and
+without a salt there is no key — so `SharedRateLimiter` fails closed and **every rate-limited
+route refuses every caller**: Google sign-in, the AI proxy, and the admin seed route. The
+refusal is a `429`, which reads to a visitor exactly like a quota they have exhausted. Any long
+random string works, and `METRICS_ID_SALT` is accepted in its place.
+
 Verify that `curl https://<app>.fly.dev/api/healthz` returns `{"status":"ok"}` and
-`/api/readyz` reports the database available, then open
+`/api/readyz` reports the database available **and carries no `rateLimiting` field** — that
+field appears only when quotas cannot count, and names what is missing. Then open
 `https://<app>.fly.dev/api/docs` and confirm Scalar loads the runtime OpenAPI document.
 
 The current `server/fly.toml` names the app `ata-api`. Create or rename that Fly application
@@ -127,7 +136,7 @@ Also set long, independent random `METRICS_TOKEN` and `METRICS_ID_SALT` values w
 production returns 404 without it. The salt HMAC-pseudonymizes verified user IDs for Grafana
 and must remain only on Fly.
 
-Set a separate random `RATE_LIMIT_SALT` as well. Before enabling paid sales, configure and
+Before enabling paid sales, configure and
 verify all of the following, then change `SALES_ENABLED` to `true`:
 
 - `STRIPE_COURSE_PRICE_ID`, `STRIPE_COURSE_PRODUCT_ID`, `STRIPE_COURSE_AMOUNT`, and
