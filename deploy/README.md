@@ -66,6 +66,11 @@ with a fixed error body when the content store is unavailable. The academy curre
 bundled content, so these routes can be deployed independently while the client migration is
 completed.
 
+Interactive API documentation is served by Scalar at `/api/docs`; its runtime FastAPI document
+is available at `/api/openapi.json`. Scalar's agent, telemetry, remote proxy, credential
+persistence, and remote fonts are disabled. The browser bundle is version-pinned, and requests
+from the interactive console go directly to this API origin.
+
 `fly.toml` therefore sets `min_machines_running = 1` and leaves
 `auto_stop_machines` off. Give the rate limiter a shared store (Redis, or the
 Postgres already in use) before changing that.
@@ -94,7 +99,8 @@ fly deploy --config server/fly.toml \
 The trailing `.` matters because it is the Docker build context. The image installs uv, syncs
 the locked Python dependencies, copies `server/app`, and runs Uvicorn as a non-root user.
 
-Verify: `curl https://<app>.fly.dev/api/healthz` returns `{"status":"ok"}`.
+Verify that `curl https://<app>.fly.dev/api/healthz` returns `{"status":"ok"}`, then open
+`https://<app>.fly.dev/api/docs` and confirm Scalar loads the runtime OpenAPI document.
 
 The current `server/fly.toml` names the app `ata-api`. Create or rename that Fly application
 before pointing the Replit relay at it; the public hostname must resolve and its health check

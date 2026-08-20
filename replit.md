@@ -12,7 +12,7 @@ packages use pnpm; `server` uses uv and keeps a pnpm package only as a workspace
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
 - **Python**: 3.12+ with uv and a committed `server/uv.lock`
-- **API framework**: FastAPI + Uvicorn
+- **API framework**: FastAPI + Uvicorn, with a Scalar interactive API reference
 - **Database**: PostgreSQL through psycopg; Supabase REST for localized content
 - **Validation**: Pydantic on the API, Zod (`zod/v4`) in generated TypeScript clients
 - **API codegen**: Orval (from OpenAPI spec)
@@ -35,6 +35,11 @@ packages use pnpm; `server` uses uv and keeps a pnpm package only as a workspace
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
+
+With the API running, Scalar is available at <http://localhost:8787/api/docs> and the runtime
+OpenAPI JSON at <http://localhost:8787/api/openapi.json>. Scalar does not enable its agent,
+telemetry, proxy, remote fonts, or credential persistence. On Replit, both paths use the same
+secretless relay as the rest of `/api` and are actually served by Fly.
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
 
@@ -86,7 +91,7 @@ project executes TypeScript in Node without launching a browser.
 
 | Layer | Runs in | Covers |
 | --- | --- | --- |
-| `server/tests` | Python + pytest | Google signature rules, session routes, deployment integration fixtures |
+| `server/tests` | Python + pytest | Google signature rules, sessions, Scalar/OpenAPI, monitoring, and deployment fixtures |
 | `tests/unit` | Node | Pure logic in `artifacts/ai-testing-academy/src/lib` |
 | `tests/component` | Chromium, desktop + mobile (Playwright CT) | Real React components, mounted and driven |
 | `tests/api` | Node → live server | `server` over HTTP |

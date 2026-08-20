@@ -9,7 +9,8 @@ in Python:
   `ios`, `android`, or `other`), and a pseudonymous user identifier.
 - AI counters group server-proxied requests by provider, model, status, approximate country,
   client type, and pseudonymous user identifier.
-- `python -m app.monitor` probes the Fly API, Replit site and academy, and GitHub Pages.
+- `python -m app.monitor` probes the local Scalar reference, Fly API, Replit site and academy,
+  and GitHub Pages.
 - `python -m app.test_history` converts the existing Allure result files into Prometheus
   metrics after every local or CI test run.
 
@@ -29,7 +30,8 @@ telemetry, update checks, and automatic plugin installation.
 
 The default probe list is the set of public servers used by this repository. Override
 `MONITORED_SERVERS` with a JSON object of `name: URL` pairs to change it. URLs may be HTTP(S)
-only and cannot contain embedded credentials.
+only and cannot contain embedded credentials. The compose default also checks
+`http://api:8080/api/docs`, so Scalar availability appears in Grafana as `local-scalar`.
 
 ## Production
 

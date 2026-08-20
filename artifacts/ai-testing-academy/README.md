@@ -7,6 +7,11 @@ localized question-bank, coding-challenge, and lecture-series content from Supab
 UI still renders its bundled content modules, so the content API is ready for the migration
 rather than required for the static site to render.
 
+When the Python API is running, its Scalar reference is available at `/api/docs` and its
+runtime OpenAPI JSON at `/api/openapi.json`. Scalar is served by Fly through the same-origin
+Replit relay; it holds no Replit secret and has agent, telemetry, proxying, remote fonts, and
+credential persistence disabled.
+
 For the full architecture walkthrough, open `architecture.html` at the repo root.
 
 ## Layout

@@ -305,7 +305,7 @@
   <text class="sub" x="368" y="132" fill="var(--c-server-ink)">/stripe/seed  (admin)</text>
   <text class="sub" x="368" y="150" fill="var(--c-server-ink)">/stripe/webhook</text>
   <text class="sub" x="368" y="168" fill="var(--c-server-ink)">/entitlements/course</text>
-  <text class="sub" x="368" y="186" fill="var(--c-server-ink)">/auth/* · /healthz</text>
+  <text class="sub" x="368" y="186" fill="var(--c-server-ink)">/auth/* · /healthz · /docs</text>
   <text class="sub" x="368" y="208" fill="var(--c-server-ink)">holds every secret</text>
 
   <text class="grp" x="700" y="20">Outside</text>
@@ -470,6 +470,14 @@
   three sections carrying no number at all. The numbers are stored rather than derived from
   the array index, because they appear on screen: changing the order should be a visible
   decision about renumbering, not a silent one.
+</div>
+
+<div class="callout good">
+  <b>Scalar documents the server that is actually running.</b> FastAPI serves its runtime
+  OpenAPI document at <code>/api/openapi.json</code> and the interactive Scalar reference at
+  <code>/api/docs</code>. The Scalar agent, telemetry, proxy, remote fonts, and credential
+  persistence are disabled; its version-pinned browser code sends test requests directly to
+  the same API origin. Replit relays both paths to Fly without storing a backend secret.
 </div>
 
 <div class="callout good">
