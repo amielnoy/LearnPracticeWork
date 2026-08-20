@@ -14,6 +14,24 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
+# Prints "label  path" with the path as a terminal hyperlink when the terminal
+# will render one, and as a plain file:// URL when it will not.
+#
+# OSC 8 is the escape sequence terminals use for hyperlinks; iTerm2, VS Code,
+# Windows Terminal and GNOME Terminal honour it, and the ones that do not would
+# print the raw escape bytes as garbage. So it is used only on a real TTY and
+# never under CI, where the output is a log file. The fallback is still useful:
+# most terminals linkify a bare file:// URL, and every one of them lets you
+# copy it.
+link() {
+  local label="$1" rel="$2" url="file://$ROOT/$2"
+  if [ -t 1 ] && [ -z "${CI:-}" ]; then
+    printf '  %-18s \033]8;;%s\033\\%s\033]8;;\033\\\n' "$label" "$url" "$rel"
+  else
+    printf '  %-18s %s\n' "$label" "$url"
+  fi
+}
+
 PW_ROOT="./node_modules/.bin/playwright"
 PW_TESTS="./node_modules/.bin/playwright"
 ALLURE="./node_modules/.bin/allure"
@@ -85,12 +103,16 @@ if [ "$status" -eq 0 ]; then
 else
   echo "✗ some suites failed (see above)"
 fi
-echo "  Allure report:     allure-report/index.html"
-echo "  Playwright report: playwright-report/index.html"
+# Allure and the architecture page are both single self-contained documents, so
+# file:// opens them and the link works. The Playwright report is not: its assets
+# cannot load over file://, which is why it is printed as a path and served
+# below rather than linked to somewhere that would open broken.
+link "Allure report:" "allure-report/index.html"
+echo "  Playwright report: playwright-report/index.html  (needs serving — see below)"
 # The same page CI links from its run summary. Locally it is the copy in the
 # working tree, not the one on Pages, so it describes the branch just tested
 # rather than whatever main last published.
-echo "  Architecture:      architecture.html"
+link "Architecture:" "architecture.html"
 
 # Open both reports when running interactively (never in CI / the container,
 # where CI=true is set and show-report would block forever).
