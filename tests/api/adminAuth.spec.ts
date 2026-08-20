@@ -79,7 +79,7 @@ test.describe('with an admin token configured', () => {
       headers: { authorization: `Bearer ${ADMIN_TOKEN}` },
     });
 
-    // Past the gate. Without a connected integration the handler cannot fetch
+    // Past the gate. Without backend Stripe secrets the handler cannot fetch
     // credentials, so this is the 500 the other Stripe routes give — not a 401,
     // and not a created product.
     expect(response.status()).toBe(500);

@@ -104,12 +104,13 @@ flip).
 
 Connection Setup lets a visitor use a **server-side default key** or **their own**.
 
-- **Default key (Groq)** — held as a Replit Secret (`GROQ_API_KEY`) on `server`
+- **Default key (Groq)** — held only in the backend host's encrypted secret store
+  (`GROQ_API_KEY`; Fly secrets in the documented deployment)
   and never sent to the browser. This is the site's default free chat provider for resume
   scoring and the mock interview. The client calls `GET /api/ai/config` for a boolean and a
   default model name, and `POST /api/ai/generate` to run a completion. See
   `server/app/main.py`.
-- **Gemini (search-only default)** — a separate Replit Secret (`GEMINI_API_KEY`) also held on
+- **Gemini (search-only default)** — a separate backend-only secret (`GEMINI_API_KEY`) held on
   `server`. It is used exclusively for the live Google Search grounding feature
   in the Practice Library's question enrichment (`grounded: true` requests) and is not offered
   as a general chat provider anymore.

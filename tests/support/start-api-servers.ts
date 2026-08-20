@@ -36,12 +36,9 @@ const DUMMY_GROQ_KEY = 'gsk_TEST-not-a-real-key-000000000000000';
 /** Env that must look the same on every machine for the assertions to hold. */
 const PINNED: Readonly<Record<string, string>> = {
   NODE_ENV: 'test',
-  // No database and no Replit connector: the Stripe routes are expected to
-  // fail as JSON, which is exactly what the api suite asserts.
+  // No database or Stripe secrets: those routes are expected to fail as JSON,
+  // which is exactly what the api suite asserts.
   DATABASE_URL: '',
-  REPLIT_CONNECTORS_HOSTNAME: '',
-  REPL_IDENTITY: '',
-  WEB_REPL_RENEWAL: '',
   REPLIT_DOMAINS: '',
   STRIPE_SECRET_KEY: '',
   STRIPE_WEBHOOK_SECRET: '',

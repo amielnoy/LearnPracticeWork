@@ -11,14 +11,11 @@ def direct_stripe_environment(monkeypatch: pytest.MonkeyPatch) -> tuple[str, str
     webhook = "whsec_fixture"
     monkeypatch.setenv("STRIPE_SECRET_KEY", secret)
     monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", webhook)
-    monkeypatch.delenv("REPLIT_CONNECTORS_HOSTNAME", raising=False)
-    monkeypatch.delenv("REPL_IDENTITY", raising=False)
-    monkeypatch.delenv("WEB_REPL_RENEWAL", raising=False)
     return secret, webhook
 
 
 @pytest.mark.asyncio
-async def test_direct_stripe_credentials_work_without_replit(
+async def test_stripe_credentials_come_from_backend_secrets(
     direct_stripe_environment: tuple[str, str],
 ) -> None:
     assert await stripe_credentials() == direct_stripe_environment
@@ -29,11 +26,8 @@ async def test_missing_stripe_configuration_fails_closed(monkeypatch: pytest.Mon
     for name in (
         "STRIPE_SECRET_KEY",
         "STRIPE_WEBHOOK_SECRET",
-        "REPLIT_CONNECTORS_HOSTNAME",
-        "REPL_IDENTITY",
-        "WEB_REPL_RENEWAL",
     ):
         monkeypatch.delenv(name, raising=False)
 
-    with pytest.raises(RuntimeError, match="Missing Replit environment variables"):
+    with pytest.raises(RuntimeError, match="STRIPE_SECRET_KEY is not configured"):
         await stripe_credentials()

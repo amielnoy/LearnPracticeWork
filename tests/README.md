@@ -118,7 +118,7 @@ server with no `ADMIN_API_TOKEN` the seed route's `401` branch is too. Splitting
 configuration across instances is what makes both sides reachable without a mock.
 
 The keyed instance is only ever sent invalid requests, so **no test can reach a model vendor**.
-All three start with database, direct Stripe, Replit connector, Supabase and session variables
+All three start with database, Stripe, Supabase and session variables
 blanked, so a developer's shell or deployment secrets cannot change the result. The keyed
 instance overrides only the inert values its cases need, and Stripe routes fail predictably as
 JSON, which is what `api/stripe.spec.ts` asserts.

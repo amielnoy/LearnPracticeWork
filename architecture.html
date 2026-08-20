@@ -1111,9 +1111,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <span>
       The unit suite stubs <code>fetch</code>. The API suite runs servers whose model key is a
       throwaway that only ever receives invalid requests, whose admin token guards a route that
-      then fails on absent Stripe credentials. Database, Supabase, direct Stripe, Replit
-      connector and session variables are pinned empty; a developer's shell cannot change any
-      of it.
+      then fails on absent Stripe credentials. Database, Supabase, Stripe and session variables
+      are pinned empty; a developer's shell cannot change any of it.
     </span>
   </div>
 </div>
@@ -1159,7 +1158,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <p>
   The Python fixture layer separately generates RSA keys and signed Google tokens, serves JWKS
   through <code>httpx.MockTransport</code>, drives routes through <code>ASGITransport</code>, and
-  covers session cookies plus direct/fallback integration configuration without live services.
+  covers session cookies plus backend-only Stripe configuration without live services.
 </p>
 
 <p>
@@ -1208,7 +1207,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <b>No test can reach a model vendor — or create a product.</b> The unit suite stubs
   <code>fetch</code>; the API suite runs one server with a throwaway Gemini key that only ever
   receives invalid requests, and one with no key at all. All instances start with
-  database, Supabase, direct Stripe, Replit connector and session variables blanked, so a
+  database, Supabase, Stripe and session variables blanked, so a
   developer's shell cannot make the suite pass or fail by accident — and so the furthest an
   authorised call to the seed route can get is failing to fetch Stripe credentials.
 </div>

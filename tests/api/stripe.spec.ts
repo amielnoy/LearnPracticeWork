@@ -119,7 +119,7 @@ test.describe('POST /api/stripe/checkout — request validation', () => {
   });
 });
 
-test.describe('Stripe routes without a connected integration', () => {
+test.describe('Stripe routes without backend secrets', () => {
   test('reports a price lookup failure as JSON', async ({ api }) => {
     const response = await api.get('/api/stripe/prices');
 

@@ -121,8 +121,8 @@ Apply the generated SQL to the Supabase database before switching a client to th
 empty or unavailable store is reported as a controlled `503`, not as fabricated content.
 
 Configure Stripe to send events to `https://<app>.fly.dev/api/stripe/webhook`. The webhook
-secret is verified against the raw request body. Ordinary `STRIPE_*` secrets take precedence;
-on Replit, the connected Stripe integration is used as a fallback when they are absent.
+secret is verified against the raw request body. Stripe credentials are read only from the
+backend host's `STRIPE_*` secret environment; there is no Replit connector fallback.
 
 ### The image
 

@@ -53,7 +53,7 @@ is absent fails closed with a controlled 4xx/5xx response. The package scripts d
 | `GEMINI_API_KEY` | `/api/ai/generate` proxies with a server-held key | The route answers 503 and the client offers BYOK |
 | `ADMIN_API_TOKEN` | `POST /api/stripe/seed` accepts `Authorization: Bearer <token>` | The route answers 404 — it fails closed, never open |
 | `GOOGLE_CLIENT_ID` + `SESSION_SECRET` | Google tokens are verified and exchanged for signed HttpOnly sessions | Sign-in answers 503; protected routes stay closed |
-| `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` | Direct Stripe API and signed webhooks | Replit's Stripe connector is tried as a fallback |
+| `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` | Stripe API and signed webhooks | Stripe routes fail closed; there is no connector fallback |
 | `ALLOWED_ORIGINS` | Comma-separated CORS allowlist | Only same-origin and Replit-domain requests |
 
 `GOOGLE_CLIENT_ID` must be the same OAuth client the academy is built with as
@@ -112,8 +112,8 @@ Every config starts whatever server it needs, so nothing has to be running first
   no test can reach a model vendor. The keyed instance also carries a test `ADMIN_API_TOKEN`
   and `GOOGLE_CLIENT_ID` so the authenticated branches are reachable, while the keyless one
   carries neither and exercises the "not configured" branches. All start with database,
-  Supabase, direct Stripe, Replit connector and session variables blanked, so the suite does
-  not depend on the developer's shell.
+  Supabase, Stripe and session variables blanked, so the suite does not depend on the
+  developer's shell.
 - **e2e** — the academy's own Vite dev server on port 5273 with `BASE_PATH=/`. Its `/api`
   proxy has nothing behind it, so Connection Setup falls back to bring-your-own-key, which is
   the state these UI flows exercise.
@@ -168,8 +168,8 @@ errors and 590 files fell off the Prettier config.
 Static and API are deployed separately, because only one of them costs anything to run.
 `deploy/README.md` is the runbook; the summary:
 
-- **Replit** — `.replit-artifact/artifact.toml` per artifact. The site and `api-server` share
-  one origin, so relative `/api` calls work.
+- **Replit** — `.replit-artifact/artifact.toml` per artifact. No production secret belongs in
+  Replit; without backend secrets, protected/provider routes deliberately stay unavailable.
 - **GitHub Pages** — `.github/workflows/ci.yml` publishes from `main`: the portfolio at the
   site root, `ai-testing-academy/` and **all ten** `ai-testing-lecture-N/` beneath it, and
   `architecture.html` alongside. Static only, so the academy's AI panel falls back to
