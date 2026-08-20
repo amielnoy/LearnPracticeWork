@@ -87,6 +87,10 @@ else
 fi
 echo "  Allure report:     allure-report/index.html"
 echo "  Playwright report: playwright-report/index.html"
+# The same page CI links from its run summary. Locally it is the copy in the
+# working tree, not the one on Pages, so it describes the branch just tested
+# rather than whatever main last published.
+echo "  Architecture:      architecture.html"
 
 # Open both reports when running interactively (never in CI / the container,
 # where CI=true is set and show-report would block forever).
