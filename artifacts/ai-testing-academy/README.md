@@ -24,8 +24,12 @@ src/
 ├── components/
 │   ├── chrome/               Nav, Footer, Hero, ScrollProgress, BackToTop,
 │   │                         ErrorBoundary, ToolLauncher — page furniture
-│   ├── agents/               ConnectionSetup, ResumeAgent, InterviewAgent —
-│   │                         everything that reaches ProviderContext
+│   ├── agents/               ConnectionSetup, ResumeAgent, InterviewAgent,
+│   │                         AiDataConsent — everything that reaches
+│   │                         ProviderContext. Each agent is wiring and form;
+│   │                         its parts sit beneath it:
+│   │   ├── resume/           ResumeTips, ResumeUploadZone, ResumeScorecard
+│   │   └── interview/        ChatTranscript, VoiceControls
 │   ├── practice/             QuestionBank, CodingChallenges, LectureSeries and
 │   │                         their cards — static content, no model access
 │   ├── account/              GoogleSignIn — the only AuthContext consumer
@@ -35,7 +39,14 @@ src/
 │   ├── ProviderContext.tsx   provider/model/key state and the AI call surface
 │   ├── AuthContext.tsx       Google sign-in → verified HttpOnly server session
 │   └── ProgressContext.tsx   per-tool progress, so the launcher can offer to resume
-├── hooks/                    useDisclosure, useReveal, useVoice
+├── hooks/
+│   ├── useDisclosure.ts      stage arithmetic for the stepped reveals
+│   ├── useReveal.ts          the scroll-in animation
+│   ├── useVoice.ts           speech recognition and synthesis
+│   ├── useResumeDrafts.ts    the three résumé fields, kept across a reload
+│   ├── useResumeUpload.ts    what the upload zone says while a file is read
+│   ├── useResumeEvaluation.ts  scoring, rewriting and the PDF download
+│   └── useInterviewSession.ts  whose turn it is, and what is persisted
 ├── scripts/
 │   └── generate-prerender.ts rewrites the static block in index.html from the data below
 └── lib/
@@ -44,6 +55,13 @@ src/
     ├── i18n.ts               language resolution, switching, <html lang/dir>
     ├── providers.ts          the provider registry and callAI
     ├── domUtils.ts           escaping, linkifying, markdown → plain text
+    ├── documentText.ts       one extractor per file format, and the rules a
+    │                         résumé file has to pass before it is accepted
+    ├── resumePdf.ts          jsPDF text builders, including the Hebrew face
+    ├── resumeExport.ts       picks a builder, names the file, rasterises as a
+    │                         last resort
+    ├── resumeSamples.ts      the worked example the "try it" link loads
+    ├── interviewSession.ts   validates a transcript restored from storage
     ├── challenges.ts         the challenge content model (types only)
     ├── lectures.ts           the bundled lecture catalogue, EN + HE, both tracks
     └── questionBank.ts       bundled interview questions, EN + HE, with hints and answers
@@ -114,7 +132,8 @@ Connection Setup lets a visitor use a **server-side default key** or **their own
   and never sent to the browser. This is the site's default free chat provider for resume
   scoring and the mock interview. The client calls `GET /api/ai/config` for a boolean and a
   default model name, and `POST /api/ai/generate` to run a completion. See
-  `server/app/main.py`.
+  `server/app/ai_gateway.py` for the provider itself and `server/app/routes/ai.py` for the
+  quota and metrics around it.
 - **Gemini (search-only default)** — a separate backend-only secret (`GEMINI_API_KEY`) held on
   `server`. It is used exclusively for the live Google Search grounding feature
   in the Practice Library's question enrichment (`grounded: true` requests) and is not offered
@@ -141,8 +160,10 @@ search grounding, respectively). Anthropic and OpenAI are own-key or nothing, an
 default exists the "use my own key" checkbox is dropped entirely rather than rendered ticked
 and disabled.
 
-To add a default for another vendor: add a handler to `server/app/main.py`, report its availability
-from `GET /api/ai/config`, and let `callAI` route through the proxy for it in `providers.ts`.
+To add a default for another vendor: add a provider class to `server/app/ai_gateway.py` and
+list it in `PROVIDERS`, then let `callAI` route through the proxy for it in `providers.ts`.
+`GET /api/ai/config` reports the new vendor's availability on its own — it is built from the
+registry, so there is no second place to remember.
 
 > **Never** serve a plaintext `.env` to the browser. Any key placed there is readable by every
 > visitor through devtools. Server-side secrets belong in the backend only.

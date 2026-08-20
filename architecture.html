@@ -472,6 +472,51 @@
   decision about renumbering, not a silent one.
 </div>
 
+<h3>Below the API</h3>
+<p>
+  The server is composed the same way, and for the same reason. <code>app/main.py</code> once
+  held 870 lines — app setup, CORS, both middleware layers, auth, content, the AI proxy, Stripe
+  and entitlements — which meant every one of those changed in the same file. It is now a
+  composition root of ~80 lines that builds the app and mounts a list.
+</p>
+
+<pre><code>app/main.py                 create_app() — CORS, middleware, handlers, routers
+├── routes/__init__.py      ROUTERS — the mount list; create_app iterates it
+│   ├── ops.py              healthz · readyz · metrics · the Scalar page
+│   ├── auth.py             Google sign-in → signed HttpOnly session
+│   ├── content.py          three routes, one shared code path
+│   ├── ai.py               quota, metrics, and the proxy call
+│   ├── commerce.py         seed · checkout · prices · webhook
+│   └── entitlements.py     has this verified identity bought the course
+├── dependencies.py         every Depends provider + the four rate limiters
+├── ai_gateway.py           one strategy object per vendor, and the dispatch
+├── content_store.py        Supabase reads + the NestedCollection specs
+├── commerce.py             checkout, seeding, prices, webhook trust decision
+├── catalog.py              the one course this deployment may sell, or None
+├── entitlements.py         purchase lookup against that catalogue
+├── origins.py              which origins a redirect may point at
+├── errors.py               ServiceError, rendered by a single handler
+└── schemas.py · settings.py   request bodies · deployment-wide limits</code></pre>
+
+<div class="callout good">
+  <b>The routes hold HTTP and nothing else.</b> A route reads its body, hands the work to a
+  service, and returns. Failures are raised as <code>ServiceError</code> and rendered once, so
+  the <code>{"error": …}</code> shape every client depends on is defined in one place rather
+  than in a <code>JSONResponse</code> literal per branch. The three content routes are the
+  clearest case: they were three near-identical 35-line handlers, and they are now one call
+  each against a <code>NestedCollection</code> that describes the tables as data.
+</div>
+
+<div class="callout good">
+  <b>Collaborators arrive through <code>Depends</code>, which is what made the services
+  testable.</b> Tests used to reach into <code>app.main</code> and reassign
+  <code>stripe_client</code> — a seam that exists only because there was nowhere else to put
+  one, and that breaks the moment a function moves. They now install a fake through
+  <code>app.dependency_overrides</code>, and most of the new coverage skips the request
+  entirely: a provider's model fallback and a webhook's trust decision are rules, and a test
+  that constructs the service names the rule instead of a route.
+</div>
+
 <div class="callout good">
   <b>Scalar documents the server that is actually running.</b> FastAPI serves its runtime
   OpenAPI document at <code>/api/openapi.json</code> and the interactive Scalar reference at
@@ -646,10 +691,15 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <!-- ───────────────────────── 6 ───────────────────────── -->
 <h2 id="features">6 · Feature modules</h2>
 
-<h3>📄 Resume Agent — the heavyweight</h3>
+<h3>📄 Resume Agent — a pipeline, not a component</h3>
 <p>
-  At ~575 lines it is the largest component, because it is really a small document pipeline:
-  read a file, extract text, score it, rewrite it, export it. All of it client-side.
+  It is really a small document pipeline — read a file, extract text, score it, rewrite it,
+  export it, all client-side — and for a long time it was also one 695-line function holding
+  every stage of that. Each stage now lives in the module that owns it, and the component is
+  ~220 lines of wiring and form: <code>lib/documentText.ts</code> reads,
+  <code>lib/resumeExport.ts</code> writes, and <code>useResumeDrafts</code>,
+  <code>useResumeUpload</code> and <code>useResumeEvaluation</code> hold the state between.
+  A change to how a DOCX is parsed no longer touches the JSX.
 </p>
 <div class="flow">
   <div class="stage"><span class="k">extract</span><p><b>pdf.js</b> or <b>mammoth</b> turns an uploaded PDF/DOCX into plain text in the browser.</p></div>
@@ -658,7 +708,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <div class="arrow">→</div>
   <div class="stage"><span class="k">rewrite</span><p>A second call with the improve prompt returns ATS-friendly prose, not JSON.</p></div>
   <div class="arrow">→</div>
-  <div class="stage"><span class="k">export</span><p><code>lib/resumePdf.ts</code> builds the PDF with <b>jsPDF</b>, embedding a Hebrew face for RTL.</p></div>
+  <div class="stage"><span class="k">export</span><p><code>lib/resumeExport.ts</code> picks a builder; <code>lib/resumePdf.ts</code> builds it with <b>jsPDF</b>, embedding a Hebrew face for RTL.</p></div>
 </div>
 <p>
   All four libraries are <b>bundled dependencies</b>, reached through dynamic
@@ -678,12 +728,22 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 </div>
 
 <p>
-  The same principle runs in reverse on the way in. <code>extractPdf()</code> counts the text
+  Formats are a registry rather than a chain of <code>if</code>s. <code>EXTRACTORS</code> maps an
+  extension to one object with an <code>extract()</code> and a <code>slowToLoad</code> flag, so
+  adding a format is an entry in that map — the size limit, the length bounds and the label
+  narration around it are written once and do not know how many formats exist. The flag is what
+  decides whether the zone says “getting ready” before it can count anything: pdf.js and its
+  worker are the wait, and mammoth is not.
+</p>
+<p>
+  The same principle runs in reverse on the way in. The PDF extractor counts the text
   runs pdf.js finds, and a file with none is reported as what it is — a scan, or a résumé
   exported as an image — rather than as a generic extraction failure, because the reader whose
   only copy is a picture has a problem well beyond this upload. Reading also reports progress:
   the zone names the wait for the parser itself, then counts pages as it goes, so a large file
-  never leaves one unchanging line on screen. The file input is cleared after every pick, since
+  never leaves one unchanging line on screen. A <code>.txt</code> reports no run count at all
+  rather than zero, so an empty one is called a failed extraction and not a scan — the two need
+  different things said to whoever uploaded them. The file input is cleared after every pick, since
   a picker holding the same file fires no <code>change</code> event and the obvious retry would
   otherwise do nothing at all.
 </p>
@@ -1057,10 +1117,13 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   unusually thin: uv installs the exact <code>server/uv.lock</code>, and the runtime stage copies
   the virtual environment plus <code>server/app</code>. No Node, pnpm or TypeScript server code;
   Uvicorn runs FastAPI as a non-root <code>app</code> user. <code>fly.toml</code>
-  deliberately keeps one machine running rather than scaling to zero, because
-  <code>app/main.py</code> builds its rate limiters on an in-memory store with a 24-hour
-  window — a machine that stops and restarts hands every caller a fresh anonymous allowance,
-  and the free-tier quota stops being a quota.
+  deliberately keeps one machine running rather than scaling to zero, so the Stripe webhook
+  endpoint stays warm. That setting used to be load-bearing for the quota too, and is not any
+  more: <code>SharedRateLimiter</code> counts in atomic Postgres rows in production, keyed by an
+  HMAC digest so no raw IP is stored, which is what makes an allowance survive a restart and
+  hold across workers. Without a database and a salt it returns <code>False</code> rather than
+  falling back to memory — a quota that resets on deploy is not a quota, and the in-memory
+  limiter is the local and test path only.
 </div>
 
 <div class="callout good">
@@ -1232,8 +1295,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <p>
   There are three instances, because most of these routes answer “not configured”
-  <em>before</em> they validate anything. <code>app/main.py</code> answers <code>503</code> for
-  a missing key before it reads the body, so on a keyless server the
+  <em>before</em> they validate anything. <code>app/ai_gateway.py</code> answers <code>503</code>
+  for a missing key before the route reads the body, so on a keyless server the
   <code>400 messages is required</code> branch is unreachable; the seed route answers
   <code>404</code> with no admin token, so its <code>401</code> branch is unreachable there too.
   One instance carries nothing, one carries a Gemini key, an admin token and an OAuth client,
@@ -1339,6 +1402,21 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
       <td>A model vendor</td>
       <td><code>lib/providers.ts</code> — one <code>ProviderDef</code></td>
       <td>The picker renders <code>Object.keys(PROVIDERS)</code> and <code>callAI</code> only ever calls <code>build</code>/<code>parse</code>.</td>
+    </tr>
+    <tr>
+      <td>A <em>server-side</em> model vendor</td>
+      <td><code>server/app/ai_gateway.py</code> — one provider class, listed in <code>PROVIDERS</code></td>
+      <td>The provider owns its models, its key variable, its request shape and its parsing. Dispatch picks by capability, and <code>GET /api/ai/config</code> is built from the registry, so the routes never learn a vendor's name.</td>
+    </tr>
+    <tr>
+      <td>A localized content collection</td>
+      <td><code>server/app/content_store.py</code> — one <code>NestedCollection</code> and one route line</td>
+      <td>The parent/child fetch, the language filter, the orphan exclusion and the 503 are one code path shared by all three existing collections.</td>
+    </tr>
+    <tr>
+      <td>A file format the résumé tool accepts</td>
+      <td><code>lib/documentText.ts</code> — one entry in <code>EXTRACTORS</code>, plus the input's <code>accept</code></td>
+      <td><code>readResumeFile</code> looks the extractor up by extension; the size, length and progress rules around it are format-agnostic. A unit test pins the map's keys to the three the input advertises, so adding one without widening <code>accept</code> fails.</td>
     </tr>
     <tr>
       <td>A model to an existing vendor</td>
