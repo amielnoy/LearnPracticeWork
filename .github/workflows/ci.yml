@@ -182,6 +182,34 @@ jobs:
         if: ${{ !cancelled() }}
         run: pnpm run test:e2e
 
+      - name: Publish test history to Prometheus
+        if: ${{ !cancelled() }}
+        env:
+          PUSHGATEWAY_URL: ${{ secrets.PUSHGATEWAY_URL }}
+          PUSHGATEWAY_USERNAME: ${{ secrets.PUSHGATEWAY_USERNAME }}
+          PUSHGATEWAY_PASSWORD: ${{ secrets.PUSHGATEWAY_PASSWORD }}
+        run: pnpm --filter @workspace/api-server run publish:test-metrics
+
+      - name: Link Grafana in the run summary
+        if: ${{ !cancelled() }}
+        env:
+          GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+        run: |
+          if [ -n "$GRAFANA_URL" ]; then
+            dashboard="${GRAFANA_URL%/}/d/academy-overview/academy-servers-and-test-history"
+            {
+              echo "## 📈 Runtime and test history"
+              echo ""
+              echo "**➡️ [Open the Grafana dashboard](${dashboard})**"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## 📈 Runtime and test history"
+              echo ""
+              echo "Set the public repository variable \`GRAFANA_URL\` to show the deployed dashboard link here."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       # Every suite above wrote into the shared repo-root `allure-results`, so a
       # single generate covers the whole run.
       #

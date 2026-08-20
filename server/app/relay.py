@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from urllib.parse import urlsplit
 
 import httpx
 from fastapi import Request
 from fastapi.responses import JSONResponse, Response
+
+from .metrics import RELAY_DURATION, RELAY_REQUESTS
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +46,7 @@ def _new_client() -> httpx.AsyncClient:
 
 
 async def relay_api_request(request: Request, upstream: str) -> Response:
+    started = time.perf_counter()
     target = f"{upstream}{request.url.path}"
     if request.url.query:
         target = f"{target}?{request.url.query}"
@@ -61,6 +65,8 @@ async def relay_api_request(request: Request, upstream: str) -> Response:
                 headers=headers,
             )
     except httpx.HTTPError:
+        RELAY_REQUESTS.labels(request.method, "502").inc()
+        RELAY_DURATION.labels(request.method).observe(time.perf_counter() - started)
         logger.exception("Could not reach the configured API upstream")
         return JSONResponse({"error": "API temporarily unavailable"}, status_code=502)
 
@@ -82,4 +88,6 @@ async def relay_api_request(request: Request, upstream: str) -> Response:
     )
     for cookie in cookies:
         response.headers.append("set-cookie", cookie)
+    RELAY_REQUESTS.labels(request.method, str(response.status_code)).inc()
+    RELAY_DURATION.labels(request.method).observe(time.perf_counter() - started)
     return response

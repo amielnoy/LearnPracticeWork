@@ -32,6 +32,7 @@ def isolated_auth(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     monkeypatch.setenv("GOOGLE_CLIENT_ID", CLIENT_ID)
     monkeypatch.setenv("SESSION_SECRET", "fixture-secret-with-at-least-thirty-two-characters")
     monkeypatch.delenv("UPSTREAM_API_BASE_URL", raising=False)
+    monkeypatch.delenv("METRICS_TOKEN", raising=False)
     google_auth.reset_key_cache()
     yield
     google_auth.reset_key_cache()

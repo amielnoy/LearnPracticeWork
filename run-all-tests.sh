@@ -141,6 +141,8 @@ echo "  Playwright report: playwright-report/index.html  (needs serving — see 
 # working tree, not the one on Pages, so it describes the branch just tested
 # rather than whatever main last published.
 link "Architecture:" "architecture.html"
+GRAFANA_BASE_URL="${GRAFANA_URL:-http://localhost:3000}"
+echo "  Grafana dashboard: ${GRAFANA_BASE_URL%/}/d/academy-overview/academy-servers-and-test-history"
 
 # Open both reports when running interactively (never in CI / the container,
 # where CI=true is set and show-report would block forever).

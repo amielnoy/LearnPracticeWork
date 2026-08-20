@@ -18,6 +18,7 @@ from .config import env, positive_int
 from .database import find_course_access, initialize_database, record_purchase
 from .google_auth import GoogleUser, verify_google_id_token
 from .integrations import stripe_client, stripe_credentials
+from .metrics import RequestTimer, metrics_authorized, prometheus_response
 from .rate_limit import MemoryRateLimiter
 from .relay import relay_api_request, upstream_api_base_url
 from .sessions import COOKIE_NAME, create_session, read_session, sessions_configured
@@ -84,6 +85,27 @@ async def request_size_limit(request: Request, call_next):
         if upstream := upstream_api_base_url():
             return await relay_api_request(request, upstream)
     return await call_next(request)
+
+
+@app.middleware("http")
+async def record_http_metrics(request: Request, call_next):
+    if request.url.path == "/metrics":
+        return await call_next(request)
+    with RequestTimer(request) as timer:
+        try:
+            response = await call_next(request)
+        except Exception:
+            timer.finish(500)
+            raise
+        timer.finish(response.status_code)
+        return response
+
+
+@app.get("/metrics", include_in_schema=False)
+async def metrics(authorization: Annotated[str | None, Header()] = None):
+    if not metrics_authorized(authorization):
+        return JSONResponse({"error": "Not found"}, status_code=404)
+    return prometheus_response()
 
 
 @app.exception_handler(ValidationError)
