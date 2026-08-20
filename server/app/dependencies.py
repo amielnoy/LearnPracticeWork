@@ -27,7 +27,7 @@ from .errors import ServiceError
 from .google_auth import GoogleUser, verify_google_id_token
 from .rate_limit import SharedRateLimiter
 from .sessions import read_session
-from .settings import BURST_LIMIT, BURST_WINDOW, DAILY_QUOTA
+from .settings import BURST_LIMIT, BURST_WINDOW, DAILY_QUOTA, TRUSTED_PROXY_HOPS
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +51,41 @@ def bearer_token(authorization: str | None) -> str:
     return token.strip() if separator and scheme.lower() == "bearer" else ""
 
 
+def _forwarded_for(request: Request) -> str | None:
+    """The caller's address from X-Forwarded-For, counting from the right.
+
+    Everything a client sends itself lands at the left of this header, so the
+    only entries worth reading are the ones our own infrastructure appended.
+    `TRUSTED_PROXY_HOPS` says how many of those there are; a list too short to
+    have that many falls back to its leftmost entry, which is the closest thing
+    to the caller that exists.
+    """
+    entries = [
+        value.strip()
+        for value in request.headers.get("x-forwarded-for", "").split(",")
+        if value.strip()
+    ]
+    if not entries:
+        return None
+    index = len(entries) - 1 - TRUSTED_PROXY_HOPS
+    return entries[index] if index >= 0 else entries[0]
+
+
 def client_ip(request: Request) -> str:
-    # Fly terminates TLS and supplies this header itself. It is accepted only in
-    # production; local/test callers cannot forge a different quota identity.
+    """Who to charge a quota to, when there is no signed-in identity to use.
+
+    Read from a forwarded header only in production, where a proxy we control is
+    the one writing it; a local caller cannot forge a different quota identity.
+    The socket address is the last resort and behind a proxy it names the proxy,
+    not the caller — which is how anonymous callers ended up sharing, and
+    shuffling between, each other's quota buckets.
+    """
     if os.getenv("NODE_ENV") == "production":
+        # Fly terminates TLS and supplies this header itself.
         if forwarded := request.headers.get("fly-client-ip", "").strip():
             return forwarded
+        if forwarded_for := _forwarded_for(request):
+            return forwarded_for
     return request.client.host if request.client else "unknown"
 
 
