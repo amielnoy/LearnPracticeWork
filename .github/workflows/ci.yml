@@ -1,5 +1,31 @@
 name: CI
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  gate ──▶ test ──┬──▶ build-pages ──▶ deploy-pages
+#                  └──▶ publish-allure
+#
+#  gate           Answers one question — should this run at all? The nightly
+#                 schedule fires twice and this drops the firing that is not
+#                 05:00 in Israel. Everything else waits on its answer.
+#
+#  test           Every push and every PR. Typecheck, lint, format, then the six
+#                 test layers as separate steps so a failure names the layer.
+#                 One job, not six: each would pay for its own install and its
+#                 own browser download, which costs more than the layers take.
+#
+#  build-pages    main only. Builds the portfolio at the site root and mounts
+#                 the academy and all ten decks underneath it.
+#  deploy-pages   main only. Publishes what build-pages produced.
+#  publish-allure main only. Pushes the report to its own repository, so test
+#                 results keep their own URL and never land on the site.
+#
+#  Two rules make the reports trustworthy:
+#    · every layer carries `if: !cancelled()`, so one red layer never hides the
+#      rest — the report covers the whole run or it is not worth reading;
+#    · publishing does not depend on the tests passing, because a report you
+#      cannot open when the build is red is missing exactly when it is needed.
+# ─────────────────────────────────────────────────────────────────────────────
+
 # Runs on every push and pull request, plus a nightly check at 05:00 Israel
 # time. GitHub cron only understands UTC and Israel switches between UTC+2 and
 # UTC+3, so both candidate hours are scheduled and the `gate` job drops the one
@@ -53,19 +79,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: Resolve the Playwright version
         id: playwright
@@ -75,7 +94,7 @@ jobs:
 
       - name: Restore the browser download
         id: browser-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
@@ -225,19 +244,12 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
       # Turns Pages on if it is not already. Without this the whole pipeline
       # runs green and only the final deploy fails, with a 404 from the Pages
