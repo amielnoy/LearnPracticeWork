@@ -8,7 +8,7 @@
 
 ## Out of scope
 
-- API Server (`artifacts/api-server/`) — backend API, not a public-facing web page
+- API Server (`server/`) — backend API, not a public-facing web page
 
 ## Target audience
 

@@ -64,8 +64,8 @@ Postgres already in use) before changing that.
 ### First deploy
 
 ```bash
-fly launch --no-deploy --config artifacts/api-server/fly.toml \
-  --dockerfile artifacts/api-server/Dockerfile
+fly launch --no-deploy --config server/fly.toml \
+  --dockerfile server/Dockerfile
 
 fly secrets set \
   GEMINI_API_KEY=... \
@@ -74,8 +74,8 @@ fly secrets set \
   SUPABASE_SERVICE_ROLE_KEY=... \
   STRIPE_SECRET_KEY=...
 
-fly deploy --config artifacts/api-server/fly.toml \
-  --dockerfile artifacts/api-server/Dockerfile .
+fly deploy --config server/fly.toml \
+  --dockerfile server/Dockerfile .
 ```
 
 The trailing `.` matters: the build context is the repository root, because the
@@ -106,7 +106,7 @@ unaffected.
 
 ### The image
 
-`artifacts/api-server/Dockerfile`, not the one at the repository root — that one
+`server/Dockerfile`, not the one at the repository root — that one
 builds the Playwright test image and its `CMD` runs the suite.
 
 `build.ts` bundles the server with esbuild into a self-contained

@@ -835,7 +835,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, <code>/api</code> routed on the same origin.</dd>
   <dt>GitHub Pages</dt><dd><code>.github/workflows/ci.yml</code> — <code>BASE_PATH=/&lt;repo&gt;/ai-testing-academy/</code>, built and published on every push to <code>main</code>.</dd>
   <dt>Cloudflare Pages</dt><dd>Same artifact. <code>deploy/cloudflare/_redirects</code> and <code>_headers</code> are copied into the site root by the same job; GitHub Pages ignores both, so one output deploys to either host.</dd>
-  <dt>Fly.io</dt><dd><code>artifacts/api-server/{Dockerfile,fly.toml}</code> — the API, separately, because it is the only piece that costs anything to run. <code>deploy/README.md</code> is the runbook.</dd>
+  <dt>Fly.io</dt><dd><code>server/{Dockerfile,fly.toml}</code> — the API, separately, because it is the only piece that costs anything to run. <code>deploy/README.md</code> is the runbook.</dd>
 </dl>
 
 <p>
@@ -861,7 +861,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <div class="callout">
   <b>The API image is not the one at the repository root.</b> That one builds the Playwright
   test image and its <code>CMD</code> runs the suite.
-  <code>artifacts/api-server/Dockerfile</code> ships the server, and its runtime stage is
+  <code>server/Dockerfile</code> ships the server, and its runtime stage is
   unusually thin: <code>build.ts</code> already bundles the whole server — workspace packages,
   express, drizzle, supabase — with esbuild into a self-contained
   <code>dist/index.mjs</code>, so the image copies <code>dist/</code> and nothing else. No

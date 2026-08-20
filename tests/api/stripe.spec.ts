@@ -45,7 +45,7 @@ test.describe('POST /api/stripe/webhook', () => {
     // `express.json()` running first would turn the payload into an object and
     // the handler would answer with the "Payload must be a Buffer" error
     // instead of a signature failure. This asserts the registration order in
-    // artifacts/api-server/src/app.ts still holds.
+    // server/src/app.ts still holds.
     const response = await api.post('/api/stripe/webhook', {
       headers: {
         'content-type': 'application/json',

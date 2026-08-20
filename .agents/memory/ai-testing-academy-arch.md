@@ -34,7 +34,7 @@ migration unchanged.
 The site originally shipped with client-side code that did
 `fetch('../.env')` to read a default AI API key — meaning any site visitor
 could see the key via devtools/view source. This was replaced with a
-backend proxy: `artifacts/api-server` holds `GEMINI_API_KEY` as a Replit
+backend proxy: `server` holds `GEMINI_API_KEY` as a Replit
 Secret and exposes `GET /api/ai/config` (availability only) and
 `POST /api/ai/generate` (does the actual call). The client only proxies
 through the backend when the visitor has not supplied their own key: BYOK

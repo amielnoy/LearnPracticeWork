@@ -38,7 +38,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 
 ## Server environment
 
-`artifacts/api-server` reads these. Everything except `PORT` is optional, and each one that is
+`server` reads these. Everything except `PORT` is optional, and each one that is
 absent disables a feature rather than breaking the server — which is what lets the suite run
 three differently-configured instances side by side.
 
@@ -86,7 +86,7 @@ throughout — the unit project executes TypeScript in Node without launching a 
 | --- | --- | --- |
 | `tests/unit` | Node | Pure logic in `artifacts/ai-testing-academy/src/lib` |
 | `tests/component` | Chromium, desktop + mobile (Playwright CT) | Real React components, mounted and driven |
-| `tests/api` | Node → live server | `artifacts/api-server` over HTTP |
+| `tests/api` | Node → live server | `server` over HTTP |
 | `tests/contract` | Node → live server | `openapi.yaml` ↔ generated Zod ↔ the running server |
 | `tests/e2e` | Chromium, desktop + mobile | The academy app on its own Vite server, via page objects |
 
@@ -158,7 +158,7 @@ the e2e layer — would not boot. Chromium also needs a roomy `/dev/shm`; compos
 
 ### Known gap
 
-`pnpm run typecheck` currently fails in `artifacts/api-server` and `scripts` — pre-existing
+`pnpm run typecheck` currently fails in `server` and `scripts` — pre-existing
 errors unrelated to the tests. CI typechecks everything else; see the comment in `ci.yml`.
 
 ## Deployment

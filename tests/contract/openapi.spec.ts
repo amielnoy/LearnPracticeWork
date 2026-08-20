@@ -80,7 +80,7 @@ test.describe('the spec itself', () => {
   });
 
   test('is served from the path the server mounts its router on', () => {
-    // artifacts/api-server/src/app.ts does app.use("/api", router)
+    // server/src/app.ts does app.use("/api", router)
     expect(basePath).toBe('/api');
   });
 });

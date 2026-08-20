@@ -103,7 +103,7 @@ carries `if: !cancelled()` so a failure in one layer still leaves the others in 
 
 ### api / contract
 
-`support/start-api-servers.ts` builds `artifacts/api-server` once and starts three instances:
+`support/start-api-servers.ts` builds `server` once and starts three instances:
 
 | Port | Configured with | Why |
 | --- | --- | --- |

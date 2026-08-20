@@ -32,7 +32,7 @@ COPY lib/api-spec/package.json      lib/api-spec/
 COPY lib/api-zod/package.json       lib/api-zod/
 COPY lib/db/package.json            lib/db/
 COPY lib/api-client-react/package.json lib/api-client-react/
-COPY artifacts/api-server/package.json artifacts/api-server/
+COPY server/package.json server/
 
 # The root manifest carries `stripe` and `stripe-replit-sync`, which
 # `src/index.ts` imports, so the root package is installed alongside the server
@@ -40,7 +40,7 @@ COPY artifacts/api-server/package.json artifacts/api-server/
 RUN pnpm install --frozen-lockfile --filter "@workspace/api-server..." --filter "{.}"
 
 COPY lib/ lib/
-COPY artifacts/api-server/ artifacts/api-server/
+COPY server/ server/
 
 RUN pnpm --filter @workspace/api-server run build
 
@@ -53,7 +53,7 @@ ENV NODE_ENV=production
 # not land on root. Nothing here writes to disk, so the tree stays root-owned
 # and read-only to the process.
 WORKDIR /app
-COPY --from=builder --chown=root:root /app/artifacts/api-server/dist ./dist
+COPY --from=builder --chown=root:root /app/server/dist ./dist
 
 USER node
 

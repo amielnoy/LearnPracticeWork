@@ -1,7 +1,7 @@
 /**
  * Playwright `webServer` entrypoint for the api and contract suites.
  *
- * Builds `artifacts/api-server` once, then runs two instances of it:
+ * Builds `server` once, then runs two instances of it:
  *
  *   1. keyed   — has a (throwaway) Gemini key, an admin token and an OAuth
  *                client ID, so the body-validation and authenticated branches run
@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const apiServerDir = path.resolve(here, '..', '..', 'artifacts', 'api-server');
+const apiServerDir = path.resolve(here, '..', '..', 'server');
 
 const KEYLESS_PORT = process.env.TEST_API_PORT ?? '8788';
 const KEYED_PORT = process.env.TEST_API_PORT_KEYED ?? '8789';

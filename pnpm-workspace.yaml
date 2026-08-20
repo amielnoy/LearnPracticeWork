@@ -1,5 +1,8 @@
 packages:
+  # artifacts/* is the client side — the academy, the portfolio, the sandbox and
+  # the ten lecture decks. The one server lives at the top level beside them.
   - artifacts/*
+  - server
   - lib/*
   - lib/integrations/*
   - scripts

@@ -3,7 +3,7 @@
 # Deploy from the repository root, because the Docker build context has to
 # include `pnpm-workspace.yaml` and `lib/`:
 #
-#     fly deploy --config artifacts/api-server/fly.toml --dockerfile artifacts/api-server/Dockerfile .
+#     fly deploy --config server/fly.toml --dockerfile server/Dockerfile .
 #
 # Secrets are set once and stored by Fly, never committed:
 #
