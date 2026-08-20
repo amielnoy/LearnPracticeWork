@@ -1,9 +1,11 @@
 # AI Testing Academy
 
 A single-page React site that teaches QA automation and runs three AI-backed tools — resume
-review, mock interview, and question-bank enrichment — from the browser. There is no backend of
-its own: the visitor brings an API key, or the optional `api-server` in this monorepo proxies
-for them.
+review, mock interview, and question-bank enrichment — from the browser. The visitor brings an
+API key, or the optional `api-server` in this monorepo proxies for them. The server also exposes
+localized question-bank, coding-challenge, and lecture-series content from Supabase; the current
+UI still renders its bundled content modules, so the content API is ready for the migration
+rather than required for the static site to render.
 
 For the full architecture walkthrough, open `architecture.html` at the repo root.
 
@@ -32,14 +34,14 @@ src/
 ├── scripts/
 │   └── generate-prerender.ts rewrites the static block in index.html from the data below
 └── lib/
-    ├── locales/{en,he}.ts    every user-visible string, typed so the two stay in step
+    ├── locales/{en,he}.ts    UI strings and coding challenges, typed so the two stay in step
     ├── sections.ts           section order and numbering — the one list, see below
     ├── i18n.ts               language resolution, switching, <html lang/dir>
     ├── providers.ts          the provider registry and callAI
     ├── domUtils.ts           escaping, linkifying, markdown → plain text
     ├── challenges.ts         the challenge content model (types only)
-    ├── lectures.ts           the lecture catalogue, EN + HE, both tracks
-    └── questionBank.ts       interview questions, EN + HE, with hints and answers
+    ├── lectures.ts           the bundled lecture catalogue, EN + HE, both tracks
+    └── questionBank.ts       bundled interview questions, EN + HE, with hints and answers
 ```
 
 `lib/sections.ts` is the order of the page, and `HomePage.tsx` and `Nav.tsx` both render from
@@ -75,7 +77,8 @@ fails if any question ships without both.
 
 ## Multi-language
 
-All copy lives in `src/lib/locales/en.ts` and `he.ts`. `he.ts` is typed as `Locale` (the type
+UI copy and coding-challenge content live in `src/lib/locales/en.ts` and `he.ts`; lecture and
+question-bank data live in their dedicated modules. `he.ts` is typed as `Locale` (the type
 inferred from `en.ts`), so the compiler enumerates anything missing — `pnpm run typecheck` is
 the gate that keeps the two catalogs aligned.
 
@@ -144,6 +147,25 @@ pnpm --filter @workspace/ai-testing-academy run dev
 silently wrong base gives a blank page and 404s on every asset, so it fails at startup instead.
 Vite proxies `/api` to `localhost:$API_PORT` (default 8787); without `api-server` running, the
 AI panel decides no server key exists and offers bring-your-own-key only.
+
+### Content API
+
+The API server exposes the database-backed content contract under `/api/content`:
+
+| Endpoint | Response | Stored data |
+| --- | --- | --- |
+| `GET /api/content/question-bank?lang=en|he` | `QuestionBank` | stages and questions |
+| `GET /api/content/coding-challenges?lang=en|he` | `CodingChallenges` | levels and challenges |
+| `GET /api/content/lecture-series?lang=en|he` | `LectureSeries` | tracks and lectures |
+
+`lang` defaults to `en`; any value other than `en` or `he` also falls back to `en`. A missing
+or unavailable Supabase content store returns `503` with the fixed body
+`{"error":"Content temporarily unavailable"}`. The OpenAPI contract is
+`lib/api-spec/openapi.yaml`; regenerate the React and Zod clients after changing it:
+
+```bash
+pnpm --filter @workspace/api-spec run codegen
+```
 
 ## Tests
 
