@@ -4,7 +4,6 @@ from types import SimpleNamespace
 
 import pytest
 
-from app import main as main_module
 from app.integrations import stripe_credentials
 
 
@@ -97,7 +96,7 @@ async def test_checkout_rejects_a_client_supplied_price(
 async def test_webhook_does_not_grant_access_for_a_different_stripe_price(
     api_client,
     course_sales_environment,
-    monkeypatch: pytest.MonkeyPatch,
+    stripe_webhook_gateway,
 ) -> None:
     event = SimpleNamespace(
         type="checkout.session.completed",
@@ -120,25 +119,7 @@ async def test_webhook_does_not_grant_access_for_a_different_stripe_price(
         payment_intent="pi_fixture",
         customer="cus_fixture",
     )
-    recorded: list[dict] = []
-
-    async def credentials() -> tuple[str, str]:
-        return "sk_test_fixture", "whsec_fixture"
-
-    async def record(values: dict) -> None:
-        recorded.append(values)
-
-    client = SimpleNamespace(
-        v1=SimpleNamespace(
-            checkout=SimpleNamespace(
-                sessions=SimpleNamespace(retrieve=lambda *_args, **_kwargs: full)
-            )
-        )
-    )
-    monkeypatch.setattr(main_module, "stripe_credentials", credentials)
-    monkeypatch.setattr(main_module.stripe.Webhook, "construct_event", lambda *_args: event)
-    monkeypatch.setattr(main_module.stripe, "StripeClient", lambda _key: client)
-    monkeypatch.setattr(main_module, "record_purchase", record)
+    recorded = stripe_webhook_gateway(event=event, checkout_session=full)
 
     response = await api_client.post(
         "/api/stripe/webhook",
@@ -154,7 +135,7 @@ async def test_webhook_does_not_grant_access_for_a_different_stripe_price(
 async def test_webhook_grants_access_only_for_the_approved_catalog(
     api_client,
     course_sales_environment,
-    monkeypatch: pytest.MonkeyPatch,
+    stripe_webhook_gateway,
 ) -> None:
     event = SimpleNamespace(
         type="checkout.session.completed",
@@ -180,25 +161,7 @@ async def test_webhook_grants_access_only_for_the_approved_catalog(
         payment_intent="pi_fixture",
         customer="cus_fixture",
     )
-    recorded: list[dict] = []
-
-    async def credentials() -> tuple[str, str]:
-        return "sk_test_fixture", "whsec_fixture"
-
-    async def record(values: dict) -> None:
-        recorded.append(values)
-
-    client = SimpleNamespace(
-        v1=SimpleNamespace(
-            checkout=SimpleNamespace(
-                sessions=SimpleNamespace(retrieve=lambda *_args, **_kwargs: full)
-            )
-        )
-    )
-    monkeypatch.setattr(main_module, "stripe_credentials", credentials)
-    monkeypatch.setattr(main_module.stripe.Webhook, "construct_event", lambda *_args: event)
-    monkeypatch.setattr(main_module.stripe, "StripeClient", lambda _key: client)
-    monkeypatch.setattr(main_module, "record_purchase", record)
+    recorded = stripe_webhook_gateway(event=event, checkout_session=full)
 
     response = await api_client.post(
         "/api/stripe/webhook",
