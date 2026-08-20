@@ -128,15 +128,33 @@ def _hit_rate_limit(
 
 
 async def find_course_access(
-    subject: str | None, email: str | None, product_id: str
+    subject: str | None,
+    email: str | None,
+    product_id: str,
+    price_id: str,
+    amount_total: int,
+    currency: str,
 ) -> tuple[bool, datetime | None] | None:
     if not database_url():
         return None
-    return await asyncio.to_thread(_find_course_access, subject, email, product_id)
+    return await asyncio.to_thread(
+        _find_course_access,
+        subject,
+        email,
+        product_id,
+        price_id,
+        amount_total,
+        currency,
+    )
 
 
 def _find_course_access(
-    subject: str | None, email: str | None, product_id: str
+    subject: str | None,
+    email: str | None,
+    product_id: str,
+    price_id: str,
+    amount_total: int,
+    currency: str,
 ) -> tuple[bool, datetime | None]:
     clauses, params = [], []
     if subject:
@@ -149,9 +167,10 @@ def _find_course_access(
         return False, None
     with psycopg.connect(database_url(), row_factory=tuple_row) as connection:
         row = connection.execute(
-            f"SELECT purchased_at FROM course_purchases WHERE product_id = %s AND "
+            f"SELECT purchased_at FROM course_purchases WHERE product_id = %s "
+            f"AND price_id = %s AND amount_total = %s AND currency = %s AND "
             f"({' OR '.join(clauses)}) "
             "ORDER BY purchased_at DESC LIMIT 1",
-            [product_id, *params],
+            [product_id, price_id, amount_total, currency, *params],
         ).fetchone()
     return (row is not None, row[0] if row else None)

@@ -855,7 +855,14 @@ async def entitlements(
             return JSONResponse(
                 {"error": "Course sales are not currently available."}, status_code=503
             )
-        access = await find_course_access(user.subject, user.email, sales[1])
+        access = await find_course_access(
+            user.subject,
+            user.email,
+            product_id=sales[1],
+            price_id=sales[0],
+            amount_total=sales[2],
+            currency=sales[3],
+        )
         if access is None:
             return JSONResponse(
                 {"error": "Purchase records are unavailable on this server."}, status_code=503
