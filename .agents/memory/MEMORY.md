@@ -5,3 +5,4 @@
 - [Academy Supabase content wiring](academy-supabase-content-wiring.md) — content fetch-with-silent-fallback contract, and a seed-vs-runtime data-integrity lesson.
 - [Playwright CT named-import bundler collision](rolldown-ct-namespace-import-workaround.md) — a named import can break rolldown-vite's CT bundle; use a namespace import as a workaround.
 - This project prefers a small static constants class over magic numbers for cross-cutting enums like HTTP status codes — keep new call sites consistent with whatever convention already exists.
+- [Artifact service commands resolve relative to artifact dir](artifact-toml-relative-paths.md) — a `run`/`args` path like `cd server` in artifact.toml resolves against `artifacts/<slug>/`, not workspace root; use `../../server` style paths.
