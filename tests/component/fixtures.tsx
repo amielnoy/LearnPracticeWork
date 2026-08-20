@@ -71,6 +71,7 @@ interface GoogleStubWindow extends Window {
     clientId?: string;
     locales: string[];
     autoSelectDisabled: boolean;
+    useFedcmForButton?: boolean;
   };
   __credential?: string;
 }
@@ -92,7 +93,12 @@ type GoogleSignInHarness = {
   /** Starts sign-in and holds the API response until the returned function runs. */
   beginSignInWith: (credential: string) => Promise<() => Promise<void>>;
   /** What the stubbed Google client was told and asked to do. */
-  stub: () => Promise<{ clientId?: string; locales: string[]; autoSelectDisabled: boolean }>;
+  stub: () => Promise<{
+    clientId?: string;
+    locales: string[];
+    autoSelectDisabled: boolean;
+    useFedcmForButton?: boolean;
+  }>;
 };
 
 /**
@@ -112,6 +118,7 @@ const GOOGLE_STUB = `
         initialize(config) {
           window.__gsi.clientId = config.client_id;
           window.__gsi.callback = config.callback;
+          window.__gsi.useFedcmForButton = config.use_fedcm_for_button === true;
         },
         renderButton(parent, options) {
           window.__gsi.locales.push(options.locale);

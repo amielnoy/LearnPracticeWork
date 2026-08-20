@@ -37,6 +37,12 @@ export interface GoogleIdentityApi {
     callback: (response: GoogleCredentialResponse) => void;
     auto_select?: boolean;
     cancel_on_tap_outside?: boolean;
+    /**
+     * Let the browser mediate the sign-in dialog instead of opening a popup to
+     * accounts.google.com. Where FedCM is unavailable, Google falls back to the
+     * popup flow on its own, so this is safe to ask for unconditionally.
+     */
+    use_fedcm_for_button?: boolean;
   }): void;
   renderButton(parent: HTMLElement, options: GoogleButtonOptions): void;
   disableAutoSelect(): void;
