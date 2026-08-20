@@ -310,27 +310,61 @@ jobs:
           BASE_PATH: ${{ steps.base.outputs.prefix }}/ai-testing-academy/
         run: pnpm --filter @workspace/ai-testing-academy run build
 
-      - name: Build lecture 1
+      # All ten, not just the first. The academy's lecture catalogue links every
+      # one of them, so building only lecture 1 left nine "Open lecture" links
+      # reachable on exactly one host — the Replit deployment — and 404 here.
+      # A loop rather than ten near-identical steps: the only thing that varies
+      # is the number, and a copied step is where the eleventh lecture gets
+      # forgotten.
+      - name: Build the lecture decks
         env:
-          PORT: '5175'
-          BASE_PATH: ${{ steps.base.outputs.prefix }}/ai-testing-lecture-1/
-        run: pnpm --filter @workspace/ai-testing-lecture-1 run build
+          PREFIX: ${{ steps.base.outputs.prefix }}
+        run: |
+          set -euo pipefail
+          for n in $(seq 1 10); do
+            echo "::group::lecture $n"
+            # PORT is required by every artifact's vite.config.ts even for a
+            # build, which never listens; the value only has to parse.
+            PORT=$((5174 + n)) BASE_PATH="${PREFIX}/ai-testing-lecture-${n}/" \
+              pnpm --filter "@workspace/ai-testing-lecture-${n}" run build
+            echo "::endgroup::"
+          done
 
       - name: Assemble the site
         run: |
           set -euo pipefail
           mkdir -p _site
           cp -R artifacts/portfolio/dist/public/. _site/
-          mkdir -p _site/ai-testing-academy _site/ai-testing-lecture-1
+          mkdir -p _site/ai-testing-academy
           cp -R artifacts/ai-testing-academy/dist/public/. _site/ai-testing-academy/
-          cp -R artifacts/ai-testing-lecture-1/dist/public/. _site/ai-testing-lecture-1/
+          for n in $(seq 1 10); do
+            mkdir -p "_site/ai-testing-lecture-${n}"
+            cp -R "artifacts/ai-testing-lecture-${n}/dist/public/." "_site/ai-testing-lecture-${n}/"
+          done
           cp architecture.html _site/architecture.html
           # The Allure report is deliberately NOT copied here — it is published to
           # a separate repository's Pages by the `publish-allure` job, so it never
           # lands on the portfolio site.
-          # Client-side routing: Pages has no rewrite rules, so an unknown path
-          # has to fall back to the portfolio shell the way Replit's rewrite does.
+          # Client-side routing. Pages has no rewrite rules, so an unknown path
+          # is served the nearest 404.html — which is why each app gets its own
+          # copy of its own shell rather than sharing the portfolio's.
+          #
+          # It matters most for the decks: their routes are `/slide<N>`, no such
+          # file is ever built, and the academy's hreflang tags point Google
+          # directly at `/ai-testing-lecture-1/slide1?lang=en`. With only a root
+          # 404.html, every one of those deep links landed on the portfolio.
           cp _site/index.html _site/404.html
+          cp _site/ai-testing-academy/index.html _site/ai-testing-academy/404.html
+          for n in $(seq 1 10); do
+            cp "_site/ai-testing-lecture-${n}/index.html" "_site/ai-testing-lecture-${n}/404.html"
+          done
+
+          # Cloudflare Pages reads these two from the output root and ignores
+          # them elsewhere; GitHub Pages ignores them entirely. Shipping both
+          # means the same artifact deploys to either host — the rewrites below
+          # are what make deep links work properly rather than via 404 fallback.
+          cp deploy/cloudflare/_redirects _site/_redirects
+          cp deploy/cloudflare/_headers _site/_headers
           # Stops Pages from running the output through Jekyll, which would drop
           # any file or directory beginning with an underscore.
           touch _site/.nojekyll
