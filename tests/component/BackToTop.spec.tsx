@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/experimental-ct-react';
 import { LocaleProvider } from '@academy/context/LocaleContext';
-import { BackToTop } from '@academy/components/BackToTop';
+import { BackToTop } from '@academy/components/chrome/BackToTop';
 import { en } from '@academy/lib/locales';
 
 /**

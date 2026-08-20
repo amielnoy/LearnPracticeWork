@@ -4,10 +4,10 @@ import type { ReactNode } from 'react';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProviderContextProvider } from '@academy/context/ProviderContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';
-import { ConnectionSetup } from '@academy/components/ConnectionSetup';
-import { QuestionBank } from '@academy/components/QuestionBank';
-import { ResumeAgent } from '@academy/components/ResumeAgent';
-import { GoogleSignIn } from '@academy/components/GoogleSignIn';
+import { ConnectionSetup } from '@academy/components/agents/ConnectionSetup';
+import { QuestionBank } from '@academy/components/practice/QuestionBank';
+import { ResumeAgent } from '@academy/components/agents/ResumeAgent';
+import { GoogleSignIn } from '@academy/components/account/GoogleSignIn';
 import { AuthProvider } from '@academy/context/AuthContext';
 
 /**

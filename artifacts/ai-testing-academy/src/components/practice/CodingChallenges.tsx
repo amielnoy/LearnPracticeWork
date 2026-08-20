@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { useLocale } from '../context/LocaleContext';
-import { useReveal } from '../hooks/useReveal';
+import { useLocale } from '../../context/LocaleContext';
+import { useReveal } from '../../hooks/useReveal';
 import { ChallengeCard } from './ChallengeCard';
-import type { ChallengeLabels } from '../lib/challenges';
-import { useProgress } from '../context/ProgressContext';
-import { sectionNum } from '../lib/sections';
+import type { ChallengeLabels } from '../../lib/challenges';
+import { useProgress } from '../../context/ProgressContext';
+import { sectionNum } from '../../lib/sections';
 
 /**
  * The challenge section: three levels of increasing difficulty, each a list of

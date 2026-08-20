@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocale } from '../context/LocaleContext';
+import { useLocale } from '../../context/LocaleContext';
 
 export function BackToTop() {
   const { locale } = useLocale();

@@ -1,13 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useLocale } from '../context/LocaleContext';
-import { useProviderContext } from '../context/ProviderContext';
-import { isRtlText, linkifyHtml, pdfItemsToText } from '../lib/domUtils';
-import { pdfFromText, pdfFromRtlText, type JsPdfInstance } from '../lib/resumePdf';
-import { useReveal } from '../hooks/useReveal';
-import { useProgress } from '../context/ProgressContext';
-import { sectionNum } from '../lib/sections';
+import { useLocale } from '../../context/LocaleContext';
+import { useProviderContext } from '../../context/ProviderContext';
+import { isRtlText, linkifyHtml, pdfItemsToText } from '../../lib/domUtils';
+import { pdfFromText, pdfFromRtlText, type JsPdfInstance } from '../../lib/resumePdf';
+import { useReveal } from '../../hooks/useReveal';
+import { useProgress } from '../../context/ProgressContext';
+import { sectionNum } from '../../lib/sections';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { readText, writeRaw } from '../lib/storage';
+import { readText, writeRaw } from '../../lib/storage';
 
 /**
  * Caps on what is reinstated from a saved draft.

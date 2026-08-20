@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef, type RefObject } from 'react';
-import { useLocale } from '../context/LocaleContext';
-import { GoogleSignIn } from './GoogleSignIn';
-import { SECTIONS } from '../lib/sections';
+import { useLocale } from '../../context/LocaleContext';
+import { GoogleSignIn } from '../account/GoogleSignIn';
+import { SECTIONS } from '../../lib/sections';
 
 /**
  * The width at which the sidebar becomes a drawer.

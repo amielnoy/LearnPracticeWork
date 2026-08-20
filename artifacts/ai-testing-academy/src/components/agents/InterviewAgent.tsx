@@ -1,12 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useLocale } from '../context/LocaleContext';
-import { useProviderContext } from '../context/ProviderContext';
-import { useReveal } from '../hooks/useReveal';
-import { useVoice } from '../hooks/useVoice';
-import type { Message } from '../lib/providers';
-import { useProgress } from '../context/ProgressContext';
-import { sectionNum } from '../lib/sections';
-import { readValidated, removeRaw, writeValidated } from '../lib/storage';
+import { useLocale } from '../../context/LocaleContext';
+import { useProviderContext } from '../../context/ProviderContext';
+import { useReveal } from '../../hooks/useReveal';
+import { useVoice } from '../../hooks/useVoice';
+import type { Message } from '../../lib/providers';
+import { useProgress } from '../../context/ProgressContext';
+import { sectionNum } from '../../lib/sections';
+import { readValidated, removeRaw, writeValidated } from '../../lib/storage';
 
 interface ChatMsg {
   cls: 'ai' | 'user' | 'sys';

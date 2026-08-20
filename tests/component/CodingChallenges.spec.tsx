@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/experimental-ct-react';
 import type { Locator } from '@playwright/test';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';
-import { CodingChallenges } from '@academy/components/CodingChallenges';
+import { CodingChallenges } from '@academy/components/practice/CodingChallenges';
 import { en } from '@academy/lib/locales';
 
 /**

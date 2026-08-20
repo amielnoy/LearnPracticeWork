@@ -1,8 +1,8 @@
-import { useLocale } from '../context/LocaleContext';
-import { useProviderContext } from '../context/ProviderContext';
-import { PROVIDERS } from '../lib/providers';
-import { useReveal } from '../hooks/useReveal';
-import { sectionNum } from '../lib/sections';
+import { useLocale } from '../../context/LocaleContext';
+import { useProviderContext } from '../../context/ProviderContext';
+import { PROVIDERS } from '../../lib/providers';
+import { useReveal } from '../../hooks/useReveal';
+import { sectionNum } from '../../lib/sections';
 
 export function ConnectionSetup({
   collapsed = false,

@@ -1,7 +1,7 @@
-import { useLocale } from '../context/LocaleContext';
-import { useProgress, type ToolId } from '../context/ProgressContext';
-import { useProviderContext } from '../context/ProviderContext';
-import { EN_BANK, HE_BANK } from '../lib/questionBank';
+import { useLocale } from '../../context/LocaleContext';
+import { useProgress, type ToolId } from '../../context/ProgressContext';
+import { useProviderContext } from '../../context/ProviderContext';
+import { EN_BANK, HE_BANK } from '../../lib/questionBank';
 
 const TOOL_LINKS: Record<ToolId, string> = {
   resume: '#resume',

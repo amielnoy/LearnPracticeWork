@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';
 import { ProviderContextProvider } from '@academy/context/ProviderContext';
-import { InterviewAgent } from '@academy/components/InterviewAgent';
+import { InterviewAgent } from '@academy/components/agents/InterviewAgent';
 
 /**
  * What the interview restores from storage, and what it refuses to.

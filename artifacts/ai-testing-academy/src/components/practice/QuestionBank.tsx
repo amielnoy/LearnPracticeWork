@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react';
-import { useLocale } from '../context/LocaleContext';
-import { useProviderContext } from '../context/ProviderContext';
-import { useReveal } from '../hooks/useReveal';
+import { useLocale } from '../../context/LocaleContext';
+import { useProviderContext } from '../../context/ProviderContext';
+import { useReveal } from '../../hooks/useReveal';
 import { QuestionCard } from './QuestionCard';
-import { EN_BANK, HE_BANK } from '../lib/questionBank';
-import { useProgress } from '../context/ProgressContext';
-import { sectionNum } from '../lib/sections';
+import { EN_BANK, HE_BANK } from '../../lib/questionBank';
+import { useProgress } from '../../context/ProgressContext';
+import { sectionNum } from '../../lib/sections';
 
 const SEED_KEYWORDS =
   'AI dev, AI test automation, Playwright, pytest, Page Object Model, flaky tests, CI/CD, Docker, API testing, SDET, AI/LLM testing';

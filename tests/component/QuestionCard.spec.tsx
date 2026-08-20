@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/experimental-ct-react';
-import { QuestionCard } from '@academy/components/QuestionCard';
+import { QuestionCard } from '@academy/components/practice/QuestionCard';
 import type { QuestionItem, QuestionLabels } from '@academy/lib/questionBank';
 
 /**

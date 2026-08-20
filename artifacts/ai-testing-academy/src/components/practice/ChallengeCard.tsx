@@ -1,5 +1,5 @@
-import { useDisclosure } from '../hooks/useDisclosure';
-import type { Challenge, ChallengeLabels } from '../lib/challenges';
+import { useDisclosure } from '../../hooks/useDisclosure';
+import type { Challenge, ChallengeLabels } from '../../lib/challenges';
 
 /** Disclosure stages: the prompt alone, then the hint, then the solution. */
 const HINT = 1;

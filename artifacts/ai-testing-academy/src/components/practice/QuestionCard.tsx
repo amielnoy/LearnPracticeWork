@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from 'react';
-import { useDisclosure } from '../hooks/useDisclosure';
-import type { QuestionItem, QuestionLabels } from '../lib/questionBank';
+import { useDisclosure } from '../../hooks/useDisclosure';
+import type { QuestionItem, QuestionLabels } from '../../lib/questionBank';
 
 /** Disclosure stages: the question alone, then the hint, then the full answer. */
 const HINT = 1;

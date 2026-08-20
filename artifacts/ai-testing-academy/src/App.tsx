@@ -1,7 +1,7 @@
 import { Switch, Route, Router as WouterRouter } from 'wouter';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { ErrorBoundary } from './components/chrome/ErrorBoundary';
 import { LocaleProvider } from './context/LocaleContext';
 import { ProviderContextProvider } from './context/ProviderContext';
 import { ProgressProvider } from './context/ProgressContext';

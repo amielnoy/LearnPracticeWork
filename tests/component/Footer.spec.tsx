@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/experimental-ct-react';
 import { LocaleProvider } from '@academy/context/LocaleContext';
-import { Footer } from '@academy/components/Footer';
+import { Footer } from '@academy/components/chrome/Footer';
 import { en } from '@academy/lib/locales';
 
 /**

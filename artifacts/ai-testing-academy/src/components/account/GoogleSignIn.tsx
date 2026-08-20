@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useLocale } from '../context/LocaleContext';
+import { useAuth } from '../../context/AuthContext';
+import { useLocale } from '../../context/LocaleContext';
 
 /**
  * Sign in with Google, for the navigation drawer.

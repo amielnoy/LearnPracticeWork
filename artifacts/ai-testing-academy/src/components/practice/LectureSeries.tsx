@@ -1,7 +1,7 @@
-import { useLocale } from '../context/LocaleContext';
-import { useReveal } from '../hooks/useReveal';
-import { sectionNum } from '../lib/sections';
-import { EN, HE, type BankData, type LectureData } from '../lib/lectures';
+import { useLocale } from '../../context/LocaleContext';
+import { useReveal } from '../../hooks/useReveal';
+import { sectionNum } from '../../lib/sections';
+import { EN, HE, type BankData, type LectureData } from '../../lib/lectures';
 
 function LectureCard({ lec, bank }: { lec: LectureData; bank: BankData }) {
   return (
