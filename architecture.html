@@ -22,7 +22,9 @@
     }
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  /* Guarded: a reader who has asked the OS to reduce motion should not be
+     thrown down a 15,000px page by a table-of-contents click. */
+  @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
   body{
     margin:0; background:var(--bg); color:var(--fg);
     font:15.5px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -50,7 +52,62 @@
   a{color:var(--accent);text-decoration:none}
   a:hover{text-decoration:underline}
 
+  /* ---- High-level block diagram ------------------------------------------
+     A pastel palette, defined once as tokens so the light and dark themes each
+     get a set that sits correctly on their own background rather than one set
+     tinted twice. Pastels are pale by definition, so every one of them carries
+     dark ink in light mode and the fills darken in dark mode — the label is
+     what has to stay readable, not the swatch. */
+  .blocks{--c-client:#dbeafe;--c-client-ink:#1e3a5f;--c-client-line:#93b4e8;
+          --c-server:#dcf3e8;--c-server-ink:#14532d;--c-server-line:#8fcfae;
+          --c-shared:#f3e8ff;--c-shared-ink:#4c1d78;--c-shared-line:#c4a5e8;
+          --c-out:#ffe9d6;--c-out-ink:#7c3a06;--c-out-line:#f0bd8a;
+          --c-edge:#9aa4b2;
+          margin:26px 0 6px}
+  @media (prefers-color-scheme: dark){
+    .blocks{--c-client:#1c2c46;--c-client-ink:#bcd4f7;--c-client-line:#33507e;
+            --c-server:#163024;--c-server-ink:#a9e3c4;--c-server-line:#2c5a42;
+            --c-shared:#2a1f3d;--c-shared-ink:#d6bdf5;--c-shared-line:#4a3568;
+            --c-out:#3a2717;--c-out-ink:#f2caa2;--c-out-line:#6b4526;
+            --c-edge:#5b6675}
+  }
+  .blocks svg{width:100%;height:auto;display:block}
+  .blocks .bx{stroke-width:1.5;rx:10}
+  .blocks .lbl{font:600 13px ui-sans-serif,system-ui,sans-serif}
+  .blocks .sub{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.85}
+  .blocks .grp{font:700 10.5px ui-sans-serif,system-ui,sans-serif;letter-spacing:.1em;
+               text-transform:uppercase;fill:var(--muted)}
+  .blocks .edge{stroke:var(--c-edge);stroke-width:1.4;fill:none}
+  .blocks .edge-lbl{font:10.5px ui-sans-serif,system-ui,sans-serif;fill:var(--muted)}
+  .blocks figcaption{color:var(--muted);font-size:.9rem;margin-top:10px;max-width:78ch}
+
+  /* The horizontal pill row stays as the in-flow table of contents; it is the
+     one that survives on a narrow screen, where a fixed rail would eat the
+     width the prose needs. */
   .toc{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}
+
+  /* The rail: a fixed vertical index down the left margin, so section 11 is one
+     click from section 2 without scrolling back to the top. It lives in the
+     gutter beside .wrap (max-width 1080), so it is only shown once the viewport
+     is wide enough to hold both without overlapping. */
+  .rail{position:fixed;top:50%;transform:translateY(-50%);inset-inline-start:max(12px,calc((100vw - 1080px)/2 - 210px));
+        width:196px;max-height:82vh;overflow-y:auto;overscroll-behavior:contain;
+        padding:14px 12px;border:1px solid var(--line);border-radius:14px;
+        background:color-mix(in srgb,var(--panel) 92%,transparent);
+        -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+        box-shadow:var(--shadow);z-index:40;display:none}
+  .rail h2{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+           margin:0 0 8px;padding:0 8px;font-weight:700;border:0}
+  .rail a{display:flex;gap:8px;align-items:baseline;font-size:12.5px;line-height:1.35;
+          padding:6px 8px;border-radius:8px;color:var(--muted);text-decoration:none;
+          border-inline-start:2px solid transparent}
+  .rail a .n{font-variant-numeric:tabular-nums;opacity:.7;min-width:1.3em}
+  .rail a:hover{color:var(--fg);background:var(--sunk);text-decoration:none}
+  /* Scroll-spy. `aria-current` rather than a class, so the state is announced
+     and not only painted. */
+  .rail a[aria-current="true"]{color:var(--accent);background:var(--sunk);
+          border-inline-start-color:var(--accent);font-weight:600}
+  @media (min-width:1320px){.rail{display:block}}
   .toc a{font-size:13px;padding:5px 12px;border:1px solid var(--line);border-radius:20px;background:var(--panel);color:var(--muted)}
   .toc a:hover{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));text-decoration:none}
 
@@ -152,6 +209,25 @@
   <a href="#extend">12 · Extension points</a>
 </nav>
 
+<!-- A fixed index of the same sections the pill row lists. Both are
+     generated from one list of headings; if a section is added, it goes in
+     both or the rail quietly stops matching the page. -->
+<nav class="rail" aria-label="Sections">
+  <h2>Contents</h2>
+  <a href="#overview"><span class="n">1</span><span>What it is</span></a>
+  <a href="#runtime"><span class="n">2</span><span>Runtime shape</span></a>
+  <a href="#composition"><span class="n">3</span><span>Composition</span></a>
+  <a href="#ai"><span class="n">4</span><span>The AI layer</span></a>
+  <a href="#content"><span class="n">5</span><span>Content &amp; i18n</span></a>
+  <a href="#features"><span class="n">6</span><span>Feature modules</span></a>
+  <a href="#state"><span class="n">7</span><span>State &amp; persistence</span></a>
+  <a href="#ui"><span class="n">8</span><span>UI mechanics</span></a>
+  <a href="#security"><span class="n">9</span><span>Trust boundaries</span></a>
+  <a href="#build"><span class="n">10</span><span>Build &amp; deploy</span></a>
+  <a href="#testing"><span class="n">11</span><span>Testing</span></a>
+  <a href="#extend"><span class="n">12</span><span>Extension points</span></a>
+</nav>
+
 <!-- ───────────────────────── 1 ───────────────────────── -->
 <h2 id="overview">1 · What it is</h2>
 
@@ -196,6 +272,85 @@
 
 <!-- ───────────────────────── 2 ───────────────────────── -->
 <h2 id="runtime">2 · Runtime shape</h2>
+
+<figure class="blocks">
+<svg viewBox="0 0 900 380" role="img"
+     aria-label="The client artifacts talk to one API server, which is the only thing holding a credential and the only thing that reaches Stripe, Supabase, Google and the model vendors.">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--c-edge)"/>
+    </marker>
+  </defs>
+
+  <text class="grp" x="16" y="20">Client · artifacts/</text>
+  <rect class="bx" x="16"  y="30" width="176" height="58" fill="var(--c-client)" stroke="var(--c-client-line)"/>
+  <text class="lbl" x="30" y="54" fill="var(--c-client-ink)">AI Testing Academy</text>
+  <text class="sub" x="30" y="72" fill="var(--c-client-ink)">the one AI app</text>
+
+  <rect class="bx" x="16"  y="98" width="176" height="58" fill="var(--c-client)" stroke="var(--c-client-line)"/>
+  <text class="lbl" x="30" y="122" fill="var(--c-client-ink)">10 lecture decks</text>
+  <text class="sub" x="30" y="140" fill="var(--c-client-ink)">1920×1080 slides</text>
+
+  <rect class="bx" x="16"  y="166" width="176" height="58" fill="var(--c-client)" stroke="var(--c-client-line)"/>
+  <text class="lbl" x="30" y="190" fill="var(--c-client-ink)">portfolio · sandbox</text>
+  <text class="sub" x="30" y="208" fill="var(--c-client-ink)">static, no API</text>
+
+  <text class="grp" x="352" y="20">Server · server/</text>
+  <rect class="bx" x="352" y="30" width="196" height="194" fill="var(--c-server)" stroke="var(--c-server-line)"/>
+  <text class="lbl" x="368" y="54"  fill="var(--c-server-ink)">api-server · Express 5</text>
+  <text class="sub" x="368" y="78"  fill="var(--c-server-ink)">/ai/generate · /ai/config</text>
+  <text class="sub" x="368" y="96"  fill="var(--c-server-ink)">/content/*</text>
+  <text class="sub" x="368" y="114" fill="var(--c-server-ink)">/stripe/checkout · /prices</text>
+  <text class="sub" x="368" y="132" fill="var(--c-server-ink)">/stripe/seed  (admin)</text>
+  <text class="sub" x="368" y="150" fill="var(--c-server-ink)">/stripe/webhook</text>
+  <text class="sub" x="368" y="168" fill="var(--c-server-ink)">/entitlements/course</text>
+  <text class="sub" x="368" y="186" fill="var(--c-server-ink)">/healthz</text>
+  <text class="sub" x="368" y="208" fill="var(--c-server-ink)">holds every secret</text>
+
+  <text class="grp" x="700" y="20">Outside</text>
+  <rect class="bx" x="700" y="30"  width="184" height="42" fill="var(--c-out)" stroke="var(--c-out-line)"/>
+  <text class="lbl" x="714" y="56" fill="var(--c-out-ink)">Groq · Gemini</text>
+  <rect class="bx" x="700" y="82"  width="184" height="42" fill="var(--c-out)" stroke="var(--c-out-line)"/>
+  <text class="lbl" x="714" y="108" fill="var(--c-out-ink)">Stripe</text>
+  <rect class="bx" x="700" y="134" width="184" height="42" fill="var(--c-out)" stroke="var(--c-out-line)"/>
+  <text class="lbl" x="714" y="160" fill="var(--c-out-ink)">Supabase · Postgres</text>
+  <rect class="bx" x="700" y="186" width="184" height="42" fill="var(--c-out)" stroke="var(--c-out-line)"/>
+  <text class="lbl" x="714" y="212" fill="var(--c-out-ink)">Google Identity</text>
+
+  <text class="grp" x="16" y="292">Shared · lib/</text>
+  <rect class="bx" x="16" y="302" width="868" height="62" fill="var(--c-shared)" stroke="var(--c-shared-line)"/>
+  <text class="sub" x="32" y="328" fill="var(--c-shared-ink)">api-spec (openapi.yaml)  →  api-zod  ·  api-client-react   |   db (drizzle · course_purchases)</text>
+  <text class="sub" x="32" y="348" fill="var(--c-shared-ink)">one contract, generated — the contract suite asserts spec ↔ schema ↔ what the server returns</text>
+
+  <path class="edge" marker-end="url(#ar)" d="M192 59 H352"/>
+  <text class="edge-lbl" x="212" y="50">/api · same origin</text>
+  <text class="edge-lbl" x="212" y="131">decks and portfolio</text>
+  <text class="edge-lbl" x="212" y="146">reach nothing</text>
+
+  <path class="edge" marker-end="url(#ar)" d="M548 60  H700"/>
+  <text class="edge-lbl" x="566" y="50">server key only</text>
+  <path class="edge" marker-end="url(#ar)" d="M548 103 H700"/>
+  <path class="edge" marker-end="url(#ar)" d="M548 155 H700"/>
+  <path class="edge" marker-end="url(#ar)" d="M548 207 H700"/>
+  <text class="edge-lbl" x="566" y="198">verifies ID tokens</text>
+
+  <path class="edge" stroke-dasharray="4 4" d="M450 224 V302"/>
+  <path class="edge" stroke-dasharray="4 4" d="M104 254 V302"/>
+  
+
+  <path class="edge" stroke-dasharray="5 4" marker-end="url(#ar)"
+        d="M104 88 C 104 262, 240 262, 620 262 C 672 262, 672 100, 700 62"/>
+  <text class="edge-lbl" x="250" y="278">bring-your-own-key — the browser calls the vendor itself, no server involved</text>
+</svg>
+<figcaption>
+  The shape to notice: thirteen client apps, one server, and every credential on
+  one side of that line. A deck is static and talks to nothing. The academy is
+  the only client with a server at all, and it works without one — the dashed
+  path is the bring-your-own-key fallback, which is what a GitHub Pages build
+  falls back to because Pages serves the static output and nothing else.
+</figcaption>
+</figure>
+
 
 <p>
   The build output is static files. At runtime the browser is the whole application:
@@ -885,12 +1040,65 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers five layers — 485 cases at the time of
-  writing (211 unit, 152 component, 65 api and contract, 57 e2e). Playwright is used as the
-  runner throughout, not just as a browser driver: the unit project never launches a browser,
-  it executes the same TypeScript modules the app imports — the academy's, and now
-  <code>api-server</code>'s too, wherever a module has no Express import to drag in.
+  One Playwright package at <code>tests/</code> covers six layers — 503 cases at the time of
+  writing (221 unit, 152 component, 49 api, 19 contract, 62 e2e and deck). Playwright is used as
+  the runner throughout, not just as a browser driver: the unit project never launches a browser,
+  it executes the same TypeScript modules the app imports — the academy's, and the server's too,
+  wherever a module has no Express import to drag in.
 </p>
+
+<h3>What decides which layer a test belongs in</h3>
+<p>
+  One question: <b>what is the cheapest thing that could still be wrong?</b> A rule about a
+  string belongs in a unit test, because a browser adds nothing but seconds. A rule about what a
+  reader can see or reach needs a real one, because that is where the bug lives. The layers below
+  are that question applied, not a taxonomy imposed on top.
+</p>
+
+<div class="grid">
+  <div class="box">
+    <span class="tag">principle</span>
+    <b>Assert the acceptance, not only the refusals</b>
+    <span>
+      A verifier that returns “no” to everything passes every rejection test ever written for it,
+      and signs nobody in while looking perfectly secure. So the Google token suite generates an
+      RSA keypair, serves a key set in place of Google's, signs a token, and asserts first that it
+      is <em>accepted</em>. Every rejection after that is the same token with one property changed,
+      so a failure names one rule.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">principle</span>
+    <b>A test that cannot fail is worth nothing</b>
+    <span>
+      New tests are checked by mutation — the fix is reverted and the test watched going red.
+      Two cases here were rewritten after they passed against deliberately broken code. One
+      mutation that was <em>not</em> caught is recorded in the source it guards: the token
+      verifier's <code>alg</code> check is defence in depth, because the verify call is already
+      pinned to RSA/sha256, so deleting it changes no outcome.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">principle</span>
+    <b>Breadth by reading, depth by running</b>
+    <span>
+      The ten lecture decks are independent artifacts, so the code they share is shared by copy.
+      One unit test reads all ten and asserts they have not drifted apart; one browser test runs
+      a single deck to prove the logic they share actually works. Neither could do the other's
+      job, and together they cost one dev server.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">principle</span>
+    <b>No test can reach a vendor, a card or a database</b>
+    <span>
+      The unit suite stubs <code>fetch</code>. The API suite runs servers whose model key is a
+      throwaway that only ever receives invalid requests, whose admin token guards a route that
+      then fails on absent Stripe credentials, and whose <code>DATABASE_URL</code> is blank. A
+      developer's shell cannot change any of it.
+    </span>
+  </div>
+</div>
 
 <div class="scroll">
 <table>
@@ -915,6 +1123,11 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
       <td><code>tests/contract</code></td>
       <td>Node → live server</td>
       <td><code>openapi.yaml</code> ↔ the generated Zod schemas ↔ what the server actually returns, plus the shared <code>customFetch</code> wrapper against real responses.</td>
+    </tr>
+    <tr>
+      <td><code>tests/deck</code></td>
+      <td>Chromium → a lecture deck</td>
+      <td>One of the ten decks, really running: that the 1920×1080 stage is drawn, that a portrait phone turns it rather than letterboxing it to a fifth of design size, that turning the phone switches the rotation back off, that a tablet is left alone, and that the stage stays 16:9 at every size. One deck is enough because the unit layer proves the other nine carry the same logic.</td>
     </tr>
     <tr>
       <td><code>tests/e2e</code></td>
@@ -1129,5 +1342,54 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 </footer>
 
 </div>
+
+<script>
+  // Highlights the rail entry for the section the reader is in.
+  //
+  // Tracks the last heading scrolled past rather than watching the headings
+  // intersect a band. The band version looks right and is wrong: a heading is a
+  // single line, so it sits inside any reasonable band for a moment and is
+  // outside it for the rest of the section — which leaves nothing highlighted
+  // for most of the page. "Last one passed" is always true of exactly one
+  // section, which is the property a table of contents needs.
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    if (!links.length) return;
+
+    var sections = links
+      .map(function (a) {
+        return { link: a, el: document.getElementById(a.getAttribute('href').slice(1)) };
+      })
+      .filter(function (s) { return s.el; });
+
+    // A heading counts as reached once it is within this much of the top.
+    var THRESHOLD = 120;
+    var pending = false;
+
+    function update() {
+      pending = false;
+      var current = sections[0];
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].el.getBoundingClientRect().top <= THRESHOLD) current = sections[i];
+      }
+      // Past the end of the page the last section is the honest answer, which
+      // falls out of the loop above without a special case.
+      sections.forEach(function (s) {
+        if (s === current) s.link.setAttribute('aria-current', 'true');
+        else s.link.removeAttribute('aria-current');
+      });
+    }
+
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(update);
+    }
+
+    addEventListener('scroll', schedule, { passive: true });
+    addEventListener('resize', schedule);
+    update();
+  })();
+</script>
 </body>
 </html>
