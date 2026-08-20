@@ -1,0 +1,73 @@
+# Fly.io configuration for the API server.
+#
+# Deploy from the repository root, because the Docker build context has to
+# include `pnpm-workspace.yaml` and `lib/`:
+#
+#     fly deploy --config artifacts/api-server/fly.toml --dockerfile artifacts/api-server/Dockerfile .
+#
+# Secrets are set once and stored by Fly, never committed:
+#
+#     fly secrets set GEMINI_API_KEY=... SUPABASE_DB_PASSWORD=... \
+#       SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... STRIPE_SECRET_KEY=...
+#
+# `fly secrets list` shows names and digests, not values.
+
+app = "ata-api"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # src/index.ts throws without PORT, so it is set here rather than left to a
+  # platform default.
+  PORT = "8080"
+  NODE_ENV = "production"
+
+  # The public origin of this deployment. Stripe webhook registration reads it
+  # (see src/index.ts), and it replaces the REPLIT_DOMAINS the server used to
+  # depend on. Change it together with the app name above.
+  PUBLIC_BASE_URL = "https://ata-api.fly.dev"
+
+  # CORS allowlist. The API is called from the browser by the academy and the
+  # lecture decks, so every origin that serves them belongs here — comma
+  # separated, no trailing slashes. Update this when the static host changes.
+  ALLOWED_ORIGINS = "https://amielnoy.github.io,https://free-tier-insights--amielpeled.replit.app"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+
+  # auto_stop/auto_start would be the cheaper setting, and it is deliberately
+  # NOT used here. Two things in this server are per-process state that a
+  # stopped machine loses:
+  #
+  #   - src/routes/ai.ts builds `burstLimiter` and `dailyQuota` on
+  #     express-rate-limit's default MemoryStore. The daily quota has a 24-hour
+  #     window, so a machine that stops and starts hands every caller a fresh
+  #     free-tier allowance — the anonymous quota stops being a quota.
+  #   - Stripe delivers webhooks to a URL that has to answer now; a cold start
+  #     under a delivery timeout turns into a retry at best.
+  #
+  # min_machines_running = 1 keeps one machine up. Roughly $2/month for
+  # shared-cpu-1x at 256MB, billed per second. Move to auto_stop only after the
+  # rate limiter has a shared store (Redis or the Postgres already in use).
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    # The health route is mounted under /api (see src/app.ts).
+    path = "/api/healthz"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+    method = "GET"
+
+[[vm]]
+  # The server is I/O bound — it proxies model calls and talks to Postgres — so
+  # it wants headroom for concurrent requests rather than CPU. 512MB leaves
+  # room for the pino worker threads and Node's heap; 256MB also runs but has
+  # little margin during the Stripe backfill on boot.
+  size = "shared-cpu-1x"
+  memory = "512mb"

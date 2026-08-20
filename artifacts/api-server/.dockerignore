@@ -1,0 +1,9 @@
+# This file is read when the build context is `artifacts/api-server`. The
+# production build's context is the repository root (it needs the workspace
+# manifests and `lib/`), so the root `.dockerignore` is the one that applies
+# there — this exists so a context-local build does not pull in build output.
+node_modules/
+dist/
+.env
+.env.*
+*.log

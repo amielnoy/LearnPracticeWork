@@ -67,3 +67,7 @@ Thumbs.db
 # public build-time config, this is where anything you would not publish goes.
 .env.local
 .env.*.local
+
+# The assembled static site. Built by the `build-pages` job in CI and by anyone
+# reproducing it locally; never a source artefact.
+_site

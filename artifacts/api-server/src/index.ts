@@ -44,9 +44,31 @@ async function initStripe() {
 
     const stripeSync = await getStripeSync();
 
-    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
-    await stripeSync.findOrCreateManagedWebhook(`${webhookBaseUrl}/api/stripe/webhook`);
-    logger.info('Stripe webhook configured');
+    // Where Stripe should send webhooks. `PUBLIC_BASE_URL` is the portable
+    // answer and takes precedence; `REPLIT_DOMAINS` remains the fallback so
+    // nothing changes on Replit, which sets it for us.
+    //
+    // This used to read REPLIT_DOMAINS alone, which meant that anywhere else —
+    // Fly, Railway, a container, a laptop — the template interpolated
+    // `undefined` and registered `https://undefined/api/stripe/webhook` with
+    // Stripe. That is not a startup failure: it is a webhook that silently
+    // never arrives, and every payment event is lost until someone notices.
+    const publicBaseUrl =
+      process.env.PUBLIC_BASE_URL?.replace(/\/$/, '') ||
+      (process.env.REPLIT_DOMAINS?.split(',')[0]
+        ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
+        : '');
+
+    if (!publicBaseUrl) {
+      logger.warn(
+        'Neither PUBLIC_BASE_URL nor REPLIT_DOMAINS is set — skipping Stripe webhook ' +
+          'registration. Payments will not be recorded until one of them names this ' +
+          "deployment's public origin.",
+      );
+    } else {
+      await stripeSync.findOrCreateManagedWebhook(`${publicBaseUrl}/api/stripe/webhook`);
+      logger.info({ webhookBaseUrl: publicBaseUrl }, 'Stripe webhook configured');
+    }
 
     stripeSync
       .syncBackfill()
