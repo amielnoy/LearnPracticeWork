@@ -14,11 +14,19 @@ src/
 ├── main.tsx                  entry — mounts <App />
 ├── App.tsx                   providers + wouter router (base from BASE_PATH)
 ├── pages/HomePage.tsx        the whole page: theme, nav drawer, section order
-├── components/               one component per section, plus ui/ (shadcn primitives)
+├── components/
+│   ├── chrome/               Nav, Footer, Hero, ScrollProgress, BackToTop,
+│   │                         ErrorBoundary, ToolLauncher — page furniture
+│   ├── agents/               ConnectionSetup, ResumeAgent, InterviewAgent —
+│   │                         everything that reaches ProviderContext
+│   ├── practice/             QuestionBank, CodingChallenges, LectureSeries and
+│   │                         their cards — static content, no model access
+│   ├── account/              GoogleSignIn — the only AuthContext consumer
+│   └── ui/                   tooltip.tsx, the one shadcn primitive still used
 ├── context/
 │   ├── LocaleContext.tsx     resolves the language once, exposes locale + switcher
 │   └── ProviderContext.tsx   provider/model/key state and the AI call surface
-├── hooks/                    useDisclosure, useReveal, use-mobile, use-toast
+├── hooks/                    useDisclosure, useReveal, useVoice
 └── lib/
     ├── locales/{en,he}.ts    every user-visible string, typed so the two stay in step
     ├── i18n.ts               language resolution, switching, <html lang/dir>
