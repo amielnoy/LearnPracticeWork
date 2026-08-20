@@ -18,7 +18,13 @@ from .config import env, positive_int
 from .database import find_course_access, initialize_database, record_purchase
 from .google_auth import GoogleUser, verify_google_id_token
 from .integrations import stripe_client, stripe_credentials
-from .metrics import RequestTimer, metrics_authorized, prometheus_response
+from .metrics import (
+    RequestTimer,
+    metrics_authorized,
+    observe_ai,
+    observe_login,
+    prometheus_response,
+)
 from .rate_limit import MemoryRateLimiter
 from .relay import relay_api_request, upstream_api_base_url
 from .sessions import COOKIE_NAME, create_session, read_session, sessions_configured
@@ -173,18 +179,22 @@ def _public_user(user: GoogleUser) -> dict[str, str | int]:
 @app.post("/api/auth/google")
 async def google_login(request: Request, response: Response):
     if not env("GOOGLE_CLIENT_ID") or not sessions_configured():
+        observe_login(request, None, "unconfigured")
         return JSONResponse({"error": "Sign-in is not configured on this server."}, status_code=503)
     allowed, _ = await login_limiter.hit(_client_ip(request))
     if not allowed:
+        observe_login(request, None, "rate_limited")
         return JSONResponse(
             {"error": "Too many sign-in attempts. Please try again later."}, status_code=429
         )
     try:
         body = GoogleLogin.model_validate(await request.json())
     except (ValidationError, ValueError):
+        observe_login(request, None, "invalid_request")
         return JSONResponse({"error": "Invalid request body"}, status_code=400)
     user = await verify_google_id_token(body.credential)
     if not user:
+        observe_login(request, None, "rejected")
         return JSONResponse({"error": "Google sign-in could not be verified."}, status_code=401)
     max_age = max(0, user.expires_at - int(__import__("time").time()))
     response.set_cookie(
@@ -196,6 +206,7 @@ async def google_login(request: Request, response: Response):
         samesite="lax",
         path="/api",
     )
+    observe_login(request, user.email, "success")
     return {"user": _public_user(user)}
 
 
@@ -379,11 +390,17 @@ async def ai_config():
     }
 
 
-async def _generate(body: GenerateBody) -> tuple[int, dict]:
+def _ai_target(body: GenerateBody) -> tuple[str, str]:
     grounded = body.grounded
     allowed = GEMINI_MODELS if grounded else GROQ_MODELS
     default = DEFAULT_GEMINI if grounded else DEFAULT_GROQ
     model = body.model if body.model in allowed else default
+    return ("gemini" if grounded else "groq"), model
+
+
+async def _generate(body: GenerateBody) -> tuple[int, dict]:
+    provider, model = _ai_target(body)
+    grounded = provider == "gemini"
     if grounded:
         key = env("GEMINI_API_KEY")
         if not key:
@@ -443,15 +460,19 @@ async def _generate(body: GenerateBody) -> tuple[int, dict]:
 
 @app.post("/api/ai/generate")
 async def ai_generate(request: Request):
+    session = read_session(request.cookies.get(COOKIE_NAME))
+    email = session.email if session else None
     ip = _client_ip(request)
     burst_ok, _ = await burst_limiter.hit(ip)
     if not burst_ok:
+        observe_ai(request, provider="unknown", model="unknown", email=email, status=429)
         return JSONResponse(
             {"error": "Too many AI requests. Please wait before trying again."}, status_code=429
         )
     daily_ok, remaining = await daily_limiter.hit(ip)
     headers = {"X-AI-Quota-Limit": str(DAILY_QUOTA), "X-AI-Quota-Remaining": str(remaining)}
     if not daily_ok:
+        observe_ai(request, provider="unknown", model="unknown", email=email, status=429)
         return JSONResponse(
             {"error": "Daily AI request quota exceeded. Please try again tomorrow."},
             status_code=429,
@@ -460,11 +481,14 @@ async def ai_generate(request: Request):
     try:
         body = GenerateBody.model_validate(await request.json())
     except (ValidationError, ValueError) as exc:
+        observe_ai(request, provider="unknown", model="unknown", email=email, status=400)
         issues = _issues(exc.errors()) if isinstance(exc, ValidationError) else []
         return JSONResponse(
             {"error": "Invalid request body", "issues": issues}, status_code=400, headers=headers
         )
+    provider, model = _ai_target(body)
     status, result = await _generate(body)
+    observe_ai(request, provider=provider, model=model, email=email, status=status)
     return JSONResponse(result, status_code=status, headers=headers)
 
 

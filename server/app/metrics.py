@@ -3,6 +3,7 @@ from __future__ import annotations
 import hmac
 import os
 import time
+from hashlib import sha256
 
 from fastapi import Request
 from fastapi.responses import Response
@@ -33,6 +34,66 @@ RELAY_DURATION = Histogram(
     "Duration of upstream API relay requests in seconds.",
     ("method",),
 )
+LOGINS = Counter(
+    "academy_logins_total",
+    "Google sign-in attempts grouped without storing personal identifiers.",
+    ("country", "user", "client", "outcome"),
+)
+AI_REQUESTS = Counter(
+    "academy_ai_requests_total",
+    "Server-proxied AI requests; prompts, responses, and keys are never labels.",
+    ("provider", "model", "country", "user", "client", "status"),
+)
+
+
+def country(request: Request) -> str:
+    for header in ("x-academy-client-country", "fly-client-country", "cf-ipcountry"):
+        value = request.headers.get(header, "").strip().upper()
+        if len(value) == 2 and value.isascii() and value.isalpha():
+            return value
+    return "unknown"
+
+
+def client_class(request: Request) -> str:
+    agent = request.headers.get("user-agent", "").lower()
+    if "android" in agent:
+        return "android"
+    if any(value in agent for value in ("iphone", "ipad", "ipod")):
+        return "ios"
+    if any(value in agent for value in ("mozilla/", "chrome/", "safari/", "firefox/", "edg/")):
+        return "desktop_web"
+    return "other"
+
+
+def user_id(email: str | None) -> str:
+    if not email:
+        return "anonymous"
+    salt = os.getenv("METRICS_ID_SALT", "").strip()
+    if not salt:
+        return "redacted"
+    return hmac.new(salt.encode(), email.strip().lower().encode(), sha256).hexdigest()[:16]
+
+
+def observe_login(request: Request, email: str | None, outcome: str) -> None:
+    LOGINS.labels(country(request), user_id(email), client_class(request), outcome).inc()
+
+
+def observe_ai(
+    request: Request,
+    *,
+    provider: str,
+    model: str,
+    email: str | None,
+    status: int,
+) -> None:
+    AI_REQUESTS.labels(
+        provider,
+        model,
+        country(request),
+        user_id(email),
+        client_class(request),
+        str(status),
+    ).inc()
 
 
 def route_name(request: Request) -> str:

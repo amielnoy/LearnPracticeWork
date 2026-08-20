@@ -51,10 +51,17 @@ async def relay_api_request(request: Request, upstream: str) -> Response:
     if request.url.query:
         target = f"{target}?{request.url.query}"
     headers = {
-        name: value for name, value in request.headers.items() if name.lower() not in _HOP_BY_HOP
+        name: value
+        for name, value in request.headers.items()
+        if name.lower() not in _HOP_BY_HOP and name.lower() != "x-academy-client-country"
     }
     headers["x-forwarded-host"] = request.headers.get("host", "")
     headers["x-forwarded-proto"] = request.url.scheme
+    for source in ("cf-ipcountry", "x-replit-user-country", "fly-client-country"):
+        candidate = request.headers.get(source, "").strip().upper()
+        if len(candidate) == 2 and candidate.isascii() and candidate.isalpha():
+            headers["x-academy-client-country"] = candidate
+            break
 
     try:
         async with _new_client() as client:

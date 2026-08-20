@@ -34,7 +34,10 @@ async def test_relay_preserves_login_cookie_and_stripe_webhook(
 
     login = await api_client.post(
         "/api/auth/google",
-        headers={"origin": "https://free-tier-insights--amielpeled.replit.app"},
+        headers={
+            "origin": "https://free-tier-insights--amielpeled.replit.app",
+            "cf-ipcountry": "IL",
+        },
         json={"credential": "google-fixture"},
     )
     assert login.status_code == 200
@@ -42,6 +45,7 @@ async def test_relay_preserves_login_cookie_and_stripe_webhook(
     assert requests[0].url == "https://ata-api.fly.dev/api/auth/google"
     assert requests[0].headers["origin"] == "https://free-tier-insights--amielpeled.replit.app"
     assert requests[0].headers["x-forwarded-host"] == "test"
+    assert requests[0].headers["x-academy-client-country"] == "IL"
 
     body = b'{"type":"checkout.session.completed"}'
     webhook = await api_client.post(

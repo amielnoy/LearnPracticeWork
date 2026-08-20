@@ -85,6 +85,36 @@
       "targets": [{ "expr": "sum(rate(academy_relay_requests_total[5m])) by (status)", "legendFormat": "HTTP {{status}}", "refId": "A" }],
       "title": "Replit → Fly relay",
       "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "academy-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 21 },
+      "id": 7,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [{ "expr": "sum(rate(academy_logins_total[5m])) by (country, client, outcome)", "legendFormat": "{{country}} · {{client}} · {{outcome}}", "refId": "A" }],
+      "title": "Logins by country and client",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "academy-prometheus" },
+      "fieldConfig": { "defaults": { "decimals": 0 }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 21 },
+      "id": 8,
+      "options": { "showHeader": true },
+      "targets": [{ "expr": "sum(increase(academy_logins_total[$__range])) by (user, country, client, outcome)", "format": "table", "instant": true, "refId": "A" }],
+      "title": "Login activity by pseudonymous user",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "academy-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 21 },
+      "id": 9,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [{ "expr": "sum(rate(academy_ai_requests_total[5m])) by (provider, model, country, client, status)", "legendFormat": "{{provider}} · {{model}} · {{country}} · {{client}} · {{status}}", "refId": "A" }],
+      "title": "AI usage (server proxy only)",
+      "type": "timeseries"
     }
   ],
   "refresh": "15s",
