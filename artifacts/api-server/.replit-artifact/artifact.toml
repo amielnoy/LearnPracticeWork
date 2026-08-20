@@ -10,7 +10,7 @@ name = "API Server"
 paths = ["/api"]
 
 [services.development]
-run = "uv run --project server uvicorn app.main:app --app-dir server --host 0.0.0.0 --port 8080 --reload"
+run = "cd ../../server && uv run uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload"
 
 [services.production]
 
@@ -21,7 +21,7 @@ args = ["uv", "sync", "--project", "server", "--frozen", "--no-dev"]
 NODE_ENV = "production"
 
 [services.production.run]
-args = ["uv", "run", "--project", "server", "uvicorn", "app.main:app", "--app-dir", "server", "--host", "0.0.0.0", "--port", "8080"]
+args = ["sh", "-c", "cd ../../server && uv run uvicorn app.main:app --host 0.0.0.0 --port 8080"]
 
 [services.production.run.env]
 PORT = "8080"
