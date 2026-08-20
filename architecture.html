@@ -130,7 +130,6 @@
     <span class="pill on">React 19 + TypeScript</span>
     <span class="pill on">Vite</span>
     <span class="pill">wouter</span>
-    <span class="pill">TanStack Query</span>
     <span class="pill">Tailwind + Radix (shadcn/ui)</span>
     <span class="pill">EN / HE with RTL</span>
     <span class="pill">Static SPA</span>
@@ -157,8 +156,9 @@
 <h2 id="overview">1 · What it is</h2>
 
 <p class="lead">
-  One page, six sections, stacked in reading order. Three are static teaching content;
-  three call a language model. Everything below exists to serve that split.
+  One page: a launcher, then six numbered sections stacked in reading order. Three are
+  static teaching content; three call a language model. Everything below exists to serve
+  that split.
 </p>
 
 <div class="grid">
@@ -271,7 +271,7 @@
 </p>
 
 <div class="stack">
-  <div class="lvl depth1"><span class="nm">QueryClientProvider</span> — <span class="why">TanStack Query client; present for future server state, not yet on the hot path.</span></div>
+  <div class="lvl depth1"><span class="nm">ErrorBoundary</span> — <span class="why">Outermost, because the failure it catches is a whole-page failure. Several things below throw on purpose — every <code>useX must be used within XProvider</code> guard, and the decks' manifest parser — and without something to land in, each of them took the document to blank white.</span></div>
   <div class="lvl depth2"><span class="nm">TooltipProvider</span> — <span class="why">Radix tooltip root for the shadcn/ui primitives.</span></div>
   <div class="lvl depth3"><span class="nm">LocaleProvider</span> — <span class="why">Resolves the language once, exposes <code>locale</code> / <code>S</code>, stamps <code>lang</code> and <code>dir</code> on <code>&lt;html&gt;</code>.</span></div>
   <div class="lvl depth4"><span class="nm">AuthProvider</span> — <span class="why">Google sign-in. Inside <code>LocaleProvider</code> because Google renders the button's own label and has to be handed the current language.</span></div>
@@ -284,7 +284,7 @@
 <h3>Below the router</h3>
 <p>
   <code>HomePage</code> owns two pieces of page-level chrome — the theme and the nav drawer —
-  and then renders the six sections in order. Everything else a section needs, it pulls
+  and then renders the sections. Everything else a section needs, it pulls
   from context itself. That is the reason the page component stays under 100 lines while
   the sections it renders are hundreds.
 </p>
@@ -294,13 +294,27 @@
 ├── Nav          ← theme toggle, language toggle, scroll-spy, Google sign-in
 ├── Hero
 └── main
-    ├── ConnectionSetup     → useProviderContext()
-    ├── ResumeAgent         → callClaude() + extractJSON()
-    ├── LectureSeries       → self-contained content
-    ├── InterviewAgent      → callClaude() with a rolling message array
-    ├── QuestionBank        → callGrounded() + extractJSON()
-    └── CodingChallenges    → locale content only, no network
-        └── ChallengeCard × 40   → useDisclosure(3)</code></pre>
+    ├── ToolLauncher        → the hub; unnumbered, not in the nav
+    ├── 01 ResumeAgent      → callClaude() + extractJSON()
+    ├── 02 LectureSeries    → lib/lectures.ts, no network
+    ├── 03 InterviewAgent   → callClaude() with a rolling message array
+    ├── 04 QuestionBank     → callGrounded() + extractJSON()
+    ├── 05 CodingChallenges → locale content only, no network
+    │   └── details × 3, closed → ChallengeCard × 40 → useDisclosure(3)
+    └── 06 ConnectionSetup  → useProviderContext()</code></pre>
+
+<div class="callout">
+  <b>One list decides the order.</b> <code>lib/sections.ts</code> exports <code>SECTIONS</code>
+  — id and number, in reading order — and both <code>HomePage</code> and <code>Nav</code>
+  render from it. There used to be three answers to “what order are the sections in”: the
+  array in <code>locale.nav.links</code>, the JSX here, and the static prerender in
+  <code>index.html</code>. None of them agreed, so reading down the nav jumped the visitor
+  16237 → 1144 → 13693 → 2749 → 3648 → 4597 pixels, the scroll-spy highlight travelled
+  2 → 4 → 5 → 6 → 3 → 1 as you scrolled, and the numbered headings counted 01 → 03 → 02 with
+  three sections carrying no number at all. The numbers are stored rather than derived from
+  the array index, because they appear on screen: changing the order should be a visible
+  decision about renumbering, not a silent one.
+</div>
 
 <div class="callout good">
   <b>The shape to notice.</b> No component imports a vendor SDK, a URL, or a key.
@@ -425,6 +439,23 @@
     </span>
   </div>
 </div>
+
+<div class="callout">
+  <b>Where a string lives depends on how much of it there is.</b> Short copy sits in
+  <code>lib/locales/{en,he}.ts</code>. Bodies of content large enough to drown a locale file
+  get their own module — <code>lib/questionBank.ts</code> and <code>lib/lectures.ts</code> —
+  exporting an <code>EN</code>/<code>HE</code> pair with the same compiler-checked shape.
+  The lecture catalogue lived inside <code>components/LectureSeries.tsx</code> until it did
+  not: 336 of that file's 425 lines were the two data objects, which made editing a blurb an
+  edit to a component and left the catalogue with no importer other than the thing that
+  rendered it. Moving it out is also what lets the prerender generator read it, since a build
+  script cannot import from a component.
+</div>
+
+<p>
+  One shape in the nav is worth calling out: <code>locale.nav.labels</code> is keyed by section
+  id, not ordered. The order is <code>lib/sections.ts</code>; only the words are translated.
+</p>
 
 <h3>The challenge content model</h3>
 <p>
@@ -587,10 +618,10 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <table>
   <thead><tr><th>Key</th><th>Written by</th><th>Where</th><th>Holds</th></tr></thead>
   <tbody>
-    <tr><td><code>ata_theme</code></td><td>HomePage</td><td>local</td><td>Exactly <code>light</code> or <code>dark</code> — checked, because this value lands on <code>data-theme</code> and the toggle only ever flips between those two. First visit falls back to <code>prefers-color-scheme</code>.</td></tr>
+    <tr><td><code>ata_theme</code></td><td>HomePage · read by the head script</td><td>local</td><td>Exactly <code>light</code> or <code>dark</code> — checked, because this value lands on <code>data-theme</code> and the toggle only ever flips between those two. First visit falls back to <code>prefers-color-scheme</code>. The inline script in <code>index.html</code> resolves it and stamps the attribute before first paint; <code>HomePage</code> reads the stamped value back rather than re-deriving it, so there is one copy of the priority rules rather than two free to disagree.</td></tr>
     <tr><td><code>ata_lang</code></td><td>i18n</td><td>local</td><td>Resolved language, checked against the catalogue. Re-written on every resolve so it stays sticky.</td></tr>
     <tr><td><code>ata_progress_v1</code></td><td>ProgressContext</td><td>local</td><td>Which tools were started and finished. Field-by-field coercion with a bounded array — the pattern the rest of the keys were brought up to.</td></tr>
-    <tr><td><code>ata_provider</code></td><td>ProviderContext</td><td>local</td><td>Selected vendor, checked against the providers that exist; defaults to <code>gemini</code>.</td></tr>
+    <tr><td><code>ata_provider</code></td><td>ProviderContext</td><td>local</td><td>Selected vendor, checked against the providers that exist; defaults to <code>groq</code>. Checking it against the current list is also what retires a stale preference — Gemini is search-only now and not a selectable chat provider, so a visitor holding one falls through to the default.</td></tr>
     <tr><td><code>ata_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>local</td><td>The user's own API key, one slot per vendor, saved only while “remember” is on.</td></tr>
     <tr><td><code>ata_session_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>session</td><td>The same key when “remember” is off — the default. Keys written by older versions are migrated here on first read.</td></tr>
     <tr><td><code>ata_remember_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>local</td><td>Which of the two slots above is in use.</td></tr>
@@ -658,6 +689,16 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <span>The <code>nav-ready</code> class lands after a double <code>requestAnimationFrame</code>, so CSS transitions are only enabled after the first paint and the drawer cannot animate on load.</span>
   </div>
   <div class="box">
+    <span class="tag">Nav</span>
+    <b>Drawer that is really closed</b>
+    <span>Below 900px the sidebar is moved off-screen by a transform, which hides it from eyes and from nobody else: it kept <code>visibility: visible</code> and all twelve of its controls stayed in the tab order, so keyboard focus vanished for twelve stops before reaching the page. <code>inert</code> takes the subtree out of focus and out of the accessibility tree in one inherited attribute.</span>
+  </div>
+  <div class="box">
+    <span class="tag">ScrollProgress</span>
+    <b>One write per frame</b>
+    <span>The bar's width is written straight to the element inside a <code>requestAnimationFrame</code> rather than held in React state — a scroll handler that calls <code>setState</code> re-renders on every event of a long page to move one CSS property.</span>
+  </div>
+  <div class="box">
     <span class="tag">lib/domUtils</span>
     <b>Safe rendering of model text</b>
     <span><code>esc()</code>, <code>linkifyHtml()</code> and <code>findLinks()</code> escape first and only then insert <code>&lt;strong&gt;</code>/<code>&lt;a&gt;</code> — markdown from a model is rendered without handing it an HTML injection.</span>
@@ -673,9 +714,20 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <ul class="notes">
   <li>A skip link to <code>#main-content</code>, translated like everything else.</li>
   <li><code>aria-expanded</code> on every disclosure button, and <code>aria-label</code> on the icon-only nav and language toggles.</li>
-  <li>Theme is an attribute on <code>&lt;html&gt;</code> (<code>data-theme</code>), so CSS — not JS — resolves colour, and the first paint is already correct.</li>
+  <li>Theme is an attribute on <code>&lt;html&gt;</code> (<code>data-theme</code>), so CSS — not JS — resolves colour, and the first paint is already correct. That last clause is newly true: the attribute used to be written in an effect after React mounted, and because this page's own app ships a static prerender, first contentful paint put finished content on screen in the light palette and the whole page then flipped.</li>
   <li>Both <code>lang</code> and <code>dir</code> are set on the document element, which is what screen readers and the bidi algorithm actually read.</li>
+  <li>The mobile drawer behaves as the modal it looks like: <code>inert</code> while closed, Escape to dismiss, focus moved to the first link on open and returned to the toggle on close, and an <code>aria-label</code> that follows <code>aria-expanded</code> instead of announcing “Open navigation menu, expanded”.</li>
 </ul>
+
+<div class="callout">
+  <b>Focus return is keyed off the transition, not off where focus is.</b> The obvious
+  implementation asks whether <code>document.activeElement</code> is <code>&lt;body&gt;</code>
+  and puts focus back if so. It silently never fires: by the time the effect runs React has
+  already applied <code>inert</code>, and the browser blurs whatever was inside the subtree
+  when it does, so there is nothing left to recognise. Tracking the open → closed edge is what
+  actually observes the event, and it also stops a drawer that was never opened from claiming
+  focus on mount.
+</div>
 
 <!-- ───────────────────────── 9 ───────────────────────── -->
 <h2 id="security">9 · Trust boundaries</h2>
@@ -723,7 +775,19 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <dt>pnpm serve</dt><dd>Previews the built output on the same port contract.</dd>
   <dt>pnpm typecheck</dt><dd><code>tsc --noEmit</code> — the gate that keeps <code>he.ts</code> aligned with <code>en.ts</code>.</dd>
   <dt>pnpm format</dt><dd>Prettier over every TypeScript source. <code>.prettierrc.json</code> pins the house style — 100 columns, single quotes, no parens on single-argument arrows — rather than accepting defaults that would have rewritten some 8,000 string literals.</dd>
+  <dt>pnpm generate-prerender</dt><dd>Rewrites the static block inside <code>index.html</code> from <code>lib/lectures.ts</code>, <code>lib/questionBank.ts</code>, <code>lib/sections.ts</code> and the locale files. Run it after changing lectures, challenges, the section order or the hero copy.</dd>
 </dl>
+
+<div class="callout">
+  <b>The prerender is generated because the hand-written one drifted.</b> The block inside
+  <code>#root</code> is what crawlers and social bots read; React replaces it on mount, so no
+  visitor ever sees it and nothing about the page reveals when it goes stale. By the time
+  anyone looked it disagreed with the app in four places — it advertised 10 coding challenges
+  against the app's 40, pointed the first cybersecurity lecture at a dead <code>gamma.app</code>
+  URL, numbered that track from an order that had since changed, and listed hero buttons that
+  had been renamed. Duplicate copy maintained by hand drifts; copy generated from the modules
+  the components render from cannot.
+</div>
 
 <p>
   Build-time configuration lives in a committed <code>.env</code> beside the Vite config.
@@ -758,27 +822,55 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   routing agrees with the host. Deploy path is configured once, in one variable.
 </p>
 
-<h3>Two deploy targets, one build</h3>
+<h3>Deploy targets, one build</h3>
 
 <p>
   Replit serves the site and <code>api-server</code> from a single origin, which is what makes
-  the relative <code>/api</code> calls work. GitHub Pages serves the static output only, under
-  <code>/&lt;repo&gt;/</code>, with no API behind it — so the AI panel there falls back to
+  the relative <code>/api</code> calls work. Every static host serves the built output only,
+  under a sub-path, with no API behind it — so the AI panel there falls back to
   bring-your-own-key, exactly as it does when the proxy is unreachable.
 </p>
 
 <dl class="kv">
   <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, <code>/api</code> routed on the same origin.</dd>
   <dt>GitHub Pages</dt><dd><code>.github/workflows/ci.yml</code> — <code>BASE_PATH=/&lt;repo&gt;/ai-testing-academy/</code>, built and published on every push to <code>main</code>.</dd>
+  <dt>Cloudflare Pages</dt><dd>Same artifact. <code>deploy/cloudflare/_redirects</code> and <code>_headers</code> are copied into the site root by the same job; GitHub Pages ignores both, so one output deploys to either host.</dd>
+  <dt>Fly.io</dt><dd><code>artifacts/api-server/{Dockerfile,fly.toml}</code> — the API, separately, because it is the only piece that costs anything to run. <code>deploy/README.md</code> is the runbook.</dd>
 </dl>
 
 <p>
-  The Pages job builds the portfolio at the site root, mounts this site and the lecture deck
-  underneath it, copies this page in as <code>architecture.html</code>, and drops a
-  <code>404.html</code> copy of the shell so client-side routes survive a hard refresh. The
-  run's Allure report is published separately, to its own reports repository’s Pages, so the
-  test results keep their own URL and never land on the portfolio site.
+  The Pages job builds the portfolio at the site root and mounts this site and
+  <em>all ten</em> lecture decks underneath it, copies this page in as
+  <code>architecture.html</code>, and gives each app a <code>404.html</code> copy of its own
+  shell. The run's Allure report is published separately, to its own reports repository’s
+  Pages, so the test results keep their own URL and never land on the portfolio site.
 </p>
+
+<div class="callout">
+  <b>Why every app gets its own 404, and why the rewrites matter.</b> These are single-page
+  apps: the decks serve <code>/slide1</code>, <code>/slide2</code>, <code>/allslides</code>
+  from one shell and none of those paths is a file. A single root <code>404.html</code>
+  holding the portfolio meant every unknown path fell back to the portfolio rather than the
+  app that owns it — and for the decks that is not a corner case, because the academy's
+  hreflang tags nominate <code>/ai-testing-lecture-1/slide1?lang=en</code> as a canonical URL.
+  GitHub Pages has no rewrite rules, so the nearest <code>404.html</code> is the best it can
+  do: the right page, carrying a 404 status. Cloudflare's <code>_redirects</code> rewrites the
+  same paths at 200, which is the reason to prefer it for anything meant to be indexed.
+</div>
+
+<div class="callout">
+  <b>The API image is not the one at the repository root.</b> That one builds the Playwright
+  test image and its <code>CMD</code> runs the suite.
+  <code>artifacts/api-server/Dockerfile</code> ships the server, and its runtime stage is
+  unusually thin: <code>build.ts</code> already bundles the whole server — workspace packages,
+  express, drizzle, supabase — with esbuild into a self-contained
+  <code>dist/index.mjs</code>, so the image copies <code>dist/</code> and nothing else. No
+  <code>node_modules</code>, no pnpm, no source, non-root user. <code>fly.toml</code>
+  deliberately keeps one machine running rather than scaling to zero, because
+  <code>routes/ai.ts</code> builds its rate limiters on an in-memory store with a 24-hour
+  window — a machine that stops and restarts hands every caller a fresh anonymous allowance,
+  and the free-tier quota stops being a quota.
+</div>
 
 <div class="callout good">
   <b>The tooling is TypeScript too.</b> <code>api-server/build.ts</code> (the esbuild driver)
@@ -945,7 +1037,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h3>CI</h3>
 
 <p>
-  Every layer runs as its own step on each push and pull request, and again nightly at 05:00
+  Typecheck, lint, formatting and every test layer run as their own steps on each push and
+  pull request, and again nightly at 05:00
   Israel time. GitHub cron is UTC-only and Israel shifts between UTC+2 and UTC+3, so both
   candidate hours are scheduled and a gate job discards the one that is not 05:00 locally.
   Each step carries <code>if: !cancelled()</code>, so one failing layer — or a failing
@@ -956,8 +1049,20 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   The Docker image is pinned to <code>linux/amd64</code> for a related reason: the workspace
   <code>overrides</code> strip every platform-native optional dependency except the
   linux-x64-gnu ones, so an arm64 image would be missing the rollup binary and the e2e layer's
-  Vite server would never boot.
+  Vite server would never boot. Both images take the pin, for the same reason.
 </p>
+
+<div class="callout">
+  <b>Lint and formatting are gates now, and that is the whole story of how they drifted.</b>
+  All three checks were defined in <code>package.json</code> and CI ran one of them: the
+  workflow invoked <code>typecheck</code> and the test layers, and the strings
+  <code>lint</code>, <code>eslint</code>, <code>format</code> and <code>prettier</code> did
+  not appear anywhere in it. The result reads exactly as you would predict — typecheck clean,
+  because it was enforced; lint at 32 errors and 590 files off the Prettier config, because
+  they were not. A sweep had in fact already been run once and undone within a day: all 590
+  files were touched by the 26 commits that landed after it, and none predated it. The fix
+  that holds is the gate, not the sweep.
+</div>
 
 <!-- ───────────────────────── 12 ───────────────────────── -->
 <h2 id="extend">12 · Extension points</h2>
@@ -993,8 +1098,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     </tr>
     <tr>
       <td>A page section</td>
-      <td>A component + one line in <code>HomePage</code> + a <code>nav.links</code> entry</td>
-      <td>Scroll-spy and reveal both derive from the DOM and the nav list, so neither needs editing.</td>
+      <td>A component, one entry in <code>lib/sections.ts</code>, one label per locale, and one line in <code>HomePage</code></td>
+      <td>The nav, the scroll-spy and the section numbering all read <code>SECTIONS</code>, so adding it in one place is what puts it in all three. Re-run <code>pnpm generate-prerender</code> to carry it into the static shell.</td>
     </tr>
     <tr>
       <td>A progressive-reveal UI elsewhere</td>
