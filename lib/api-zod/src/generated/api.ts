@@ -134,6 +134,17 @@ export const SignInWithGoogleResponse = zod.object({
 });
 
 /**
+ * Returns the public Google OAuth client ID. Static clients use this at runtime so Replit does not need authentication configuration or secrets.
+
+ * @summary Read public browser authentication configuration
+ */
+export const GetAuthConfigResponse = zod.object({
+  clientId: zod
+    .string()
+    .describe('Public Google OAuth client ID, or an empty string when sign-in is disabled.'),
+});
+
+/**
  * @summary Read the current signed browser session
  */
 export const GetAuthSessionResponse = zod.object({

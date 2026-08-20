@@ -17,6 +17,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AuthConfig,
   AuthErrorResponse,
   AuthSession,
   CodingChallenges,
@@ -435,6 +436,68 @@ export const useSignInWithGoogle = <
 > => {
   return useMutation(getSignInWithGoogleMutationOptions(options));
 };
+
+/**
+ * Returns the public Google OAuth client ID. Static clients use this at runtime so Replit does not need authentication configuration or secrets.
+
+ * @summary Read public browser authentication configuration
+ */
+export const getGetAuthConfigUrl = () => {
+  return `/api/auth/config`;
+};
+
+export const getAuthConfig = async (options?: RequestInit): Promise<AuthConfig> => {
+  return customFetch<AuthConfig>(getGetAuthConfigUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetAuthConfigQueryKey = () => {
+  return [`/api/auth/config`] as const;
+};
+
+export const getGetAuthConfigQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAuthConfig>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthConfig>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAuthConfigQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthConfig>>> = ({ signal }) =>
+    getAuthConfig({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAuthConfig>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAuthConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthConfig>>>;
+export type GetAuthConfigQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Read public browser authentication configuration
+ */
+
+export function useGetAuthConfig<
+  TData = Awaited<ReturnType<typeof getAuthConfig>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthConfig>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAuthConfigQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Read the current signed browser session

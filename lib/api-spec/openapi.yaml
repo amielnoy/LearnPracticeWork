@@ -110,6 +110,21 @@ paths:
           $ref: "#/components/responses/AuthError"
         "503":
           $ref: "#/components/responses/AuthError"
+  /auth/config:
+    get:
+      operationId: getAuthConfig
+      tags: [auth]
+      summary: Read public browser authentication configuration
+      description: >
+        Returns the public Google OAuth client ID. Static clients use this at
+        runtime so Replit does not need authentication configuration or secrets.
+      responses:
+        "200":
+          description: Public authentication configuration.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthConfig"
   /auth/session:
     get:
       operationId: getAuthSession
@@ -195,6 +210,13 @@ components:
           minLength: 1
           maxLength: 10000
       required: [credential]
+    AuthConfig:
+      type: object
+      properties:
+        clientId:
+          type: string
+          description: Public Google OAuth client ID, or an empty string when sign-in is disabled.
+      required: [clientId]
     GoogleUser:
       type: object
       properties:

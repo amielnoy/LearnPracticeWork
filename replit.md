@@ -55,9 +55,12 @@ is absent fails closed with a controlled 4xx/5xx response. The package scripts d
 | `GOOGLE_CLIENT_ID` + `SESSION_SECRET` | Google tokens are verified and exchanged for signed HttpOnly sessions | Sign-in answers 503; protected routes stay closed |
 | `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` | Stripe API and signed webhooks | Stripe routes fail closed; there is no connector fallback |
 | `ALLOWED_ORIGINS` | Comma-separated CORS allowlist | Only same-origin and Replit-domain requests |
+| `UPSTREAM_API_BASE_URL` | Secretless Replit API artifact relays `/api/*` to Fly | FastAPI handles routes locally |
+| `METRICS_TOKEN` | Protects production `/metrics` scrapes | Metrics are available only outside production |
+| `METRICS_ID_SALT` | HMAC-pseudonymizes user labels in metrics | Authenticated users are labeled `redacted` |
 
-`GOOGLE_CLIENT_ID` must be the same OAuth client the academy is built with as
-`VITE_GOOGLE_CLIENT_ID`; the server compares it against the token's `aud` claim.
+`GOOGLE_CLIENT_ID` is returned publicly by `/api/auth/config` and compared against the Google
+token's `aud` claim. A build-time `VITE_GOOGLE_CLIENT_ID` still works but is optional.
 
 `ADMIN_API_TOKEN` is a secret you choose — any long random string. Rotate it by setting a new
 value; there is nothing else to update.
@@ -169,7 +172,8 @@ Static and API are deployed separately, because only one of them costs anything 
 `deploy/README.md` is the runbook; the summary:
 
 - **Replit** — `.replit-artifact/artifact.toml` per artifact. No production secret belongs in
-  Replit; without backend secrets, protected/provider routes deliberately stay unavailable.
+  Replit. The API artifact relays same-origin `/api/*` requests to Fly over HTTPS, preserving
+  first-party login cookies and Stripe request bodies without storing provider credentials.
 - **GitHub Pages** — `.github/workflows/ci.yml` publishes from `main`: the portfolio at the
   site root, `ai-testing-academy/` and **all ten** `ai-testing-lecture-N/` beneath it, and
   `architecture.html` alongside. Static only, so the academy's AI panel falls back to
@@ -185,6 +189,12 @@ Static and API are deployed separately, because only one of them costs anything 
   rather than scaling to zero, because `app/main.py` builds its rate limiters on an
   in-memory store with a 24-hour window: a machine that stops and restarts hands every caller
   a fresh anonymous allowance.
+- **Grafana** — `monitoring/compose.yaml` provisions Grafana, Prometheus, Pushgateway and the
+  Python uptime probe. The local test runner prints its dashboard URL; Actions links the public
+  dashboard when `GRAFANA_URL` is configured and publishes history when its Pushgateway secrets
+  are configured. Login and server-proxied AI panels use only approximate country, derived
+  client type, and HMAC-pseudonymous users; they do not export identity, IP, prompt, response,
+  token, or key data. Keep both `METRICS_TOKEN` and `METRICS_ID_SALT` on Fly, never Replit.
 
   Publishing runs **even when the test job fails** — that is when the Allure report is most
   worth reading. The site job overrides the skip-on-failed-dependency default with

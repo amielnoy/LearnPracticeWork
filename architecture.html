@@ -999,18 +999,28 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h3>Deploy targets, one build</h3>
 
 <p>
-  Replit serves the site and <code>api-server</code> from a single origin, which is what makes
-  the relative <code>/api</code> calls work. Every static host serves the built output only,
+  Replit serves the site and a secretless same-origin API relay. The relay forwards relative
+  <code>/api</code> calls to the Python service on Fly while keeping first-party login cookies
+  on the Replit domain. Every static host serves the built output only,
   under a sub-path, with no API behind it — so the AI panel there falls back to
   bring-your-own-key, exactly as it does when the proxy is unreachable.
 </p>
 
 <dl class="kv">
-  <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, <code>/api</code> routed on the same origin.</dd>
+  <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, with a secretless same-origin <code>/api</code> relay to Fly.</dd>
   <dt>GitHub Pages</dt><dd><code>.github/workflows/ci.yml</code> — <code>BASE_PATH=/&lt;repo&gt;/ai-testing-academy/</code>, built and published on every push to <code>main</code>.</dd>
   <dt>Cloudflare Pages</dt><dd>Same artifact. <code>deploy/cloudflare/_redirects</code> and <code>_headers</code> are copied into the site root by the same job; GitHub Pages ignores both, so one output deploys to either host.</dd>
   <dt>Fly.io</dt><dd><code>server/{Dockerfile,fly.toml}</code> — the API, separately, because it is the only piece that costs anything to run. <code>deploy/README.md</code> is the runbook.</dd>
+  <dt>Grafana</dt><dd><code>monitoring/compose.yaml</code> — Prometheus server and test history, Python uptime probes, and dashboards for health, logins, client type, approximate country, and server-proxied AI usage.</dd>
 </dl>
+
+<div class="callout good">
+  <b>Monitoring stops at the privacy boundary.</b> Verified users become stable HMAC-based
+  labels using a Fly-only <code>METRICS_ID_SALT</code>; raw identity, IP address, prompts,
+  responses, tokens, and keys never enter Prometheus. Country comes from the trusted hosting
+  proxy and client type from User-Agent. Browser bring-your-own-key AI calls are not visible to
+  the server and are therefore not counted.
+</div>
 
 <p>
   The Pages job builds the portfolio at the site root and mounts this site and

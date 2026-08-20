@@ -8,6 +8,7 @@ hosted separately because they cost very different amounts.
 | Static | 12 Vite SPAs — portfolio, academy, 10 lecture decks | GitHub Pages (wired) or Cloudflare Pages | $0 |
 | API | One FastAPI server: auth, AI proxy, content, Stripe, entitlements | Fly.io | ~$2–5/month |
 | Database | Postgres | Supabase | $0 on the free tier |
+| Monitoring | Python metrics/probes, Prometheus, Pushgateway, Grafana | Private host or managed equivalents | Depends on host |
 
 ## Static
 
@@ -95,6 +96,10 @@ the locked Python dependencies, copies `server/app`, and runs Uvicorn as a non-r
 
 Verify: `curl https://<app>.fly.dev/api/healthz` returns `{"status":"ok"}`.
 
+The current `server/fly.toml` names the app `ata-api`. Create or rename that Fly application
+before pointing the Replit relay at it; the public hostname must resolve and its health check
+must pass.
+
 ### Environment
 
 Set in `fly.toml` (not secret):
@@ -108,6 +113,11 @@ Set via `fly secrets` (never committed): `GROQ_API_KEY`, `GEMINI_API_KEY`,
 `GOOGLE_CLIENT_ID`, a random `SESSION_SECRET` of at least 32 characters,
 `SUPABASE_DB_PASSWORD`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `STRIPE_SECRET_KEY`, and
 `STRIPE_WEBHOOK_SECRET`.
+
+Also set long, independent random `METRICS_TOKEN` and `METRICS_ID_SALT` values with
+`fly secrets set`. Prometheus supplies the token as a bearer token when scraping `/metrics`;
+production returns 404 without it. The salt HMAC-pseudonymizes verified user IDs for Grafana
+and must remain only on Fly.
 
 `SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints. Generate the
 content seed SQL with:
@@ -123,6 +133,32 @@ empty or unavailable store is reported as a controlled `503`, not as fabricated 
 Configure Stripe to send events to `https://<app>.fly.dev/api/stripe/webhook`. The webhook
 secret is verified against the raw request body. Stripe credentials are read only from the
 backend host's `STRIPE_*` secret environment; there is no Replit connector fallback.
+
+## Replit domains without Replit secrets
+
+The static applications and their existing `*.replit.app` paths remain deployable through the
+committed `.replit-artifact/artifact.toml` files. The Replit API artifact is a secretless,
+same-origin relay: `UPSTREAM_API_BASE_URL=https://ata-api.fly.dev` forwards `/api/*` to Fly,
+while `/api/healthz` stays local so Replit can check the relay process itself.
+
+This preserves first-party `SameSite=Lax` login cookies on the Replit domain. It also forwards
+Stripe signature headers and raw webhook bodies unchanged. Google/session, Stripe, Supabase,
+AI, admin, database, and metrics secrets exist only on Fly. Before publishing Replit, verify:
+
+1. the Fly hostname resolves and `/api/healthz` returns 200;
+2. Fly's `ALLOWED_ORIGINS` contains the exact Replit origin;
+3. the Google OAuth client authorizes the exact Replit origin; and
+4. Stripe sends webhooks to the Fly URL, not to the relay.
+
+## Grafana and test history
+
+`monitoring/compose.yaml` provisions Grafana, Prometheus, Pushgateway, a secretless local API,
+and the Python server-probe service. See `monitoring/README.md` for local startup and production
+settings. GitHub Actions publishes Allure history through Python when `PUSHGATEWAY_URL` is set,
+and links the dashboard when the public `GRAFANA_URL` repository variable is set. The dashboard
+also groups login and server-proxied AI usage by approximate country, pseudonymous user, and
+desktop/iOS/Android client. Metrics never contain names, emails, IPs, prompts, responses, or
+credentials; browser BYOK traffic is intentionally outside server monitoring.
 
 ### The image
 

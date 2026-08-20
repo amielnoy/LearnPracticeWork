@@ -156,8 +156,11 @@ posts it to `POST /api/auth/google`. The Python API verifies RS256, issuer, audi
 claims and `email_verified`, then returns public profile fields and sets an HMAC-signed,
 HttpOnly, `SameSite=Lax` cookie. The raw Google credential is never persisted in browser
 storage. Reloads restore the profile through `GET /api/auth/session`; logout calls
-`POST /api/auth/logout`. Set the same OAuth client in `VITE_GOOGLE_CLIENT_ID` and
-`GOOGLE_CLIENT_ID`, plus a random server-only `SESSION_SECRET` of at least 32 characters.
+`POST /api/auth/logout`. When a build has no `VITE_GOOGLE_CLIENT_ID`, the client reads the
+public ID from `GET /api/auth/config`, so a static Replit build needs no authentication
+configuration. Set `GOOGLE_CLIENT_ID` and a random server-only `SESSION_SECRET` of at least
+32 characters on the Fly backend. Register the Replit and GitHub Pages origins in that Google
+OAuth client's authorized JavaScript origins.
 
 ### Content API
 

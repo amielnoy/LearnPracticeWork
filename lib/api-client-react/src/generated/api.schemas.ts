@@ -25,6 +25,11 @@ export interface GoogleCredential {
   credential: string;
 }
 
+export interface AuthConfig {
+  /** Public Google OAuth client ID, or an empty string when sign-in is disabled. */
+  clientId: string;
+}
+
 export interface GoogleUser {
   name: string;
   email: string;
