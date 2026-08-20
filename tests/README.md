@@ -14,7 +14,9 @@ tests/
 │   └── components/            reusable fragments (NavComponent, HeroComponent)
 ├── deck/        Chromium      one lecture deck, really running
 └── support/     fixtures, fakes, and the server launcher
-server/tests/    pytest fixtures for Google verification, sessions, and integrations
+server/tests/    pytest — Google verification, sessions, integrations, and one
+                 module per service: ai_gateway, content_store, catalog,
+                 commerce, origins
 ```
 
 ## Running
@@ -222,11 +224,18 @@ also needs a roomy `/dev/shm`: compose sets `shm_size: 1gb`, and a plain `docker
 
 - **Pure TypeScript function** → `unit/`. Stub browser globals with `support/fakeBrowser.ts` and
   network calls with `support/fetchStub.ts` rather than adding jsdom.
-- **Python backend rule** → `server/tests/`. Prefer fixtures in `conftest.py`; use
-  `httpx.MockTransport` for upstreams and `ASGITransport` for routes so tests never need a real
-  Google, Stripe, model-vendor, or database connection. Reuse `authenticated_client`,
-  `client_headers`, `stripe_checkout_gateway`, `relay_requests`, and `allure_result_factory`
-  instead of rebuilding those states in individual modules.
+- **Python backend rule** → `server/tests/`. Ask first whether the rule needs a request at all:
+  a provider's model fallback, a catalogue variable, a webhook's trust decision are all
+  reachable by constructing the service, and a test that does is shorter and names the rule
+  rather than a route. Keep `ASGITransport` for the cases that are genuinely about HTTP —
+  status codes, headers, cookies, middleware.
+- **A backend test that needs a collaborator replaced** → override the `Depends` provider, never
+  the module global. `override_dependency` in `conftest.py` installs one for the length of a
+  test and removes it afterwards; `stripe_checkout_gateway` and `stripe_webhook_gateway` are
+  built on it and are the shape to copy. Reuse `authenticated_client`, `client_headers`,
+  `course_sales_environment`, `relay_requests`, and `allure_result_factory` rather than
+  rebuilding those states. Use `httpx.MockTransport` for anything the server itself calls out to,
+  so tests never need a real Google, Stripe, model-vendor, or database connection.
 - **Anything that decides whether to accept something** → assert the *acceptance* first. A
   verifier that refuses everything passes every rejection test ever written;
   `server/tests/test_google_auth.py` signs a real token with a fixture keypair so
@@ -234,6 +243,9 @@ also needs a roomy `/dev/shm`: compose sets `shm_size: 1gb`, and a plain `docker
 - **Component** → `component/`. Import it through `@academy/…`; use `mountLocalized` for locale
   context and add a focused harness fixture when several specs repeat the same mounting or
   disclosure setup. Intercept `/api/ai/config` with `page.route` instead of relying on a server.
+- **New AI provider** → a class in `server/app/ai_gateway.py`, an entry in `PROVIDERS`, and
+  cases in `server/tests/test_ai_gateway.py` for its request shape, its response parsing and its
+  model fallback. Nothing in the routes changes, so nothing in `api/` needs to.
 - **New route** → `api/`, add its request and response shape to `lib/api-spec/openapi.yaml`,
   regenerate with `pnpm --filter @workspace/api-spec run codegen`, and add focused API coverage.
   The contract suite will then reject undocumented routes automatically.

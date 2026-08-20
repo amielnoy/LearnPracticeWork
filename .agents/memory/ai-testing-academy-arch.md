@@ -23,12 +23,34 @@ Old vanilla-JS files (`assets/js/*.js`, inline `<style>` in `index.html`) were
 deleted as part of the migration; CSS was ported near-verbatim into
 `src/app.css` rather than rewritten in Tailwind utilities, since the design
 is fully custom. PDF export (jsPDF/html2canvas) and doc parsing (PDF.js,
-Mammoth) still use the old CDN dynamic-loader pattern post-migration — that
-is a known follow-up, not yet converted to npm imports.
+Mammoth) are npm dependencies reached through dynamic `import()`, so they are
+fetched on first use rather than on page load. The runtime-injection loader
+that used to walk cdnjs → jsDelivr → unpkg is gone; an earlier version of this
+note called that a pending follow-up, and it is done.
 
 **Why:** the locale-object pattern was chosen to keep English/Hebrew content
 symmetric and avoid duplicating markup per language; it survived the React
 migration unchanged.
+
+## The agents are wiring, not implementations
+`ResumeAgent` and `InterviewAgent` were single 695- and 410-line components
+holding file parsing, PDF generation, AI orchestration, persistence and JSX
+together. The behaviour now sits in modules and hooks and the components are
+composition: `lib/documentText.ts` (an extractor per format, keyed by
+extension in `EXTRACTORS`), `lib/resumeExport.ts`, `lib/interviewSession.ts`
+(validates a restored transcript), and `useResumeDrafts` / `useResumeUpload` /
+`useResumeEvaluation` / `useInterviewSession`.
+
+**How to apply:** to support another résumé file format, add an entry to
+`EXTRACTORS` and widen the input's `accept` — do not add a branch to the
+component. To change how a transcript is restored, edit
+`lib/interviewSession.ts`; every element is validated because `text` is
+rendered as a child and `cls` as a class name.
+
+The same reshaping happened on the server: `server/app/main.py` is a ~80-line
+composition root, routes live under `server/app/routes/`, and AI vendors are
+strategy objects in `server/app/ai_gateway.py`. Backend tests substitute
+collaborators via `app.dependency_overrides`, not by patching module globals.
 
 ## AI provider keys: never serve a plaintext .env to the browser
 The site originally shipped with client-side code that did

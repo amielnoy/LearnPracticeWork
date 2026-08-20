@@ -68,8 +68,13 @@ persistence, and remote fonts are disabled. The browser bundle is version-pinned
 from the interactive console go directly to this API origin.
 
 `fly.toml` therefore sets `min_machines_running = 1` and leaves
-`auto_stop_machines` off. Give the rate limiter a shared store (Redis, or the
-Postgres already in use) before changing that.
+`auto_stop_machines` off — a warm endpoint for Stripe webhooks.
+
+The quota no longer depends on that. In production `app/rate_limit.py` counts in atomic
+Postgres rows keyed by an HMAC digest, so allowances are shared across workers and survive a
+restart; it needs `DATABASE_URL` (or `SUPABASE_DB_PASSWORD`) plus `RATE_LIMIT_SALT` — or
+`METRICS_ID_SALT` — and **fails closed** without them rather than falling back to memory. The
+in-memory limiter runs only when `NODE_ENV` is not `production`.
 
 ### First deploy
 

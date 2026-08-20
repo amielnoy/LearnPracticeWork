@@ -64,6 +64,33 @@ is absent fails closed with a controlled 4xx/5xx response. The package scripts d
 | `METRICS_TOKEN` | Protects production `/metrics` scrapes | Metrics are available only outside production |
 | `METRICS_ID_SALT` | HMAC-pseudonymizes user labels in metrics | Authenticated users are labeled `redacted` |
 
+### API structure
+
+`server/app/main.py` is a composition root and nothing else: it builds the app, installs CORS,
+the two middleware layers and the error handlers, and mounts the routers. Behaviour lives in
+the module that owns it.
+
+| Module | Holds |
+| --- | --- |
+| `routes/{ops,auth,content,ai,commerce,entitlements}.py` | One `APIRouter` each; HTTP shape only |
+| `routes/__init__.py` | `ROUTERS` — the mount list, so `create_app` never changes |
+| `dependencies.py` | Every `Depends` provider, plus the four shared rate limiters |
+| `ai_gateway.py` | One strategy object per AI provider, and the proxy that dispatches to it |
+| `content_store.py` | Supabase reads, and the `NestedCollection` specs the content routes are built from |
+| `commerce.py` | Checkout, catalogue seeding, prices and the Stripe webhook |
+| `catalog.py` | The one course this deployment may sell, or `None` |
+| `entitlements.py` | Whether a verified identity has bought it |
+| `origins.py` | Which origins a redirect may point at |
+| `errors.py` | `ServiceError`, rendered by a single handler |
+| `schemas.py` · `settings.py` | Request bodies; deployment-wide limits |
+
+Two consequences worth knowing before editing:
+
+- **Adding an AI provider** is a class in `ai_gateway.py` plus an entry in `PROVIDERS`.
+  Dispatch, `/api/ai/config` and the routes all follow from the registry.
+- **Tests substitute collaborators through `app.dependency_overrides`**, not by patching module
+  globals. `server/tests/conftest.py` exposes `override_dependency` for this.
+
 `GOOGLE_CLIENT_ID` is returned publicly by `/api/auth/config` and compared against the Google
 token's `aud` claim. A build-time `VITE_GOOGLE_CLIENT_ID` still works but is optional.
 
@@ -91,7 +118,7 @@ project executes TypeScript in Node without launching a browser.
 
 | Layer | Runs in | Covers |
 | --- | --- | --- |
-| `server/tests` | Python + pytest | Google signature rules, sessions, Scalar/OpenAPI, monitoring, and deployment fixtures |
+| `server/tests` | Python + pytest | Google signature rules, sessions, Scalar/OpenAPI, monitoring, deployment fixtures, and each service module on its own — AI providers, the content store, the course catalogue, commerce rules and redirect origins |
 | `tests/unit` | Node | Pure logic in `artifacts/ai-testing-academy/src/lib` |
 | `tests/component` | Chromium, desktop + mobile (Playwright CT) | Real React components, mounted and driven |
 | `tests/api` | Node → live server | `server` over HTTP |
@@ -191,9 +218,11 @@ Static and API are deployed separately, because only one of them costs anything 
   nearest `404.html` — the right page carrying a 404 status, on URLs the academy's own
   hreflang tags nominate for indexing.
 - **Fly.io** — `server/{Dockerfile,fly.toml}` for the Python API. It keeps one machine running
-  rather than scaling to zero, because `app/main.py` builds its rate limiters on an
-  in-memory store with a 24-hour window: a machine that stops and restarts hands every caller
-  a fresh anonymous allowance.
+  rather than scaling to zero so the Stripe webhook endpoint stays warm. This used to be about
+  the quota as well, and no longer is: in production `SharedRateLimiter` counts in atomic
+  Postgres rows, so an allowance survives a restart and is shared across workers. Without
+  `DATABASE_URL` and a salt it fails closed rather than falling back to memory — the in-memory
+  limiter is the local and test path only.
 - **Grafana** — `monitoring/compose.yaml` provisions Grafana, Prometheus, Pushgateway and the
   Python uptime probe. The local test runner prints its dashboard URL; Actions links the public
   dashboard when `GRAFANA_URL` is configured and publishes history when its Pushgateway secrets
