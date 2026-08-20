@@ -12,6 +12,7 @@ tests/
 ├── e2e/         Chromium      the real academy app, driven through page objects
 │   ├── pages/                 one class per route (BasePage, HomePage)
 │   └── components/            reusable fragments (NavComponent, HeroComponent)
+├── deck/        Chromium      one lecture deck, really running
 └── support/     fixtures, fakes, and the server launcher
 ```
 
@@ -127,6 +128,19 @@ compared against an `aud` claim on tokens that are rejected before a signature i
 `/api/stripe/seed` is still listed in the contract suite's inventory and still never called
 there — it is a write endpoint. What keeps it safe is no longer that list, though: it is behind
 an admin token, and `api/adminAuth.spec.ts` is what asserts so.
+
+### deck
+
+A second Vite dev server, on port 5274, running `ai-testing-lecture-1`. One deck
+stands in for all ten: `unit/lectureDecks.spec.ts` reads all ten and asserts they
+have not drifted apart, so running one in a browser is enough to prove the logic
+they share actually works. Lecture 1 is the smallest, which keeps the extra
+server cheap.
+
+The split is deliberate. Source-reading covers breadth — ten copies of the same
+stage logic, and the details that are easy to lose in a copy — and a browser
+covers the thing source-reading cannot: that the stage is really drawn, really
+turned on a portrait phone, and really left alone once the phone is turned.
 
 ### e2e
 
