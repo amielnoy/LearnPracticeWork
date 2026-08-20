@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/experimental-ct-react';
+import { test, expect } from './fixtures';
 import { ChallengeCard } from '@academy/components/practice/ChallengeCard';
 import type { Challenge, ChallengeLabels } from '@academy/lib/challenges';
 

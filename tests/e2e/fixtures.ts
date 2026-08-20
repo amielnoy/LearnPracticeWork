@@ -5,6 +5,10 @@ import type { HeroComponent } from './components/HeroComponent';
 import type { QuestionsComponent } from './components/QuestionsComponent';
 import type { ChallengesComponent } from './components/ChallengesComponent';
 import type { FooterComponent } from './components/FooterComponent';
+import {
+  meaningfulReporting,
+  type MeaningfulReportingFixture,
+} from '../support/meaningfulReporting';
 
 type AcademyApiFixture = {
   /** Content requests observed by the fixture, useful when a test exercises fallback behaviour. */
@@ -25,7 +29,7 @@ type BrowserStorageFixture = {
  * component fixtures are conveniences that hang off the same page object, so
  * `hero` and `home.hero` are the one instance.
  */
-type AcademyFixtures = {
+type AcademyFixtures = MeaningfulReportingFixture & {
   academyApi: AcademyApiFixture;
   storage: BrowserStorageFixture;
   home: HomePage;
@@ -37,6 +41,7 @@ type AcademyFixtures = {
 };
 
 export const test = base.extend<AcademyFixtures>({
+  _meaningfulReporting: [meaningfulReporting, { auto: true }],
   // Auto fixture: keep backend-dependent state deterministic before navigation.
   // The academy deliberately falls back to bundled content when the content API
   // is unavailable. Without this route, a late remote response can replace a

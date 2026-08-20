@@ -17,6 +17,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "allure-pytest>=2.16.0,<3",
   "pytest>=8.4.0,<10",
   "pytest-asyncio>=1.1.0,<2",
   "pytest-xdist>=3.8.0,<4",
@@ -24,7 +25,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "-n auto --dist loadscope"
+addopts = "-n auto --dist loadscope --alluredir=../allure-results"
 asyncio_mode = "auto"
 pythonpath = ["."]
 testpaths = ["tests"]

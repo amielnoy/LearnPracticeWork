@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../support/test';
 import { resolveLang, getLocale, switchLang, applyHtmlAttrs } from '@academy/lib/i18n';
 import { installFakeBrowser, type FakeBrowser } from '../support/fakeBrowser';
 

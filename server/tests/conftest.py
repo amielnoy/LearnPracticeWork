@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import base64
 import json
+import os
+import platform
 import time
 from collections.abc import AsyncIterator, Callable, Iterator
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+import allure
 import httpx
 import pytest
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -19,6 +22,14 @@ from app.main import app
 
 CLIENT_ID = "000000000000-test.apps.googleusercontent.com"
 KID = "fixture-key"
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo):
+    """Expose each phase result to the lifecycle fixture after the test body finishes."""
+    outcome = yield
+    report = outcome.get_result()
+    setattr(item, f"report_{report.when}", report)
 
 
 def _segment(value: dict) -> str:
@@ -40,6 +51,56 @@ def isolated_auth(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     google_auth.reset_key_cache()
     yield
     google_auth.reset_key_cache()
+
+
+@pytest.fixture(autouse=True)
+def meaningful_test_report(request: pytest.FixtureRequest, isolated_auth: None) -> Iterator[None]:
+    """Give every backend test a safe, readable Given/When/Then Allure narrative."""
+    node_id = request.node.nodeid
+    title = request.node.name
+    worker = os.getenv("PYTEST_XDIST_WORKER", "local")
+    started_at = time.perf_counter()
+
+    allure.dynamic.parent_suite("Python backend")
+    print(f"[GIVEN] {title} | isolated backend fixtures | worker={worker} | {node_id}")
+    with allure.step(f"Given isolated backend conditions for “{title}”"):
+        allure.attach(
+            json.dumps(
+                {
+                    "test": title,
+                    "source": node_id,
+                    "worker": worker,
+                    "python": platform.python_version(),
+                    "externalServices": "in-memory fixtures only",
+                },
+                indent=2,
+            ),
+            name="starting-conditions.json",
+            attachment_type=allure.attachment_type.JSON,
+        )
+
+    print(f"[WHEN] {title} | execute test actions and assertions")
+    with allure.step("When the test executes its actions and assertions"):
+        yield
+
+    report = getattr(request.node, "report_call", None)
+    if report is None:
+        status = "not run"
+    elif report.skipped:
+        status = "skipped"
+    elif report.failed:
+        status = "failed"
+    else:
+        status = "passed"
+    duration_ms = round((time.perf_counter() - started_at) * 1000)
+
+    print(f"[THEN] {title} | status={status} | duration={duration_ms}ms")
+    with allure.step(f"Then the test {status} in {duration_ms} ms"):
+        allure.attach(
+            json.dumps({"status": status, "durationMs": duration_ms}, indent=2),
+            name="result.json",
+            attachment_type=allure.attachment_type.JSON,
+        )
 
 
 @pytest.fixture

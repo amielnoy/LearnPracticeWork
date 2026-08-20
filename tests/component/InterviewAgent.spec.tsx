@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/experimental-ct-react';
+import { test, expect } from './fixtures';
 import type { Page } from '@playwright/test';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';

@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 import { withAllureReporting, type ApiClient } from './apiReporting';
+import { meaningfulReporting, type MeaningfulReportingFixture } from './meaningfulReporting';
 
 /**
  * The base test for the API and contract suites.
@@ -13,7 +14,8 @@ import { withAllureReporting, type ApiClient } from './apiReporting';
  * rather than by file path, so "the API tests" is one thing you can look at
  * instead of a list of spec names.
  */
-export const test = base.extend<{ api: ApiClient }>({
+export const test = base.extend<{ api: ApiClient } & MeaningfulReportingFixture>({
+  _meaningfulReporting: [meaningfulReporting, { auto: true }],
   api: async ({ request }, use) => {
     await use(withAllureReporting(request));
   },

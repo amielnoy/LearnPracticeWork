@@ -10,6 +10,10 @@ import { ResumeAgent } from '@academy/components/agents/ResumeAgent';
 import { GoogleSignIn } from '@academy/components/account/GoogleSignIn';
 import { AuthProvider } from '@academy/context/AuthContext';
 import { CodingChallenges } from '@academy/components/practice/CodingChallenges';
+import {
+  meaningfulReporting,
+  type MeaningfulReportingFixture,
+} from '../support/meaningfulReporting';
 
 /**
  * Component fixtures. The provider context probes `/api/ai/config` on mount, so
@@ -126,7 +130,7 @@ const GOOGLE_STUB = `
   };
 `;
 
-type ComponentFixtures = {
+type ComponentFixtures = MeaningfulReportingFixture & {
   /** Mount any component inside the real locale provider. */
   mountLocalized: (node: ReactNode) => Promise<Locator>;
   /** CodingChallenges mounted with progress state and helpers for its closed levels. */
@@ -150,6 +154,7 @@ const withProviders = (node: ReactNode) => (
 );
 
 export const test = base.extend<ComponentFixtures>({
+  _meaningfulReporting: [meaningfulReporting, { auto: true }],
   mountLocalized: async ({ mount }, use) => {
     await use((node: ReactNode) => mount(<LocaleProvider>{node}</LocaleProvider>));
   },

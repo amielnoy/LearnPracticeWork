@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../support/test';
 import { customFetch, ApiError, setBaseUrl } from '@lib/api-client-react/src/custom-fetch';
 import { HealthCheckResponse } from '@workspace/api-zod';
 import { KEYLESS_URL } from '../support/servers';
