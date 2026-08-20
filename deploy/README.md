@@ -47,7 +47,7 @@ nominate for indexing. Cloudflare rewrites them properly at 200.
 
 ## API server
 
-Fly, because the server has two pieces of per-process state that a
+Fly runs the API because the server has two pieces of per-process state that a
 scale-to-zero host loses:
 
 - `src/routes/ai.ts` builds its burst and daily limiters on
@@ -56,6 +56,13 @@ scale-to-zero host loses:
   allowance — the free-tier quota stops being a quota.
 - Stripe webhooks need a URL that answers immediately; a cold start inside a
   delivery timeout becomes a retry at best.
+
+The same API also serves the academy's localized content at
+`/api/content/question-bank`, `/api/content/coding-challenges`, and
+`/api/content/lecture-series`. Each accepts the optional `lang=en|he` query parameter,
+reads ordered rows from Supabase, and returns `503` with a fixed error body when the content
+store is unavailable. The academy currently renders bundled content, so these routes can be
+deployed independently while the client migration is completed.
 
 `fly.toml` therefore sets `min_machines_running = 1` and leaves
 `auto_stop_machines` off. Give the rate limiter a shared store (Redis, or the
@@ -97,6 +104,11 @@ Set via `fly secrets` (never committed): `GEMINI_API_KEY`,
 `SUPABASE_DB_PASSWORD`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 `STRIPE_SECRET_KEY`.
 
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are also required for the content endpoints.
+Populate the content tables with the repository's seed workflow before switching a client to
+the API; an empty or unavailable store is reported as a controlled `503`, not as fabricated
+content.
+
 `PUBLIC_BASE_URL` replaced a hardcoded read of `REPLIT_DOMAINS`. Off Replit that
 variable is unset, and the old code interpolated it anyway — registering
 `https://undefined/api/stripe/webhook` with Stripe. That fails silently: the
@@ -113,11 +125,37 @@ builds the Playwright test image and its `CMD` runs the suite.
 `dist/index.mjs`, so the runtime stage copies `dist/` and nothing else: no
 `node_modules`, no pnpm, no source. It runs as the non-root `node` user.
 
-## Not done
+## Moving the decks to a new origin
 
-The lecture URLs in `artifacts/ai-testing-academy/src/lib/lectures.ts` are
-absolute and point at `free-tier-insights--amielpeled.replit.app`. Every deck
-now also builds and deploys to Pages, but until those URLs change, the "Open
-lecture" links keep resolving to Replit. Changing them changes public URLs that
-are already indexed, so it is a decision rather than a cleanup — the canonical
-and hreflang tags in each deck's `index.html` have to move with them.
+The lecture links used to be twenty absolute URLs pinned to
+`free-tier-insights--amielpeled.replit.app`, one per lecture per language. They
+are derived now: `lib/lectures.ts` stores a deck number, and `lectureHref()`
+builds the URL from a configurable origin.
+
+Set `VITE_SITE_ORIGIN` to move all twenty at once:
+
+```bash
+VITE_SITE_ORIGIN=https://amielnoy.github.io/LearnPracticeWork \
+  pnpm --filter @workspace/ai-testing-academy run build
+```
+
+Set it for the prerender generator too — it reads the same name from
+`process.env`, because it runs under Node where `import.meta.env` does not
+exist. Set one and not the other and the crawler-facing shell will disagree
+with the rendered page about where a lecture lives.
+
+Unset, it falls back to `DEFAULT_SITE_ORIGIN`, which is the origin the links
+were already pinned to — so a build that does not set it is byte-identical to
+one from before the change. The cybersecurity track keeps explicit `url`
+values, because those lectures are hosted on gamma.site and are not ours to
+move.
+
+### Still pinned
+
+Each deck's own `index.html` carries absolute `canonical`, `og:url` and
+`hreflang` tags naming the Replit origin, and those are static HTML rather than
+anything `VITE_SITE_ORIGIN` reaches. Moving the canonical home means editing
+them — ten files — and it changes URLs that are already indexed, so it is a
+decision rather than a cleanup. Do it together with the env var, not before:
+links that point one way and canonicals that point another are worse than
+either alone.

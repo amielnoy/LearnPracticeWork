@@ -178,9 +178,10 @@
   <h1>AI Testing Academy — how the whole thing is put together</h1>
   <p class="stand">
     A single-page React site that teaches QA automation and runs three AI-backed tools
-    (resume review, mock interview, question-bank enrichment) <b>entirely from the browser</b>.
-    There is no backend of its own: the user brings an API key, or an optional shared
-    proxy in the monorepo answers for them. This page walks the runtime shape, the
+    (resume review, mock interview, question-bank enrichment) from the browser. The user brings
+    an API key, or an optional shared proxy in the monorepo answers for them. The same API also
+    exposes localized question-bank, coding-challenge, and lecture-series content from Supabase;
+    the current UI still renders bundled content modules. This page walks the runtime shape, the
     provider abstraction, the content model, and where to extend each one.
   </p>
   <p>
@@ -233,8 +234,8 @@
 
 <p class="lead">
   One page: a launcher, then six numbered sections stacked in reading order. Three are
-  static teaching content; three call a language model. Everything below exists to serve
-  that split.
+  static teaching content; three call a language model. The API additionally exposes the
+  teaching content as localized, ordered data for clients that are ready to consume it.
 </p>
 
 <div class="grid">
@@ -251,7 +252,7 @@
   <div class="box">
     <span class="tag">static</span>
     <b>🎓 Lecture Series</b>
-    <span>Course tracks and lecture links. Content lives in the component itself, not the locale files.</span>
+    <span>Course tracks and lecture links. The current UI reads bundled EN/HE data from <code>lib/lectures.ts</code>.</span>
   </div>
   <div class="box">
     <span class="tag">AI · chat</span>
@@ -741,12 +742,26 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <code>callGrounded()</code>, then <code>extractJSON()</code> lifts a <code>questions</code>
   array out of the reply. Grounding is why this one path is Gemini-only.
 </p>
+<p>
+  The API counterpart is <code>GET /api/content/question-bank?lang=en|he</code>. It reads
+  ordered stages and items from Supabase and returns the same <code>QuestionBank</code> shape;
+  an unavailable content store produces a deliberate <code>503</code>. The browser currently
+  uses the bundled module, so this endpoint is the migration boundary rather than a dependency
+  of the static build.
+</p>
 
 <h3>🐍 Coding Challenges</h3>
 <p>
   The section maps levels to <code>ChallengeCard</code>s and knows nothing else. Each card owns
   its own <code>useDisclosure(3)</code> — prompt → hint → solution → collapsed — so the list
   never tracks a stage per index and adding challenges cannot regress the reveal logic.
+</p>
+<p>
+  <code>GET /api/content/coding-challenges?lang=en|he</code> exposes the ordered level and
+  challenge model from Supabase. Lecture tracks use the corresponding
+  <code>GET /api/content/lecture-series?lang=en|he</code> endpoint. Both default invalid or
+  missing language values to English and return the same controlled <code>503</code> when the
+  content store cannot be reached.
 </p>
 
 <!-- ───────────────────────── 7 ───────────────────────── -->
@@ -1040,8 +1055,13 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers six layers — 504 cases at the time of
-  writing (221 unit, 152 component, 49 api, 19 contract, 58 e2e, 5 deck). Playwright is used as
+  One Playwright package at <code>tests/</code> covers six layers — 612 cases as this was
+  written (221 unit, 152 component, 58 api, 31 contract, 145 e2e, 5 deck), though that total
+  is the least durable sentence on this page: it has been wrong twice in a day, once because
+  suites grew and once because the e2e config picked up WebKit and Firefox projects, which
+  multiplies a layer without anyone adding a test. The layer <em>structure</em> below is the
+  stable part; for the current split, ask the runner —
+  <code>pnpm --filter @workspace/tests exec playwright test --list</code>. Playwright is used as
   the runner throughout, not just as a browser driver: the unit project never launches a browser,
   it executes the same TypeScript modules the app imports — the academy's, and the server's too,
   wherever a module has no Express import to drag in.
@@ -1286,7 +1306,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <tbody>
     <tr>
       <td>A coding challenge or a whole level</td>
-      <td><code>lib/locales/en.ts</code> + <code>he.ts</code></td>
+      <td><code>lib/locales/en.ts</code> + <code>he.ts</code>, or the content store/API</td>
       <td><code>CodingChallenges</code> maps over whatever the locale provides; it never counts levels or items.</td>
     </tr>
     <tr>
@@ -1325,7 +1345,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <h3>Where the edges are</h3>
 <ul class="notes">
-  <li><b>Lecture content is hardcoded</b> inside <code>LectureSeries.tsx</code> as <code>EN</code>/<code>HE</code> objects rather than living in the locale files — the last section that breaks the content/UI split. The question bank used to do the same and now sits in <code>lib/questionBank.ts</code>; the same move is available here.</li>
+  <li><b>Content has two sources during migration.</b> The academy renders bundled lectures and practice data from <code>lib/lectures.ts</code>, <code>lib/questionBank.ts</code>, and the locale files. The API routes read the corresponding ordered records from Supabase for a future server-backed client.</li>
   <li><b>Grounded search is Gemini-only</b>, so the enrich action degrades if the user is on Anthropic or OpenAI without a Gemini key.</li>
   <li><b>The proxy path covers Gemini only.</b> The other two vendors are own-key or nothing.</li>
   <li><b>Resume tooling needs the public internet</b> beyond the model call; behind a strict CSP or an offline network, extraction and PDF export are the first things to fail.</li>
