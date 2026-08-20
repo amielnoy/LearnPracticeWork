@@ -30,7 +30,9 @@ const DECK_PORT = Number(process.env.E2E_DECK_PORT ?? 5274);
 const DECK_URL = `http://127.0.0.1:${DECK_PORT}`;
 
 export default defineConfig({
+  outputDir: '../test-results/e2e',
   fullyParallel: true,
+  workers: process.env.PW_SUITE_WORKERS ? Number(process.env.PW_SUITE_WORKERS) : undefined,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [

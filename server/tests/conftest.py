@@ -3,14 +3,18 @@ from __future__ import annotations
 import base64
 import json
 import time
-from collections.abc import Callable, Iterator
+from collections.abc import AsyncIterator, Callable, Iterator
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
 
 import httpx
 import pytest
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256
 
-from app import google_auth
+from app import google_auth, relay
+from app import main as main_module
 from app.main import app
 
 CLIENT_ID = "000000000000-test.apps.googleusercontent.com"
@@ -109,7 +113,118 @@ def google_jwks(monkeypatch: pytest.MonkeyPatch, rsa_keys):
 
 
 @pytest.fixture
-async def api_client():
+async def api_client() -> AsyncIterator[httpx.AsyncClient]:
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
+
+
+@pytest.fixture
+async def authenticated_client(
+    api_client: httpx.AsyncClient,
+    google_jwks: dict[str, Any],
+    google_token: Callable[..., str],
+) -> httpx.AsyncClient:
+    """An API client with a real fixture-signed Google session cookie."""
+    response = await api_client.post("/api/auth/google", json={"credential": google_token()})
+    assert response.status_code == 200
+    return api_client
+
+
+@pytest.fixture
+def client_headers() -> Callable[[str, str], dict[str, str]]:
+    """Build the trusted country header and a representative client user-agent."""
+    agents = {
+        "desktop": "Mozilla/5.0 (Macintosh; Intel Mac OS X) Chrome/140 Safari/537.36",
+        "ios": "Mozilla/5.0 (iPhone) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+        "android": "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/140 Mobile",
+    }
+
+    def make(country: str = "IL", client: str = "desktop") -> dict[str, str]:
+        return {
+            "fly-client-country": country.upper(),
+            "user-agent": agents[client],
+        }
+
+    return make
+
+
+@pytest.fixture
+def stripe_environment(monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
+    """Backend-only Stripe credentials that can never reach a real account."""
+    credentials = ("sk_test_fixture", "whsec_fixture")
+    monkeypatch.setenv("STRIPE_SECRET_KEY", credentials[0])
+    monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", credentials[1])
+    return credentials
+
+
+@pytest.fixture
+def stripe_checkout_gateway(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+    """A Stripe checkout client that records parameters and returns a harmless URL."""
+    captured: dict[str, Any] = {}
+
+    class Sessions:
+        @staticmethod
+        def create(params: dict[str, Any]) -> SimpleNamespace:
+            captured.update(params)
+            return SimpleNamespace(url="https://checkout.stripe.test/session")
+
+    async def client() -> SimpleNamespace:
+        return SimpleNamespace(v1=SimpleNamespace(checkout=SimpleNamespace(sessions=Sessions())))
+
+    monkeypatch.setattr(main_module, "stripe_client", client)
+    return captured
+
+
+@pytest.fixture
+def relay_requests(monkeypatch: pytest.MonkeyPatch) -> list[httpx.Request]:
+    """Run the Replit relay against an in-memory upstream and record every request."""
+    requests: list[httpx.Request] = []
+
+    def upstream(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path == "/api/auth/google":
+            return httpx.Response(
+                200,
+                json={"user": {"name": "Reader"}},
+                headers={
+                    "set-cookie": ("ata_session=signed; Path=/api; HttpOnly; Secure; SameSite=lax")
+                },
+                request=request,
+            )
+        return httpx.Response(204, request=request)
+
+    transport = httpx.MockTransport(upstream)
+    original_client = httpx.AsyncClient
+    monkeypatch.setenv("NODE_ENV", "production")
+    monkeypatch.setenv("UPSTREAM_API_BASE_URL", "https://ata-api.fly.dev")
+    monkeypatch.setattr(
+        relay,
+        "_new_client",
+        lambda: original_client(transport=transport, follow_redirects=False),
+    )
+    return requests
+
+
+@pytest.fixture
+def allure_result_factory(
+    tmp_path: Path,
+) -> tuple[Path, Callable[..., Path]]:
+    """Write small Allure result fixtures without repeating JSON/file plumbing."""
+    counter = 0
+
+    def write(*, status: str, suite: str, start: int, stop: int, **extra: Any) -> Path:
+        nonlocal counter
+        result = {
+            "status": status,
+            "start": start,
+            "stop": stop,
+            "labels": [{"name": "suite", "value": suite}],
+            **extra,
+        }
+        path = tmp_path / f"{counter}-result.json"
+        counter += 1
+        path.write_text(json.dumps(result), encoding="utf-8")
+        return path
+
+    return tmp_path, write

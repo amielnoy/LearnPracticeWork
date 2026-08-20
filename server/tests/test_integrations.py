@@ -5,20 +5,11 @@ import pytest
 from app.integrations import stripe_credentials
 
 
-@pytest.fixture
-def direct_stripe_environment(monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
-    secret = "sk_test_fixture"
-    webhook = "whsec_fixture"
-    monkeypatch.setenv("STRIPE_SECRET_KEY", secret)
-    monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", webhook)
-    return secret, webhook
-
-
 @pytest.mark.asyncio
 async def test_stripe_credentials_come_from_backend_secrets(
-    direct_stripe_environment: tuple[str, str],
+    stripe_environment: tuple[str, str],
 ) -> None:
-    assert await stripe_credentials() == direct_stripe_environment
+    assert await stripe_credentials() == stripe_environment
 
 
 @pytest.mark.asyncio
@@ -31,3 +22,40 @@ async def test_missing_stripe_configuration_fails_closed(monkeypatch: pytest.Mon
 
     with pytest.raises(RuntimeError, match="STRIPE_SECRET_KEY is not configured"):
         await stripe_credentials()
+
+
+@pytest.mark.asyncio
+async def test_checkout_returns_to_the_allowlisted_replit_app(
+    api_client,
+    stripe_checkout_gateway,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    replit_host = "free-tier-insights--amielpeled.replit.app"
+    monkeypatch.setenv("REPLIT_DOMAINS", replit_host)
+
+    response = await api_client.post(
+        "/api/stripe/checkout",
+        headers={"origin": f"https://{replit_host}"},
+        json={"priceId": "price_fixture"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"url": "https://checkout.stripe.test/session"}
+    assert stripe_checkout_gateway["success_url"].startswith(f"https://{replit_host}/")
+    assert stripe_checkout_gateway["cancel_url"].startswith(f"https://{replit_host}/")
+
+
+@pytest.mark.asyncio
+async def test_checkout_rejects_an_untrusted_redirect_origin(
+    api_client,
+    stripe_checkout_gateway,
+) -> None:
+    response = await api_client.post(
+        "/api/stripe/checkout",
+        headers={"origin": "https://attacker.example"},
+        json={"priceId": "price_fixture"},
+    )
+
+    assert response.status_code == 200
+    assert stripe_checkout_gateway["success_url"].startswith("http://test/")
+    assert "attacker.example" not in stripe_checkout_gateway["success_url"]

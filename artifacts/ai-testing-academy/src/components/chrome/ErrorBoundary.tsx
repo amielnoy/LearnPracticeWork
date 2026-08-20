@@ -55,21 +55,12 @@ export class ErrorBoundary extends Component<Props, State> {
     return (
       <div style={WRAP} role="alert">
         <div style={{ maxWidth: '46ch', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>This page stopped loading</h1>
+          <h1 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>
+            We couldn’t finish loading this page
+          </h1>
           <p style={{ color: 'var(--muted, #5a5460)', marginBottom: '20px', lineHeight: 1.6 }}>
-            Something failed while rendering the academy. Reloading usually clears it. If it keeps
-            happening, the details are in the browser console.
-          </p>
-          <p
-            style={{
-              fontFamily: 'monospace',
-              fontSize: '.8rem',
-              color: 'var(--muted, #5a5460)',
-              marginBottom: '20px',
-              wordBreak: 'break-word',
-            }}
-          >
-            {error.message}
+            Your saved progress is still safe. Please reload and try again. If the problem
+            continues, come back in a few minutes.
           </p>
           <button
             type="button"

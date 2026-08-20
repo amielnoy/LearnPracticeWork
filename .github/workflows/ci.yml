@@ -8,12 +8,10 @@ name: CI
 #                 schedule fires twice and this drops the firing that is not
 #                 05:00 in Israel. Everything else waits on its answer.
 #
-#  test           Every push and every PR. Typecheck, lint, format, then the test
-#                 layers as separate steps so a failure names the layer. Five
-#                 steps for six layers: `deck` is a third project inside the e2e
-#                 config, so `test:e2e` runs it alongside desktop and mobile.
-#                 One job, not several: each would pay for its own install and
-#                 its own browser download, which costs more than the layers take.
+#  test           Every push and every PR. Typecheck, lint and format first, then
+#                 Python, unit/API/contract, component and E2E workers run in
+#                 parallel on the same prepared runner. The runner collects every
+#                 result even when one worker fails, so Allure remains complete.
 #
 #  build-pages    main only. Builds the portfolio at the site root and mounts
 #                 the academy and all ten decks underneath it.
@@ -156,31 +154,14 @@ jobs:
         if: ${{ !cancelled() }}
         run: pnpm run format:check
 
-      # Split per layer so a failure names the layer that broke, and
-      # `!cancelled()` lets every later layer still run — including after the
-      # typecheck fails, which otherwise silently drops a whole layer out of the
-      # Allure report.
-      - name: Unit tests
+      # `run-all-tests.sh` starts five isolated workers: TypeScript test
+      # typecheck, Python fixtures, unit/API/contract, component, and E2E/deck.
+      # Each worker writes a separate log and report directory; the script waits
+      # for all of them and returns non-zero if any failed. This keeps the full
+      # failure picture while cutting out the serial wait between layers.
+      - name: Run all test suites in parallel
         if: ${{ !cancelled() }}
-        run: pnpm run test:unit
-
-      - name: Component tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:component
-
-      - name: API tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:api
-
-      - name: Contract tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:contract
-
-      # Drives the real academy app in desktop + mobile Chrome; Playwright boots
-      # the app's own Vite server via the e2e config's `webServer`.
-      - name: E2E tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:e2e
+        run: ./run-all-tests.sh
 
       - name: Publish test history to Prometheus
         if: ${{ !cancelled() }}

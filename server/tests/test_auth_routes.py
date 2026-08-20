@@ -16,10 +16,9 @@ async def test_auth_config_exposes_only_the_public_client_id(api_client):
     assert "SESSION_SECRET" not in response.text
 
 
-async def test_logout_clears_session_fixture(api_client, google_jwks, google_token):
-    await api_client.post("/api/auth/google", json={"credential": google_token()})
-    assert (await api_client.post("/api/auth/logout")).status_code == 200
-    assert (await api_client.get("/api/auth/session")).status_code == 401
+async def test_logout_clears_session_fixture(authenticated_client):
+    assert (await authenticated_client.post("/api/auth/logout")).status_code == 200
+    assert (await authenticated_client.get("/api/auth/session")).status_code == 401
 
 
 async def test_forged_google_token_is_rejected(api_client):

@@ -1,8 +1,4 @@
-import { test, expect } from '@playwright/experimental-ct-react';
-import type { Locator } from '@playwright/test';
-import { LocaleProvider } from '@academy/context/LocaleContext';
-import { ProgressProvider } from '@academy/context/ProgressContext';
-import { CodingChallenges } from '@academy/components/practice/CodingChallenges';
+import { test, expect } from './fixtures';
 import { en } from '@academy/lib/locales';
 
 /**
@@ -20,22 +16,9 @@ import { en } from '@academy/lib/locales';
 const t = en.codingChallenges;
 const totalChallenges = t.levels.reduce((sum, level) => sum + level.items.length, 0);
 
-async function openAllLevels(component: Locator): Promise<void> {
-  const levels = component.locator('details.challenge-level');
-  const count = await levels.count();
-  for (let i = 0; i < count; i++) await levels.nth(i).locator('summary').click();
-}
-
-test('renders every level in the catalog', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
-
-  await openAllLevels(component);
+test('renders every level in the catalog', async ({ codingChallenges }) => {
+  const { component, openAllLevels } = codingChallenges;
+  await openAllLevels();
 
   await expect(component.locator('.challenge-level')).toHaveCount(t.levels.length);
 
@@ -45,44 +28,25 @@ test('renders every level in the catalog', async ({ mount }) => {
   }
 });
 
-test('renders one card per challenge', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
-
+test('renders one card per challenge', async ({ codingChallenges }) => {
+  const { component } = codingChallenges;
   await expect(component.locator('.agent-box')).toHaveCount(totalChallenges);
   expect(totalChallenges).toBeGreaterThan(0);
 });
 
-test('hides every hint and solution until asked', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
-
-  await openAllLevels(component);
+test('hides every hint and solution until asked', async ({ codingChallenges }) => {
+  const { component, openAllLevels } = codingChallenges;
+  await openAllLevels();
 
   await expect(component.locator('pre')).toHaveCount(0);
   await expect(component.getByRole('button', { name: t.showHintBtn })).toHaveCount(totalChallenges);
 });
 
-test('reveals one card at a time, leaving its neighbours collapsed', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
-
-  await openAllLevels(component);
+test('reveals one card at a time, leaving its neighbours collapsed', async ({
+  codingChallenges,
+}) => {
+  const { component, openAllLevels } = codingChallenges;
+  await openAllLevels();
 
   await component.locator('.agent-box').first().getByRole('button').click();
 
@@ -92,16 +56,12 @@ test('reveals one card at a time, leaving its neighbours collapsed', async ({ mo
   );
 });
 
-test('gives every challenge a unique title, so the cards keep stable keys', async ({ mount }) => {
+test('gives every challenge a unique title, so the cards keep stable keys', async ({
+  codingChallenges,
+}) => {
   const titles = t.levels.flatMap(level => level.items.map(item => item.title));
   expect(new Set(titles).size).toBe(titles.length);
 
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
+  const { component } = codingChallenges;
   await expect(component.locator('.agent-box h4')).toHaveCount(titles.length);
 });

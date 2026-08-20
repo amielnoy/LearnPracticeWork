@@ -69,32 +69,73 @@ for d in allure-results allure-report blob-report playwright-report; do
 done
 
 status=0
-layer() {
+
+# Resolve Python dependencies before launching workers. `uv sync` takes a lock,
+# so asking the backend API servers and pytest to perform it simultaneously only
+# serialises them invisibly and can make a fresh checkout look hung.
+echo "▶ prepare Python environment"
+if ! (cd server && uv sync --frozen); then
+  echo "✗ Python environment preparation failed"
+  exit 1
+fi
+
+# Every independent layer runs at the same time. Output is captured per layer
+# and printed as a group after it finishes, so parallel workers cannot interleave
+# their progress into an unreadable terminal stream. Playwright already gives
+# each config its own blob directory, while Allure uses UUID result filenames,
+# making both report formats safe for concurrent writers.
+RUN_LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/academy-tests.XXXXXX")"
+cleanup_logs() { rm -rf "$RUN_LOG_DIR"; }
+trap cleanup_logs EXIT INT TERM
+
+layer_titles=()
+layer_logs=()
+layer_pids=()
+
+launch_layer() {
   local title="$1"; shift
-  echo ""
-  echo "▶ ${title}"
-  if ! "$@"; then
-    status=1
-    echo "✗ ${title} failed"
-  fi
+  local index="${#layer_pids[@]}"
+  local log="$RUN_LOG_DIR/layer-$index.log"
+  layer_titles[$index]="$title"
+  layer_logs[$index]="$log"
+  echo "  ↗ ${title}"
+  ( "$@" ) >"$log" 2>&1 &
+  layer_pids[$index]=$!
 }
 
-# CI typechecks before it runs anything, and Playwright transpiles specs without
-# checking them — so a type error in a spec passes here and fails the pipeline.
-# Running it first closes that gap. Like every other layer it does not abort the
-# run; the exit status still reflects it.
-layer "typecheck (tests)" \
+echo ""
+echo "▶ parallel test layers"
+# Two workers inside each suite keeps the suites themselves parallel without
+# multiplying three Playwright processes into an unbounded browser stampede.
+# pytest-xdist reads its matching cap. Both remain overridable for larger CI or
+# developer machines.
+export PW_SUITE_WORKERS="${PW_SUITE_WORKERS:-2}"
+export PYTEST_XDIST_AUTO_NUM_WORKERS="${PYTEST_XDIST_AUTO_NUM_WORKERS:-2}"
+launch_layer "typecheck (tests)" \
   bash -c "cd tests && ./node_modules/.bin/tsc -p tsconfig.json --noEmit"
-
-layer "backend fixtures (Python)" \
+launch_layer "backend fixtures (Python)" \
   bash -c "cd server && uv run pytest"
-
-layer "unit / api / contract" \
+launch_layer "unit / api / contract" \
   "$PW_ROOT" test --config=playwright.config.mts
-layer "component (desktop + mobile)" \
+launch_layer "component (desktop + mobile)" \
   bash -c "cd tests && $PW_TESTS test --config=playwright-ct.config.ts"
-layer "$E2E_LABEL" \
+launch_layer "$E2E_LABEL" \
   bash -c "cd tests && $PW_TESTS test --config=playwright-e2e.config.ts $E2E_PROJECTS"
+
+for index in "${!layer_pids[@]}"; do
+  title="${layer_titles[$index]}"
+  log="${layer_logs[$index]}"
+  echo ""
+  echo "── ${title} ──"
+  if wait "${layer_pids[$index]}"; then
+    cat "$log"
+    echo "✓ ${title} passed"
+  else
+    cat "$log"
+    echo "✗ ${title} failed"
+    status=1
+  fi
+done
 
 echo ""
 echo "▶ allure report"

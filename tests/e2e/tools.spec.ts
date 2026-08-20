@@ -20,20 +20,19 @@ test('the sample CV CTA loads a useful example without asking for setup first', 
   await expect(page.locator('#targetRole')).toHaveValue('QA Automation Engineer');
 });
 
-test('progress survives a reload and offers a continue action', async ({ home: _home, page }) => {
-  await page.evaluate(() => {
-    localStorage.setItem(
-      'ata_progress_v1',
-      JSON.stringify({
-        resumeStarted: true,
-        resumeCompleted: false,
-        interviewStarted: false,
-        interviewAnswers: 0,
-        interviewCompleted: false,
-        practiceCompleted: [],
-        lastTool: 'resume',
-      }),
-    );
+test('progress survives a reload and offers a continue action', async ({
+  home: _home,
+  page,
+  storage,
+}) => {
+  await storage.set('ata_progress_v1', {
+    resumeStarted: true,
+    resumeCompleted: false,
+    interviewStarted: false,
+    interviewAnswers: 0,
+    interviewCompleted: false,
+    practiceCompleted: [],
+    lastTool: 'resume',
   });
   await page.reload();
 

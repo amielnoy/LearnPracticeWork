@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/experimental-ct-react';
-import { LocaleProvider } from '@academy/context/LocaleContext';
+import { test, expect } from './fixtures';
 import { BackToTop } from '@academy/components/chrome/BackToTop';
 import { en } from '@academy/lib/locales';
 
@@ -17,34 +16,25 @@ async function scrollTo(page: import('@playwright/test').Page, y: number) {
   }, y);
 }
 
-test('is labelled for screen readers from the locale', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <BackToTop />
-    </LocaleProvider>,
-  );
+test('is labelled for screen readers from the locale', async ({ mountLocalized }) => {
+  const component = await mountLocalized(<BackToTop />);
 
   await expect(component).toHaveAttribute('aria-label', en.ui.toTop);
 });
 
-test('stays out of the way near the top of the page', async ({ mount, page }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <BackToTop />
-    </LocaleProvider>,
-  );
+test('stays out of the way near the top of the page', async ({ mountLocalized, page }) => {
+  const component = await mountLocalized(<BackToTop />);
 
   await scrollTo(page, 100);
 
   await expect(component).not.toHaveClass(/show/);
 });
 
-test('appears once the reader has scrolled past the threshold', async ({ mount, page }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <BackToTop />
-    </LocaleProvider>,
-  );
+test('appears once the reader has scrolled past the threshold', async ({
+  mountLocalized,
+  page,
+}) => {
+  const component = await mountLocalized(<BackToTop />);
 
   await scrollTo(page, 600);
 
@@ -52,14 +42,10 @@ test('appears once the reader has scrolled past the threshold', async ({ mount, 
 });
 
 test('asks the browser to scroll smoothly back to the top when clicked', async ({
-  mount,
+  mountLocalized,
   page,
 }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <BackToTop />
-    </LocaleProvider>,
-  );
+  const component = await mountLocalized(<BackToTop />);
 
   await scrollTo(page, 900);
   await expect(component).toHaveClass(/show/);

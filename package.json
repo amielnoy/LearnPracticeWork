@@ -12,7 +12,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm --filter @workspace/api-server run typecheck && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --filter \"./tests\" --if-present run typecheck",
-    "test": "pnpm --filter @workspace/api-server run test && pnpm --filter @workspace/tests run test",
+    "test": "./run-all-tests.sh",
     "test:unit": "pnpm --filter @workspace/api-server run test && pnpm --filter @workspace/tests run test:unit",
     "test:component": "pnpm --filter @workspace/tests run test:component",
     "test:api": "pnpm --filter @workspace/tests run test:api",

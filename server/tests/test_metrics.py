@@ -30,13 +30,14 @@ async def test_login_metrics_pseudonymize_user_and_classify_country_and_ios(
     api_client,
     google_jwks,
     google_token,
+    client_headers,
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("METRICS_ID_SALT", "fixture-metrics-salt")
     response = await api_client.post(
         "/api/auth/google",
         json={"credential": google_token()},
-        headers={"fly-client-country": "il", "user-agent": "Mozilla/5.0 (iPhone) Safari/605"},
+        headers=client_headers("IL", "ios"),
     )
     assert response.status_code == 200
     metrics = (await api_client.get("/metrics")).text
@@ -50,13 +51,13 @@ async def test_login_metrics_pseudonymize_user_and_classify_country_and_ios(
 
 
 async def test_ai_metrics_include_provider_model_country_and_android(
-    api_client, monkeypatch: pytest.MonkeyPatch
+    api_client, client_headers, monkeypatch: pytest.MonkeyPatch
 ):
     monkeypatch.delenv("GROQ_API_KEY", raising=False)
     response = await api_client.post(
         "/api/ai/generate",
         json={"messages": [{"role": "user", "content": "fixture prompt"}]},
-        headers={"fly-client-country": "us", "user-agent": "Mozilla/5.0 Android"},
+        headers=client_headers("US", "android"),
     )
     assert response.status_code == 503
     metrics = (await api_client.get("/metrics")).text

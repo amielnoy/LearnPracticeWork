@@ -75,6 +75,31 @@ allowed_origins.extend(
     for domain in (env("REPLIT_DOMAINS") or "").split(",")
     if domain.strip()
 )
+
+
+def _configured_origins() -> set[str]:
+    """Current public browser origins, including runtime configuration changes in tests."""
+    origins = {
+        origin.strip().rstrip("/")
+        for origin in (env("ALLOWED_ORIGINS") or "").split(",")
+        if origin.strip()
+    }
+    origins.update(
+        f"https://{domain.strip()}"
+        for domain in (env("REPLIT_DOMAINS") or "").split(",")
+        if domain.strip()
+    )
+    return origins
+
+
+def _public_origin(request: Request) -> str:
+    """Use a configured browser origin for redirects, never an arbitrary Host header."""
+    origin = request.headers.get("origin", "").strip().rstrip("/")
+    if origin and origin in _configured_origins():
+        return origin
+    return str(request.base_url).rstrip("/")
+
+
 if os.getenv("NODE_ENV") != "production":
     allowed_origin_regex = r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
 else:
@@ -268,6 +293,14 @@ async def _content_rows(
     return data
 
 
+def _content_failure(resource: str, exc: Exception) -> JSONResponse:
+    if isinstance(exc, RuntimeError):
+        logger.warning("%s unavailable: %s", resource, exc)
+    else:
+        logger.exception("Failed to load %s", resource)
+    return JSONResponse({"error": "Content temporarily unavailable"}, status_code=503)
+
+
 def _language(request: Request) -> str:
     values = request.query_params.getlist("lang")
     return values[0] if len(values) == 1 and values[0] in ("en", "he") else "en"
@@ -299,9 +332,8 @@ async def question_bank(request: Request):
                 for stage in stages
             ]
         }
-    except Exception:
-        logger.exception("Failed to load question bank content")
-        return JSONResponse({"error": "Content temporarily unavailable"}, status_code=503)
+    except Exception as exc:
+        return _content_failure("question bank content", exc)
 
 
 @app.get("/api/content/coding-challenges")
@@ -335,9 +367,8 @@ async def coding_challenges(request: Request):
                 for level in levels
             ]
         }
-    except Exception:
-        logger.exception("Failed to load coding challenges content")
-        return JSONResponse({"error": "Content temporarily unavailable"}, status_code=503)
+    except Exception as exc:
+        return _content_failure("coding challenges content", exc)
 
 
 @app.get("/api/content/lecture-series")
@@ -372,9 +403,8 @@ async def lecture_series(request: Request):
                 for track in tracks
             ]
         }
-    except Exception:
-        logger.exception("Failed to load lecture series content")
-        return JSONResponse({"error": "Content temporarily unavailable"}, status_code=503)
+    except Exception as exc:
+        return _content_failure("lecture series content", exc)
 
 
 class Message(BaseModel):
@@ -564,8 +594,9 @@ async def stripe_seed(request: Request, authorization: Annotated[str | None, Hea
             client.v1.prices.create, {"product": product.id, "unit_amount": 5000, "currency": "usd"}
         )
         return {"status": "created", "productId": product.id, "priceId": price.id}
-    except Exception as exc:
-        return JSONResponse({"error": str(exc)}, status_code=500)
+    except Exception:
+        logger.exception("Stripe catalog seed failed")
+        return JSONResponse({"error": "Could not prepare the Stripe catalog"}, status_code=500)
 
 
 @app.post("/api/stripe/checkout")
@@ -582,7 +613,7 @@ async def stripe_checkout(
     user = await _user_from_request(authorization, ata_session)
     try:
         client = await stripe_client()
-        origin = str(request.base_url).rstrip("/")
+        origin = _public_origin(request)
         params = {
             "payment_method_types": ["card"],
             "line_items": [{"price": body.priceId, "quantity": 1}],
@@ -597,8 +628,9 @@ async def stripe_checkout(
             params["metadata"] = {"googleSubject": user.subject}
         session = await asyncio.to_thread(client.v1.checkout.sessions.create, params)
         return {"url": session.url}
-    except Exception as exc:
-        return JSONResponse({"error": str(exc)}, status_code=500)
+    except Exception:
+        logger.exception("Stripe checkout creation failed")
+        return JSONResponse({"error": "Could not create the checkout session"}, status_code=500)
 
 
 @app.get("/api/stripe/prices")
@@ -614,8 +646,9 @@ async def stripe_prices():
             client.v1.prices.list, {"product": products.data[0].id, "active": True}
         )
         return {"data": [item.to_dict() for item in prices.data]}
-    except Exception as exc:
-        return JSONResponse({"error": str(exc)}, status_code=500)
+    except Exception:
+        logger.exception("Stripe price lookup failed")
+        return JSONResponse({"error": "Could not load prices"}, status_code=500)
 
 
 @app.post("/api/stripe/webhook")

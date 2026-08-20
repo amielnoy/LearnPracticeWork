@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/experimental-ct-react';
-import { LocaleProvider } from '@academy/context/LocaleContext';
+import { test, expect } from './fixtures';
 import { Footer } from '@academy/components/chrome/Footer';
 import { en } from '@academy/lib/locales';
 
@@ -9,24 +8,18 @@ import { en } from '@academy/lib/locales';
  * against the provider chain breaking.
  */
 
-test('renders the footer text from the active locale', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <Footer />
-    </LocaleProvider>,
-  );
+test('renders the footer text from the active locale', async ({ mountLocalized }) => {
+  const component = await mountLocalized(<Footer />);
 
   await expect(component).toContainText(en.footer.text);
   await expect(component).toContainText(en.footer.suffix);
   await expect(component).toContainText(String(en.footer.year));
 });
 
-test('links to the author with an external link that cannot reach back', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <Footer />
-    </LocaleProvider>,
-  );
+test('links to the author with an external link that cannot reach back', async ({
+  mountLocalized,
+}) => {
+  const component = await mountLocalized(<Footer />);
 
   const link = component.getByRole('link', { name: en.footer.authorName });
 
@@ -36,12 +29,11 @@ test('links to the author with an external link that cannot reach back', async (
   await expect(link).toHaveAttribute('rel', /noopener/);
 });
 
-test('sets the document language and direction while rendering', async ({ mount, page }) => {
-  await mount(
-    <LocaleProvider>
-      <Footer />
-    </LocaleProvider>,
-  );
+test('sets the document language and direction while rendering', async ({
+  mountLocalized,
+  page,
+}) => {
+  await mountLocalized(<Footer />);
 
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');

@@ -9,6 +9,7 @@ import { QuestionBank } from '@academy/components/practice/QuestionBank';
 import { ResumeAgent } from '@academy/components/agents/ResumeAgent';
 import { GoogleSignIn } from '@academy/components/account/GoogleSignIn';
 import { AuthProvider } from '@academy/context/AuthContext';
+import { CodingChallenges } from '@academy/components/practice/CodingChallenges';
 
 /**
  * Component fixtures. The provider context probes `/api/ai/config` on mount, so
@@ -23,6 +24,11 @@ const NO_SERVER_KEY = { groq: { available: false }, gemini: { available: false }
 type QuestionBankHarness = {
   component: Locator;
   openAllStages: () => Promise<void>;
+};
+
+type CodingChallengesHarness = {
+  component: Locator;
+  openAllLevels: () => Promise<void>;
 };
 
 /**
@@ -121,6 +127,10 @@ const GOOGLE_STUB = `
 `;
 
 type ComponentFixtures = {
+  /** Mount any component inside the real locale provider. */
+  mountLocalized: (node: ReactNode) => Promise<Locator>;
+  /** CodingChallenges mounted with progress state and helpers for its closed levels. */
+  codingChallenges: CodingChallengesHarness;
   /** Mount ConnectionSetup against a chosen server config, wrapped in its providers. */
   mountSetup: (config: unknown) => Promise<Locator>;
   /** QuestionBank mounted with no server key (its stages start collapsed). */
@@ -140,6 +150,28 @@ const withProviders = (node: ReactNode) => (
 );
 
 export const test = base.extend<ComponentFixtures>({
+  mountLocalized: async ({ mount }, use) => {
+    await use((node: ReactNode) => mount(<LocaleProvider>{node}</LocaleProvider>));
+  },
+
+  codingChallenges: async ({ mount }, use) => {
+    const component = await mount(
+      <LocaleProvider>
+        <ProgressProvider>
+          <CodingChallenges />
+        </ProgressProvider>
+      </LocaleProvider>,
+    );
+    const openAllLevels = async () => {
+      const levels = component.locator('details.challenge-level');
+      const count = await levels.count();
+      for (let index = 0; index < count; index++) {
+        await levels.nth(index).locator('summary').click();
+      }
+    };
+    await use({ component, openAllLevels });
+  },
+
   mountSetup: async ({ mount, page }, use) => {
     await use(async (config: unknown) => {
       await page.route('**/api/ai/config', route => route.fulfill({ json: config }));
