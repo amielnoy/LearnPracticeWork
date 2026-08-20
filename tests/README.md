@@ -149,6 +149,37 @@ without `PORT` and `BASE_PATH`). No API server is started: the `/api` proxy has 
 it, so Connection Setup falls back to bring-your-own-key, which is the state these flows
 exercise.
 
+## The wide pass
+
+`pnpm run test:regression` (or `./run-all-tests.sh --regression`) runs the e2e
+layer on every engine instead of the two Chromium projects a push gets:
+
+| project | engine | what it honestly is |
+| --- | --- | --- |
+| `e2e-desktop` | Chromium | desktop Chrome |
+| `e2e-mobile` | Chromium, Pixel 5 viewport | Android's engine at Android's size — not a device |
+| `e2e-desktop-webkit` | WebKit | Safari |
+| `e2e-mobile-webkit` | WebKit, iPhone 13 viewport | the engine iOS runs, at an iPhone's size — not iOS |
+| `e2e-desktop-firefox` | Gecko | shares no engine with either |
+| `deck` | Chromium | one lecture deck |
+
+The naming is deliberate. A project called `e2e-ios` that never touches iOS is
+the most expensive kind of green: real iOS and real Android need a Mac runner or
+a device cloud, and neither is here. What the WebKit pair does buy is real —
+Safari and every browser on iOS run WebKit, so a WebKit failure is a Safari
+failure, while Chromium at a phone size says nothing about Safari at all.
+
+Browsers for it install once:
+
+```bash
+pnpm --filter @workspace/tests run test:browsers:all
+```
+
+`.github/workflows/regression.yml` runs the same matrix nightly and on demand,
+one engine per job. Locally they share one machine and one Vite server, so
+`test:e2e:all` caps workers — at full parallelism the contention alone is enough
+to make a slower engine miss an assertion that passes every time on its own.
+
 ## Docker
 
 `Dockerfile` and `docker-compose.yml` at the repo root run everything in the official Playwright

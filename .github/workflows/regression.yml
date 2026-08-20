@@ -1,0 +1,117 @@
+name: Regression
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  The wide pass. CI runs the fast one — Chromium desktop and phone — on every
+#  push, because a push should not wait on five engines. This runs the same
+#  specs on all of them, nightly and on demand.
+#
+#  What "all of them" honestly means:
+#    · WebKit desktop and WebKit at an iPhone viewport. WebKit is the engine
+#      Safari and every browser on iOS run, so a failure here is a real Safari
+#      failure. It is not iOS: a phone viewport and a user agent are not a
+#      device, and real iOS needs a Mac runner or a device cloud.
+#    · Chromium at a Pixel viewport, which is Android's engine on Android's
+#      screen size, and the same caveat applies to the word "Android".
+#    · Firefox desktop, which shares no engine with either and is where layout
+#      assumptions tend to surface first.
+#
+#  Locally the same thing is `pnpm run test:regression`.
+# ─────────────────────────────────────────────────────────────────────────────
+on:
+  schedule:
+    - cron: '0 2 * * *' # 05:00 IDT (UTC+3, summer)
+    - cron: '0 3 * * *' # 05:00 IST (UTC+2, winter)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '11.20.0'
+
+jobs:
+  # The nightly schedule fires twice so that one of them is 05:00 in Israel
+  # whichever side of the DST change we are on. This drops the other, exactly as
+  # the gate in ci.yml does.
+  gate:
+    name: Should this run?
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          hour=$(TZ=Asia/Jerusalem date +%H)
+          if [ "$hour" = "05" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Israel local hour is $hour, not 05 — skipping this firing."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  e2e:
+    name: ${{ matrix.project }}
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # One engine per job so a WebKit-only failure is named as such in the
+      # checks list, and so a red engine does not stop the others reporting.
+      fail-fast: false
+      matrix:
+        project:
+          - e2e-desktop
+          - e2e-mobile
+          - e2e-desktop-webkit
+          - e2e-mobile-webkit
+          - e2e-desktop-firefox
+          - deck
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      - name: Resolve the Playwright version
+        id: playwright
+        run: |
+          version=$(pnpm --filter @workspace/tests exec playwright --version | awk '{print $2}')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # Keyed on all three engines, so this cache never collides with the
+      # Chromium-only one ci.yml restores.
+      - name: Restore the browser download
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-all-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Install browsers
+        run: pnpm --filter @workspace/tests exec playwright install --with-deps chromium webkit firefox
+
+      - name: Run ${{ matrix.project }}
+        run: |
+          pnpm --filter @workspace/tests exec playwright test \
+            --config=playwright-e2e.config.ts --project=${{ matrix.project }}
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-${{ matrix.project }}
+          path: |
+            tests/playwright-report
+            tests/test-results
+          retention-days: 7
+          if-no-files-found: ignore

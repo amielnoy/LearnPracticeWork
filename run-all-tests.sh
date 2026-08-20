@@ -14,6 +14,31 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
+# --regression widens the e2e layer from the two Chromium projects to every
+# engine: WebKit desktop and phone — the engine Safari and iOS actually run —
+# plus Firefox. Off by default because it roughly triples the e2e wall time, and
+# a push should not have to wait for it. The scheduled workflow of the same name
+# runs it nightly.
+REGRESSION=0
+for arg in "$@"; do
+  case "$arg" in
+    --regression) REGRESSION=1 ;;
+    -h|--help)
+      echo "usage: $0 [--regression]"
+      echo "  --regression  run the e2e layer on every engine, not just Chromium"
+      exit 0 ;;
+    *) echo "unknown option: $arg" >&2; exit 2 ;;
+  esac
+done
+
+if [ "$REGRESSION" -eq 1 ]; then
+  E2E_PROJECTS=""
+  E2E_LABEL="e2e (every engine — chromium, webkit, firefox)"
+else
+  E2E_PROJECTS="--project=e2e-desktop --project=e2e-mobile --project=deck"
+  E2E_LABEL="e2e (desktop + mobile)"
+fi
+
 # Prints "label  path" with the path as a terminal hyperlink when the terminal
 # will render one, and as a plain file:// URL when it will not.
 #
@@ -65,8 +90,8 @@ layer "unit / api / contract" \
   "$PW_ROOT" test --config=playwright.config.mts
 layer "component (desktop + mobile)" \
   bash -c "cd tests && $PW_TESTS test --config=playwright-ct.config.ts"
-layer "e2e (desktop + mobile)" \
-  bash -c "cd tests && $PW_TESTS test --config=playwright-e2e.config.ts"
+layer "$E2E_LABEL" \
+  bash -c "cd tests && $PW_TESTS test --config=playwright-e2e.config.ts $E2E_PROJECTS"
 
 echo ""
 echo "▶ allure report"

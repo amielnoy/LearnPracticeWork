@@ -17,6 +17,7 @@
     "test:api": "pnpm --filter @workspace/tests run test:api",
     "test:contract": "pnpm --filter @workspace/tests run test:contract",
     "test:e2e": "pnpm --filter @workspace/tests run test:e2e",
+    "test:regression": "./run-all-tests.sh --regression",
     "report:allure": "pnpm --filter @workspace/tests run report:allure",
     "report:allure:single": "pnpm --filter @workspace/tests run report:allure:single",
     "report:allure:serve": "pnpm --filter @workspace/tests run report:allure:serve"

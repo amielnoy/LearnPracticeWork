@@ -78,6 +78,29 @@ export default defineConfig({
     },
   ],
 
+  /**
+   * Engines, and what each one honestly is.
+   *
+   * `Pixel 5` and `iPhone 13` are Chromium and WebKit with a phone's viewport,
+   * touch flags and user agent — not Android and not iOS. What makes the WebKit
+   * pair worth running is the engine underneath: Safari and every browser on
+   * iOS run WebKit, so a WebKit failure here is a real Safari failure, while a
+   * Chromium-on-a-phone-viewport pass says nothing about Safari at all.
+   *
+   * Real Android and real iOS need a device or a device cloud, which this
+   * pipeline does not have. The names below say `-webkit` rather than `-ios`
+   * for that reason: a project called `e2e-ios` that never touched iOS would be
+   * the most expensive kind of green.
+   *
+   * The two Chromium projects run on every push. The rest are the regression
+   * matrix — see `.github/workflows/regression.yml` and `pnpm test:regression`.
+   *
+   * CI gives each engine its own job. Locally they share one machine and one
+   * Vite server, which at full parallelism is enough contention to make the
+   * slower engines miss an assertion that passes every time on its own — so
+   * `test:e2e:all` caps workers rather than pretending a laptop is six
+   * runners.
+   */
   projects: [
     {
       name: 'e2e-desktop',
@@ -88,6 +111,21 @@ export default defineConfig({
       name: 'e2e-mobile',
       testDir: './e2e',
       use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'e2e-desktop-webkit',
+      testDir: './e2e',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'e2e-mobile-webkit',
+      testDir: './e2e',
+      use: { ...devices['iPhone 13'] },
+    },
+    {
+      name: 'e2e-desktop-firefox',
+      testDir: './e2e',
+      use: { ...devices['Desktop Firefox'] },
     },
     {
       // The deck sets its own viewport per test, so it runs once rather than
