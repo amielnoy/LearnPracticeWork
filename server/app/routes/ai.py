@@ -50,6 +50,11 @@ async def ai_generate(request: Request, ai: Ai, session: SessionUser):
 
     provider, model = ai.target(body)
     outcome = await ai.generate(body)
+    if outcome.status != 200:
+        # The caller received nothing, so the allowance they just spent buys
+        # them nothing either. Retrying stays bounded by the burst limiter.
+        if (remaining := await daily_limiter.release(key)) is not None:
+            headers["X-AI-Quota-Remaining"] = str(remaining)
     observe_ai(request, provider=provider, model=model, email=email, status=outcome.status)
     return JSONResponse(outcome.payload, status_code=outcome.status, headers=headers)
 
