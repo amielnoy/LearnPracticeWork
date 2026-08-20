@@ -1,6 +1,6 @@
 import type { StageData } from './questionBank';
 import type { ChallengeLevel } from './challenges';
-import type { TrackData } from '../components/LectureSeries';
+import type { TrackData } from './lectures';
 
 /**
  * Live content for the question bank, coding challenges, and lecture series

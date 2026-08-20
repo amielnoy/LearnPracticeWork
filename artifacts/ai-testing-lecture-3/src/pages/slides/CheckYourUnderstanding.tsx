@@ -93,7 +93,9 @@ export default function CheckYourUnderstanding() {
       </div>
 
       {/* Body */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2.5vh' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2.5vh' }}
+      >
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
           <div
             style={{
@@ -163,9 +165,7 @@ export default function CheckYourUnderstanding() {
                 >
                   {t('Answer', 'תשובה')}
                 </div>
-                <div style={{ fontSize: '0.9vw', color: '#475569', lineHeight: 1.5 }}>
-                  {item.a}
-                </div>
+                <div style={{ fontSize: '0.9vw', color: '#475569', lineHeight: 1.5 }}>{item.a}</div>
               </div>
             </div>
           ))}

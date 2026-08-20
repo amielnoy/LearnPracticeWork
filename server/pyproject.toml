@@ -1,0 +1,38 @@
+[project]
+name = "ai-testing-academy-api"
+version = "0.1.0"
+description = "Python API for the AI Testing Academy"
+requires-python = ">=3.12"
+dependencies = [
+  "cryptography>=50.0.0,<51",
+  "fastapi>=0.116.0,<1",
+  "httpx>=0.28.0,<1",
+  "prometheus-client>=0.22.0,<1",
+  "psycopg[binary]>=3.2.0,<4",
+  "pydantic[email]>=2.11.0,<3",
+  "scalar-fastapi>=1.8.2,<2",
+  "stripe>=12.4.0,<15",
+  "uvicorn[standard]>=0.35.0,<1",
+]
+
+[dependency-groups]
+dev = [
+  "allure-pytest>=2.16.0,<3",
+  "pytest>=8.4.0,<10",
+  "pytest-asyncio>=1.1.0,<2",
+  "pytest-xdist>=3.8.0,<4",
+  "ruff>=0.12.0,<1",
+]
+
+[tool.pytest.ini_options]
+addopts = "-n auto --dist loadscope --alluredir=../allure-results"
+asyncio_mode = "auto"
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]

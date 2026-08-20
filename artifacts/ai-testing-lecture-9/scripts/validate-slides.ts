@@ -1,12 +1,5 @@
 /// <reference types="node" />
-import {
-  existsSync,
-  readdirSync,
-  readFileSync,
-  renameSync,
-  unlinkSync,
-  writeFileSync,
-} from 'fs';
+import { existsSync, readdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'fs';
 import { access } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,20 +14,13 @@ import {
   repairSlidesManifest,
   type RepairResult,
 } from './sdmRepair';
-import {
-  findOrphanSdmFiles,
-  validateSdmEntries,
-  type SdmValidationIo,
-} from './sdmValidation';
+import { findOrphanSdmFiles, validateSdmEntries, type SdmValidationIo } from './sdmValidation';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const slidesDir = path.join(projectRoot, 'src/pages/slides');
-const slidesManifestPath = path.join(
-  projectRoot,
-  'src/data/slides-manifest.json',
-);
+const slidesManifestPath = path.join(projectRoot, 'src/data/slides-manifest.json');
 
 type ValidationIssue = {
   message: string;
@@ -131,7 +117,7 @@ function formatIssuePath(issuePath: string): string {
   return issuePath
     .slice(1)
     .split('/')
-    .map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'))
+    .map(segment => segment.replaceAll('~1', '/').replaceAll('~0', '~'))
     .join('.');
 }
 
@@ -140,7 +126,7 @@ function getSlideFilenames(): string[] {
     return [];
   }
 
-  return readdirSync(slidesDir).filter((name) => name.endsWith('.tsx'));
+  return readdirSync(slidesDir).filter(name => name.endsWith('.tsx'));
 }
 
 function validateDuplicatePositions(issues: ValidationIssue[]) {
@@ -191,7 +177,7 @@ function validateContiguousPositions(issues: ValidationIssue[]) {
 }
 
 function jsxSlides(): SlideEntry[] {
-  return slides.filter((slide) => slide.kind !== 'sdm');
+  return slides.filter(slide => slide.kind !== 'sdm');
 }
 
 function validateFilepaths(issues: ValidationIssue[]) {
@@ -227,12 +213,10 @@ function validateFilepaths(issues: ValidationIssue[]) {
 
 function validateOrphanedSlideFiles(issues: ValidationIssue[]) {
   const manifestSet = new Set(
-    jsxSlides().map((slide) =>
-      path.normalize(path.resolve(projectRoot, slide.filepath)),
-    ),
+    jsxSlides().map(slide => path.normalize(path.resolve(projectRoot, slide.filepath))),
   );
 
-  const files = getSlideFilenames().map((name) => path.join(slidesDir, name));
+  const files = getSlideFilenames().map(name => path.join(slidesDir, name));
 
   for (const file of files) {
     if (!manifestSet.has(path.normalize(file))) {
@@ -245,21 +229,21 @@ function validateOrphanedSlideFiles(issues: ValidationIssue[]) {
 
 function validateSdmSlides(issues: ValidationIssue[]) {
   const io: SdmValidationIo = {
-    readFile: (relativePath) => {
+    readFile: relativePath => {
       try {
         return readFileSync(path.join(projectRoot, relativePath), 'utf8');
       } catch {
         return null;
       }
     },
-    listFiles: (relativeDir) => {
+    listFiles: relativeDir => {
       try {
         return readdirSync(path.join(projectRoot, relativeDir), {
           recursive: true,
           withFileTypes: true,
         })
-          .filter((entry) => entry.isFile())
-          .map((entry) =>
+          .filter(entry => entry.isFile())
+          .map(entry =>
             relativeToProject(path.join(entry.parentPath, entry.name)).slice(
               `${relativeDir}/`.length,
             ),
@@ -269,11 +253,8 @@ function validateSdmSlides(issues: ValidationIssue[]) {
       }
     },
   };
-  const sdmEntries = slides.filter((slide) => slide.kind === 'sdm');
-  const messages = [
-    ...validateSdmEntries(sdmEntries, io),
-    ...findOrphanSdmFiles(slides, io),
-  ];
+  const sdmEntries = slides.filter(slide => slide.kind === 'sdm');
+  const messages = [...validateSdmEntries(sdmEntries, io), ...findOrphanSdmFiles(slides, io)];
   for (const message of messages) {
     issues.push({ message });
   }
@@ -281,7 +262,7 @@ function validateSdmSlides(issues: ValidationIssue[]) {
 
 function pendingSdmRepairs(): Array<PendingRepair> {
   const repairs: Array<PendingRepair> = [];
-  for (const slide of slides.filter((entry) => entry.kind === 'sdm')) {
+  for (const slide of slides.filter(entry => entry.kind === 'sdm')) {
     if (!isRepairableSdmFile(slide.id, slide.filepath)) {
       continue;
     }
@@ -354,9 +335,7 @@ async function main() {
   }
   const parsedManifest = validateSlidesManifest(rawManifest);
   if (!parsedManifest.ok) {
-    console.error(
-      `Slide manifest validation failed (${parsedManifest.issues.length} issue(s)):\n`,
-    );
+    console.error(`Slide manifest validation failed (${parsedManifest.issues.length} issue(s)):\n`);
     for (const issue of parsedManifest.issues) {
       const issuePath = formatIssuePath(issue.path);
       console.error(`- Invalid manifest at ${issuePath}: ${issue.message}`);
@@ -379,9 +358,7 @@ async function main() {
   validateSdmSlides(issues);
 
   if (issues.length > 0) {
-    console.error(
-      `Slide manifest validation failed (${issues.length} issue(s)):\n`,
-    );
+    console.error(`Slide manifest validation failed (${issues.length} issue(s)):\n`);
     for (const issue of issues) {
       console.error(`- ${issue.message}`);
     }
@@ -393,9 +370,6 @@ async function main() {
 }
 
 const executedPath = process.argv[1];
-if (
-  executedPath !== undefined &&
-  path.resolve(executedPath) === fileURLToPath(import.meta.url)
-) {
+if (executedPath !== undefined && path.resolve(executedPath) === fileURLToPath(import.meta.url)) {
   await main();
 }

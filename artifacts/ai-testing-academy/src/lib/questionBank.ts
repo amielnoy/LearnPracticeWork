@@ -825,7 +825,8 @@ export const HE_BANK: BankData = {
   videoMentorBtn: '👨‍💻 עקבו אחרי ניב יצחקי, מנטור בקאנד, בלינקדאין',
   videoMentorUrl: 'https://linkedin.com/in/nivitzhaky',
   videoInterviewGuideBtn: '🧠 הדרכה: איך עוברים ראיון טכני',
-  videoInterviewGuideUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7405845248226066432/',
+  videoInterviewGuideUrl:
+    'https://www.linkedin.com/feed/update/urn:li:activity:7405845248226066432/',
   enrichCta: '✨ העשר עם AI',
   enrichPlaceholder: 'תפקיד או מילות מפתח (למשל SDET, Playwright, CI/CD)',
   enrichHint:

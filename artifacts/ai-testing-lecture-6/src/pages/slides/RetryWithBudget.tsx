@@ -39,14 +39,25 @@ export default function RetryWithBudget() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -93,7 +104,14 @@ export default function RetryWithBudget() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Bound the retry count', 'הגבל את מספר הניסיונות החוזרים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -104,7 +122,14 @@ export default function RetryWithBudget() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Log every attempt outcome', 'תעד כל תוצאת ניסיון')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -115,7 +140,14 @@ export default function RetryWithBudget() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Flag, do not hide, a retry-only pass', 'סמן, אל תסתיר, מעבר בניסיון חוזר בלבד')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>

@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/experimental-ct-react';
+import { test, expect } from './fixtures';
 import type { Page } from '@playwright/test';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';
 import { ProviderContextProvider } from '@academy/context/ProviderContext';
-import { InterviewAgent } from '@academy/components/InterviewAgent';
+import { InterviewAgent } from '@academy/components/agents/InterviewAgent';
 
 /**
  * What the interview restores from storage, and what it refuses to.
@@ -63,6 +63,15 @@ const read = (page: Page, where: 'local' | 'session') =>
     ([target, key]) => (target === 'local' ? localStorage : sessionStorage).getItem(key as string),
     [where, KEY] as const,
   );
+
+test('requires affirmative data-processing consent before starting', async ({ mount, page }) => {
+  await page.route('**/api/ai/config', route => route.fulfill({ json: { gemini: {} } }));
+  const component = await mount(harness());
+
+  await expect(component.locator('#startBtn')).toBeDisabled();
+  await component.locator('#interviewDataConsent').check();
+  await expect(component.locator('#startBtn')).toBeEnabled();
+});
 
 test.describe('a transcript saved in this session', () => {
   test('is restored, so a reload does not lose the interview', async ({ mount, page }) => {

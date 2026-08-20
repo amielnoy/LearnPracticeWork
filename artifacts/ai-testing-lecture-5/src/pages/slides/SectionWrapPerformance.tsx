@@ -57,7 +57,9 @@ export default function SectionWrapPerformance() {
       </div>
 
       {/* Body */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3vh', justifyContent: 'center' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', gap: '3vh', justifyContent: 'center' }}
+      >
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
           <div
             style={{
@@ -95,7 +97,9 @@ export default function SectionWrapPerformance() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}
+            >
               {t('Latency Budget', 'תקציב זמן תגובה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -115,7 +119,9 @@ export default function SectionWrapPerformance() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}
+            >
               {t('Retry Behavior', 'התנהגות ניסיון חוזר')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -135,7 +141,9 @@ export default function SectionWrapPerformance() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}
+            >
               {t('Graceful Degradation', 'הפחתה חינה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>

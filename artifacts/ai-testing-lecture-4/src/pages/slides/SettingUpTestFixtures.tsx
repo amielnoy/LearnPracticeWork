@@ -127,7 +127,7 @@ export default function SettingUpTestFixtures() {
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
                 'Pre-populate the chat history your test needs via an API call or direct DB seed — never rely on a previous test to leave the right state behind.',
-                'מלאו מראש את היסטוריית הצ\'אט שהבדיקה שלכם צריכה דרך קריאת API או זריעת DB ישירה — לעולם אל תסתמכו על בדיקה קודמת להשאיר את המצב הנכון.',
+                "מלאו מראש את היסטוריית הצ'אט שהבדיקה שלכם צריכה דרך קריאת API או זריעת DB ישירה — לעולם אל תסתמכו על בדיקה קודמת להשאיר את המצב הנכון.",
               )}
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function SettingUpTestFixtures() {
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
-                'Inject a valid session cookie or bearer token in the Playwright fixture\'s beforeEach so every test starts already authenticated — eliminates flaky login flows.',
+                "Inject a valid session cookie or bearer token in the Playwright fixture's beforeEach so every test starts already authenticated — eliminates flaky login flows.",
                 'הזריקו cookie סשן תקפה או bearer token ב-beforeEach של ה-fixture של Playwright כדי שכל בדיקה תתחיל כשהיא כבר מאומתת — מבטל תהליכי התחברות רגישים.',
               )}
             </div>
@@ -219,7 +219,10 @@ export default function SettingUpTestFixtures() {
               t('Each test owns its own conversation context', 'כל בדיקה בעלת הקשר שיחה משלה'),
               t('Auth state injected — no UI login flow', 'מצב Auth מוזרק — ללא תהליך התחברות UI'),
               t('Rate limit counters reset in afterEach', 'מוני מגבלת קצב מאופסים ב-afterEach'),
-              t('Model mock or fixture response pre-loaded', 'מוק מודל או תגובת fixture טעונה מראש'),
+              t(
+                'Model mock or fixture response pre-loaded',
+                'מוק מודל או תגובת fixture טעונה מראש',
+              ),
             ].map((item, i) => (
               <div
                 key={i}

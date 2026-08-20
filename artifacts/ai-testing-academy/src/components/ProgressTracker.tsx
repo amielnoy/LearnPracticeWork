@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLocale } from '../context/LocaleContext';
 import { useProgress } from '../context/ProgressContext';
-import { EN as LECTURES_EN, HE as LECTURES_HE } from './LectureSeries';
+import { EN as LECTURES_EN, HE as LECTURES_HE } from '../lib/lectures';
 
 /**
  * Total counts come from the same content the rest of the app renders, not
@@ -51,15 +51,7 @@ function Bar({ value }: { value: number }) {
   );
 }
 
-function StatRow({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: number;
-  detail: string;
-}) {
+function StatRow({ label, value, detail }: { label: string; value: number; detail: string }) {
   return (
     <div style={{ marginBottom: '16px' }}>
       <div
@@ -185,7 +177,7 @@ export function ProgressTracker() {
                   borderRadius: '10px',
                   padding: '10px',
                   textAlign: 'center',
-                  opacity: unlocked ? 1 : 0.4,
+                  borderStyle: unlocked ? 'solid' : 'dashed',
                   background: unlocked
                     ? 'linear-gradient(135deg, rgba(13,148,136,.08), rgba(30,58,95,.08))'
                     : 'transparent',

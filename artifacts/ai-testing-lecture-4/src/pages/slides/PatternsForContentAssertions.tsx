@@ -149,7 +149,9 @@ export default function PatternsForContentAssertions() {
                 gap: '1vh',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <div style={{ fontSize: '1.15vw', fontWeight: 700, color: '#1E3A5F' }}>
                   {p.label}
                 </div>

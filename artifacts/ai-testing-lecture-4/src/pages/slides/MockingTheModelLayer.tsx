@@ -115,11 +115,18 @@ export default function MockingTheModelLayer() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Intercept with page.route()', 'יירוט עם page.route()')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '0.8vh' }}>
+            <div
+              style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4, marginBottom: '0.8vh' }}
+            >
               {t(
                 'Match the AI endpoint URL pattern and return a pre-defined JSON or streaming SSE fixture. The rest of the test exercises real UI code with predictable input.',
                 'התאימו את דפוס ה-URL של endpoint ה-AI והחזירו JSON מוגדר מראש או fixture SSE בסטרימינג. שאר הבדיקה מפעיל קוד UI אמיתי עם קלט צפוי.',
@@ -140,7 +147,12 @@ export default function MockingTheModelLayer() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Keep Fixture Responses Minimal', 'שמרו תגובות Fixture מינימליות')}
             </div>
@@ -153,7 +165,12 @@ export default function MockingTheModelLayer() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Complement with a Real-Model Smoke Suite', 'השלמה עם סוויטת עשן עם מודל אמיתי')}
             </div>

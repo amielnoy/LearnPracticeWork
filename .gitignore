@@ -10,12 +10,20 @@ out-tsc
 
 # dependencies
 node_modules
+.venv
+__pycache__/
+*.py[cod]
+.pytest_cache/
 
 # Playwright (tests/playwright/ itself is the component-test template, keep it)
 test-results
 playwright-report
 blob-report
 playwright/.cache
+# Console logs, page snapshots and screenshots dropped by the Playwright MCP
+# browser tools. One directory per debugging session, none of it reproducible
+# and none of it worth reviewing.
+.playwright-mcp
 
 # Allure (results are generated per-run; report is generated from them)
 allure-results
@@ -63,3 +71,7 @@ Thumbs.db
 # public build-time config, this is where anything you would not publish goes.
 .env.local
 .env.*.local
+
+# The assembled static site. Built by the `build-pages` job in CI and by anyone
+# reproducing it locally; never a source artefact.
+_site

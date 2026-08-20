@@ -95,7 +95,9 @@ export default function SafetyClassifierArchitecture() {
       </div>
 
       {/* Body */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2.5vh' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2.5vh' }}
+      >
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
           <div
             style={{
@@ -122,7 +124,7 @@ export default function SafetyClassifierArchitecture() {
           </h1>
           <p style={{ fontSize: '1.2vw', color: '#475569', margin: 0, lineHeight: 1.5 }}>
             {t(
-              'A safety classifier acts as a gate between the LLM\'s raw output and the consumer — whether that consumer is a user or a CI test runner.',
+              "A safety classifier acts as a gate between the LLM's raw output and the consumer — whether that consumer is a user or a CI test runner.",
               'מסווג בטיחות פועל כשער בין פלט ה-LLM הגולמי לצרכן — בין אם הצרכן הוא משתמש או מריץ בדיקות CI.',
             )}
           </p>
@@ -156,11 +158,17 @@ export default function SafetyClassifierArchitecture() {
                 }}
               >
                 <div style={{ fontSize: '2vw' }}>{step.icon}</div>
-                <div style={{ fontSize: '1.05vw', fontWeight: 700, color: step.color }}>{step.label}</div>
-                <div style={{ fontSize: '0.85vw', color: '#64748B', lineHeight: 1.3 }}>{step.sub}</div>
+                <div style={{ fontSize: '1.05vw', fontWeight: 700, color: step.color }}>
+                  {step.label}
+                </div>
+                <div style={{ fontSize: '0.85vw', color: '#64748B', lineHeight: 1.3 }}>
+                  {step.sub}
+                </div>
               </div>
               {i < steps.length - 1 && (
-                <div style={{ fontSize: '1.5vw', color: '#94A3B8', padding: '0 0.5vw', flexShrink: 0 }}>
+                <div
+                  style={{ fontSize: '1.5vw', color: '#94A3B8', padding: '0 0.5vw', flexShrink: 0 }}
+                >
                   {isHe ? '←' : '→'}
                 </div>
               )}
@@ -189,7 +197,14 @@ export default function SafetyClassifierArchitecture() {
           >
             <div style={{ fontSize: '1.8vw' }}>🚫</div>
             <div style={{ textAlign: isHe ? 'right' : 'left' }}>
-              <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1.05vw',
+                  fontWeight: 700,
+                  color: '#DC2626',
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {t('Blocked: Toxic / Policy Violation', 'חסום: רעילות / הפרת מדיניות')}
               </div>
               <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -214,7 +229,14 @@ export default function SafetyClassifierArchitecture() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('Production Use', 'שימוש בייצור')}
             </div>
             <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -234,7 +256,14 @@ export default function SafetyClassifierArchitecture() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.05vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.05vw',
+                fontWeight: 700,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('CI Use', 'שימוש ב-CI')}
             </div>
             <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>

@@ -62,12 +62,7 @@ const google = (
 
 export const SDM_FONT_REGISTRY: ReadonlyArray<SdmRegisteredFont> = [
   classic('Aptos', 'sans', ['Segoe UI', 'Arial', 'sans-serif']),
-  classic('Aptos Display', 'sans', [
-    'Aptos',
-    'Segoe UI',
-    'Arial',
-    'sans-serif',
-  ]),
+  classic('Aptos Display', 'sans', ['Aptos', 'Segoe UI', 'Arial', 'sans-serif']),
   classic(
     'Arial',
     'sans',
@@ -81,12 +76,7 @@ export const SDM_FONT_REGISTRY: ReadonlyArray<SdmRegisteredFont> = [
     ['Carlito', 'sans-serif'],
     [{ family: 'Carlito', weights: '400;700' }],
   ),
-  classic(
-    'Cambria',
-    'serif',
-    ['Caladea', 'serif'],
-    [{ family: 'Caladea', weights: '400;700' }],
-  ),
+  classic('Cambria', 'serif', ['Caladea', 'serif'], [{ family: 'Caladea', weights: '400;700' }]),
   classic(
     'Century Gothic',
     'sans',
@@ -111,12 +101,7 @@ export const SDM_FONT_REGISTRY: ReadonlyArray<SdmRegisteredFont> = [
     ['EB Garamond', 'serif'],
     [{ family: 'EB Garamond', weights: '400..800' }],
   ),
-  classic(
-    'Georgia',
-    'serif',
-    ['Gelasio', 'serif'],
-    [{ family: 'Gelasio', weights: '400..700' }],
-  ),
+  classic('Georgia', 'serif', ['Gelasio', 'serif'], [{ family: 'Gelasio', weights: '400..700' }]),
   classic(
     'Helvetica',
     'sans',
@@ -161,12 +146,7 @@ export const SDM_FONT_REGISTRY: ReadonlyArray<SdmRegisteredFont> = [
   google('Outfit', 'sans', '100..900', 'sans-serif'),
   google('Playfair Display', 'serif', '400..900', 'serif'),
   google('Plus Jakarta Sans', 'sans', '200..800', 'sans-serif'),
-  google(
-    'Poppins',
-    'sans',
-    '100;200;300;400;500;600;700;800;900',
-    'sans-serif',
-  ),
+  google('Poppins', 'sans', '100;200;300;400;500;600;700;800;900', 'sans-serif'),
   google('Raleway', 'sans', '100..900', 'sans-serif'),
   google('Roboto', 'sans', '100..900', 'sans-serif'),
   google('Source Serif 4', 'serif', '200..900', 'serif'),
@@ -174,17 +154,13 @@ export const SDM_FONT_REGISTRY: ReadonlyArray<SdmRegisteredFont> = [
   google('Work Sans', 'sans', '100..900', 'sans-serif'),
 ];
 
-const registryByKey = new Map(
-  SDM_FONT_REGISTRY.map((entry) => [familyKey(entry.family), entry]),
-);
+const registryByKey = new Map(SDM_FONT_REGISTRY.map(entry => [familyKey(entry.family), entry]));
 
 function familyKey(family: string): string {
   return family.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
-export function getRegisteredFont(
-  family: string,
-): SdmRegisteredFont | undefined {
+export function getRegisteredFont(family: string): SdmRegisteredFont | undefined {
   return registryByKey.get(familyKey(family));
 }
 
@@ -237,9 +213,7 @@ export function buildRegistryFontsCssUrl(): string {
     .map(({ family, weights }) => {
       const name = encodeURIComponent(family).replace(/%20/g, '+');
 
-      return weights === null
-        ? `family=${name}`
-        : `family=${name}:wght@${weights}`;
+      return weights === null ? `family=${name}` : `family=${name}:wght@${weights}`;
     })
     .join('&');
 

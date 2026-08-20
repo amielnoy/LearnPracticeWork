@@ -67,14 +67,9 @@ interface OwnerLayout {
 
 const DEFAULT_SIZE_PT = 18;
 
-export function analyzeSlideLayout(
-  document: SlideDocument,
-): Array<SdmLayoutIssue> {
+export function analyzeSlideLayout(document: SlideDocument): Array<SdmLayoutIssue> {
   const issues: Array<SdmLayoutIssue> = [];
-  if (
-    document.size.width !== SDM_SLIDE_WIDTH ||
-    document.size.height !== SDM_SLIDE_HEIGHT
-  ) {
+  if (document.size.width !== SDM_SLIDE_WIDTH || document.size.height !== SDM_SLIDE_HEIGHT) {
     issues.push({
       code: 'canvas-size',
       elementIds: [],
@@ -92,9 +87,7 @@ export function analyzeSlideLayout(
     owners,
     issues,
   );
-  const layouts = owners
-    .filter((owner) => !owner.hidden)
-    .map((owner) => layoutOwner(owner));
+  const layouts = owners.filter(owner => !owner.hidden).map(owner => layoutOwner(owner));
   const canvas: Frame = {
     x: 0,
     y: 0,
@@ -117,7 +110,7 @@ export function analyzeSlideLayout(
     if (!owner.transformed) {
       const visible = visibleRect(owner);
       const outside = layout.visibleLines.some(
-        (line) =>
+        line =>
           line.x < visible.x - 2 ||
           line.y < visible.y - 2 ||
           line.x + line.width > visible.x + visible.width + 2 ||
@@ -141,16 +134,9 @@ export function analyzeSlideLayout(
       continue;
     }
     const leftLines = clipLines(left.visibleLines, visibleRect(left.owner));
-    for (
-      let rightIndex = leftIndex + 1;
-      rightIndex < layouts.length;
-      rightIndex += 1
-    ) {
+    for (let rightIndex = leftIndex + 1; rightIndex < layouts.length; rightIndex += 1) {
       const right = layouts[rightIndex];
-      const rightLines = clipLines(
-        right.visibleLines,
-        visibleRect(right.owner),
-      );
+      const rightLines = clipLines(right.visibleLines, visibleRect(right.owner));
       if (right.owner.transformed || !linesOverlap(leftLines, rightLines)) {
         continue;
       }
@@ -195,7 +181,7 @@ function clipLines(lines: Array<Line>, clip: Frame | undefined): Array<Line> {
     return lines;
   }
 
-  return lines.flatMap((line) => {
+  return lines.flatMap(line => {
     const visible = intersectRects(line, clip);
 
     return visible.width > 0 && visible.height > 0 ? [visible] : [];
@@ -212,8 +198,7 @@ function collectTextOwners(
   issues: Array<SdmLayoutIssue>,
 ): void {
   for (const element of elements) {
-    const hidden =
-      parentHidden || element.hidden === true || element.opacity === 0;
+    const hidden = parentHidden || element.hidden === true || element.opacity === 0;
     const transformed =
       parentTransformed ||
       (element.rotationDeg ?? 0) !== 0 ||
@@ -243,12 +228,8 @@ function collectTextOwners(
       const groupTransform: Transform = {
         x: transform.x + element.frame.x * transform.scaleX,
         y: transform.y + element.frame.y * transform.scaleY,
-        scaleX:
-          transform.scaleX *
-          (element.frame.width / element.coordinateSpace.width),
-        scaleY:
-          transform.scaleY *
-          (element.frame.height / element.coordinateSpace.height),
+        scaleX: transform.scaleX * (element.frame.width / element.coordinateSpace.width),
+        scaleY: transform.scaleY * (element.frame.height / element.coordinateSpace.height),
       };
       let childClip = clip;
       if (element.clip) {
@@ -258,9 +239,7 @@ function collectTextOwners(
           width: element.frame.width * transform.scaleX,
           height: element.frame.height * transform.scaleY,
         };
-        childClip = childClip
-          ? intersectRects(childClip, groupRect)
-          : groupRect;
+        childClip = childClip ? intersectRects(childClip, groupRect) : groupRect;
       }
       collectTextOwners(
         element.children,
@@ -272,15 +251,7 @@ function collectTextOwners(
         issues,
       );
     } else if (element.type === 'table') {
-      collectTableCells(
-        element,
-        transform,
-        hidden,
-        transformed,
-        clip,
-        owners,
-        issues,
-      );
+      collectTableCells(element, transform, hidden, transformed, clip, owners, issues);
     }
   }
 }
@@ -297,11 +268,9 @@ function collectTableCells(
   if (table.rows.length === 0 || table.columns.length === 0) {
     return;
   }
-  const columnWeights = table.columns.map((column) => column.width);
+  const columnWeights = table.columns.map(column => column.width);
   const columnWidths = normalizeSizes(columnWeights, table.frame.width);
-  const rowWeights = table.rows.map(
-    (row) => row.height ?? table.frame.height / table.rows.length,
-  );
+  const rowWeights = table.rows.map(row => row.height ?? table.frame.height / table.rows.length);
   const rowHeights = normalizeSizes(rowWeights, table.frame.height);
   const columnOffsets = cumulativeOffsets(columnWidths, table.frame.x);
   const rowOffsets = cumulativeOffsets(rowHeights, table.frame.y);
@@ -311,10 +280,7 @@ function collectTableCells(
     let columnIndex = 0;
     row.cells.forEach((cell, cellIndex) => {
       const cellId = `${table.id}:r${rowIndex}c${cellIndex}`;
-      while (
-        columnIndex < table.columns.length &&
-        occupied[rowIndex][columnIndex]
-      ) {
+      while (columnIndex < table.columns.length && occupied[rowIndex][columnIndex]) {
         columnIndex += 1;
       }
       if (columnIndex >= table.columns.length) {
@@ -377,8 +343,7 @@ function collectTableCells(
         frame: {
           x: columnOffsets[columnIndex],
           y: rowOffsets[rowIndex],
-          width:
-            columnOffsets[columnIndex + colSpan] - columnOffsets[columnIndex],
+          width: columnOffsets[columnIndex + colSpan] - columnOffsets[columnIndex],
           height: rowOffsets[rowIndex + rowSpan] - rowOffsets[rowIndex],
         },
         body: cell.body,
@@ -392,13 +357,10 @@ function collectTableCells(
   });
 }
 
-function normalizeSizes(
-  weights: Array<number>,
-  available: number,
-): Array<number> {
+function normalizeSizes(weights: Array<number>, available: number): Array<number> {
   const total = weights.reduce((sum, weight) => sum + weight, 0);
 
-  return weights.map((weight) => (weight / total) * available);
+  return weights.map(weight => (weight / total) * available);
 }
 
 function cumulativeOffsets(sizes: Array<number>, start: number): Array<number> {
@@ -429,38 +391,25 @@ function layoutText(body: TextBody, frame: Frame): TextLayout {
   const insets = body.insetsPt ?? { top: 0, right: 0, bottom: 0, left: 0 };
   const left = frame.x + insets.left * 2;
   const top = frame.y + insets.top * 2;
-  const availableWidth = Math.max(
-    1,
-    frame.width - (insets.left + insets.right) * 2,
-  );
-  const availableHeight = Math.max(
-    1,
-    frame.height - (insets.top + insets.bottom) * 2,
-  );
+  const availableWidth = Math.max(1, frame.width - (insets.left + insets.right) * 2);
+  const availableHeight = Math.max(1, frame.height - (insets.top + insets.bottom) * 2);
   const lines: Array<Line> = [];
   let cursorY = 0;
   let fitsWidth = true;
-  const effectiveParagraphs = body.paragraphs.map((paragraph) =>
-    effectiveParagraph(paragraph),
-  );
+  const effectiveParagraphs = body.paragraphs.map(paragraph => effectiveParagraph(paragraph));
   const markers = paragraphMarkers(effectiveParagraphs);
 
   for (const [index, effective] of effectiveParagraphs.entries()) {
     cursorY += effective.spaceBeforePt * 2;
     const paragraphWidth = Math.max(1, availableWidth - effective.indentPt * 2);
-    const paragraphLines = layoutParagraph(
-      effective,
-      markers[index] ?? '',
-      paragraphWidth,
-    );
+    const paragraphLines = layoutParagraph(effective, markers[index] ?? '', paragraphWidth);
     // The renderer pulls the first line into the hanging-indent gutter via a
     // negative text-indent, so the marker does not reduce the text width.
     const hangingWidth = effective.hangingIndentPt * 2;
     fitsWidth &&=
       paragraphLines.longestToken <= paragraphWidth &&
       paragraphLines.lines.every(
-        (line, index) =>
-          line.width <= paragraphWidth + (index === 0 ? hangingWidth : 0),
+        (line, index) => line.width <= paragraphWidth + (index === 0 ? hangingWidth : 0),
       );
     for (const [lineIndex, line] of paragraphLines.lines.entries()) {
       let lineX = effective.indentPt * 2;
@@ -612,7 +561,7 @@ interface Token {
 function tokenizeRun(run: TextRun, lineHeight: number): Array<Token> {
   const parts = run.text.split(/(\n|[\t ]+)/).filter(Boolean);
 
-  return parts.map((text) => ({
+  return parts.map(text => ({
     text,
     width: text === '\n' ? 0 : textWidth(text, run),
     height: runHeight(run, lineHeight),
@@ -655,19 +604,13 @@ function runHeight(run: TextRun, lineHeight: number): number {
 
 function defaultLineHeight(paragraph: EffectiveParagraph): number {
   const sizes = paragraph.runs.map(
-    (run) => run.sizePt ?? paragraph.defaultRunStyle.sizePt ?? DEFAULT_SIZE_PT,
+    run => run.sizePt ?? paragraph.defaultRunStyle.sizePt ?? DEFAULT_SIZE_PT,
   );
   if (paragraph.bullet !== undefined && paragraph.runs.length > 0) {
-    sizes.push(
-      paragraph.runs[0]?.sizePt ??
-        paragraph.defaultRunStyle.sizePt ??
-        DEFAULT_SIZE_PT,
-    );
+    sizes.push(paragraph.runs[0]?.sizePt ?? paragraph.defaultRunStyle.sizePt ?? DEFAULT_SIZE_PT);
   }
   const largest =
-    sizes.length === 0
-      ? (paragraph.defaultRunStyle.sizePt ?? DEFAULT_SIZE_PT)
-      : Math.max(...sizes);
+    sizes.length === 0 ? (paragraph.defaultRunStyle.sizePt ?? DEFAULT_SIZE_PT) : Math.max(...sizes);
 
   return (largest || DEFAULT_SIZE_PT) * 2 * paragraph.lineHeight;
 }
@@ -677,7 +620,7 @@ function layoutFits(layout: TextLayout): boolean {
 }
 
 function transformLines(lines: Array<Line>, transform: Transform): Array<Line> {
-  return lines.map((line) => ({
+  return lines.map(line => ({
     x: transform.x + line.x * transform.scaleX,
     y: transform.y + line.y * transform.scaleY,
     width: line.width * transform.scaleX,
@@ -686,11 +629,10 @@ function transformLines(lines: Array<Line>, transform: Transform): Array<Line> {
 }
 
 function linesOverlap(left: Array<Line>, right: Array<Line>): boolean {
-  return left.some((a) =>
-    right.some((b) => {
+  return left.some(a =>
+    right.some(b => {
       const width = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
-      const height =
-        Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+      const height = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
       if (width <= 4 || height <= 4) {
         return false;
       }

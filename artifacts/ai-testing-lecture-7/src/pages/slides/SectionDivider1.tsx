@@ -30,12 +30,34 @@ export default function SectionDivider1() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em', color: '#FAFBFC' }}>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div
+            style={{
+              fontSize: '1.2vw',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              color: '#FAFBFC',
+            }}
+          >
             AI Testing Academy
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: 'rgba(255,255,255,0.6)',
+          }}
+        >
           <div>{t('SECURITY TESTING', 'בדיקות אבטחה')}</div>
           <div>{t('LECTURE 07', 'הרצאה 07')}</div>
         </div>

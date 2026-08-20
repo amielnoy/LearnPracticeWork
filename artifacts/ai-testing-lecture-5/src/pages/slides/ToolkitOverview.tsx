@@ -116,7 +116,14 @@ export default function ToolkitOverview() {
                 }}
               />
             </div>
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('Schema Validation', 'אימות סכמה')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -155,7 +162,14 @@ export default function ToolkitOverview() {
                 }}
               />
             </div>
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('Semantic Assertions', 'קביעות סמנטיות')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -195,7 +209,14 @@ export default function ToolkitOverview() {
                 }}
               />
             </div>
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('Load and Latency', 'עומס וזמן תגובה')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -234,7 +255,14 @@ export default function ToolkitOverview() {
                 }}
               />
             </div>
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('Mocking', 'הדמייה')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -273,7 +301,14 @@ export default function ToolkitOverview() {
                 }}
               />
             </div>
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: '#1E3A5F',
+                marginBottom: '0.8vh',
+              }}
+            >
               {t('Cost Tracking', 'מעקב עלויות')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>

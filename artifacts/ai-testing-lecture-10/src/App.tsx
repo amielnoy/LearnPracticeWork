@@ -22,7 +22,7 @@ function getSlideIndex(pathname: string): number {
   const match = pathname.match(/^\/slide(\d+)$/);
   if (!match) return -1;
   const position = parseInt(match[1], 10);
-  return slides.findIndex((s) => s.position === position);
+  return slides.findIndex(s => s.position === position);
 }
 
 const PARENT_OWNS_NAVIGATION =
@@ -52,9 +52,7 @@ function SlideEditor() {
 
     const consumesArrowKeys = (target: EventTarget | null) => {
       if (!(target instanceof HTMLElement)) return false;
-      return (
-        target.isContentEditable || !!target.closest(ARROW_KEY_CONSUMERS)
-      );
+      return target.isContentEditable || !!target.closest(ARROW_KEY_CONSUMERS);
     };
 
     const postNav = (type: 'advanceSlide' | 'retreatSlide') => {
@@ -74,29 +72,18 @@ function SlideEditor() {
           const isPlainLink =
             !!focused &&
             focused.tagName === 'A' &&
-            (!role ||
-              role === 'link' ||
-              role === 'none' ||
-              role === 'presentation');
+            (!role || role === 'link' || role === 'none' || role === 'presentation');
           if (focused && !isPlainLink) return;
           event.preventDefault();
           postNav('advanceSlide');
           return;
         }
         if (consumesArrowKeys(event.target)) return;
-        if (
-          event.key === 'ArrowLeft' ||
-          event.key === 'ArrowUp' ||
-          event.key === 'PageUp'
-        ) {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'PageUp') {
           event.preventDefault();
           postNav('retreatSlide');
         }
-        if (
-          event.key === 'ArrowRight' ||
-          event.key === 'ArrowDown' ||
-          event.key === 'PageDown'
-        ) {
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown' || event.key === 'PageDown') {
           event.preventDefault();
           postNav('advanceSlide');
         }
@@ -106,9 +93,7 @@ function SlideEditor() {
         event.preventDefault();
       }
       if (
-        (event.key === 'ArrowLeft' ||
-          event.key === 'ArrowUp' ||
-          event.key === 'PageUp') &&
+        (event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'PageUp') &&
         currentIndex > 0
       ) {
         navigate(`/slide${slides[currentIndex - 1].position}`);
@@ -192,10 +177,7 @@ function SlideEditor() {
   return (
     <div className="select-none">
       {slides.map((slide, index) => (
-        <div
-          key={slide.id}
-          style={{ display: index === currentIndex ? 'block' : 'none' }}
-        >
+        <div key={slide.id} style={{ display: index === currentIndex ? 'block' : 'none' }}>
           <slide.Component />
         </div>
       ))}
@@ -210,7 +192,7 @@ function SlideEditor() {
 function AllSlides() {
   return (
     <div className="bg-black">
-      {slides.map((slide) => (
+      {slides.map(slide => (
         <div
           key={slide.id}
           data-slide-id={slide.id}
@@ -226,23 +208,52 @@ function AllSlides() {
   );
 }
 
+/**
+ * How big the 1920x1080 stage can be drawn, and whether it has to be turned.
+ *
+ * A 16:9 stage laid across the short edge of a portrait phone is the problem
+ * this solves: on a 390x664 screen it comes out 390x219 — a fifth of its design
+ * size, with two thirds of the display left black. Every point of text on the
+ * slide is then scaled by 0.20, which is what makes a 40px heading render at 8.
+ *
+ * Turning the stage a quarter turn lets it span the long edge instead: 664x373,
+ * a scale of 0.35, and no black bars. That is the same result the reader gets by
+ * physically rotating the phone, so once they do, the rotation here switches off
+ * and the stage is drawn the ordinary way round.
+ *
+ * The width test is what keeps this off tablets and desktops in portrait, where
+ * the stage is already large enough to read.
+ */
+const ROTATE_BELOW_WIDTH = 700;
+
+function stageDims(): { width: number; height: number; rotated: boolean } {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const rotated = vh > vw && vw < ROTATE_BELOW_WIDTH;
+  const availableW = rotated ? vh : vw;
+  const availableH = rotated ? vw : vh;
+  return {
+    width: Math.min(availableW, availableH * (16 / 9)),
+    height: Math.min(availableH, availableW * (9 / 16)),
+    rotated,
+  };
+}
+
 // This component is used for the deployed view at `/`
 function SlideViewer() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [dims, setDims] = useState(() => ({
-    width: Math.min(window.innerWidth, window.innerHeight * (16 / 9)),
-    height: Math.min(window.innerHeight, window.innerWidth * (9 / 16)),
-  }));
-
+  const [dims, setDims] = useState(stageDims);
   useEffect(() => {
-    const update = () => {
-      setDims({
-        width: Math.min(window.innerWidth, window.innerHeight * (16 / 9)),
-        height: Math.min(window.innerHeight, window.innerWidth * (9 / 16)),
-      });
-    };
+    const update = () => setDims(stageDims());
     window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    // iOS fires orientationchange before innerWidth/innerHeight settle, so the
+    // resize that follows it is the one worth measuring; listening to both and
+    // recomputing twice is cheaper than reading stale dimensions once.
+    window.addEventListener('orientationchange', update);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+    };
   }, []);
 
   useEffect(() => {
@@ -279,7 +290,19 @@ function SlideViewer() {
       <iframe
         ref={iframeRef}
         src={`${base}/slide${firstPosition}`}
-        style={{ width: dims.width, height: dims.height, border: 'none' }}
+        style={{
+          width: dims.width,
+          height: dims.height,
+          border: 'none',
+          // The stage is a flex item, and once rotated its width is the
+          // viewport's *height* — wider than the container. Without this,
+          // flex-shrink squeezes it back to the container width and the
+          // rotation buys nothing.
+          flex: 'none',
+          // The parent centres it, so rotating about the centre keeps it there
+          // without any positioning maths.
+          transform: dims.rotated ? 'rotate(90deg)' : undefined,
+        }}
         onLoad={() => iframeRef.current?.focus()}
         title="Slide viewer"
       />
@@ -293,11 +316,7 @@ export default function App() {
   // DO NOT edit this useEffect - redirects unknown routes to the first slide.
   // The "/" and "/allslides" routes are handled separately below.
   useEffect(() => {
-    if (
-      location !== '/' &&
-      location !== '/allslides' &&
-      getSlideIndex(location) === -1
-    ) {
+    if (location !== '/' && location !== '/allslides' && getSlideIndex(location) === -1) {
       if (slides.length > 0) {
         navigate(`/slide${slides[0].position}`, { replace: true });
       }
@@ -312,7 +331,7 @@ export default function App() {
       if (
         event.data?.type === 'navigateToSlide' &&
         typeof event.data.position === 'number' &&
-        slides.some((s) => s.position === event.data.position)
+        slides.some(s => s.position === event.data.position)
       ) {
         navigate(`/slide${event.data.position}`);
       }
@@ -333,7 +352,7 @@ export default function App() {
         return;
       }
       if (action.kind === 'goToSlide') {
-        const target = slides.find((slide) => slide.id === action.slideId);
+        const target = slides.find(slide => slide.id === action.slideId);
         if (target) {
           navigate(`/slide${target.position}`);
         }
@@ -342,10 +361,7 @@ export default function App() {
       if (action.kind !== 'goToRelativeSlide') {
         return;
       }
-      if (
-        PARENT_OWNS_NAVIGATION &&
-        (action.target === 'next' || action.target === 'previous')
-      ) {
+      if (PARENT_OWNS_NAVIGATION && (action.target === 'next' || action.target === 'previous')) {
         window.parent.postMessage(
           {
             type: action.target === 'next' ? 'advanceSlide' : 'retreatSlide',

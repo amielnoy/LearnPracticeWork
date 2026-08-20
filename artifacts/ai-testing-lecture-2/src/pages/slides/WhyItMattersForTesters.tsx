@@ -46,23 +46,60 @@ export default function WhyItMattersForTesters() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('FOUNDATIONS', 'יסודות')}</div>
           <div>{t('LECTURE 02', 'הרצאה 02')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '1vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {t('Foundations', 'יסודות')}
         </div>
-        <h1 style={{ fontSize: '3.6vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '3.6vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {t('Why Prompt Engineering Matters for Testers', 'למה הנדסת פרומפטים חשובה לבודקים')}
         </h1>
 
@@ -124,19 +161,58 @@ export default function WhyItMattersForTesters() {
             boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
           }}
         >
-          <div style={{ width: '7vw', height: '7vw', borderRadius: '50%', backgroundColor: 'rgba(13, 148, 136, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '3.5vw', height: '3.5vw', borderRadius: '0.6vw', backgroundColor: '#0D9488' }} />
+          <div
+            style={{
+              width: '7vw',
+              height: '7vw',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(13, 148, 136, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              style={{
+                width: '3.5vw',
+                height: '3.5vw',
+                borderRadius: '0.6vw',
+                backgroundColor: '#0D9488',
+              }}
+            />
           </div>
-          <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#1E3A5F', textAlign: 'center' }}>
+          <div
+            style={{ fontSize: '1.2vw', fontWeight: 600, color: '#1E3A5F', textAlign: 'center' }}
+          >
             {t('The Prompt Is the Interface', 'הפרומפט הוא הממשק')}
           </div>
-          <div style={{ fontSize: '1vw', color: '#64748B', textAlign: 'center', lineHeight: 1.5, maxWidth: '18vw' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              color: '#64748B',
+              textAlign: 'center',
+              lineHeight: 1.5,
+              maxWidth: '18vw',
+            }}
+          >
             {t('What you test is what you wrote', 'מה שבודקים הוא מה שנכתב')}
           </div>
         </div>
       </div>
 
-      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '2vh', fontSize: '0.9vw', color: '#94A3B8', fontWeight: 500 }}>
+      <div
+        style={{
+          gridColumn: '1 / -1',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid #E2E8F0',
+          paddingTop: '2vh',
+          fontSize: '0.9vw',
+          color: '#94A3B8',
+          fontWeight: 500,
+        }}
+      >
         <div>{t('Prompt Engineering for Testers', 'הנדסת פרומפטים לבודקים')}</div>
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>

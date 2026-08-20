@@ -2,7 +2,8 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+pnpm workspace monorepo with TypeScript clients and tooling plus a Python API. JavaScript
+packages use pnpm; `server` uses uv and keeps a pnpm package only as a workspace command adapter.
 
 ## Stack
 
@@ -10,14 +11,15 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
+- **Python**: 3.12+ with uv and a committed `server/uv.lock`
+- **API framework**: FastAPI + Uvicorn, with a Scalar interactive API reference
+- **Database**: PostgreSQL through psycopg; Supabase REST for localized content
+- **Validation**: Pydantic on the API, Zod (`zod/v4`) in generated TypeScript clients
 - **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
-- **Tests**: Playwright — unit, component, API, contract and e2e (`tests/`)
-- **Lint**: ESLint 10 flat config (`eslint.config.mjs`) + Prettier for formatting
-- **Reporting**: Allure 3 (`allure-report/`, one report across all five layers)
+- **Build**: Vite clients; Python bytecode/Docker validation for the API
+- **Tests**: pytest fixtures for the backend; Playwright unit, component, API, contract and e2e
+- **Lint**: ESLint + Prettier for TypeScript; Ruff for Python
+- **Reporting**: Allure 3 (`allure-report/`, one report across all six layers)
 - **CI**: GitHub Actions — tests on every push/PR, nightly at 05:00 Israel time, and
   GitHub Pages publishing from `main`
 
@@ -27,66 +29,72 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm run lint` — ESLint across the workspace (`lint:fix` to apply fixes)
 - `pnpm run build` — typecheck + lint + build all packages
 - `./run-all-tests.sh` — every layer plus the Allure report; does **not** fail fast
-- `pnpm run test` — every layer in order (stops at the first failure)
+- `pnpm run test` — Python fixtures, then every Playwright layer (stops at the first failure)
 - `pnpm run test:unit` / `test:component` / `test:api` / `test:contract` / `test:e2e` — one layer
 - `docker compose run --rm tests` — the whole suite in a container, reports on the host
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
+With the API running, Scalar is available at <http://localhost:8787/api/docs> and the runtime
+OpenAPI JSON at <http://localhost:8787/api/openapi.json>. Scalar does not enable its agent,
+telemetry, proxy, remote fonts, or credential persistence. On Replit, both paths use the same
+secretless relay as the rest of `/api` and are actually served by Fly.
+
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
 
 ## Server environment
 
-`artifacts/api-server` reads these. Everything except `PORT` is optional, and each one that is
-absent disables a feature rather than breaking the server — which is what lets the suite run
-three differently-configured instances side by side.
+`server` reads these. The API starts without optional integrations; a route whose dependency
+is absent fails closed with a controlled 4xx/5xx response. The package scripts default `PORT`.
 
 | Variable | Effect when set | Effect when absent |
 | --- | --- | --- |
-| `PORT` | The port to listen on | The server refuses to start |
+| `PORT` | The port to listen on | `dev` uses 8787; `start` uses 8080 |
 | `DATABASE_URL` | Stripe sync and purchase records work | Both are skipped; `/api/entitlements/*` answers 503 |
+| `SUPABASE_DB_PASSWORD` | Builds this project's pooled Postgres URL when `DATABASE_URL` is absent | No database unless `DATABASE_URL` is set |
+| `SUPABASE_URL` + `SUPABASE_ANON_KEY` | Localized content routes can read Supabase REST | Content routes answer 503 |
+| `GROQ_API_KEY` | General AI proxy uses Groq | General generation answers 503 and the client offers BYOK |
 | `GEMINI_API_KEY` | `/api/ai/generate` proxies with a server-held key | The route answers 503 and the client offers BYOK |
 | `ADMIN_API_TOKEN` | `POST /api/stripe/seed` accepts `Authorization: Bearer <token>` | The route answers 404 — it fails closed, never open |
-| `GOOGLE_CLIENT_ID` | Google ID tokens are verified server-side | Sign-in-backed routes answer 503 |
+| `GOOGLE_CLIENT_ID` + `SESSION_SECRET` | Google tokens are verified and exchanged for signed HttpOnly sessions | Sign-in answers 503; protected routes stay closed |
+| `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` | Stripe API and signed webhooks | Stripe routes fail closed; there is no connector fallback |
 | `ALLOWED_ORIGINS` | Comma-separated CORS allowlist | Only same-origin and Replit-domain requests |
-| `TRUST_PROXY_HOPS` | Proxy hops to trust in production | Defaults to 1 |
+| `UPSTREAM_API_BASE_URL` | Secretless Replit API artifact relays `/api/*` to Fly | FastAPI handles routes locally |
+| `METRICS_TOKEN` | Protects production `/metrics` scrapes | Metrics are available only outside production |
+| `METRICS_ID_SALT` | HMAC-pseudonymizes user labels in metrics | Authenticated users are labeled `redacted` |
 
-`GOOGLE_CLIENT_ID` must be the same OAuth client the academy is built with as
-`VITE_GOOGLE_CLIENT_ID`; the server compares it against the token's `aud` claim.
+`GOOGLE_CLIENT_ID` is returned publicly by `/api/auth/config` and compared against the Google
+token's `aud` claim. A build-time `VITE_GOOGLE_CLIENT_ID` still works but is optional.
 
 `ADMIN_API_TOKEN` is a secret you choose — any long random string. Rotate it by setting a new
 value; there is nothing else to update.
 
 ### Purchases
 
-`checkout.session.completed` webhooks write a row into `course_purchases` (see
-`lib/db/src/schema/coursePurchases.ts`), which is what ties a Stripe payment to a person.
+`checkout.session.completed` webhooks write a row into `course_purchases`, which is what ties a
+Stripe payment to a person. FastAPI creates the table and indexes idempotently at startup when a
+database is configured; `lib/db/src/schema/coursePurchases.ts` remains the TypeScript schema used
+by repository tooling.
 `GET /api/entitlements/course` reads it back for the caller's verified Google identity.
 
-**TODO — the table has not been created anywhere yet.** It needs a live `DATABASE_URL` and one
-run of the command below, which is also what to run after any later change to that schema:
-
-```bash
-pnpm --filter @workspace/db run push
-```
-
-Until that runs, the server degrades rather than failing: a completed checkout logs a warning
-instead of writing a row, and `/api/entitlements/course` answers 503 rather than guessing.
+Without a database the server degrades rather than guessing: webhooks cannot persist purchases
+and `/api/entitlements/course` answers 503.
 
 Note that no UI calls `POST /api/stripe/checkout` yet — the route and the record it produces
 are in place, but the purchase flow itself is still to be built.
 
 ## Testing
 
-`tests/` is one workspace package holding all five layers. The Playwright runner is used
-throughout — the unit project executes TypeScript in Node without launching a browser.
+The backend has its own pytest fixture layer. `tests/` holds the Playwright layers; its unit
+project executes TypeScript in Node without launching a browser.
 
 | Layer | Runs in | Covers |
 | --- | --- | --- |
+| `server/tests` | Python + pytest | Google signature rules, sessions, Scalar/OpenAPI, monitoring, and deployment fixtures |
 | `tests/unit` | Node | Pure logic in `artifacts/ai-testing-academy/src/lib` |
 | `tests/component` | Chromium, desktop + mobile (Playwright CT) | Real React components, mounted and driven |
-| `tests/api` | Node → live server | `artifacts/api-server` over HTTP |
+| `tests/api` | Node → live server | `server` over HTTP |
 | `tests/contract` | Node → live server | `openapi.yaml` ↔ generated Zod ↔ the running server |
 | `tests/e2e` | Chromium, desktop + mobile | The academy app on its own Vite server, via page objects |
 
@@ -106,14 +114,14 @@ pnpm --filter @workspace/tests run test:browsers
 
 Every config starts whatever server it needs, so nothing has to be running first:
 
-- **api / contract** — three `api-server` instances via `tests/support/start-api-servers.ts`
+- **api / contract** — three FastAPI/Uvicorn instances via `tests/support/start-api-servers.ts`
   (ports 8788, 8789 and 8790). One has no Gemini key, one has a throwaway key that only ever
   receives invalid requests, and one has a deliberately tiny quota for the rate-limit spec, so
   no test can reach a model vendor. The keyed instance also carries a test `ADMIN_API_TOKEN`
   and `GOOGLE_CLIENT_ID` so the authenticated branches are reachable, while the keyless one
-  carries neither and exercises the "not configured" branches. All start with `DATABASE_URL`
-  and the Replit connector variables blanked, so the suite does not depend on the developer's
-  shell.
+  carries neither and exercises the "not configured" branches. All start with database,
+  Supabase, Stripe and session variables blanked, so the suite does not depend on the
+  developer's shell.
 - **e2e** — the academy's own Vite dev server on port 5273 with `BASE_PATH=/`. Its `/api`
   proxy has nothing behind it, so Connection Setup falls back to bring-your-own-key, which is
   the state these UI flows exercise.
@@ -124,7 +132,7 @@ between the two fails to link.
 
 ### Reports
 
-All five layers write Allure results into one `allure-results/` at the repo root, so a single
+All six layers write Allure results into one `allure-results/` at the repo root, so a single
 report covers the whole run:
 
 ```bash
@@ -150,28 +158,48 @@ pinned to the workspace's Playwright version so the browsers match the specs:
 docker compose run --rm tests
 ```
 
-The image is pinned to `linux/amd64` deliberately. `pnpm-workspace.yaml`'s `overrides` strip
-every platform-native optional dependency except the linux-x64-gnu ones, so an arm64 image
-would be missing `@rollup/rollup-linux-arm64-gnu` and the academy's Vite server — and with it
-the e2e layer — would not boot. Chromium also needs a roomy `/dev/shm`; compose sets
-`shm_size: 1gb`, and a plain `docker run` needs `--shm-size=1g`.
+The image is pinned to `linux/amd64` to match the official Playwright browser image. Chromium
+also needs a roomy `/dev/shm`; compose sets `shm_size: 1gb`, and a plain `docker run` needs
+`--shm-size=1g`.
 
 ### Known gap
 
-`pnpm run typecheck` currently fails in `artifacts/api-server` and `scripts` — pre-existing
-errors unrelated to the tests. CI typechecks everything else; see the comment in `ci.yml`.
+`pnpm run typecheck` covers the whole workspace and passes. It used to fail in `server` and
+`scripts`, and CI carried exclusions for both; they compile clean now, so the exclusions are
+gone and the CI step is the plain script again. `pnpm run lint` and `pnpm run format:check`
+are also CI gates now — they were defined here but invoked nowhere, which is precisely where
+the repository drifted: typecheck stayed clean because it was enforced, while lint reached 32
+errors and 590 files fell off the Prettier config.
 
 ## Deployment
 
-Two targets from the same build:
+Static and API are deployed separately, because only one of them costs anything to run.
+`deploy/README.md` is the runbook; the summary:
 
-- **Replit** — `.replit-artifact/artifact.toml` per artifact. The site and `api-server` share
-  one origin, so relative `/api` calls work.
+- **Replit** — `.replit-artifact/artifact.toml` per artifact. No production secret belongs in
+  Replit. The API artifact relays same-origin `/api/*` requests to Fly over HTTPS, preserving
+  first-party login cookies and Stripe request bodies without storing provider credentials.
 - **GitHub Pages** — `.github/workflows/ci.yml` publishes from `main`: the portfolio at the
-  site root, `ai-testing-academy/` and `ai-testing-lecture-1/` beneath it, and
+  site root, `ai-testing-academy/` and **all ten** `ai-testing-lecture-N/` beneath it, and
   `architecture.html` alongside. Static only, so the academy's AI panel falls back to
   bring-your-own-key. The Allure report is **not** part of this site — it is published to its
   own reports repository, with its own Pages URL.
+- **Cloudflare Pages** — the same artifact, unchanged. `deploy/cloudflare/_redirects` and
+  `_headers` are copied into the site root by the same job and Pages ignores both. The reason
+  to prefer it is rewrites: every app here is a single-page app, and GitHub Pages has no
+  rewrite rules, so a deep link like `/ai-testing-lecture-3/slide5` is served through the
+  nearest `404.html` — the right page carrying a 404 status, on URLs the academy's own
+  hreflang tags nominate for indexing.
+- **Fly.io** — `server/{Dockerfile,fly.toml}` for the Python API. It keeps one machine running
+  rather than scaling to zero, because `app/main.py` builds its rate limiters on an
+  in-memory store with a 24-hour window: a machine that stops and restarts hands every caller
+  a fresh anonymous allowance.
+- **Grafana** — `monitoring/compose.yaml` provisions Grafana, Prometheus, Pushgateway and the
+  Python uptime probe. The local test runner prints its dashboard URL; Actions links the public
+  dashboard when `GRAFANA_URL` is configured and publishes history when its Pushgateway secrets
+  are configured. Login and server-proxied AI panels use only approximate country, derived
+  client type, and HMAC-pseudonymous users; they do not export identity, IP, prompt, response,
+  token, or key data. Keep both `METRICS_TOKEN` and `METRICS_ID_SALT` on Fly, never Replit.
 
   Publishing runs **even when the test job fails** — that is when the Allure report is most
   worth reading. The site job overrides the skip-on-failed-dependency default with

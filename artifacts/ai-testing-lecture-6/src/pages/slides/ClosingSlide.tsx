@@ -32,14 +32,25 @@ export default function ClosingSlide() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: 'rgba(255,255,255,0.6)',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -89,7 +100,7 @@ export default function ClosingSlide() {
           }}
         >
           {t(
-            "You\u2019ve completed all six lectures of the AI Testing Academy. You now have the full toolkit to design, run, and maintain AI test suites that are reliable, affordable, and honest about what they find.",
+            'You\u2019ve completed all six lectures of the AI Testing Academy. You now have the full toolkit to design, run, and maintain AI test suites that are reliable, affordable, and honest about what they find.',
             'השלמת את כל שש ההרצאות של AI Testing Academy. כעת יש לך את ערכת הכלים המלאה לתכנון, הפעלה ותחזוקה של חבילות בדיקות AI שהן אמינות, כלכליות וכנות לגבי מה שהן מוצאות.',
           )}
         </p>

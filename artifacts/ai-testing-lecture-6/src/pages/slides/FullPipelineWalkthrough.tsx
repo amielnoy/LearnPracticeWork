@@ -31,14 +31,25 @@ export default function FullPipelineWalkthrough() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -109,7 +120,10 @@ export default function FullPipelineWalkthrough() {
               {t('PR Opens', 'PR נפתח')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Developer pushes; GitHub Actions triggers the ai-tests job.', 'מפתח דוחף; GitHub Actions מפעיל את משימת ai-tests.')}
+              {t(
+                'Developer pushes; GitHub Actions triggers the ai-tests job.',
+                'מפתח דוחף; GitHub Actions מפעיל את משימת ai-tests.',
+              )}
             </div>
           </div>
           <div
@@ -145,7 +159,10 @@ export default function FullPipelineWalkthrough() {
               {t('Sharded + Cached', 'מפוצל + שמור')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('4 runners split the @smoke tests; cached responses used where prompt is unchanged.', '4 runners מפצלים את בדיקות ה-@smoke; תגובות שמורות בשימוש שם שה-prompt לא השתנה.')}
+              {t(
+                '4 runners split the @smoke tests; cached responses used where prompt is unchanged.',
+                '4 runners מפצלים את בדיקות ה-@smoke; תגובות שמורות בשימוש שם שה-prompt לא השתנה.',
+              )}
             </div>
           </div>
           <div
@@ -182,7 +199,10 @@ export default function FullPipelineWalkthrough() {
               {t('Retry + Budget', 'ניסיון חוזר + תקציב')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Max 2 retries; outcomes logged; cost gate enforced at $0.50.', 'מקסימום 2 ניסיונות חוזרים; תוצאות מתועדות; שער עלות נאכף ב-$0.50.')}
+              {t(
+                'Max 2 retries; outcomes logged; cost gate enforced at $0.50.',
+                'מקסימום 2 ניסיונות חוזרים; תוצאות מתועדות; שער עלות נאכף ב-$0.50.',
+              )}
             </div>
           </div>
           <div
@@ -218,7 +238,10 @@ export default function FullPipelineWalkthrough() {
               {t('Judge Gate', 'שער השופט')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('LLM scores each response against rubric. avg_score >= 4.0 required to pass.', 'LLM מדרג כל תגובה מול רובריקה. avg_score >= 4.0 נדרש לעבור.')}
+              {t(
+                'LLM scores each response against rubric. avg_score >= 4.0 required to pass.',
+                'LLM מדרג כל תגובה מול רובריקה. avg_score >= 4.0 נדרש לעבור.',
+              )}
             </div>
           </div>
           <div
@@ -255,7 +278,10 @@ export default function FullPipelineWalkthrough() {
               {t('Merge / Block', 'מיזוג / חסימה')}
             </div>
             <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
-              {t('Pass: merge enabled. Block: reviewer sees judge reasoning before override. Full suite runs overnight.', 'עבר: מיזוג מאופשר. חסום: סוקר רואה נימוק שופט לפני עקיפה. חבילה מלאה מופעלת בלילה.')}
+              {t(
+                'Pass: merge enabled. Block: reviewer sees judge reasoning before override. Full suite runs overnight.',
+                'עבר: מיזוג מאופשר. חסום: סוקר רואה נימוק שופט לפני עקיפה. חבילה מלאה מופעלת בלילה.',
+              )}
             </div>
           </div>
         </div>

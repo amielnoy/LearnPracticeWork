@@ -1,17 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocale } from '../context/LocaleContext';
-import { ScrollProgress } from '../components/ScrollProgress';
-import { BackToTop } from '../components/BackToTop';
-import { Nav, NavToggle, NavScrim } from '../components/Nav';
-import { Hero } from '../components/Hero';
-import { Footer } from '../components/Footer';
-import { ConnectionSetup } from '../components/ConnectionSetup';
-import { ResumeAgent } from '../components/ResumeAgent';
-import { LectureSeries } from '../components/LectureSeries';
-import { InterviewAgent } from '../components/InterviewAgent';
-import { QuestionBank } from '../components/QuestionBank';
-import { CodingChallenges } from '../components/CodingChallenges';
-import { ToolLauncher } from '../components/ToolLauncher';
+import { ScrollProgress } from '../components/chrome/ScrollProgress';
+import { BackToTop } from '../components/chrome/BackToTop';
+import { Nav, NavToggle, NavScrim } from '../components/chrome/Nav';
+import { Hero } from '../components/chrome/Hero';
+import { Footer } from '../components/chrome/Footer';
+import { ConnectionSetup } from '../components/agents/ConnectionSetup';
+import { ResumeAgent } from '../components/agents/ResumeAgent';
+import { LectureSeries } from '../components/practice/LectureSeries';
+import { InterviewAgent } from '../components/agents/InterviewAgent';
+import { QuestionBank } from '../components/practice/QuestionBank';
+import { CodingChallenges } from '../components/practice/CodingChallenges';
+import { ToolLauncher } from '../components/chrome/ToolLauncher';
 import { WhatsNew } from '../components/WhatsNew';
 import { ProgressTracker } from '../components/ProgressTracker';
 import { useProviderContext } from '../context/ProviderContext';
@@ -35,18 +35,32 @@ export function HomePage() {
   const { quotaExhausted, serverConfigLoaded, hasServerDefault } = useProviderContext();
 
   // Theme
+  //
+  // The head script in index.html has already resolved this and stamped it on
+  // <html> before first paint — it has to, because the page ships a static
+  // prerender and would otherwise paint finished content in the wrong palette.
+  // So the attribute is the answer; re-deriving it here would just be a second
+  // copy of the same priority rules, free to disagree with the first.
   const [theme, setTheme] = useState<Theme>(() => {
+    const stamped = document.documentElement.getAttribute('data-theme');
+    if (stamped === 'light' || stamped === 'dark') return stamped;
+    // Only reachable if the head script did not run.
     const saved = readOneOf(localStorage, THEME_KEY, THEMES);
     if (saved) return saved;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  // Nav drawer
+  // Nav drawer. The toggle's ref is held here rather than inside NavToggle
+  // because Nav needs it too: closing the drawer has to put focus back on the
+  // button that opened it, and the two are siblings.
   const [navOpen, setNavOpen] = useState(false);
+  const navToggleRef = useRef<HTMLButtonElement>(null);
 
-  // Apply theme to <html>
+  // Apply theme to <html>, and keep the browser chrome in step with it.
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#17151c' : '#fbf7f2');
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
@@ -83,23 +97,34 @@ export function HomePage() {
         {locale.ui.skip}
       </a>
       <ScrollProgress />
-      <NavToggle navOpen={navOpen} onToggle={() => setNavOpen(v => !v)} />
-      <NavScrim navOpen={navOpen} onClose={() => setNavOpen(false)} />
+      <NavToggle navOpen={navOpen} onToggle={() => setNavOpen(v => !v)} buttonRef={navToggleRef} />
+      <NavScrim onClose={() => setNavOpen(false)} />
       <BackToTop />
 
-      <Nav navOpen={navOpen} setNavOpen={setNavOpen} theme={theme} onToggleTheme={toggleTheme} />
+      <Nav
+        navOpen={navOpen}
+        setNavOpen={setNavOpen}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        toggleRef={navToggleRef}
+      />
 
       <Hero />
 
+      {/* Section order is `lib/sections.ts` and nothing else — the nav renders
+          from the same list, so the two cannot drift apart again. Keep this
+          block in step with it when the order changes. ToolLauncher is the hub
+          rather than a numbered section, so it is not in that list and stays
+          at the top. */}
       <main id="main-content">
         <WhatsNew />
         <ProgressTracker />
         <ToolLauncher />
         <ResumeAgent />
+        <LectureSeries />
         <InterviewAgent />
         <QuestionBank />
         <CodingChallenges />
-        <LectureSeries />
         <ConnectionSetup
           collapsed
           forceOpen={quotaExhausted || (serverConfigLoaded && !hasServerDefault('groq'))}

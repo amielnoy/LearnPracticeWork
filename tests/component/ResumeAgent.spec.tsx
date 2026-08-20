@@ -26,6 +26,23 @@ const FULL_RESUME =
   'SUMMARY\nAutomation engineer building Playwright suites and CI pipelines.\n\n' +
   'SKILLS\nPlaywright, TypeScript, Node.js, CI/CD, REST APIs, SQL';
 
+test('rejects a file above the 10 MB client safety limit before parsing', async ({
+  resumeAgent,
+}) => {
+  await resumeAgent.upload('oversized.pdf', Buffer.alloc(10 * 1024 * 1024 + 1));
+
+  await expect(resumeAgent.error).toContainText('maximum size is 10 MB');
+  await expect(resumeAgent.resumeText).toHaveValue('');
+});
+
+test('requires affirmative data-processing consent before an AI submission', async ({
+  resumeAgent,
+}) => {
+  await expect(resumeAgent.component.locator('#resumeBtn')).toBeDisabled();
+  await resumeAgent.component.locator('#resumeDataConsent').check();
+  await expect(resumeAgent.component.locator('#resumeBtn')).toBeEnabled();
+});
+
 test.describe('a résumé with no text layer', () => {
   test('is named as a scan rather than as an extraction that came up short', async ({
     resumeAgent,

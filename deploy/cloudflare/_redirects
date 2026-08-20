@@ -1,0 +1,32 @@
+# Cloudflare Pages rewrite rules. Copied to the site root by the `Assemble the
+# site` step in .github/workflows/ci.yml; GitHub Pages ignores this file, so the
+# same artifact deploys to either host.
+#
+# Every app here is a single-page app: the academy routes with wouter, and each
+# lecture deck serves `/slide1`, `/slide2`, ... and `/allslides` from one shell.
+# None of those paths is a file on disk. Without a rewrite the host 404s, and
+# for the decks that is not a corner case — the academy's hreflang tags name
+# `/ai-testing-lecture-1/slide1?lang=en` as a canonical URL, so it is the
+# address Google is told to index.
+#
+# A `200` is a rewrite, not a redirect: the URL the visitor sees is unchanged
+# and the shell boots and routes to the slide. Pages resolves real files before
+# consulting this file, so hashed assets under `/assets/` are untouched.
+#
+# Order matters — first match wins, so the specific prefixes precede the
+# catch-all that hands everything else to the portfolio.
+
+/ai-testing-academy/*    /ai-testing-academy/index.html     200
+
+/ai-testing-lecture-1/*  /ai-testing-lecture-1/index.html   200
+/ai-testing-lecture-2/*  /ai-testing-lecture-2/index.html   200
+/ai-testing-lecture-3/*  /ai-testing-lecture-3/index.html   200
+/ai-testing-lecture-4/*  /ai-testing-lecture-4/index.html   200
+/ai-testing-lecture-5/*  /ai-testing-lecture-5/index.html   200
+/ai-testing-lecture-6/*  /ai-testing-lecture-6/index.html   200
+/ai-testing-lecture-7/*  /ai-testing-lecture-7/index.html   200
+/ai-testing-lecture-8/*  /ai-testing-lecture-8/index.html   200
+/ai-testing-lecture-9/*  /ai-testing-lecture-9/index.html   200
+/ai-testing-lecture-10/* /ai-testing-lecture-10/index.html  200
+
+/*                       /index.html                        200

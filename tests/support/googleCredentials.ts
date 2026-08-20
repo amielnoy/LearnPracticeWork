@@ -1,11 +1,9 @@
 /**
  * Google ID tokens for tests.
  *
- * These are unsigned, and deliberately so: the site reads the token without
- * verifying it — see `lib/googleIdentity.ts` for why that is the limit of what
- * sign-in claims here — so a real signature would prove nothing that a fake one
- * does not. What the shape has to be right about is everything the reader does
- * look at: three segments, a base64url payload, and an `exp`.
+ * These are unsigned because only the component fixture consumes them; that
+ * fixture stands in for the Python verification boundary. Python backend tests
+ * use real RSA signatures and fixture-hosted JWKS documents.
  */
 
 const base64url = (value: unknown): string =>

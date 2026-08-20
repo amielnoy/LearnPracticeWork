@@ -113,7 +113,14 @@ export default function CommonPitfalls() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#DC2626', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#DC2626',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Testing Only the Happy Path Prompt', 'בדיקת הנחיית המסלול המאושר בלבד')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function CommonPitfalls() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#DC2626', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#DC2626',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Asserting on Exact Model Wording', 'בדיקה על ניסוח מדויק של המודל')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function CommonPitfalls() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#DC2626', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#DC2626',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Skipping the Mock in Unit Tests', 'דילוג על ההדמייה בבדיקות יחידה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -178,7 +199,9 @@ export default function CommonPitfalls() {
           >
             {t('Two More to Watch', 'עוד שתיים לשים לב אליהן')}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', position: 'relative' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', position: 'relative' }}
+          >
             <div
               style={
                 {
@@ -191,7 +214,15 @@ export default function CommonPitfalls() {
                 } as React.CSSProperties
               }
             />
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',
@@ -209,7 +240,15 @@ export default function CommonPitfalls() {
                 )}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',

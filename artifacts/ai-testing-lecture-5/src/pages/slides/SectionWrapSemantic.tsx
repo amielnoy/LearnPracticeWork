@@ -57,7 +57,9 @@ export default function SectionWrapSemantic() {
       </div>
 
       {/* Body */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3vh', justifyContent: 'center' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', gap: '3vh', justifyContent: 'center' }}
+      >
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
           <div
             style={{
@@ -95,7 +97,9 @@ export default function SectionWrapSemantic() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}
+            >
               {t('Cosine Similarity', 'דמיון קוסינוס')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -115,7 +119,9 @@ export default function SectionWrapSemantic() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}
+            >
               {t('LLM-as-Judge', 'LLM כשופט')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>
@@ -135,7 +141,9 @@ export default function SectionWrapSemantic() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}
+            >
               {t('Reference Checks', 'בדיקות הפניות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5 }}>

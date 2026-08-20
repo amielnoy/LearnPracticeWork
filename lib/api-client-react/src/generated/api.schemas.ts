@@ -8,3 +8,251 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface ReadinessStatus {
+  status: string;
+  database: string;
+}
+
+export interface AiProviderConfig {
+  available: boolean;
+  defaultModel: string;
+  anonymousDailyQuota: number;
+}
+
+export interface AiConfig {
+  groq: AiProviderConfig;
+  gemini: AiProviderConfig;
+}
+
+export type AiMessageRole = (typeof AiMessageRole)[keyof typeof AiMessageRole];
+
+export const AiMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export interface AiMessage {
+  role: AiMessageRole;
+  /**
+   * @minLength 1
+   * @maxLength 50000
+   */
+  content: string;
+}
+
+export interface GenerateRequest {
+  /** @maxLength 100 */
+  model?: string;
+  /** @maxLength 12000 */
+  system?: string;
+  /**
+   * @minItems 1
+   * @maxItems 20
+   */
+  messages: AiMessage[];
+  /**
+   * @minimum 1
+   * @maximum 8192
+   */
+  maxTokens?: number;
+  grounded?: boolean;
+}
+
+export interface GenerateResponse {
+  text: string;
+  truncated: boolean;
+}
+
+export type CheckoutRequestLocale =
+  (typeof CheckoutRequestLocale)[keyof typeof CheckoutRequestLocale];
+
+export const CheckoutRequestLocale = {
+  en: 'en',
+  he: 'he',
+} as const;
+
+export interface CheckoutRequest {
+  /** @maxLength 320 */
+  email?: string;
+  acceptedTerms: true;
+  locale?: CheckoutRequestLocale;
+}
+
+export interface CheckoutResponse {
+  url: string;
+}
+
+export type CoursePricesDataItem = { [key: string]: unknown };
+
+export interface CoursePrices {
+  data: CoursePricesDataItem[];
+  salesEnabled: boolean;
+}
+
+export const WebhookResponseValue = {
+  received: true,
+} as const;
+export type WebhookResponse = typeof WebhookResponseValue;
+
+export type SeedResponseStatus = (typeof SeedResponseStatus)[keyof typeof SeedResponseStatus];
+
+export const SeedResponseStatus = {
+  created: 'created',
+  already_exists: 'already_exists',
+} as const;
+
+export interface SeedResponse {
+  status: SeedResponseStatus;
+  productId: string;
+  /** @nullable */
+  priceId: string | null;
+}
+
+export interface EntitlementResponse {
+  hasAccess: boolean;
+  /** @nullable */
+  purchasedAt: string | null;
+}
+
+export interface ContentError {
+  error: string;
+}
+
+export type ErrorResponseIssuesItem = { [key: string]: unknown };
+
+export interface ErrorResponse {
+  error: string;
+  issues?: ErrorResponseIssuesItem[];
+  requestId?: string;
+}
+
+export interface GoogleCredential {
+  /**
+   * @minLength 1
+   * @maxLength 10000
+   */
+  credential: string;
+}
+
+export interface AuthConfig {
+  /** Public Google OAuth client ID, or an empty string when sign-in is disabled. */
+  clientId: string;
+}
+
+export interface GoogleUser {
+  name: string;
+  email: string;
+  picture: string;
+  /** Google token expiry as Unix epoch milliseconds. */
+  expiresAt: number;
+}
+
+export interface AuthSession {
+  user: GoogleUser;
+}
+
+export const LogoutResponseValue = {
+  ok: true,
+} as const;
+export type LogoutResponse = typeof LogoutResponseValue;
+
+export interface QuestionBankItem {
+  q: string;
+  hint: string;
+  answer: string;
+}
+
+export interface QuestionBankStage {
+  icon: string;
+  title: string;
+  items: QuestionBankItem[];
+}
+
+export interface QuestionBank {
+  stages: QuestionBankStage[];
+}
+
+export interface CodingChallenge {
+  title: string;
+  prompt: string;
+  hint: string;
+  code: string;
+  complexity: string;
+}
+
+export interface CodingChallengeLevel {
+  label: string;
+  blurb: string;
+  items: CodingChallenge[];
+}
+
+export interface CodingChallenges {
+  levels: CodingChallengeLevel[];
+}
+
+export interface Lecture {
+  num: number;
+  ready: boolean;
+  title: string;
+  desc: string;
+  /** Present only once the lecture is published. */
+  url?: string;
+}
+
+export interface LectureTrack {
+  title: string;
+  lead: string;
+  lectures: Lecture[];
+}
+
+export interface LectureSeries {
+  tracks: LectureTrack[];
+}
+
+/**
+ * The request was refused, unavailable, or failed safely.
+ */
+export type RequestErrorResponse = ErrorResponse;
+
+/**
+ * Authentication failed, is unavailable, or was rate-limited.
+ */
+export type AuthErrorResponse = ErrorResponse;
+
+/**
+ * The content store could not be reached. Deliberately a 503 and not a 500: the request was fine, the dependency was not, and the message is fixed so nothing about the store leaks to an unauthenticated caller.
+
+ */
+export type ContentUnavailableResponse = ContentError;
+
+export type LangParameter = (typeof LangParameter)[keyof typeof LangParameter];
+
+export const LangParameter = {
+  en: 'en',
+  he: 'he',
+} as const;
+
+export type GetQuestionBankParams = {
+  /**
+ * Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.
+
+ */
+  lang?: LangParameter;
+};
+
+export type GetCodingChallengesParams = {
+  /**
+ * Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.
+
+ */
+  lang?: LangParameter;
+};
+
+export type GetLectureSeriesParams = {
+  /**
+ * Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.
+
+ */
+  lang?: LangParameter;
+};

@@ -21,19 +21,28 @@ export default function CIPipelineForPlaywrightAiTests() {
     {
       step: t('Fast Mocked Suite', 'סוויטה מדומה מהירה'),
       trigger: t('Every PR & commit', 'כל PR ו-commit'),
-      detail: t('All AI calls mocked. Sharded across workers for speed. Fails fast on regressions.', 'כל קריאות AI מדומות. מחולק בין workers למהירות. נכשל מהר על רגרסיות.'),
+      detail: t(
+        'All AI calls mocked. Sharded across workers for speed. Fails fast on regressions.',
+        'כל קריאות AI מדומות. מחולק בין workers למהירות. נכשל מהר על רגרסיות.',
+      ),
       color: '#0D9488',
     },
     {
       step: t('Real-Model Smoke Suite', 'סוויטת עשן עם מודל אמיתי'),
       trigger: t('Scheduled — once daily', 'מתוזמן — פעם ביום'),
-      detail: t('Small set of critical paths against the live model API. Catches integration drift and model behaviour changes.', 'סט קטן של נתיבים קריטיים מול ה-API של המודל החי. מזהה סטיות אינטגרציה ושינויים בהתנהגות המודל.'),
+      detail: t(
+        'Small set of critical paths against the live model API. Catches integration drift and model behaviour changes.',
+        'סט קטן של נתיבים קריטיים מול ה-API של המודל החי. מזהה סטיות אינטגרציה ושינויים בהתנהגות המודל.',
+      ),
       color: 'rgba(13,148,136,0.55)',
     },
     {
       step: t('Failure Triage', 'תיאום כשלים'),
       trigger: t('On flake or red build', 'על תנודתיות או build אדום'),
-      detail: t('Open trace viewer for the failed test. Check video recording. Inspect network log for unexpected AI responses.', 'פתחו את trace viewer עבור הבדיקה הנכשלת. בדקו הקלטת וידאו. בדקו יומן רשת לתגובות AI בלתי צפויות.'),
+      detail: t(
+        'Open trace viewer for the failed test. Check video recording. Inspect network log for unexpected AI responses.',
+        'פתחו את trace viewer עבור הבדיקה הנכשלת. בדקו הקלטת וידאו. בדקו יומן רשת לתגובות AI בלתי צפויות.',
+      ),
       color: 'rgba(13,148,136,0.25)',
     },
   ];
@@ -152,13 +161,29 @@ export default function CIPipelineForPlaywrightAiTests() {
                 }}
               />
               <div>
-                <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.3vh' }}>
+                <div
+                  style={{
+                    fontSize: '1.1vw',
+                    fontWeight: 700,
+                    color: '#1E3A5F',
+                    marginBottom: '0.3vh',
+                  }}
+                >
                   {s.step}
                 </div>
-                <div style={{ fontSize: '0.85vw', fontWeight: 600, color: '#0D9488', marginBottom: '0.5vh' }}>
+                <div
+                  style={{
+                    fontSize: '0.85vw',
+                    fontWeight: 600,
+                    color: '#0D9488',
+                    marginBottom: '0.5vh',
+                  }}
+                >
                   {s.trigger}
                 </div>
-                <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>{s.detail}</div>
+                <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.4 }}>
+                  {s.detail}
+                </div>
               </div>
             </div>
           ))}
@@ -198,22 +223,40 @@ export default function CIPipelineForPlaywrightAiTests() {
           {[
             {
               label: t('Sharding', 'שיתוף מקביל'),
-              desc: t('Split the mocked suite across multiple CI machines to keep PR feedback under 2 minutes.', 'פצלו את הסוויטה המדומה על פני מספר מכונות CI כדי לשמור משוב PR מתחת ל-2 דקות.'),
+              desc: t(
+                'Split the mocked suite across multiple CI machines to keep PR feedback under 2 minutes.',
+                'פצלו את הסוויטה המדומה על פני מספר מכונות CI כדי לשמור משוב PR מתחת ל-2 דקות.',
+              ),
             },
             {
               label: t('Retry Policy', 'מדיניות ניסיון חוזר'),
-              desc: t('Allow up to 2 retries in CI for mocked tests (transient infra issues). Zero retries for real-model tests — a retry masks a real flake.', 'אפשרו עד 2 ניסיונות חוזרים ב-CI לבדיקות מדומות (בעיות תשתית חולפות). אפס ניסיונות חוזרים לבדיקות מודל אמיתי — ניסיון חוזר מסתיר תנודתיות אמיתית.'),
+              desc: t(
+                'Allow up to 2 retries in CI for mocked tests (transient infra issues). Zero retries for real-model tests — a retry masks a real flake.',
+                'אפשרו עד 2 ניסיונות חוזרים ב-CI לבדיקות מדומות (בעיות תשתית חולפות). אפס ניסיונות חוזרים לבדיקות מודל אמיתי — ניסיון חוזר מסתיר תנודתיות אמיתית.',
+              ),
             },
             {
               label: t('Artefact Retention', 'שמירת Artefacts'),
-              desc: t('Always upload Playwright trace files and video recordings on failure so debugging is possible without re-running locally.', 'תמיד העלו קבצי trace של Playwright והקלטות וידאו בכשל כדי שניפוי באגים יהיה אפשרי מבלי להריץ מחדש מקומית.'),
+              desc: t(
+                'Always upload Playwright trace files and video recordings on failure so debugging is possible without re-running locally.',
+                'תמיד העלו קבצי trace של Playwright והקלטות וידאו בכשל כדי שניפוי באגים יהיה אפשרי מבלי להריץ מחדש מקומית.',
+              ),
             },
           ].map((item, i) => (
             <div key={i}>
-              <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+              <div
+                style={{
+                  fontSize: '1.1vw',
+                  fontWeight: 700,
+                  color: '#1E3A5F',
+                  marginBottom: '0.4vh',
+                }}
+              >
                 {item.label}
               </div>
-              <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.5 }}>{item.desc}</div>
+              <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.5 }}>
+                {item.desc}
+              </div>
             </div>
           ))}
         </div>

@@ -7,11 +7,11 @@ import type { Page, Locator } from '@playwright/test';
  */
 export class FooterComponent {
   readonly root: Locator;
-  /** The author credit — the page's single external link. */
+  /** The external author credit, separate from the legal and contact links. */
   readonly authorLink: Locator;
 
   constructor(page: Page) {
     this.root = page.locator('footer#site-footer');
-    this.authorLink = this.root.getByRole('link');
+    this.authorLink = this.root.getByRole('link', { name: 'Amiel Peled' });
   }
 }

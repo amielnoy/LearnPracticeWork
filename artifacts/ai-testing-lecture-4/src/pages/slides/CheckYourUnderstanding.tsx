@@ -21,7 +21,7 @@ export default function CheckYourUnderstanding() {
     {
       q: t(
         'A test for your chat widget uses waitForTimeout(4000) before asserting on the AI response. What is the problem and how would you fix it?',
-        'בדיקה של ווידג\'ט הצ\'אט שלכם משתמשת ב-waitForTimeout(4000) לפני אסרציה על תגובת ה-AI. מה הבעיה וכיצד הייתם מתקנים אותה?',
+        "בדיקה של ווידג'ט הצ'אט שלכם משתמשת ב-waitForTimeout(4000) לפני אסרציה על תגובת ה-AI. מה הבעיה וכיצד הייתם מתקנים אותה?",
       ),
       a: t(
         'Fixed waits are fragile — too short on slow responses, too long on fast ones. Replace it with waitForFunction() that polls for data-stream="done", or use page.waitForResponse() to gate on the network completion event.',

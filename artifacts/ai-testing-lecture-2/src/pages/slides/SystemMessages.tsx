@@ -17,7 +17,14 @@ const wrap: React.CSSProperties = {
 };
 
 const bulletRow: React.CSSProperties = { display: 'flex', gap: '1.2vw', alignItems: 'flex-start' };
-const dot: React.CSSProperties = { width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', marginTop: '0.7vw' };
+const dot: React.CSSProperties = {
+  width: '0.6vw',
+  height: '0.6vw',
+  minWidth: '0.6vw',
+  borderRadius: '50%',
+  backgroundColor: '#0D9488',
+  marginTop: '0.7vw',
+};
 const chip: React.CSSProperties = {
   fontSize: '0.9vw',
   fontWeight: 600,
@@ -31,22 +38,72 @@ const chip: React.CSSProperties = {
 export default function SystemMessages() {
   return (
     <div style={wrap} dir={dir}>
-      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #E2E8F0', paddingBottom: '2vh' }}>
+      <div
+        style={{
+          gridColumn: '1 / -1',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid #E2E8F0',
+          paddingBottom: '2vh',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('CORE TECHNIQUES', 'טכניקות ליבה')}</div>
           <div>{t('LECTURE 02', 'הרצאה 02')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '1vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {t('Core Techniques', 'טכניקות ליבה')}
         </div>
-        <h1 style={{ fontSize: '3.6vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '3.6vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {t('System Messages: Setting the Contract', 'הודעות מערכת: קביעת החוזה')}
         </h1>
 
@@ -91,8 +148,32 @@ export default function SystemMessages() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ background: '#FFFFFF', padding: '3.5vh 2.5vw', borderRadius: '1vw', border: '1px solid #E2E8F0', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh', boxSizing: 'border-box', boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)' }}>
-          <div style={{ fontSize: '0.95vw', fontWeight: 600, color: '#64748B', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em', textAlign: isHe ? 'right' : 'left' }}>
+        <div
+          style={{
+            background: '#FFFFFF',
+            padding: '3.5vh 2.5vw',
+            borderRadius: '1vw',
+            border: '1px solid #E2E8F0',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            gap: '2vh',
+            boxSizing: 'border-box',
+            boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '0.95vw',
+              fontWeight: 600,
+              color: '#64748B',
+              textTransform: isHe ? 'none' : 'uppercase',
+              letterSpacing: '0.05em',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {t('The Contract', 'החוזה')}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1vw' }}>
@@ -104,7 +185,19 @@ export default function SystemMessages() {
         </div>
       </div>
 
-      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '2vh', fontSize: '0.9vw', color: '#94A3B8', fontWeight: 500 }}>
+      <div
+        style={{
+          gridColumn: '1 / -1',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid #E2E8F0',
+          paddingTop: '2vh',
+          fontSize: '0.9vw',
+          color: '#94A3B8',
+          fontWeight: 500,
+        }}
+      >
         <div>{t('Prompt Engineering for Testers', 'הנדסת פרומפטים לבודקים')}</div>
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>

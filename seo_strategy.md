@@ -8,7 +8,7 @@
 
 ## Out of scope
 
-- API Server (`artifacts/api-server/`) — backend API, not a public-facing web page
+- API Server (`server/`) — backend API, not a public-facing web page
 
 ## Target audience
 
@@ -61,12 +61,19 @@ and `tests/e2e/seoHead.spec.ts` (each URL really serves that language, before hy
   do not run JS, so they only ever see the static `og:*` tags. Fixing this needs path-based
   variants (`/he/`) rendered at build time — the same change that would let `lang`/`dir` be
   correct in the raw HTML rather than applied by script.
-- **The lecture deck is declared on `/slide1`, not on its root.** At `/` the app renders the
+- **Each lecture deck is declared on `/slide1`, not on its root.** At `/` the app renders the
   deck inside an `<iframe src="/slide1">`, so the root is a ~300-byte shell to a crawler, and
   the iframe drops `?lang` — which means **`/ai-testing-lecture-1/?lang=he` shows English**.
   That is a real bilingual defect, not just an SEO one, but the fix is in `App.tsx`, which is
   marked a platform contract file ("do not restructure"). Declaring the root as a language
-  variant would have pointed Google at three URLs that do not differ.
+  variant would have pointed Google at three URLs that do not differ. This applies to all ten
+  decks, every one of which is published now — it used to be only the first.
+- **Deep links depend on the host's rewrite rules.** A deck's routes (`/slide1`, `/allslides`)
+  are not files, so a static host has to rewrite them. GitHub Pages cannot, and serves them
+  through each app's own `404.html` — the right page under a 404 status, which is a weak
+  signal on exactly the URLs the `hreflang` declarations nominate. Cloudflare Pages rewrites
+  them at 200 via `deploy/cloudflare/_redirects`, which is the reason to prefer it for
+  anything meant to be indexed.
 
 ## Core Web Vitals
 

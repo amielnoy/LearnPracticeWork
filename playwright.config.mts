@@ -43,8 +43,10 @@ const needsApiServers =
 
 export default defineConfig({
   testDir: './tests',
+  outputDir: './test-results/node',
   tsconfig: './tests/tsconfig.json',
   fullyParallel: true,
+  workers: process.env.PW_SUITE_WORKERS ? Number(process.env.PW_SUITE_WORKERS) : undefined,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [

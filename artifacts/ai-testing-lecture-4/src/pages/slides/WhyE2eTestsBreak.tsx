@@ -158,7 +158,10 @@ export default function WhyE2eTestsBreak() {
                 marginBottom: '0.5vh',
               }}
             >
-              {t('Selectors Tied to Volatile Generated Text', 'סלקטורים הקשורים לטקסט מיוצר תנודתי')}
+              {t(
+                'Selectors Tied to Volatile Generated Text',
+                'סלקטורים הקשורים לטקסט מיוצר תנודתי',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -258,7 +261,10 @@ export default function WhyE2eTestsBreak() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Responses arrive as a stream, not a snapshot', 'תגובות מגיעות כסטרים, לא כצילום מצב')}
+                {t(
+                  'Responses arrive as a stream, not a snapshot',
+                  'תגובות מגיעות כסטרים, לא כצילום מצב',
+                )}
               </div>
             </div>
             <div
@@ -281,7 +287,10 @@ export default function WhyE2eTestsBreak() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('DOM structure must not depend on generated text', 'מבנה ה-DOM לא חייב להיות תלוי בטקסט מיוצר')}
+                {t(
+                  'DOM structure must not depend on generated text',
+                  'מבנה ה-DOM לא חייב להיות תלוי בטקסט מיוצר',
+                )}
               </div>
             </div>
             <div
@@ -304,7 +313,10 @@ export default function WhyE2eTestsBreak() {
                 }}
               />
               <div style={{ fontSize: '1.2vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Error and timeout paths are real user scenarios', 'נתיבי שגיאה ופסק זמן הם תרחישי משתמש אמיתיים')}
+                {t(
+                  'Error and timeout paths are real user scenarios',
+                  'נתיבי שגיאה ופסק זמן הם תרחישי משתמש אמיתיים',
+                )}
               </div>
             </div>
           </div>

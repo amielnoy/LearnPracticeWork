@@ -39,14 +39,25 @@ export default function TemperatureControl() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -87,13 +98,20 @@ export default function TemperatureControl() {
         </h1>
         <p style={{ fontSize: '1.2vw', color: '#475569', margin: '0 0 3vh 0', lineHeight: 1.6 }}>
           {t(
-            'Set the model\'s temperature near zero and fix any random seed in test fixtures so the same input produces the same output run to run.',
+            "Set the model's temperature near zero and fix any random seed in test fixtures so the same input produces the same output run to run.",
             'הגדר את טמפרטורת המודל קרוב לאפס וקבע כל seed אקראי בקובעי הבדיקה כך שאותו קלט מייצר אותו פלט מריצה לריצה.',
           )}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Temperature near zero', 'טמפרטורה קרובה לאפס')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -104,7 +122,14 @@ export default function TemperatureControl() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Fix random seeds in fixtures', 'קיבוע seeds אקראיים בקובעים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -115,7 +140,14 @@ export default function TemperatureControl() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Provider seeds where available', 'seeds ספק כשזמינים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -169,18 +201,34 @@ export default function TemperatureControl() {
             }}
           >
             <div style={{ color: '#94A3B8' }}>def call_for_test(prompt):</div>
-            <div style={{ color: '#E2E8F0', paddingLeft: '1.5vw' }}>return client.chat.completions.create(</div>
+            <div style={{ color: '#E2E8F0', paddingLeft: '1.5vw' }}>
+              return client.chat.completions.create(
+            </div>
             <div style={{ color: '#38BDF8', paddingLeft: '3vw' }}>model="gpt-4o-mini",</div>
-            <div style={{ color: '#FBBF24', paddingLeft: '3vw' }}>messages=[&#123;"role":"user",</div>
+            <div style={{ color: '#FBBF24', paddingLeft: '3vw' }}>
+              messages=[&#123;"role":"user",
+            </div>
             <div style={{ color: '#FBBF24', paddingLeft: '4.5vw' }}>"content": prompt&#125;],</div>
             <div style={{ color: '#2DD4BF', paddingLeft: '3vw' }}>temperature=0.0,</div>
             <div style={{ color: '#2DD4BF', paddingLeft: '3vw' }}>seed=42,</div>
             <div style={{ color: '#E2E8F0', paddingLeft: '1.5vw' }}>)</div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1vh', textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1vh',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#64748B' }}>
               <span style={{ color: '#0D9488', fontWeight: 700 }}>&#x2192;</span>
-              <span>{t('temperature=0.0 minimises sampling variance', 'temperature=0.0 ממזערת שונות דגימה')}</span>
+              <span>
+                {t(
+                  'temperature=0.0 minimises sampling variance',
+                  'temperature=0.0 ממזערת שונות דגימה',
+                )}
+              </span>
             </div>
             <div style={{ display: 'flex', gap: '0.8vw', fontSize: '1vw', color: '#64748B' }}>
               <span style={{ color: '#0D9488', fontWeight: 700 }}>&#x2192;</span>

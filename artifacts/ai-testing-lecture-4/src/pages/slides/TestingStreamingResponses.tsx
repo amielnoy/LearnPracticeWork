@@ -281,7 +281,10 @@ export default function TestingStreamingResponses() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Completion signal fires before final assertion', 'אות השלמה נשלח לפני האסרציה הסופית')}
+                {t(
+                  'Completion signal fires before final assertion',
+                  'אות השלמה נשלח לפני האסרציה הסופית',
+                )}
               </div>
             </div>
             <div
@@ -304,7 +307,10 @@ export default function TestingStreamingResponses() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('No waitForTimeout() anywhere in the test', 'אין waitForTimeout() בשום מקום בבדיקה')}
+                {t(
+                  'No waitForTimeout() anywhere in the test',
+                  'אין waitForTimeout() בשום מקום בבדיקה',
+                )}
               </div>
             </div>
           </div>

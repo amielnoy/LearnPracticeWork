@@ -105,14 +105,25 @@ export default function WorkedExampleGitHubActions() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -120,7 +131,12 @@ export default function WorkedExampleGitHubActions() {
       </div>
 
       <div
-        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
       >
         <div
           style={{
@@ -135,7 +151,13 @@ export default function WorkedExampleGitHubActions() {
           {example?.eyebrow ?? t('Worked Example', 'דוגמה מעשית')}
         </div>
         <h1
-          style={{ fontSize: '2.4vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.15, letterSpacing: '-0.02em' }}
+          style={{
+            fontSize: '2.4vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+          }}
         >
           {example?.title ?? '\u00A0'}
         </h1>
@@ -156,7 +178,9 @@ export default function WorkedExampleGitHubActions() {
               {t('Example content unavailable.', 'תוכן הדוגמה אינו זמין.')}
             </div>
           ) : !example ? (
-            <div style={{ fontSize: '1vw', color: '#64748B' }}>{t('Loading\u2026', 'טוען\u2026')}</div>
+            <div style={{ fontSize: '1vw', color: '#64748B' }}>
+              {t('Loading\u2026', 'טוען\u2026')}
+            </div>
           ) : (
             example.panels.map((panel, pi) => (
               <div key={pi} style={{ display: 'flex', flexDirection: 'column', gap: '2.2vh' }}>
@@ -177,9 +201,9 @@ export default function WorkedExampleGitHubActions() {
                           panel.verdict.status === 'נכשל'
                             ? '#DC2626'
                             : panel.verdict.status.toUpperCase().includes('BLOCK') ||
-                              panel.verdict.status.toUpperCase().includes('QUARANTINE')
-                            ? '#D97706'
-                            : '#059669',
+                                panel.verdict.status.toUpperCase().includes('QUARANTINE')
+                              ? '#D97706'
+                              : '#059669',
                         color: '#fff',
                         borderRadius: '0.4vw',
                         padding: '0.5vh 1vw',
@@ -190,7 +214,9 @@ export default function WorkedExampleGitHubActions() {
                     >
                       {panel.verdict.status}
                     </span>
-                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>{panel.verdict.note}</span>
+                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>
+                      {panel.verdict.note}
+                    </span>
                   </div>
                 )}
               </div>

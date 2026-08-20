@@ -32,14 +32,25 @@ export default function CaseStudyMigration() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -91,7 +102,9 @@ export default function CaseStudyMigration() {
             padding: '2vh 2vw',
           }}
         >
-          <div style={{ fontSize: '0.85vw', color: '#64748B', marginBottom: '0.8vh', fontWeight: 600 }}>
+          <div
+            style={{ fontSize: '0.85vw', color: '#64748B', marginBottom: '0.8vh', fontWeight: 600 }}
+          >
             {t('BEFORE MIGRATION', 'לפני ההעברה')}
           </div>
           <div style={{ fontSize: '1vw', color: '#E2E8F0', lineHeight: 1.5 }}>
@@ -142,7 +155,9 @@ export default function CaseStudyMigration() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.3vh' }}>
+            <div
+              style={{ fontSize: '1vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.3vh' }}
+            >
               {t('Problem: 40-minute unsharded run', 'בעיה: ריצה לא מפוצלת של 40 דקות')}
             </div>
             <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -161,7 +176,9 @@ export default function CaseStudyMigration() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.3vh' }}>
+            <div
+              style={{ fontSize: '1vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.3vh' }}
+            >
               {t('Problem: API key leaked in a log line', 'בעיה: מפתח API דלף בשורת log')}
             </div>
             <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -180,8 +197,13 @@ export default function CaseStudyMigration() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.3vh' }}>
-              {t('Problem: flaky test blocked merges for a week', 'בעיה: בדיקה לא יציבה חסמה מיזוגים למשך שבוע')}
+            <div
+              style={{ fontSize: '1vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.3vh' }}
+            >
+              {t(
+                'Problem: flaky test blocked merges for a week',
+                'בעיה: בדיקה לא יציבה חסמה מיזוגים למשך שבוע',
+              )}
             </div>
             <div style={{ fontSize: '0.95vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -202,7 +224,10 @@ export default function CaseStudyMigration() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            {t('After migration: 6m PR builds, no leaks, no blocked merges.', 'לאחר ההעברה: PR builds של 6 דקות, אין דליפות, אין מיזוגים חסומים.')}
+            {t(
+              'After migration: 6m PR builds, no leaks, no blocked merges.',
+              'לאחר ההעברה: PR builds של 6 דקות, אין דליפות, אין מיזוגים חסומים.',
+            )}
           </div>
         </div>
       </div>

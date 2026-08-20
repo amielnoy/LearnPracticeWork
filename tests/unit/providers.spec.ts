@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../support/test';
 import {
   PROVIDERS,
   loadServerConfig,
@@ -53,7 +53,7 @@ test.describe('provider registry', () => {
   });
 
   test('the Groq models match the ones the server proxy allows', () => {
-    // Mirrors ALLOWED_GROQ_MODELS in artifacts/api-server/src/routes/ai.ts —
+    // Mirrors GROQ_MODELS in server/app/main.py —
     // a model offered here but rejected there silently downgrades the request.
     expect(PROVIDERS.groq!.models).toEqual([
       'openai/gpt-oss-120b',
@@ -436,6 +436,46 @@ test.describe('callAI', () => {
   // ever reached with a key that already satisfies the hint's own check. The
   // hint format itself is covered directly in "groq key hints and validation"
   // above.
+});
+
+test.describe('a reply that ran out of room', () => {
+  /**
+   * The failure this covers is a silent one. When the model stops because it hit
+   * the token ceiling, the text ends mid-sentence — and `extractJSON` repairs the
+   * half-written object into something that renders as a finished answer. The
+   * reader gets a truncated sentence presented as complete, with nothing to
+   * suggest anything went wrong. So the transports have to refuse it, and these
+   * are the two places a reply can arrive from.
+   */
+  test('the proxy refuses a truncated answer rather than returning it', async () => {
+    fetchStub = stubFetch(() => jsonResponse({ text: 'half a sentence', truncated: true }));
+
+    await expect(
+      callGeminiGrounded('', { gemini: { available: true } }, S, 'sys', 'q'),
+    ).rejects.toThrow(S.errTruncated);
+  });
+
+  test('a direct Gemini call refuses one too, on its own finishReason', async () => {
+    fetchStub = stubFetch(() =>
+      jsonResponse({
+        candidates: [
+          { content: { parts: [{ text: 'half a sentence' }] }, finishReason: 'MAX_TOKENS' },
+        ],
+      }),
+    );
+
+    await expect(callGeminiGrounded('AIzaKEY', {}, S, 'sys', 'q')).rejects.toThrow(S.errTruncated);
+  });
+
+  test('a complete answer is still returned, finishReason and all', async () => {
+    fetchStub = stubFetch(() =>
+      jsonResponse({
+        candidates: [{ content: { parts: [{ text: 'a whole answer' }] }, finishReason: 'STOP' }],
+      }),
+    );
+
+    expect(await callGeminiGrounded('AIzaKEY', {}, S, 'sys', 'q')).toBe('a whole answer');
+  });
 });
 
 test.describe('callGeminiGrounded', () => {

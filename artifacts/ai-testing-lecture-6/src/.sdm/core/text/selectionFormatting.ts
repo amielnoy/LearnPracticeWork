@@ -2,11 +2,7 @@ import type { EditorState } from 'prosemirror-state';
 
 import type { Bullet, Paragraph, RunStyle } from '../schema';
 import { effectiveParagraph } from './listStyles';
-import {
-  canonicalizeRunStyle,
-  paragraphFromPmAttrs,
-  runStyleFromMarks,
-} from './pmDoc';
+import { canonicalizeRunStyle, paragraphFromPmAttrs, runStyleFromMarks } from './pmDoc';
 import { sdmTextSchema } from './pmSchema';
 
 export interface SdmSelectionFormatting {
@@ -24,9 +20,7 @@ export interface SdmSelectionFormatting {
  * style overlaid with the marks at the caret (stored marks win while typing),
  * plus the paragraph attributes formatting controls reflect.
  */
-export function selectionFormatting(
-  state: EditorState,
-): SdmSelectionFormatting {
+export function selectionFormatting(state: EditorState): SdmSelectionFormatting {
   const { $head } = state.selection;
   // AllSelection resolves its head at the doc boundary; fall back to the
   // adjacent paragraph — attributes and inline marks alike — so Select All

@@ -105,7 +105,9 @@ export default function KeyTakeaways() {
             >
               {t('Takeaway 1', 'נקודה 1')}
             </div>
-            <div style={{ fontSize: '2vw', fontWeight: 700, color: '#DC2626', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '2vw', fontWeight: 700, color: '#DC2626', marginBottom: '1vh' }}
+            >
               {t('200 Is Not Success', '200 אינו הצלחה')}
             </div>
             <div style={{ fontSize: '1vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}>
@@ -127,7 +129,9 @@ export default function KeyTakeaways() {
             >
               {t('Takeaway 2', 'נקודה 2')}
             </div>
-            <div style={{ fontSize: '2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}
+            >
               {t('Structure Then Meaning', 'מבנה ואז משמעות')}
             </div>
             <div style={{ fontSize: '1vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}>
@@ -149,7 +153,9 @@ export default function KeyTakeaways() {
             >
               {t('Takeaway 3', 'נקודה 3')}
             </div>
-            <div style={{ fontSize: '2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}
+            >
               {t('Budget Everything', 'תקצבו הכל')}
             </div>
             <div style={{ fontSize: '1vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}>
@@ -171,7 +177,9 @@ export default function KeyTakeaways() {
             >
               {t('Takeaway 4', 'נקודה 4')}
             </div>
-            <div style={{ fontSize: '2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}
+            >
               {t('Test Failure Paths', 'בדקו נתיבי כשל')}
             </div>
             <div style={{ fontSize: '1vw', fontWeight: 500, color: '#64748B', marginTop: '1vh' }}>

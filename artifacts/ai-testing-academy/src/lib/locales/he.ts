@@ -6,31 +6,32 @@ export const he: Locale = {
   ui: {
     skip: 'דלג לתוכן הראשי',
     navOpen: 'פתח תפריט ניווט',
+    navClose: 'סגור תפריט ניווט',
     toTop: 'חזור למעלה',
   },
   nav: {
     logo: 'AI Testing Academy',
     agentsGroup: 'סוכנים',
-    links: [
-      { href: '#setup', label: '⚙️ הגדרות' },
-      { href: '#resume', label: '📄 קורות חיים' },
-      { href: '#lecture-series', label: '🎓 סדרת הרצאות' },
-      { href: '#interview-talk', label: '🎙️ ראיון סימולציה' },
-      { href: '#interview-questions', label: '❓ שאלות ראיון' },
-      { href: '#coding-challenges', label: '🐍 אתגרי קוד בפייתון' },
-    ],
+    labels: {
+      resume: '📄 קורות חיים',
+      'lecture-series': '🎓 סדרת הרצאות',
+      'interview-talk': '🎙️ ראיון סימולציה',
+      'interview-questions': '❓ שאלות ראיון',
+      'coding-challenges': '🐍 אתגרי קוד בפייתון',
+      setup: '⚙️ הגדרות',
+    },
     communityGroup: 'קהילה',
     community: [
       {
         href: 'https://www.youtube.com/@amielnoy',
         label: '▶ יוטיוב',
-        cls: 'github-btn',
+        cls: 'youtube-btn',
         target: '_blank',
       },
       {
         href: 'https://www.linkedin.com/in/amiel-peled/',
         label: '💼 לינקדאין',
-        cls: 'telegram-btn',
+        cls: 'linkedin-btn',
         target: '_blank',
       },
       {
@@ -88,7 +89,6 @@ export const he: Locale = {
     },
   },
   setup: {
-    num: '01',
     title: 'הגדרת חיבור',
     settingsTitle: 'הגדרות ספק AI',
     settingsHint: 'אופציונלי כל עוד המכסה החינמית זמינה',
@@ -139,7 +139,6 @@ export const he: Locale = {
     quotaLabel: 'נותרו {remaining} מתוך {limit} בקשות AI חינמיות במכסה הנוכחית',
   },
   resume: {
-    num: '01',
     title: 'סוכן 1 — קורות חיים ומכתב מקדים',
     lead: 'העלו את ה-CV שלכם וקבלו ניתוח מדורג עם חוזקות, פערים, ואת הגרסה המשופרת המותאמת לכל תפקיד QA או SDET.',
     boxTitle: '📄 נתחו ושפרו את קורות החיים שלכם',
@@ -188,7 +187,6 @@ export const he: Locale = {
     tipsExpertUrl: 'https://www.linkedin.com/feed/update/urn:li:activity:7495691019024400384/',
   },
   interview: {
-    num: '03',
     title: 'סוכן 2 — ראיון סימולציה',
     lead: 'הריצו ראיון QA Automation ריאליסטי עם מראיין AI — חמישה שלבים, מ-HR ועד לבדיקות AI.',
     boxTitle: '🎙️ התחל ראיון סימולציה',
@@ -259,6 +257,7 @@ export const he: Locale = {
     pingSystem: 'You are a helpful assistant. Reply with exactly the word: OK',
     pingUser: 'Ping',
     errNoKey: 'אין ספק AI זמין. הוסיפו מפתח API בהגדרות.',
+    errTruncated: 'המודל נגמר לו המקום לפני שסיים. נסו תפקיד קצר יותר או פחות מילות מפתח.',
     errBlockedPrefix: 'שגיאת רשת בגישה ל-',
     errBlockedMid: '. סיבות אפשריות:\n',
     errBlockedCauses: '• מדיניות CORS חוסמת את הבקשה הישירה מהדפדפן\n• חסימת רשת או firewall\n',
@@ -273,6 +272,8 @@ export const he: Locale = {
     errScannedPdf:
       'ל-PDF הזה אין שכבת טקסט — זו סריקה או ייצוא כתמונה בלבד, שגם מערכת ATS לא תוכל לקרוא. ייצא אותו מחדש כ-PDF טקסטואלי, או הדבק את הטקסט למטה.',
     signInAria: 'התחברות עם Google',
+    signingInStatus: 'מתחבר…',
+    signInError: 'ההתחברות נכשלה. נסה שוב.',
     signOutBtn: 'התנתקות',
     uploadPrompt: '📁 לחץ או גרור את קורות החיים לכאן — PDF, DOCX, או TXT',
     uploadLoadedMid: ' · ',
@@ -326,6 +327,7 @@ export const he: Locale = {
     showHintBtn: 'הצג רמז',
     showSolutionBtn: 'הצג פתרון',
     hideBtn: 'הסתר',
+    challengeCountLabel: '{count} אתגרים',
     levels: [
       {
         label: 'רמה 1 — יסודות',

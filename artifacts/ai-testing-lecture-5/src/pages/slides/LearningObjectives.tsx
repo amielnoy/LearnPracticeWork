@@ -94,7 +94,7 @@ export default function LearningObjectives() {
             letterSpacing: '-0.02em',
           }}
         >
-          {t("What You\u2019ll Be Able To Do", 'מה תוכלו לעשות')}
+          {t('What You\u2019ll Be Able To Do', 'מה תוכלו לעשות')}
         </h1>
         <p
           style={{

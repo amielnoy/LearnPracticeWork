@@ -108,7 +108,9 @@ export default function ChoosingASimilarityThreshold() {
             boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
           }}
         >
-          <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '3vh' }}>
+          <div
+            style={{ fontSize: '1.1vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '3vh' }}
+          >
             {t('Similarity Score Range: 0.0 → 1.0', 'טווח ציון דמיון: 0.0 → 1.0')}
           </div>
           {/* Track */}
@@ -121,7 +123,8 @@ export default function ChoosingASimilarityThreshold() {
                 right: 0,
                 height: '100%',
                 borderRadius: '1vw',
-                background: 'linear-gradient(90deg, #DC2626 0%, #F59E0B 40%, #0D9488 70%, #0D9488 100%)',
+                background:
+                  'linear-gradient(90deg, #DC2626 0%, #F59E0B 40%, #0D9488 70%, #0D9488 100%)',
               }}
             />
             {/* Marker: too low */}
@@ -154,7 +157,16 @@ export default function ChoosingASimilarityThreshold() {
             />
           </div>
           {/* Labels */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85vw', color: '#94A3B8', fontWeight: 500, marginBottom: '3vh' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: '0.85vw',
+              color: '#94A3B8',
+              fontWeight: 500,
+              marginBottom: '3vh',
+            }}
+          >
             <span>0.0</span>
             <span>0.5</span>
             <span>1.0</span>
@@ -171,16 +183,41 @@ export default function ChoosingASimilarityThreshold() {
               padding: '2.5vh 2vw',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#DC2626', marginBottom: '1.2vh' }}>
+            <div
+              style={{
+                fontSize: '1.2vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '1.2vh',
+              }}
+            >
               {t('Threshold Too Low (e.g. 0.5)', 'סף נמוך מדי (לדוג. 0.5)')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
               {[
-                t('False positives: wrong answers slip through', 'חיובי שווא: תשובות שגויות עוברות'),
-                t('Paraphrases of wrong facts score as PASS', 'פרפרזות של עובדות שגויות מקבלות עבר'),
-                t('Test suite loses its ability to catch regressions', 'חבילת הבדיקה מאבדת יכולת לתפוס נסיגות'),
+                t(
+                  'False positives: wrong answers slip through',
+                  'חיובי שווא: תשובות שגויות עוברות',
+                ),
+                t(
+                  'Paraphrases of wrong facts score as PASS',
+                  'פרפרזות של עובדות שגויות מקבלות עבר',
+                ),
+                t(
+                  'Test suite loses its ability to catch regressions',
+                  'חבילת הבדיקה מאבדת יכולת לתפוס נסיגות',
+                ),
               ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: '0.8vw', alignItems: 'flex-start', fontSize: '1vw', color: '#64748B' }}>
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    gap: '0.8vw',
+                    alignItems: 'flex-start',
+                    fontSize: '1vw',
+                    color: '#64748B',
+                  }}
+                >
                   <span style={{ color: '#DC2626', fontWeight: 700, marginTop: '0.1vh' }}>✘</span>
                   <span>{item}</span>
                 </div>
@@ -196,16 +233,41 @@ export default function ChoosingASimilarityThreshold() {
               padding: '2.5vh 2vw',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#D97706', marginBottom: '1.2vh' }}>
+            <div
+              style={{
+                fontSize: '1.2vw',
+                fontWeight: 700,
+                color: '#D97706',
+                marginBottom: '1.2vh',
+              }}
+            >
               {t('Threshold Too High (e.g. 0.98)', 'סף גבוה מדי (לדוג. 0.98)')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
               {[
-                t('False negatives: valid paraphrases are rejected', 'שלילי שווא: פרפרזות תקפות נדחות'),
-                t('Test suite becomes brittle — prompts fail silently', 'חבילת הבדיקה שבירה — הנחיות נכשלות בשקט'),
-                t('Human review burden increases unnecessarily', 'עומס הסקירה האנושית גדל שלא לצורך'),
+                t(
+                  'False negatives: valid paraphrases are rejected',
+                  'שלילי שווא: פרפרזות תקפות נדחות',
+                ),
+                t(
+                  'Test suite becomes brittle — prompts fail silently',
+                  'חבילת הבדיקה שבירה — הנחיות נכשלות בשקט',
+                ),
+                t(
+                  'Human review burden increases unnecessarily',
+                  'עומס הסקירה האנושית גדל שלא לצורך',
+                ),
               ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: '0.8vw', alignItems: 'flex-start', fontSize: '1vw', color: '#64748B' }}>
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    gap: '0.8vw',
+                    alignItems: 'flex-start',
+                    fontSize: '1vw',
+                    color: '#64748B',
+                  }}
+                >
                   <span style={{ color: '#D97706', fontWeight: 700, marginTop: '0.1vh' }}>⚠</span>
                   <span>{item}</span>
                 </div>
@@ -226,7 +288,8 @@ export default function ChoosingASimilarityThreshold() {
             fontWeight: 500,
           }}
         >
-          ✦ {t(
+          ✦{' '}
+          {t(
             'Start at 0.80–0.85, measure precision/recall against a labelled sample, then iterate. One threshold does not fit all task types.',
             'התחל ב-0.80–0.85, מדוד דיוק/recall מול דוגמה מתויגת, ואז חזור על התהליך. סף אחד אינו מתאים לכל סוגי המשימות.',
           )}

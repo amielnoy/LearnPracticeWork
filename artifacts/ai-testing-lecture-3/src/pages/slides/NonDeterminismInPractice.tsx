@@ -137,10 +137,19 @@ export default function NonDeterminismInPractice() {
             marginBottom: '2vh',
           }}
         >
-          <div style={{ fontSize: '0.9vw', color: '#64748B', marginBottom: '0.8vh', fontWeight: 600 }}>
+          <div
+            style={{ fontSize: '0.9vw', color: '#64748B', marginBottom: '0.8vh', fontWeight: 600 }}
+          >
             {t('PROMPT', 'הנחיה')}
           </div>
-          <div style={{ fontSize: '1.1vw', color: '#E2E8F0', fontFamily: 'monospace', lineHeight: 1.5 }}>
+          <div
+            style={{
+              fontSize: '1.1vw',
+              color: '#E2E8F0',
+              fontFamily: 'monospace',
+              lineHeight: 1.5,
+            }}
+          >
             {t(
               '"How tall is the Eiffel Tower and when was it built?"',
               '"מה גובה מגדל אייפל ומתי הוא נבנה?"',
@@ -160,7 +169,8 @@ export default function NonDeterminismInPractice() {
             boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
           }}
         >
-          💡 {t(
+          💡{' '}
+          {t(
             'All three responses are factually correct. String matching passes only 1 of 3. Semantic similarity passes all 3.',
             'כל שלוש התגובות נכונות עובדתית. התאמת מחרוזות עוברת רק 1 מתוך 3. דמיון סמנטי עובר את כל 3.',
           )}
@@ -168,7 +178,9 @@ export default function NonDeterminismInPractice() {
       </div>
 
       {/* Right column */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}
+      >
         <div
           style={{
             fontSize: '1.2vw',
@@ -204,7 +216,9 @@ export default function NonDeterminismInPractice() {
             >
               {r.label}
             </div>
-            <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <div
+              style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5, fontStyle: 'italic' }}
+            >
               {r.text}
             </div>
             <div style={{ display: 'flex', gap: '1vw', marginTop: '1vh', flexWrap: 'wrap' }}>

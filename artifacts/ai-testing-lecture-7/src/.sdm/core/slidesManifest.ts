@@ -20,9 +20,7 @@ const renderableSlideManifestEntryProperties = {
   description: nonBlankString,
 };
 
-export const SlideManifestEntrySchema = Type.Object(
-  slideManifestEntryProperties,
-);
+export const SlideManifestEntrySchema = Type.Object(slideManifestEntryProperties);
 export const SlidesManifestSchema = Type.Array(SlideManifestEntrySchema);
 
 const RenderableSlideManifestSchema = Type.Array(
@@ -46,12 +44,10 @@ export type SlideManifestParseResult =
   | { ok: false; issues: Array<SlideManifestIssue> };
 
 function issuesFor(
-  schema:
-    | typeof RenderableSlideManifestSchema
-    | typeof AuthoredSlideManifestSchema,
+  schema: typeof RenderableSlideManifestSchema | typeof AuthoredSlideManifestSchema,
   input: unknown,
 ): Array<SlideManifestIssue> {
-  return [...Value.Errors(schema, input)].map((error) => ({
+  return [...Value.Errors(schema, input)].map(error => ({
     path: error.path,
     message: error.message,
   }));
@@ -64,15 +60,11 @@ function normalizeEntry(entry: SlideManifestEntry): SlideManifestEntry {
     filepath: entry.filepath.trim(),
     title: entry.title.trim(),
     description: entry.description.trim(),
-    ...(entry.speakerNotes === undefined
-      ? {}
-      : { speakerNotes: entry.speakerNotes.trim() }),
+    ...(entry.speakerNotes === undefined ? {} : { speakerNotes: entry.speakerNotes.trim() }),
   };
 }
 
-export function isSlidesManifest(
-  input: unknown,
-): input is Array<SlideManifestEntry> {
+export function isSlidesManifest(input: unknown): input is Array<SlideManifestEntry> {
   return Value.Check(SlidesManifestSchema, input);
 }
 
@@ -87,9 +79,7 @@ export function parseSlidesManifest(input: unknown): SlideManifestParseResult {
   return { ok: true, entries: input.map(normalizeEntry) };
 }
 
-export function validateSlidesManifest(
-  input: unknown,
-): SlideManifestParseResult {
+export function validateSlidesManifest(input: unknown): SlideManifestParseResult {
   if (!Value.Check(AuthoredSlideManifestSchema, input)) {
     return { ok: false, issues: issuesFor(AuthoredSlideManifestSchema, input) };
   }

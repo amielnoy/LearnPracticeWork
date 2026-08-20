@@ -20,22 +20,47 @@ const wrap: React.CSSProperties = {
 
 const bulletRow: React.CSSProperties = { display: 'flex', gap: '1.2vw', alignItems: 'flex-start' };
 const dot: React.CSSProperties = {
-  width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%',
-  backgroundColor: '#0D9488', marginTop: '0.7vw',
+  width: '0.6vw',
+  height: '0.6vw',
+  minWidth: '0.6vw',
+  borderRadius: '50%',
+  backgroundColor: '#0D9488',
+  marginTop: '0.7vw',
 };
 const codePanel: React.CSSProperties = {
-  background: '#0F172A', borderRadius: '1vw', border: '1px solid #1E293B',
-  padding: '3vh 2.4vw', fontFamily: "'SFMono-Regular', Menlo, Consolas, monospace",
-  color: '#E2E8F0', width: '100%', height: '100%', boxSizing: 'border-box',
-  display: 'flex', flexDirection: 'column', gap: '2vh',
-  boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)', justifyContent: 'center',
+  background: '#0F172A',
+  borderRadius: '1vw',
+  border: '1px solid #1E293B',
+  padding: '3vh 2.4vw',
+  fontFamily: "'SFMono-Regular', Menlo, Consolas, monospace",
+  color: '#E2E8F0',
+  width: '100%',
+  height: '100%',
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2vh',
+  boxShadow: '0 0.5vw 1.5vw rgba(30, 58, 95, 0.05)',
+  justifyContent: 'center',
 };
 const ROW_COLORS = ['#38BDF8', '#FBBF24', '#94A3B8', '#2DD4BF', '#F87171'];
 
-function Row({ label, labelColor, children }: { label: string; labelColor: string; children: React.ReactNode }) {
+function Row({
+  label,
+  labelColor,
+  children,
+}: {
+  label: string;
+  labelColor: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6vh' }}>
-      <div style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}>{label}</div>
+      <div
+        style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}
+      >
+        {label}
+      </div>
       <div style={{ fontSize: '1.05vw', lineHeight: 1.55, color: '#E2E8F0' }}>{children}</div>
     </div>
   );
@@ -48,41 +73,114 @@ export default function WorkedExampleEvalAuditLog() {
   useEffect(() => {
     let cancelled = false;
     fetchLectureExample(25)
-      .then(data => { if (!cancelled) setExample(data); })
-      .catch(() => { if (!cancelled) setFailed(true); });
-    return () => { cancelled = true; };
+      .then(data => {
+        if (!cancelled) setExample(data);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const defaultBullets = [
-    t('Log every eval-set change to Supabase for a complete audit trail', 'רשום כל שינוי בערכת ההערכה ב-Supabase לנתיב ביקורת מלא'),
-    t('Each row records what changed, why, and who approved it', 'כל שורה מתעדת מה השתנה, מדוע ומי אישר זאת'),
-    t('Query the log to show all changes that happened after a model upgrade', 'שאל את היומן כדי להציג את כל השינויים שקרו לאחר שדרוג מודל'),
+    t(
+      'Log every eval-set change to Supabase for a complete audit trail',
+      'רשום כל שינוי בערכת ההערכה ב-Supabase לנתיב ביקורת מלא',
+    ),
+    t(
+      'Each row records what changed, why, and who approved it',
+      'כל שורה מתעדת מה השתנה, מדוע ומי אישר זאת',
+    ),
+    t(
+      'Query the log to show all changes that happened after a model upgrade',
+      'שאל את היומן כדי להציג את כל השינויים שקרו לאחר שדרוג מודל',
+    ),
   ];
 
   const defaultCode = [
     { label: 'TABLE', value: 'eval_set_audit_log' },
-    { label: 'INSERT', value: "supabase.from('eval_set_audit_log').insert({ eval_set_id: 'golden-v3', change_type: 'add_examples', example_count_delta: 47, reason: 'Production failures in 2025-10 sprint', approved_by: 'lead-qa', related_model_version: 'gpt-4o-2024-11' })" },
-    { label: 'QUERY', value: "supabase.from('eval_set_audit_log').select('changed_at, change_type, reason, approved_by').gte('changed_at', '2025-11-01').order('changed_at', { ascending: false })" },
+    {
+      label: 'INSERT',
+      value:
+        "supabase.from('eval_set_audit_log').insert({ eval_set_id: 'golden-v3', change_type: 'add_examples', example_count_delta: 47, reason: 'Production failures in 2025-10 sprint', approved_by: 'lead-qa', related_model_version: 'gpt-4o-2024-11' })",
+    },
+    {
+      label: 'QUERY',
+      value:
+        "supabase.from('eval_set_audit_log').select('changed_at, change_type, reason, approved_by').gte('changed_at', '2025-11-01').order('changed_at', { ascending: false })",
+    },
   ];
 
   return (
     <div style={wrap} dir={dir}>
-      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #E2E8F0', paddingBottom: '2vh' }}>
+      <div
+        style={{
+          gridColumn: '1 / -1',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid #E2E8F0',
+          paddingBottom: '2vh',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI TESTING STRATEGY', 'אסטרטגיית בדיקות AI')}</div>
           <div>{t('LECTURE 10', 'הרצאה 10')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '1vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {example?.eyebrow ?? t('Worked Example', 'דוגמה מעשית')}
         </div>
-        <h1 style={{ fontSize: '2.4vw', fontWeight: 800, margin: '0 0 3vh 0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '2.4vw',
+            fontWeight: 800,
+            margin: '0 0 3vh 0',
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {example?.title ?? t('Eval-Set Audit Trail', 'נתיב ביקורת ערכת הערכה')}
         </h1>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh' }}>
@@ -98,18 +196,36 @@ export default function WorkedExampleEvalAuditLog() {
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={codePanel}>
           {failed ? (
-            <div style={{ fontSize: '1vw', color: '#94A3B8' }}>{t('Example content unavailable.', 'תוכן הדוגמה אינו זמין.')}</div>
+            <div style={{ fontSize: '1vw', color: '#94A3B8' }}>
+              {t('Example content unavailable.', 'תוכן הדוגמה אינו זמין.')}
+            </div>
           ) : !example ? (
             <>
               {defaultCode.map((row, ri) => (
                 <Fragment key={ri}>
-                  <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>{row.value}</Row>
+                  <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>
+                    {row.value}
+                  </Row>
                   <div style={{ height: '1px', background: '#1E293B' }} />
                 </Fragment>
               ))}
               <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-                <span style={{ background: '#059669', color: '#fff', borderRadius: '0.4vw', padding: '0.5vh 1vw', fontSize: '0.95vw', fontWeight: 700, letterSpacing: '0.05em' }}>LOGGED</span>
-                <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>{t('3 changes recorded post-model-upgrade', '3 שינויים נרשמו לאחר שדרוג מודל')}</span>
+                <span
+                  style={{
+                    background: '#059669',
+                    color: '#fff',
+                    borderRadius: '0.4vw',
+                    padding: '0.5vh 1vw',
+                    fontSize: '0.95vw',
+                    fontWeight: 700,
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  LOGGED
+                </span>
+                <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>
+                  {t('3 changes recorded post-model-upgrade', '3 שינויים נרשמו לאחר שדרוג מודל')}
+                </span>
               </div>
             </>
           ) : (
@@ -117,14 +233,30 @@ export default function WorkedExampleEvalAuditLog() {
               <div key={pi} style={{ display: 'flex', flexDirection: 'column', gap: '2vh' }}>
                 {panel.rows.map((row, ri) => (
                   <Fragment key={ri}>
-                    <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>{row.value}</Row>
+                    <Row label={row.label} labelColor={ROW_COLORS[ri % ROW_COLORS.length]}>
+                      {row.value}
+                    </Row>
                     <div style={{ height: '1px', background: '#1E293B' }} />
                   </Fragment>
                 ))}
                 {panel.verdict && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-                    <span style={{ background: '#059669', color: '#fff', borderRadius: '0.4vw', padding: '0.5vh 1vw', fontSize: '0.95vw', fontWeight: 700, letterSpacing: '0.05em' }}>{panel.verdict.status}</span>
-                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>{panel.verdict.note}</span>
+                    <span
+                      style={{
+                        background: '#059669',
+                        color: '#fff',
+                        borderRadius: '0.4vw',
+                        padding: '0.5vh 1vw',
+                        fontSize: '0.95vw',
+                        fontWeight: 700,
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      {panel.verdict.status}
+                    </span>
+                    <span style={{ fontSize: '0.95vw', color: '#94A3B8' }}>
+                      {panel.verdict.note}
+                    </span>
                   </div>
                 )}
               </div>
@@ -133,7 +265,19 @@ export default function WorkedExampleEvalAuditLog() {
         </div>
       </div>
 
-      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '2vh', fontSize: '0.9vw', color: '#94A3B8', fontWeight: 500 }}>
+      <div
+        style={{
+          gridColumn: '1 / -1',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid #E2E8F0',
+          paddingTop: '2vh',
+          fontSize: '0.9vw',
+          color: '#94A3B8',
+          fontWeight: 500,
+        }}
+      >
         <div>{t('Building an AI Testing Strategy', 'בניית אסטרטגיית בדיקות AI')}</div>
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>

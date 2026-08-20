@@ -22,7 +22,9 @@
     }
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  /* Guarded: a reader who has asked the OS to reduce motion should not be
+     thrown down a 15,000px page by a table-of-contents click. */
+  @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
   body{
     margin:0; background:var(--bg); color:var(--fg);
     font:15.5px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -50,7 +52,62 @@
   a{color:var(--accent);text-decoration:none}
   a:hover{text-decoration:underline}
 
+  /* ---- High-level block diagram ------------------------------------------
+     A pastel palette, defined once as tokens so the light and dark themes each
+     get a set that sits correctly on their own background rather than one set
+     tinted twice. Pastels are pale by definition, so every one of them carries
+     dark ink in light mode and the fills darken in dark mode — the label is
+     what has to stay readable, not the swatch. */
+  .blocks{--c-client:#dbeafe;--c-client-ink:#1e3a5f;--c-client-line:#93b4e8;
+          --c-server:#dcf3e8;--c-server-ink:#14532d;--c-server-line:#8fcfae;
+          --c-shared:#f3e8ff;--c-shared-ink:#4c1d78;--c-shared-line:#c4a5e8;
+          --c-out:#ffe9d6;--c-out-ink:#7c3a06;--c-out-line:#f0bd8a;
+          --c-edge:#9aa4b2;
+          margin:26px 0 6px}
+  @media (prefers-color-scheme: dark){
+    .blocks{--c-client:#1c2c46;--c-client-ink:#bcd4f7;--c-client-line:#33507e;
+            --c-server:#163024;--c-server-ink:#a9e3c4;--c-server-line:#2c5a42;
+            --c-shared:#2a1f3d;--c-shared-ink:#d6bdf5;--c-shared-line:#4a3568;
+            --c-out:#3a2717;--c-out-ink:#f2caa2;--c-out-line:#6b4526;
+            --c-edge:#5b6675}
+  }
+  .blocks svg{width:100%;height:auto;display:block}
+  .blocks .bx{stroke-width:1.5;rx:10}
+  .blocks .lbl{font:600 13px ui-sans-serif,system-ui,sans-serif}
+  .blocks .sub{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.85}
+  .blocks .grp{font:700 10.5px ui-sans-serif,system-ui,sans-serif;letter-spacing:.1em;
+               text-transform:uppercase;fill:var(--muted)}
+  .blocks .edge{stroke:var(--c-edge);stroke-width:1.4;fill:none}
+  .blocks .edge-lbl{font:10.5px ui-sans-serif,system-ui,sans-serif;fill:var(--muted)}
+  .blocks figcaption{color:var(--muted);font-size:.9rem;margin-top:10px;max-width:78ch}
+
+  /* The horizontal pill row stays as the in-flow table of contents; it is the
+     one that survives on a narrow screen, where a fixed rail would eat the
+     width the prose needs. */
   .toc{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}
+
+  /* The rail: a fixed vertical index down the left margin, so section 11 is one
+     click from section 2 without scrolling back to the top. It lives in the
+     gutter beside .wrap (max-width 1080), so it is only shown once the viewport
+     is wide enough to hold both without overlapping. */
+  .rail{position:fixed;top:50%;transform:translateY(-50%);inset-inline-start:max(12px,calc((100vw - 1080px)/2 - 210px));
+        width:196px;max-height:82vh;overflow-y:auto;overscroll-behavior:contain;
+        padding:14px 12px;border:1px solid var(--line);border-radius:14px;
+        background:color-mix(in srgb,var(--panel) 92%,transparent);
+        -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+        box-shadow:var(--shadow);z-index:40;display:none}
+  .rail h2{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+           margin:0 0 8px;padding:0 8px;font-weight:700;border:0}
+  .rail a{display:flex;gap:8px;align-items:baseline;font-size:12.5px;line-height:1.35;
+          padding:6px 8px;border-radius:8px;color:var(--muted);text-decoration:none;
+          border-inline-start:2px solid transparent}
+  .rail a .n{font-variant-numeric:tabular-nums;opacity:.7;min-width:1.3em}
+  .rail a:hover{color:var(--fg);background:var(--sunk);text-decoration:none}
+  /* Scroll-spy. `aria-current` rather than a class, so the state is announced
+     and not only painted. */
+  .rail a[aria-current="true"]{color:var(--accent);background:var(--sunk);
+          border-inline-start-color:var(--accent);font-weight:600}
+  @media (min-width:1320px){.rail{display:block}}
   .toc a{font-size:13px;padding:5px 12px;border:1px solid var(--line);border-radius:20px;background:var(--panel);color:var(--muted)}
   .toc a:hover{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));text-decoration:none}
 
@@ -121,16 +178,16 @@
   <h1>AI Testing Academy — how the whole thing is put together</h1>
   <p class="stand">
     A single-page React site that teaches QA automation and runs three AI-backed tools
-    (resume review, mock interview, question-bank enrichment) <b>entirely from the browser</b>.
-    There is no backend of its own: the user brings an API key, or an optional shared
-    proxy in the monorepo answers for them. This page walks the runtime shape, the
+    (resume review, mock interview, question-bank enrichment) from the browser. The user brings
+    an API key, or an optional shared proxy in the monorepo answers for them. The same API also
+    exposes localized question-bank, coding-challenge, and lecture-series content from Supabase;
+    the current UI still renders bundled content modules. This page walks the runtime shape, the
     provider abstraction, the content model, and where to extend each one.
   </p>
   <p>
     <span class="pill on">React 19 + TypeScript</span>
     <span class="pill on">Vite</span>
     <span class="pill">wouter</span>
-    <span class="pill">TanStack Query</span>
     <span class="pill">Tailwind + Radix (shadcn/ui)</span>
     <span class="pill">EN / HE with RTL</span>
     <span class="pill">Static SPA</span>
@@ -153,12 +210,32 @@
   <a href="#extend">12 · Extension points</a>
 </nav>
 
+<!-- A fixed index of the same sections the pill row lists. Both are
+     generated from one list of headings; if a section is added, it goes in
+     both or the rail quietly stops matching the page. -->
+<nav class="rail" aria-label="Sections">
+  <h2>Contents</h2>
+  <a href="#overview"><span class="n">1</span><span>What it is</span></a>
+  <a href="#runtime"><span class="n">2</span><span>Runtime shape</span></a>
+  <a href="#composition"><span class="n">3</span><span>Composition</span></a>
+  <a href="#ai"><span class="n">4</span><span>The AI layer</span></a>
+  <a href="#content"><span class="n">5</span><span>Content &amp; i18n</span></a>
+  <a href="#features"><span class="n">6</span><span>Feature modules</span></a>
+  <a href="#state"><span class="n">7</span><span>State &amp; persistence</span></a>
+  <a href="#ui"><span class="n">8</span><span>UI mechanics</span></a>
+  <a href="#security"><span class="n">9</span><span>Trust boundaries</span></a>
+  <a href="#build"><span class="n">10</span><span>Build &amp; deploy</span></a>
+  <a href="#testing"><span class="n">11</span><span>Testing</span></a>
+  <a href="#extend"><span class="n">12</span><span>Extension points</span></a>
+</nav>
+
 <!-- ───────────────────────── 1 ───────────────────────── -->
 <h2 id="overview">1 · What it is</h2>
 
 <p class="lead">
-  One page, six sections, stacked in reading order. Three are static teaching content;
-  three call a language model. Everything below exists to serve that split.
+  One page: a launcher, then six numbered sections stacked in reading order. Three are
+  static teaching content; three call a language model. The API additionally exposes the
+  teaching content as localized, ordered data for clients that are ready to consume it.
 </p>
 
 <div class="grid">
@@ -175,7 +252,7 @@
   <div class="box">
     <span class="tag">static</span>
     <b>🎓 Lecture Series</b>
-    <span>Course tracks and lecture links. Content lives in the component itself, not the locale files.</span>
+    <span>Course tracks and lecture links. The current UI reads bundled EN/HE data from <code>lib/lectures.ts</code>.</span>
   </div>
   <div class="box">
     <span class="tag">AI · chat</span>
@@ -196,6 +273,85 @@
 
 <!-- ───────────────────────── 2 ───────────────────────── -->
 <h2 id="runtime">2 · Runtime shape</h2>
+
+<figure class="blocks">
+<svg viewBox="0 0 900 380" role="img"
+     aria-label="The client artifacts talk to one API server, which is the only thing holding a credential and the only thing that reaches Stripe, Supabase, Google and the model vendors.">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--c-edge)"/>
+    </marker>
+  </defs>
+
+  <text class="grp" x="16" y="20">Client · artifacts/</text>
+  <rect class="bx" x="16"  y="30" width="176" height="58" fill="var(--c-client)" stroke="var(--c-client-line)"/>
+  <text class="lbl" x="30" y="54" fill="var(--c-client-ink)">AI Testing Academy</text>
+  <text class="sub" x="30" y="72" fill="var(--c-client-ink)">the one AI app</text>
+
+  <rect class="bx" x="16"  y="98" width="176" height="58" fill="var(--c-client)" stroke="var(--c-client-line)"/>
+  <text class="lbl" x="30" y="122" fill="var(--c-client-ink)">10 lecture decks</text>
+  <text class="sub" x="30" y="140" fill="var(--c-client-ink)">1920×1080 slides</text>
+
+  <rect class="bx" x="16"  y="166" width="176" height="58" fill="var(--c-client)" stroke="var(--c-client-line)"/>
+  <text class="lbl" x="30" y="190" fill="var(--c-client-ink)">portfolio · sandbox</text>
+  <text class="sub" x="30" y="208" fill="var(--c-client-ink)">static, no API</text>
+
+  <text class="grp" x="352" y="20">Server · server/</text>
+  <rect class="bx" x="352" y="30" width="196" height="194" fill="var(--c-server)" stroke="var(--c-server-line)"/>
+  <text class="lbl" x="368" y="54"  fill="var(--c-server-ink)">api-server · FastAPI</text>
+  <text class="sub" x="368" y="78"  fill="var(--c-server-ink)">/ai/generate · /ai/config</text>
+  <text class="sub" x="368" y="96"  fill="var(--c-server-ink)">/content/*</text>
+  <text class="sub" x="368" y="114" fill="var(--c-server-ink)">/stripe/checkout · /prices</text>
+  <text class="sub" x="368" y="132" fill="var(--c-server-ink)">/stripe/seed  (admin)</text>
+  <text class="sub" x="368" y="150" fill="var(--c-server-ink)">/stripe/webhook</text>
+  <text class="sub" x="368" y="168" fill="var(--c-server-ink)">/entitlements/course</text>
+  <text class="sub" x="368" y="186" fill="var(--c-server-ink)">/auth/* · /healthz · /docs</text>
+  <text class="sub" x="368" y="208" fill="var(--c-server-ink)">holds every secret</text>
+
+  <text class="grp" x="700" y="20">Outside</text>
+  <rect class="bx" x="700" y="30"  width="184" height="42" fill="var(--c-out)" stroke="var(--c-out-line)"/>
+  <text class="lbl" x="714" y="56" fill="var(--c-out-ink)">Groq · Gemini</text>
+  <rect class="bx" x="700" y="82"  width="184" height="42" fill="var(--c-out)" stroke="var(--c-out-line)"/>
+  <text class="lbl" x="714" y="108" fill="var(--c-out-ink)">Stripe</text>
+  <rect class="bx" x="700" y="134" width="184" height="42" fill="var(--c-out)" stroke="var(--c-out-line)"/>
+  <text class="lbl" x="714" y="160" fill="var(--c-out-ink)">Supabase · Postgres</text>
+  <rect class="bx" x="700" y="186" width="184" height="42" fill="var(--c-out)" stroke="var(--c-out-line)"/>
+  <text class="lbl" x="714" y="212" fill="var(--c-out-ink)">Google Identity</text>
+
+  <text class="grp" x="16" y="292">Shared · lib/</text>
+  <rect class="bx" x="16" y="302" width="868" height="62" fill="var(--c-shared)" stroke="var(--c-shared-line)"/>
+  <text class="sub" x="32" y="328" fill="var(--c-shared-ink)">api-spec (openapi.yaml)  →  api-zod  ·  api-client-react   |   db (drizzle · course_purchases)</text>
+  <text class="sub" x="32" y="348" fill="var(--c-shared-ink)">one contract, generated — the contract suite asserts spec ↔ schema ↔ what the server returns</text>
+
+  <path class="edge" marker-end="url(#ar)" d="M192 59 H352"/>
+  <text class="edge-lbl" x="212" y="50">/api · same origin</text>
+  <text class="edge-lbl" x="212" y="131">decks and portfolio</text>
+  <text class="edge-lbl" x="212" y="146">reach nothing</text>
+
+  <path class="edge" marker-end="url(#ar)" d="M548 60  H700"/>
+  <text class="edge-lbl" x="566" y="50">server key only</text>
+  <path class="edge" marker-end="url(#ar)" d="M548 103 H700"/>
+  <path class="edge" marker-end="url(#ar)" d="M548 155 H700"/>
+  <path class="edge" marker-end="url(#ar)" d="M548 207 H700"/>
+  <text class="edge-lbl" x="566" y="198">verifies ID tokens</text>
+
+  <path class="edge" stroke-dasharray="4 4" d="M450 224 V302"/>
+  <path class="edge" stroke-dasharray="4 4" d="M104 254 V302"/>
+
+
+  <path class="edge" stroke-dasharray="5 4" marker-end="url(#ar)"
+        d="M104 88 C 104 262, 240 262, 620 262 C 672 262, 672 100, 700 62"/>
+  <text class="edge-lbl" x="250" y="278">bring-your-own-key — the browser calls the vendor itself, no server involved</text>
+</svg>
+<figcaption>
+  The shape to notice: thirteen client apps, one server, and every credential on
+  one side of that line. A deck is static and talks to nothing. The academy is
+  the only client with a server at all, and it works without one — the dashed
+  path is the bring-your-own-key fallback, which is what a GitHub Pages build
+  falls back to because Pages serves the static output and nothing else.
+</figcaption>
+</figure>
+
 
 <p>
   The build output is static files. At runtime the browser is the whole application:
@@ -271,7 +427,7 @@
 </p>
 
 <div class="stack">
-  <div class="lvl depth1"><span class="nm">QueryClientProvider</span> — <span class="why">TanStack Query client; present for future server state, not yet on the hot path.</span></div>
+  <div class="lvl depth1"><span class="nm">ErrorBoundary</span> — <span class="why">Outermost, because the failure it catches is a whole-page failure. Several things below throw on purpose — every <code>useX must be used within XProvider</code> guard, and the decks' manifest parser — and without something to land in, each of them took the document to blank white.</span></div>
   <div class="lvl depth2"><span class="nm">TooltipProvider</span> — <span class="why">Radix tooltip root for the shadcn/ui primitives.</span></div>
   <div class="lvl depth3"><span class="nm">LocaleProvider</span> — <span class="why">Resolves the language once, exposes <code>locale</code> / <code>S</code>, stamps <code>lang</code> and <code>dir</code> on <code>&lt;html&gt;</code>.</span></div>
   <div class="lvl depth4"><span class="nm">AuthProvider</span> — <span class="why">Google sign-in. Inside <code>LocaleProvider</code> because Google renders the button's own label and has to be handed the current language.</span></div>
@@ -284,7 +440,7 @@
 <h3>Below the router</h3>
 <p>
   <code>HomePage</code> owns two pieces of page-level chrome — the theme and the nav drawer —
-  and then renders the six sections in order. Everything else a section needs, it pulls
+  and then renders the sections. Everything else a section needs, it pulls
   from context itself. That is the reason the page component stays under 100 lines while
   the sections it renders are hundreds.
 </p>
@@ -294,13 +450,35 @@
 ├── Nav          ← theme toggle, language toggle, scroll-spy, Google sign-in
 ├── Hero
 └── main
-    ├── ConnectionSetup     → useProviderContext()
-    ├── ResumeAgent         → callClaude() + extractJSON()
-    ├── LectureSeries       → self-contained content
-    ├── InterviewAgent      → callClaude() with a rolling message array
-    ├── QuestionBank        → callGrounded() + extractJSON()
-    └── CodingChallenges    → locale content only, no network
-        └── ChallengeCard × 40   → useDisclosure(3)</code></pre>
+    ├── ToolLauncher        → the hub; unnumbered, not in the nav
+    ├── 01 ResumeAgent      → callClaude() + extractJSON()
+    ├── 02 LectureSeries    → lib/lectures.ts, no network
+    ├── 03 InterviewAgent   → callClaude() with a rolling message array
+    ├── 04 QuestionBank     → callGrounded() + extractJSON()
+    ├── 05 CodingChallenges → locale content only, no network
+    │   └── details × 3, closed → ChallengeCard × 40 → useDisclosure(3)
+    └── 06 ConnectionSetup  → useProviderContext()</code></pre>
+
+<div class="callout">
+  <b>One list decides the order.</b> <code>lib/sections.ts</code> exports <code>SECTIONS</code>
+  — id and number, in reading order — and both <code>HomePage</code> and <code>Nav</code>
+  render from it. There used to be three answers to “what order are the sections in”: the
+  array in <code>locale.nav.links</code>, the JSX here, and the static prerender in
+  <code>index.html</code>. None of them agreed, so reading down the nav jumped the visitor
+  16237 → 1144 → 13693 → 2749 → 3648 → 4597 pixels, the scroll-spy highlight travelled
+  2 → 4 → 5 → 6 → 3 → 1 as you scrolled, and the numbered headings counted 01 → 03 → 02 with
+  three sections carrying no number at all. The numbers are stored rather than derived from
+  the array index, because they appear on screen: changing the order should be a visible
+  decision about renumbering, not a silent one.
+</div>
+
+<div class="callout good">
+  <b>Scalar documents the server that is actually running.</b> FastAPI serves its runtime
+  OpenAPI document at <code>/api/openapi.json</code> and the interactive Scalar reference at
+  <code>/api/docs</code>. The Scalar agent, telemetry, proxy, remote fonts, and credential
+  persistence are disabled; its version-pinned browser code sends test requests directly to
+  the same API origin. Replit relays both paths to Fly without storing a backend secret.
+</div>
 
 <div class="callout good">
   <b>The shape to notice.</b> No component imports a vendor SDK, a URL, or a key.
@@ -426,6 +604,23 @@
   </div>
 </div>
 
+<div class="callout">
+  <b>Where a string lives depends on how much of it there is.</b> Short copy sits in
+  <code>lib/locales/{en,he}.ts</code>. Bodies of content large enough to drown a locale file
+  get their own module — <code>lib/questionBank.ts</code> and <code>lib/lectures.ts</code> —
+  exporting an <code>EN</code>/<code>HE</code> pair with the same compiler-checked shape.
+  The lecture catalogue lived inside <code>components/practice/LectureSeries.tsx</code> until it did
+  not: 336 of that file's 425 lines were the two data objects, which made editing a blurb an
+  edit to a component and left the catalogue with no importer other than the thing that
+  rendered it. Moving it out is also what lets the prerender generator read it, since a build
+  script cannot import from a component.
+</div>
+
+<p>
+  One shape in the nav is worth calling out: <code>locale.nav.labels</code> is keyed by section
+  id, not ordered. The order is <code>lib/sections.ts</code>; only the words are translated.
+</p>
+
 <h3>The challenge content model</h3>
 <p>
   <code>lib/challenges.ts</code> declares types only — no data. The UI depends on the shape,
@@ -496,37 +691,42 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h3>🔐 Sign in with Google</h3>
 <p>
   <code>AuthProvider</code> plus a <code>GoogleSignIn</code> control in the nav drawer. Google's
-  hosted client is loaded on demand, draws its own button, and hands back an ID token;
-  <code>lib/googleIdentity.ts</code> reads the name, address and picture out of it and nothing
-  else. Google renders the button's label itself, so the current language is passed to
-  <code>renderButton</code> — that half of the translation cannot come from a strings file.
+  hosted client is loaded on demand, draws its own button, and hands back an ID token. The
+  browser immediately posts that credential to <code>POST /api/auth/google</code>; it never
+  decodes or persists it. Google renders the button's label itself, so the current language is
+  passed to <code>renderButton</code> — that half of the translation cannot come from a strings
+  file.
 </p>
 <p>
-  <b>In the browser it is identity, not authorisation.</b> The token is read here and never
-  verified: checking a signature needs Google's keys and a server trusted to use them, and the
-  page has neither. Anyone can hand it a hand-written token and appear signed in as anybody, so
-  nothing on the client is gated on it — the profile is good for a name and an avatar in the
-  corner and for nothing else.
+  <b>The browser trusts only the API response.</b> While verification is in flight the nav shows
+  a localized progress state; a refusal or network failure leaves the visitor signed out and
+  shows a localized error. On success the response contains only the public profile fields the
+  header needs. No client-side claim grants access to anything.
 </p>
 <p>
-  <b>On the server it is verified, and that is where decisions are made.</b> The condition this
-  page used to state — “if any of that arrives, the token has to go to <code>api-server</code>
-  and come back verified first” — is what now happens. When the token is sent to
-  <code>api-server</code> as a bearer credential, <code>lib/googleAuth.ts</code> checks the
-  signature against Google's published keys and then the issuer, audience, expiry and
-  <code>email_verified</code> before any claim in it counts. The algorithm is pinned to RS256
-  rather than read out of the token, which is how <code>alg: none</code> and key-confusion
-  attacks get in. That is what <code>GET /api/entitlements/course</code> answers from.
+  <b>The Python server verifies before it creates a session.</b>
+  <code>app/google_auth.py</code> pins RS256, selects a key from Google's cached JWKS, verifies
+  the signature, issuer, audience, expiry, issue/not-before times and
+  <code>email_verified</code>, then exchanges the result for an HMAC-signed cookie. The cookie is
+  <code>HttpOnly</code>, <code>SameSite=Lax</code>, secure in production, scoped to
+  <code>/api</code>, and cannot outlive the Google token. Login is rate-limited to ten attempts
+  per IP per five minutes.
 </p>
 <p>
-  The two halves are not in tension: reading a token for display and verifying one for a
-  decision are different jobs, and only the second needs a server. A Pages build still has no
-  server, so it still has no entitlements — it renders the profile and nothing more.
+  Reloads restore the public profile through <code>GET /api/auth/session</code>; logout deletes
+  the cookie through <code>POST /api/auth/logout</code>. Entitlements and checkout accept that
+  verified session. Bearer ID tokens remain accepted on those server endpoints for API-client
+  compatibility, but the academy UI uses the cookie path.
 </p>
 <p>
   A build with no <code>VITE_GOOGLE_CLIENT_ID</code> renders no sign-in at all and never
   contacts Google, so a deployment that has not been given an OAuth client stays whole rather
   than showing a button that cannot work.
+</p>
+<p>
+  Sign-in requires the static app and API to share an origin (or an equivalent reverse proxy
+  for <code>/api</code>). GitHub Pages is static-only: leave its repository variable unset unless
+  such a proxy exists, otherwise verification correctly ends in the visible signed-out error.
 </p>
 
 <h3>🎙️ Interview Agent</h3>
@@ -555,12 +755,26 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <code>callGrounded()</code>, then <code>extractJSON()</code> lifts a <code>questions</code>
   array out of the reply. Grounding is why this one path is Gemini-only.
 </p>
+<p>
+  The API counterpart is <code>GET /api/content/question-bank?lang=en|he</code>. It reads
+  ordered stages and items from Supabase and returns the same <code>QuestionBank</code> shape;
+  an unavailable content store produces a deliberate <code>503</code>. The browser currently
+  uses the bundled module, so this endpoint is the migration boundary rather than a dependency
+  of the static build.
+</p>
 
 <h3>🐍 Coding Challenges</h3>
 <p>
   The section maps levels to <code>ChallengeCard</code>s and knows nothing else. Each card owns
   its own <code>useDisclosure(3)</code> — prompt → hint → solution → collapsed — so the list
   never tracks a stage per index and adding challenges cannot regress the reveal logic.
+</p>
+<p>
+  <code>GET /api/content/coding-challenges?lang=en|he</code> exposes the ordered level and
+  challenge model from Supabase. Lecture tracks use the corresponding
+  <code>GET /api/content/lecture-series?lang=en|he</code> endpoint. Both default invalid or
+  missing language values to English and return the same controlled <code>503</code> when the
+  content store cannot be reached.
 </p>
 
 <!-- ───────────────────────── 7 ───────────────────────── -->
@@ -587,14 +801,14 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <table>
   <thead><tr><th>Key</th><th>Written by</th><th>Where</th><th>Holds</th></tr></thead>
   <tbody>
-    <tr><td><code>ata_theme</code></td><td>HomePage</td><td>local</td><td>Exactly <code>light</code> or <code>dark</code> — checked, because this value lands on <code>data-theme</code> and the toggle only ever flips between those two. First visit falls back to <code>prefers-color-scheme</code>.</td></tr>
+    <tr><td><code>ata_theme</code></td><td>HomePage · read by the head script</td><td>local</td><td>Exactly <code>light</code> or <code>dark</code> — checked, because this value lands on <code>data-theme</code> and the toggle only ever flips between those two. First visit falls back to <code>prefers-color-scheme</code>. The inline script in <code>index.html</code> resolves it and stamps the attribute before first paint; <code>HomePage</code> reads the stamped value back rather than re-deriving it, so there is one copy of the priority rules rather than two free to disagree.</td></tr>
     <tr><td><code>ata_lang</code></td><td>i18n</td><td>local</td><td>Resolved language, checked against the catalogue. Re-written on every resolve so it stays sticky.</td></tr>
     <tr><td><code>ata_progress_v1</code></td><td>ProgressContext</td><td>local</td><td>Which tools were started and finished. Field-by-field coercion with a bounded array — the pattern the rest of the keys were brought up to.</td></tr>
-    <tr><td><code>ata_provider</code></td><td>ProviderContext</td><td>local</td><td>Selected vendor, checked against the providers that exist; defaults to <code>gemini</code>.</td></tr>
+    <tr><td><code>ata_provider</code></td><td>ProviderContext</td><td>local</td><td>Selected vendor, checked against the providers that exist; defaults to <code>groq</code>. Checking it against the current list is also what retires a stale preference — Gemini is search-only now and not a selectable chat provider, so a visitor holding one falls through to the default.</td></tr>
     <tr><td><code>ata_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>local</td><td>The user's own API key, one slot per vendor, saved only while “remember” is on.</td></tr>
     <tr><td><code>ata_session_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>session</td><td>The same key when “remember” is off — the default. Keys written by older versions are migrated here on first read.</td></tr>
     <tr><td><code>ata_remember_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>local</td><td>Which of the two slots above is in use.</td></tr>
-    <tr><td><code>ata_google_credential</code></td><td>AuthContext</td><td>local</td><td>The last Google ID token, so a reload does not sign the reader out. Dropped the moment it fails to parse or its <code>exp</code> passes.</td></tr>
+    <tr><td><code>ata_google_credential</code></td><td>AuthContext migration cleanup</td><td>local</td><td>Legacy only. Current code deletes this raw-token key on mount and never writes it; authentication persists solely in the server-issued HttpOnly cookie.</td></tr>
     <tr><td><code>ata_interview_session_v1</code></td><td>InterviewAgent</td><td>session</td><td>A partly-finished interview, so a reload does not lose it. Every element validated: <code>text</code> is rendered as a child and <code>cls</code> as a class name.</td></tr>
     <tr><td><code>ata_resume_draft_&lt;lang&gt;_*</code></td><td>ResumeAgent</td><td>session</td><td>The résumé, target role and job description in progress. Three keys per language.</td></tr>
   </tbody>
@@ -605,7 +819,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <code>resetSettings()</code> deliberately does <b>not</b> sweep the whole prefix. It removes
   the provider selection, the per-vendor keys and their remember flags, and nothing else:
   resetting which model you talk to should not also erase your progress, your interview
-  history, your résumé drafts, or which account you are signed in as.
+  history or your résumé drafts. Authentication is a server cookie and is not part of settings.
 </p>
 
 <div class="callout good">
@@ -658,6 +872,16 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <span>The <code>nav-ready</code> class lands after a double <code>requestAnimationFrame</code>, so CSS transitions are only enabled after the first paint and the drawer cannot animate on load.</span>
   </div>
   <div class="box">
+    <span class="tag">Nav</span>
+    <b>Drawer that is really closed</b>
+    <span>Below 900px the sidebar is moved off-screen by a transform, which hides it from eyes and from nobody else: it kept <code>visibility: visible</code> and all twelve of its controls stayed in the tab order, so keyboard focus vanished for twelve stops before reaching the page. <code>inert</code> takes the subtree out of focus and out of the accessibility tree in one inherited attribute.</span>
+  </div>
+  <div class="box">
+    <span class="tag">ScrollProgress</span>
+    <b>One write per frame</b>
+    <span>The bar's width is written straight to the element inside a <code>requestAnimationFrame</code> rather than held in React state — a scroll handler that calls <code>setState</code> re-renders on every event of a long page to move one CSS property.</span>
+  </div>
+  <div class="box">
     <span class="tag">lib/domUtils</span>
     <b>Safe rendering of model text</b>
     <span><code>esc()</code>, <code>linkifyHtml()</code> and <code>findLinks()</code> escape first and only then insert <code>&lt;strong&gt;</code>/<code>&lt;a&gt;</code> — markdown from a model is rendered without handing it an HTML injection.</span>
@@ -673,19 +897,30 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <ul class="notes">
   <li>A skip link to <code>#main-content</code>, translated like everything else.</li>
   <li><code>aria-expanded</code> on every disclosure button, and <code>aria-label</code> on the icon-only nav and language toggles.</li>
-  <li>Theme is an attribute on <code>&lt;html&gt;</code> (<code>data-theme</code>), so CSS — not JS — resolves colour, and the first paint is already correct.</li>
+  <li>Theme is an attribute on <code>&lt;html&gt;</code> (<code>data-theme</code>), so CSS — not JS — resolves colour, and the first paint is already correct. That last clause is newly true: the attribute used to be written in an effect after React mounted, and because this page's own app ships a static prerender, first contentful paint put finished content on screen in the light palette and the whole page then flipped.</li>
   <li>Both <code>lang</code> and <code>dir</code> are set on the document element, which is what screen readers and the bidi algorithm actually read.</li>
+  <li>The mobile drawer behaves as the modal it looks like: <code>inert</code> while closed, Escape to dismiss, focus moved to the first link on open and returned to the toggle on close, and an <code>aria-label</code> that follows <code>aria-expanded</code> instead of announcing “Open navigation menu, expanded”.</li>
 </ul>
+
+<div class="callout">
+  <b>Focus return is keyed off the transition, not off where focus is.</b> The obvious
+  implementation asks whether <code>document.activeElement</code> is <code>&lt;body&gt;</code>
+  and puts focus back if so. It silently never fires: by the time the effect runs React has
+  already applied <code>inert</code>, and the browser blurs whatever was inside the subtree
+  when it does, so there is nothing left to recognise. Tracking the open → closed edge is what
+  actually observes the event, and it also stops a drawer that was never opened from claiming
+  focus on mount.
+</div>
 
 <!-- ───────────────────────── 9 ───────────────────────── -->
 <h2 id="security">9 · Trust boundaries</h2>
 
 <div class="callout">
   <b>Be explicit about the key.</b> In own-key mode the API key lives in
-  <code>localStorage</code> and is sent from the page to the vendor. That is the accepted
-  trade for a backend-free teaching site — any script running on this origin could read it,
-  and the key is exposed to the browser's network log. The proxy path exists precisely so a
-  casual visitor never has to make that trade.
+  <code>sessionStorage</code> by default and is sent from the page to the vendor. A clearly
+  labelled “remember” choice moves it to <code>localStorage</code>. Either way any script on this
+  origin and the browser's network log can reach it; the proxy path exists precisely so a casual
+  visitor never has to make that trade.
 </div>
 
 <ul class="notes">
@@ -693,8 +928,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <li><b>No secret is bundled.</b> Server-side keys stay in <code>api-server</code>; the client only ever learns the boolean <code>available</code> and a default model name.</li>
   <li><b>Error bodies are truncated</b> to 300 characters before display, which keeps a verbose upstream error from dumping a wall of text into the UI.</li>
   <li><b>One third-party script, by necessity.</b> Google's sign-in client is loaded from <code>accounts.google.com</code> and runs on this origin — there is no packaged equivalent, the credential flow only exists inside the hosted client. It is the only runtime code on the site that does not ship with it, it is requested only when an OAuth client is configured, and the résumé libraries that used to be fetched from public CDNs are now bundled dependencies.</li>
-  <li><b>Sign-in proves nothing <i>in the browser</i>.</b> The ID token is read here, not verified, so identity on the client is a display convenience and not a security claim — nothing on the page is gated on it, because treating it as authorisation would mean trusting a value any visitor can forge.</li>
-  <li><b>It proves something once the server has checked it.</b> Sent to <code>api-server</code> as a bearer credential, the same token is verified against Google's published keys — signature, issuer, audience, expiry, <code>email_verified</code> — and only then does a claim in it decide anything. That is the whole difference between the two halves, and it is why the entitlement answer lives on the server and not in the bundle.</li>
+  <li><b>The raw Google token never becomes browser state.</b> It is posted once to the Python API and discarded. The UI renders only the verified public user returned by the server.</li>
+  <li><b>The session is server-authenticated and script-inaccessible.</b> The API checks Google's signature and claims before issuing its own short-lived, HMAC-signed HttpOnly cookie. Entitlement decisions are made from that verified identity, never from a browser-decoded claim.</li>
   <li><b>A purchase record is never written by a browser.</b> Rows in <code>course_purchases</code> come from a signature-verified Stripe webhook and from nowhere else. The <code>googleSubject</code> a row carries is stamped into the checkout session from a token the server verified, so it is not a field any client can set — the checkout schema is strict and rejects the attempt.</li>
   <li><b>The seed route is an admin route.</b> <code>POST /api/stripe/seed</code> writes a product and a price to a live Stripe account. It requires <code>ADMIN_API_TOKEN</code> as a bearer token, compared in constant time over hashes so a length mismatch cannot leak through an exception, and answers <code>404</code> rather than <code>401</code> when no token is configured — an unconfigured deployment should not advertise that the surface exists, and forgetting the variable should fail closed.</li>
 </ul>
@@ -723,7 +958,19 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <dt>pnpm serve</dt><dd>Previews the built output on the same port contract.</dd>
   <dt>pnpm typecheck</dt><dd><code>tsc --noEmit</code> — the gate that keeps <code>he.ts</code> aligned with <code>en.ts</code>.</dd>
   <dt>pnpm format</dt><dd>Prettier over every TypeScript source. <code>.prettierrc.json</code> pins the house style — 100 columns, single quotes, no parens on single-argument arrows — rather than accepting defaults that would have rewritten some 8,000 string literals.</dd>
+  <dt>pnpm generate-prerender</dt><dd>Rewrites the static block inside <code>index.html</code> from <code>lib/lectures.ts</code>, <code>lib/questionBank.ts</code>, <code>lib/sections.ts</code> and the locale files. Run it after changing lectures, challenges, the section order or the hero copy.</dd>
 </dl>
+
+<div class="callout">
+  <b>The prerender is generated because the hand-written one drifted.</b> The block inside
+  <code>#root</code> is what crawlers and social bots read; React replaces it on mount, so no
+  visitor ever sees it and nothing about the page reveals when it goes stale. By the time
+  anyone looked it disagreed with the app in four places — it advertised 10 coding challenges
+  against the app's 40, pointed the first cybersecurity lecture at a dead <code>gamma.app</code>
+  URL, numbered that track from an order that had since changed, and listed hero buttons that
+  had been renamed. Duplicate copy maintained by hand drifts; copy generated from the modules
+  the components render from cannot.
+</div>
 
 <p>
   Build-time configuration lives in a committed <code>.env</code> beside the Vite config.
@@ -738,18 +985,17 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <table>
   <thead><tr><th>Variable</th><th>Required</th><th>Effect</th></tr></thead>
   <tbody>
-    <tr><td><code>PORT</code></td><td>yes</td><td>Dev and preview server port. Missing or malformed throws at config time.</td></tr>
-    <tr><td><code>BASE_PATH</code></td><td>yes</td><td>Deploy sub-path, threaded to both asset URLs and the router.</td></tr>
+    <tr><td><code>PORT</code></td><td>no</td><td>Dev and preview server port; defaults to 5000. A malformed explicit value still fails.</td></tr>
+    <tr><td><code>BASE_PATH</code></td><td>no</td><td>Deploy sub-path, threaded to asset URLs and the router; defaults to <code>/</code>.</td></tr>
     <tr><td><code>VITE_GOOGLE_CLIENT_ID</code></td><td>no</td><td>OAuth client for Sign in with Google. Absent, the control is not rendered and Google is never contacted.</td></tr>
   </tbody>
 </table>
 </div>
 
 <div class="callout good">
-  <b>Config fails loudly.</b> <code>vite.config.ts</code> throws if <code>PORT</code> or
-  <code>BASE_PATH</code> is missing or malformed, rather than defaulting. Under a sub-path
-  deploy a silently wrong base produces a blank page with 404s on every asset — a startup
-  error is far cheaper to diagnose.
+  <b>Clean builds have safe defaults.</b> Every Vite config builds from a clean shell with
+  <code>PORT=5000</code> and <code>BASE_PATH=/</code>. Deployment jobs still pass an explicit
+  base for every sub-path; malformed explicit ports fail at config time.
 </div>
 
 <p>
@@ -758,47 +1004,136 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   routing agrees with the host. Deploy path is configured once, in one variable.
 </p>
 
-<h3>Two deploy targets, one build</h3>
+<h3>Deploy targets, one build</h3>
 
 <p>
-  Replit serves the site and <code>api-server</code> from a single origin, which is what makes
-  the relative <code>/api</code> calls work. GitHub Pages serves the static output only, under
-  <code>/&lt;repo&gt;/</code>, with no API behind it — so the AI panel there falls back to
+  Replit serves the site and a secretless same-origin API relay. The relay forwards relative
+  <code>/api</code> calls to the Python service on Fly while keeping first-party login cookies
+  on the Replit domain. Every static host serves the built output only,
+  under a sub-path, with no API behind it — so the AI panel there falls back to
   bring-your-own-key, exactly as it does when the proxy is unreachable.
 </p>
 
 <dl class="kv">
-  <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, <code>/api</code> routed on the same origin.</dd>
+  <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, with a secretless same-origin <code>/api</code> relay to Fly.</dd>
   <dt>GitHub Pages</dt><dd><code>.github/workflows/ci.yml</code> — <code>BASE_PATH=/&lt;repo&gt;/ai-testing-academy/</code>, built and published on every push to <code>main</code>.</dd>
+  <dt>Cloudflare Pages</dt><dd>Same artifact. <code>deploy/cloudflare/_redirects</code> and <code>_headers</code> are copied into the site root by the same job; GitHub Pages ignores both, so one output deploys to either host.</dd>
+  <dt>Fly.io</dt><dd><code>server/{Dockerfile,fly.toml}</code> — the API, separately, because it is the only piece that costs anything to run. <code>deploy/README.md</code> is the runbook.</dd>
+  <dt>Grafana</dt><dd><code>monitoring/compose.yaml</code> — Prometheus server and test history, Python uptime probes, and dashboards for health, logins, client type, approximate country, and server-proxied AI usage.</dd>
 </dl>
 
+<div class="callout good">
+  <b>Monitoring stops at the privacy boundary.</b> Verified users become stable HMAC-based
+  labels using a Fly-only <code>METRICS_ID_SALT</code>; raw identity, IP address, prompts,
+  responses, tokens, and keys never enter Prometheus. Country comes from the trusted hosting
+  proxy and client type from User-Agent. Browser bring-your-own-key AI calls are not visible to
+  the server and are therefore not counted.
+</div>
+
 <p>
-  The Pages job builds the portfolio at the site root, mounts this site and the lecture deck
-  underneath it, copies this page in as <code>architecture.html</code>, and drops a
-  <code>404.html</code> copy of the shell so client-side routes survive a hard refresh. The
-  run's Allure report is published separately, to its own reports repository’s Pages, so the
-  test results keep their own URL and never land on the portfolio site.
+  The Pages job builds the portfolio at the site root and mounts this site and
+  <em>all ten</em> lecture decks underneath it, copies this page in as
+  <code>architecture.html</code>, and gives each app a <code>404.html</code> copy of its own
+  shell. The run's Allure report is published separately, to its own reports repository’s
+  Pages, so the test results keep their own URL and never land on the portfolio site.
 </p>
 
+<div class="callout">
+  <b>Why every app gets its own 404, and why the rewrites matter.</b> These are single-page
+  apps: the decks serve <code>/slide1</code>, <code>/slide2</code>, <code>/allslides</code>
+  from one shell and none of those paths is a file. A single root <code>404.html</code>
+  holding the portfolio meant every unknown path fell back to the portfolio rather than the
+  app that owns it — and for the decks that is not a corner case, because the academy's
+  hreflang tags nominate <code>/ai-testing-lecture-1/slide1?lang=en</code> as a canonical URL.
+  GitHub Pages has no rewrite rules, so the nearest <code>404.html</code> is the best it can
+  do: the right page, carrying a 404 status. Cloudflare's <code>_redirects</code> rewrites the
+  same paths at 200, which is the reason to prefer it for anything meant to be indexed.
+</div>
+
+<div class="callout">
+  <b>The API image is not the one at the repository root.</b> That one builds the Playwright
+  test image and its <code>CMD</code> runs the suite.
+  <code>server/Dockerfile</code> ships the server, and its runtime stage is
+  unusually thin: uv installs the exact <code>server/uv.lock</code>, and the runtime stage copies
+  the virtual environment plus <code>server/app</code>. No Node, pnpm or TypeScript server code;
+  Uvicorn runs FastAPI as a non-root <code>app</code> user. <code>fly.toml</code>
+  deliberately keeps one machine running rather than scaling to zero, because
+  <code>app/main.py</code> builds its rate limiters on an in-memory store with a 24-hour
+  window — a machine that stops and restarts hands every caller a fresh anonymous allowance,
+  and the free-tier quota stops being a quota.
+</div>
+
 <div class="callout good">
-  <b>The tooling is TypeScript too.</b> <code>api-server/build.ts</code> (the esbuild driver)
-  and <code>tests/support/start-api-servers.ts</code> (the Playwright <code>webServer</code>
-  entry point) are run straight from source as <code>node ./build.ts</code>. Node strips the
-  types itself from 22.18 on, and CI pins 24, so neither needs a loader, a build step, or a
-  dependency to earn the same typechecking as the rest of the repo — <code>build.ts</code>
-  through its own <code>tsconfig.tools.json</code>, since it sits outside <code>rootDir</code>.
+  <b>The language boundary is deliberate.</b> All browser and repository tooling remains
+  TypeScript. The backend is Python under <code>server/app</code>, managed by uv and checked by
+  Ruff, compileall and pytest. <code>tests/support/start-api-servers.ts</code> remains TypeScript
+  because it belongs to the Playwright harness; it launches three locked Uvicorn processes.
 </div>
 
 <!-- ───────────────────────── 11 ───────────────────────── -->
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers five layers — 485 cases at the time of
-  writing (211 unit, 152 component, 65 api and contract, 57 e2e). Playwright is used as the
-  runner throughout, not just as a browser driver: the unit project never launches a browser,
-  it executes the same TypeScript modules the app imports — the academy's, and now
-  <code>api-server</code>'s too, wherever a module has no Express import to drag in.
+  Pytest covers backend rules under <code>server/tests</code>, and one Playwright package at
+  <code>tests/</code> covers six TypeScript/browser layers. Counts change often; ask the runners —
+  <code>uv run --directory server pytest --collect-only -q</code> and
+  <code>pnpm --filter @workspace/tests exec playwright test --list</code>. Playwright is used as
+  the runner throughout, not just as a browser driver: the unit project never launches a browser,
+  and executes the same TypeScript modules the academy imports.
 </p>
+
+<h3>What decides which layer a test belongs in</h3>
+<p>
+  One question: <b>what is the cheapest thing that could still be wrong?</b> A rule about a
+  string belongs in a unit test, because a browser adds nothing but seconds. A rule about what a
+  reader can see or reach needs a real one, because that is where the bug lives. The layers below
+  are that question applied, not a taxonomy imposed on top.
+</p>
+
+<div class="grid">
+  <div class="box">
+    <span class="tag">principle</span>
+    <b>Assert the acceptance, not only the refusals</b>
+    <span>
+      A verifier that returns “no” to everything passes every rejection test ever written for it,
+      and signs nobody in while looking perfectly secure. So the Google token suite generates an
+      RSA keypair, serves a key set in place of Google's, signs a token, and asserts first that it
+      is <em>accepted</em>. Every rejection after that is the same token with one property changed,
+      so a failure names one rule.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">principle</span>
+    <b>A test that cannot fail is worth nothing</b>
+    <span>
+      New tests are checked by mutation — the fix is reverted and the test watched going red.
+      Two cases here were rewritten after they passed against deliberately broken code. One
+      mutation that was <em>not</em> caught is recorded in the source it guards: the token
+      verifier's <code>alg</code> check is defence in depth, because the verify call is already
+      pinned to RSA/sha256, so deleting it changes no outcome.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">principle</span>
+    <b>Breadth by reading, depth by running</b>
+    <span>
+      The ten lecture decks are independent artifacts, so the code they share is shared by copy.
+      One unit test reads all ten and asserts they have not drifted apart; one browser test runs
+      a single deck to prove the logic they share actually works. Neither could do the other's
+      job, and together they cost one dev server.
+    </span>
+  </div>
+  <div class="box">
+    <span class="tag">principle</span>
+    <b>No test can reach a vendor, a card or a database</b>
+    <span>
+      The unit suite stubs <code>fetch</code>. The API suite runs servers whose model key is a
+      throwaway that only ever receives invalid requests, whose admin token guards a route that
+      then fails on absent Stripe credentials. Database, Supabase, Stripe and session variables
+      are pinned empty; a developer's shell cannot change any of it.
+    </span>
+  </div>
+</div>
 
 <div class="scroll">
 <table>
@@ -807,7 +1142,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr>
       <td><code>tests/unit</code></td>
       <td>Node</td>
-      <td><code>domUtils</code> escaping and linkifying, language resolution, the whole provider registry — request building, key validation, error mapping, proxy-vs-direct routing. Also the two things that must hold before a browser is involved: the résumé PDF builders, checked by parsing the emitted file back with pdf.js rather than by asserting which jsPDF calls were made, and the Google ID token reader, checked for reading a Hebrew name intact and for answering “nobody” to every malformed or expired token instead of throwing on page load. Two more since: <code>lib/storage.ts</code>, including the case no real <code>localStorage</code> can be made to produce — one that throws on every call — and the server's token verifier, signing real tokens with a keypair generated in the test process.</td>
+      <td><code>domUtils</code> escaping and linkifying, language resolution, the provider registry, storage hardening, and résumé PDF builders checked by parsing emitted files back with pdf.js rather than asserting which jsPDF calls were made.</td>
     </tr>
     <tr>
       <td><code>tests/component</code></td>
@@ -817,12 +1152,17 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr>
       <td><code>tests/api</code></td>
       <td>Node → live server</td>
-      <td>Status codes, CORS, malformed bodies, the webhook signature gate, and the raw-body registration order in <code>app.ts</code>. Also the two authenticated surfaces: the admin token in front of the seed route — including that the right token gets <em>through</em> it, and then fails on Stripe rather than on auth — and the entitlements route, sent tokens shaped exactly like real ones to prove none of them work.</td>
+      <td>Status codes, CORS, malformed bodies, webhook signature handling, rate limits, and live FastAPI behavior. It also covers the admin token in front of the seed route and the entitlement route's closed failure modes.</td>
     </tr>
     <tr>
       <td><code>tests/contract</code></td>
       <td>Node → live server</td>
       <td><code>openapi.yaml</code> ↔ the generated Zod schemas ↔ what the server actually returns, plus the shared <code>customFetch</code> wrapper against real responses.</td>
+    </tr>
+    <tr>
+      <td><code>tests/deck</code></td>
+      <td>Chromium → a lecture deck</td>
+      <td>One of the ten decks, really running: that the 1920×1080 stage is drawn, that a portrait phone turns it rather than letterboxing it to a fifth of design size, that turning the phone switches the rotation back off, that a tablet is left alone, and that the stage stays 16:9 at every size. One deck is enough because the unit layer proves the other nine carry the same logic.</td>
     </tr>
     <tr>
       <td><code>tests/e2e</code></td>
@@ -832,6 +1172,12 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   </tbody>
 </table>
 </div>
+
+<p>
+  The Python fixture layer separately generates RSA keys and signed Google tokens, serves JWKS
+  through <code>httpx.MockTransport</code>, drives routes through <code>ASGITransport</code>, and
+  covers session cookies plus backend-only Stripe configuration without live services.
+</p>
 
 <p>
   Component and e2e both run twice, at a desktop viewport and as an emulated phone, so a layout
@@ -879,14 +1225,14 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <b>No test can reach a model vendor — or create a product.</b> The unit suite stubs
   <code>fetch</code>; the API suite runs one server with a throwaway Gemini key that only ever
   receives invalid requests, and one with no key at all. All instances start with
-  <code>DATABASE_URL</code> and the Replit connector variables blanked, so a developer's shell
-  cannot make the suite pass or fail by accident — and so the furthest an authorised call to the
-  seed route can get is failing to fetch Stripe credentials.
+  database, Supabase, Stripe and session variables blanked, so a
+  developer's shell cannot make the suite pass or fail by accident — and so the furthest an
+  authorised call to the seed route can get is failing to fetch Stripe credentials.
 </div>
 
 <p>
   There are three instances, because most of these routes answer “not configured”
-  <em>before</em> they validate anything. <code>routes/ai.ts</code> answers <code>503</code> for
+  <em>before</em> they validate anything. <code>app/main.py</code> answers <code>503</code> for
   a missing key before it reads the body, so on a keyless server the
   <code>400 messages is required</code> branch is unreachable; the seed route answers
   <code>404</code> with no admin token, so its <code>401</code> branch is unreachable there too.
@@ -898,7 +1244,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <div class="callout">
   <b>Assert the acceptance, not only the refusals.</b> A verifier that returns “no” to
   everything passes every rejection test ever written for it, and signs nobody in while looking
-  perfectly secure. <code>tests/unit/googleAuth.spec.ts</code> therefore generates an RSA
+  perfectly secure. <code>server/tests/test_google_auth.py</code> therefore uses fixtures to generate an RSA
   keypair, serves a key set in place of Google's, signs a token, and asserts first that it is
   <em>accepted</em> — every rejection after that is the same token with one property changed, so
   each failure is attributable to exactly one rule. The suite was checked by mutation: deleting
@@ -915,9 +1261,9 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <dl class="kv">
   <dt>./run-all-tests.sh</dt><dd>Every layer plus both reports. Does <b>not</b> fail fast, so one broken layer still leaves a complete report — and still exits non-zero.</dd>
   <dt>pnpm test</dt><dd>Every layer in order, stopping at the first failure.</dd>
-  <dt>pnpm test:unit</dt><dd>Node only — no server, no browser, sub-second.</dd>
+  <dt>pnpm test:unit</dt><dd>Python fixtures followed by Node unit tests; no live server or browser.</dd>
   <dt>pnpm test:component</dt><dd>Needs <code>pnpm --filter @workspace/tests run test:browsers</code> once.</dd>
-  <dt>pnpm test:api</dt><dd>Boots both api-server instances automatically.</dd>
+  <dt>pnpm test:api</dt><dd>Boots all three FastAPI instances automatically.</dd>
   <dt>pnpm test:contract</dt><dd>Same servers; fails when the spec, the codegen and the routes disagree.</dd>
   <dt>pnpm test:e2e</dt><dd>Boots the academy on port 5273.</dd>
   <dt>docker compose run --rm tests</dt><dd>The lot, in the pinned Playwright image; reports land on the host.</dd>
@@ -945,7 +1291,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h3>CI</h3>
 
 <p>
-  Every layer runs as its own step on each push and pull request, and again nightly at 05:00
+  Typecheck, lint, formatting and every test layer run as their own steps on each push and
+  pull request, and again nightly at 05:00
   Israel time. GitHub cron is UTC-only and Israel shifts between UTC+2 and UTC+3, so both
   candidate hours are scheduled and a gate job discards the one that is not 05:00 locally.
   Each step carries <code>if: !cancelled()</code>, so one failing layer — or a failing
@@ -956,8 +1303,20 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   The Docker image is pinned to <code>linux/amd64</code> for a related reason: the workspace
   <code>overrides</code> strip every platform-native optional dependency except the
   linux-x64-gnu ones, so an arm64 image would be missing the rollup binary and the e2e layer's
-  Vite server would never boot.
+  Vite server would never boot. Both images take the pin, for the same reason.
 </p>
+
+<div class="callout">
+  <b>Lint and formatting are gates now, and that is the whole story of how they drifted.</b>
+  All three checks were defined in <code>package.json</code> and CI ran one of them: the
+  workflow invoked <code>typecheck</code> and the test layers, and the strings
+  <code>lint</code>, <code>eslint</code>, <code>format</code> and <code>prettier</code> did
+  not appear anywhere in it. The result reads exactly as you would predict — typecheck clean,
+  because it was enforced; lint at 32 errors and 590 files off the Prettier config, because
+  they were not. A sweep had in fact already been run once and undone within a day: all 590
+  files were touched by the 26 commits that landed after it, and none predated it. The fix
+  that holds is the gate, not the sweep.
+</div>
 
 <!-- ───────────────────────── 12 ───────────────────────── -->
 <h2 id="extend">12 · Extension points</h2>
@@ -968,7 +1327,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <tbody>
     <tr>
       <td>A coding challenge or a whole level</td>
-      <td><code>lib/locales/en.ts</code> + <code>he.ts</code></td>
+      <td><code>lib/locales/en.ts</code> + <code>he.ts</code>, or the content store/API</td>
       <td><code>CodingChallenges</code> maps over whatever the locale provides; it never counts levels or items.</td>
     </tr>
     <tr>
@@ -993,8 +1352,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     </tr>
     <tr>
       <td>A page section</td>
-      <td>A component + one line in <code>HomePage</code> + a <code>nav.links</code> entry</td>
-      <td>Scroll-spy and reveal both derive from the DOM and the nav list, so neither needs editing.</td>
+      <td>A component, one entry in <code>lib/sections.ts</code>, one label per locale, and one line in <code>HomePage</code></td>
+      <td>The nav, the scroll-spy and the section numbering all read <code>SECTIONS</code>, so adding it in one place is what puts it in all three. Re-run <code>pnpm generate-prerender</code> to carry it into the static shell.</td>
     </tr>
     <tr>
       <td>A progressive-reveal UI elsewhere</td>
@@ -1007,7 +1366,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <h3>Where the edges are</h3>
 <ul class="notes">
-  <li><b>Lecture content is hardcoded</b> inside <code>LectureSeries.tsx</code> as <code>EN</code>/<code>HE</code> objects rather than living in the locale files — the last section that breaks the content/UI split. The question bank used to do the same and now sits in <code>lib/questionBank.ts</code>; the same move is available here.</li>
+  <li><b>Content has two sources during migration.</b> The academy renders bundled lectures and practice data from <code>lib/lectures.ts</code>, <code>lib/questionBank.ts</code>, and the locale files. The API routes read the corresponding ordered records from Supabase for a future server-backed client.</li>
   <li><b>Grounded search is Gemini-only</b>, so the enrich action degrades if the user is on Anthropic or OpenAI without a Gemini key.</li>
   <li><b>The proxy path covers Gemini only.</b> The other two vendors are own-key or nothing.</li>
   <li><b>Resume tooling needs the public internet</b> beyond the model call; behind a strict CSP or an offline network, extraction and PDF export are the first things to fail.</li>
@@ -1024,5 +1383,54 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 </footer>
 
 </div>
+
+<script>
+  // Highlights the rail entry for the section the reader is in.
+  //
+  // Tracks the last heading scrolled past rather than watching the headings
+  // intersect a band. The band version looks right and is wrong: a heading is a
+  // single line, so it sits inside any reasonable band for a moment and is
+  // outside it for the rest of the section — which leaves nothing highlighted
+  // for most of the page. "Last one passed" is always true of exactly one
+  // section, which is the property a table of contents needs.
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    if (!links.length) return;
+
+    var sections = links
+      .map(function (a) {
+        return { link: a, el: document.getElementById(a.getAttribute('href').slice(1)) };
+      })
+      .filter(function (s) { return s.el; });
+
+    // A heading counts as reached once it is within this much of the top.
+    var THRESHOLD = 120;
+    var pending = false;
+
+    function update() {
+      pending = false;
+      var current = sections[0];
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].el.getBoundingClientRect().top <= THRESHOLD) current = sections[i];
+      }
+      // Past the end of the page the last section is the honest answer, which
+      // falls out of the loop above without a special case.
+      sections.forEach(function (s) {
+        if (s === current) s.link.setAttribute('aria-current', 'true');
+        else s.link.removeAttribute('aria-current');
+      });
+    }
+
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(update);
+    }
+
+    addEventListener('scroll', schedule, { passive: true });
+    addEventListener('resize', schedule);
+    update();
+  })();
+</script>
 </body>
 </html>

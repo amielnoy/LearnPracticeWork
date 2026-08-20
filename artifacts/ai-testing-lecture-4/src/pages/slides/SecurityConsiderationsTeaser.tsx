@@ -87,7 +87,7 @@ export default function SecurityConsiderationsTeaser() {
             letterSpacing: '-0.02em',
           }}
         >
-          {t('Testing Isn\'t Just About Correctness', 'בדיקות הן לא רק על נכונות')}
+          {t("Testing Isn't Just About Correctness", 'בדיקות הן לא רק על נכונות')}
         </h1>
         <p
           style={{

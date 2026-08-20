@@ -27,7 +27,7 @@ export default function RegressionTestingForPrompts() {
   const versions = [
     { ver: 'v1.0', sim: '94%', fact: '96%', schema: '100%', status: t('baseline', 'בסיס') },
     { ver: 'v1.1', sim: '96%', fact: '97%', schema: '100%', status: t('✔ improved', '✔ שופר') },
-    { ver: 'v1.2', sim: '91%', fact: '95%', schema: '98%',  status: t('⚠ regression', '⚠ נסיגה') },
+    { ver: 'v1.2', sim: '91%', fact: '95%', schema: '98%', status: t('⚠ regression', '⚠ נסיגה') },
   ];
 
   return (
@@ -110,7 +110,14 @@ export default function RegressionTestingForPrompts() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Version Your Prompts', 'גרס את ההנחיות שלך')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -121,7 +128,14 @@ export default function RegressionTestingForPrompts() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Golden Test Suite', 'חבילת בדיקות זהובות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -132,7 +146,14 @@ export default function RegressionTestingForPrompts() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Trend Monitoring', 'ניטור מגמות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -211,12 +232,20 @@ export default function RegressionTestingForPrompts() {
                   color: '#1E3A5F',
                   padding: '1.2vh 0.8vw',
                   borderRadius: '0.6vw',
-                  background: isRegression ? 'rgba(220,38,38,0.05)' : i === 0 ? 'rgba(100,116,139,0.05)' : 'rgba(13,148,136,0.05)',
+                  background: isRegression
+                    ? 'rgba(220,38,38,0.05)'
+                    : i === 0
+                      ? 'rgba(100,116,139,0.05)'
+                      : 'rgba(13,148,136,0.05)',
                   textAlign: 'center',
                   alignItems: 'center',
                 }}
               >
-                <div style={{ textAlign: isHe ? 'right' : 'left', fontWeight: 700, color: '#0D9488' }}>{v.ver}</div>
+                <div
+                  style={{ textAlign: isHe ? 'right' : 'left', fontWeight: 700, color: '#0D9488' }}
+                >
+                  {v.ver}
+                </div>
                 <div>{v.sim}</div>
                 <div>{v.fact}</div>
                 <div>{v.schema}</div>
@@ -246,7 +275,8 @@ export default function RegressionTestingForPrompts() {
               lineHeight: 1.4,
             }}
           >
-            💡 {t(
+            💡{' '}
+            {t(
               'v1.2 shows regression in similarity AND a schema slip — two independent signals flagging the same prompt change.',
               'v1.2 מראה נסיגה בדמיון וגם בעיית סכמה — שני אותות עצמאיים המסמנים את אותו שינוי הנחיה.',
             )}

@@ -108,14 +108,19 @@ export default function DebuggingFlakyAiTests() {
           }}
         >
           {t(
-            'AI test flakiness usually comes from timing, non-deterministic output, or shared state. Playwright\'s built-in tools make the root cause visible without re-running locally.',
+            "AI test flakiness usually comes from timing, non-deterministic output, or shared state. Playwright's built-in tools make the root cause visible without re-running locally.",
             'תנודתיות בדיקות AI מגיעה בדרך כלל מתזמון, פלט אי-דטרמיניסטי, או מצב משותף. הכלים המובנים של Playwright הופכים את הסיבה השורשית לגלויה מבלי להריץ מחדש מקומית.',
           )}
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Trace Viewer', 'מציג Trace')}
             </div>
@@ -128,7 +133,12 @@ export default function DebuggingFlakyAiTests() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Video Recording', 'הקלטת וידאו')}
             </div>
@@ -141,7 +151,12 @@ export default function DebuggingFlakyAiTests() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Inspect the Network Log', 'בדיקת יומן הרשת')}
             </div>
@@ -201,11 +216,23 @@ export default function DebuggingFlakyAiTests() {
               }
             />
             {[
-              t('Download trace archive from CI artefacts', 'הורידו ארכיון trace מ-artefacts של CI'),
+              t(
+                'Download trace archive from CI artefacts',
+                'הורידו ארכיון trace מ-artefacts של CI',
+              ),
               t('Open with: npx playwright show-trace', 'פתחו עם: npx playwright show-trace'),
-              t('Identify the first divergence from expected flow', 'זהו את הסטייה הראשונה מהזרימה הצפויה'),
-              t('Check network tab for unexpected AI response', 'בדקו לשונית רשת לתגובת AI בלתי צפויה'),
-              t('Add waitForFunction or tighten the assertion scope', 'הוסיפו waitForFunction או הדקו את טווח ה-assertion'),
+              t(
+                'Identify the first divergence from expected flow',
+                'זהו את הסטייה הראשונה מהזרימה הצפויה',
+              ),
+              t(
+                'Check network tab for unexpected AI response',
+                'בדקו לשונית רשת לתגובת AI בלתי צפויה',
+              ),
+              t(
+                'Add waitForFunction or tighten the assertion scope',
+                'הוסיפו waitForFunction או הדקו את טווח ה-assertion',
+              ),
             ].map((item, i) => (
               <div
                 key={i}

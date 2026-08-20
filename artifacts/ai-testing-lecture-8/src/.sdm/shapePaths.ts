@@ -1,10 +1,6 @@
 import type { Geometry } from './core/schema';
 
-type PathBuilder = (
-  w: number,
-  h: number,
-  adjustments?: Record<string, number>,
-) => string;
+type PathBuilder = (w: number, h: number, adjustments?: Record<string, number>) => string;
 
 function polygon(points: Array<[number, number]>): string {
   return `M ${points.map(([x, y]) => `${round(x)} ${round(y)}`).join(' L ')} Z`;
@@ -57,8 +53,7 @@ const PRESET_PATHS: Record<string, PathBuilder> = {
     ]);
   },
   chevron: (w, h, adjustments) => {
-    const depth =
-      Math.min(w, h) * Math.min(Math.max(adjustments?.depth ?? 0.5, 0), 0.5);
+    const depth = Math.min(w, h) * Math.min(Math.max(adjustments?.depth ?? 0.5, 0), 0.5);
     return polygon([
       [0, 0],
       [w - depth, 0],
@@ -228,11 +223,7 @@ export function shapePathFor(
   }
 
   return {
-    d: PRESET_PATHS[geometry.preset](
-      width,
-      height,
-      geometry.adjustments,
-    ),
+    d: PRESET_PATHS[geometry.preset](width, height, geometry.adjustments),
     viewBox: { width, height },
   };
 }

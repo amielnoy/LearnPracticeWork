@@ -44,7 +44,9 @@ function Row({
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5vh' }}>
-      <div style={{ fontSize: '0.78vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}>
+      <div
+        style={{ fontSize: '0.78vw', fontWeight: 700, letterSpacing: '0.08em', color: labelColor }}
+      >
         {label}
       </div>
       <div style={{ fontSize: '0.95vw', lineHeight: 1.5, color: '#E2E8F0' }}>{children}</div>
@@ -88,12 +90,27 @@ export default function WorkedExampleBeforeAfterPrompt() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('CORE TECHNIQUES', 'טכניקות ליבה')}</div>
           <div>{t('LECTURE 02', 'הרצאה 02')}</div>
         </div>
@@ -112,7 +129,15 @@ export default function WorkedExampleBeforeAfterPrompt() {
         >
           {example?.eyebrow ?? t('Worked Example', 'דוגמה מעשית')}
         </div>
-        <h1 style={{ fontSize: '2.4vw', fontWeight: 800, margin: 0, lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '2.4vw',
+            fontWeight: 800,
+            margin: 0,
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {example?.title ?? '\u00A0'}
         </h1>
       </div>
@@ -126,7 +151,9 @@ export default function WorkedExampleBeforeAfterPrompt() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vw', minHeight: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2vh', minHeight: 0 }}>
-            <div style={{ fontSize: '1vw', fontWeight: 700, color: '#DC2626' }}>{before?.label}</div>
+            <div style={{ fontSize: '1vw', fontWeight: 700, color: '#DC2626' }}>
+              {before?.label}
+            </div>
             <div style={{ ...codePanel, border: '1px solid #7F1D1D' }}>
               {before?.rows.map((row, ri) => (
                 <Fragment key={ri}>

@@ -235,7 +235,10 @@ export default function LoadingAndErrorStates() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Loading \u2014 indicator visible, input disabled', 'טעינה \u2014 מחוון גלוי, קלט מושבת')}
+                {t(
+                  'Loading \u2014 indicator visible, input disabled',
+                  'טעינה \u2014 מחוון גלוי, קלט מושבת',
+                )}
               </div>
             </div>
             <div
@@ -258,7 +261,10 @@ export default function LoadingAndErrorStates() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Success \u2014 response container non-empty', 'הצלחה \u2014 מכיל תגובה אינו ריק')}
+                {t(
+                  'Success \u2014 response container non-empty',
+                  'הצלחה \u2014 מכיל תגובה אינו ריק',
+                )}
               </div>
             </div>
             <div
@@ -281,7 +287,10 @@ export default function LoadingAndErrorStates() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Timeout \u2014 friendly message, retry button enabled', 'פסק זמן \u2014 הודעה ידידותית, כפתור ניסיון חוזר פעיל')}
+                {t(
+                  'Timeout \u2014 friendly message, retry button enabled',
+                  'פסק זמן \u2014 הודעה ידידותית, כפתור ניסיון חוזר פעיל',
+                )}
               </div>
             </div>
             <div
@@ -304,7 +313,10 @@ export default function LoadingAndErrorStates() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Error \u2014 error region visible, no raw stack trace', 'שגיאה \u2014 אזור שגיאה גלוי, אין stack trace גולמי')}
+                {t(
+                  'Error \u2014 error region visible, no raw stack trace',
+                  'שגיאה \u2014 אזור שגיאה גלוי, אין stack trace גולמי',
+                )}
               </div>
             </div>
           </div>

@@ -37,15 +37,15 @@ test.describe('a tampered theme preference', () => {
    * These navigate themselves rather than taking the `home` fixture, because the
    * value has to be in place before the page's first script runs.
    */
-  test('is ignored, and the document falls back to a real theme', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('ata_theme', 'x" onload="alert(1)'));
+  test('is ignored, and the document falls back to a real theme', async ({ page, storage }) => {
+    await storage.seedBeforeNavigation('ata_theme', 'x" onload="alert(1)');
     const home = await new HomePage(page).open();
 
     await expect(home.html).toHaveAttribute('data-theme', /^(light|dark)$/);
   });
 
-  test('leaves the toggle working rather than stuck', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('ata_theme', 'neither'));
+  test('leaves the toggle working rather than stuck', async ({ page, storage }) => {
+    await storage.seedBeforeNavigation('ata_theme', 'neither');
     const home = await new HomePage(page).open();
 
     const before = await home.html.getAttribute('data-theme');

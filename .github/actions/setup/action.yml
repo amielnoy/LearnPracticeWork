@@ -1,0 +1,44 @@
+name: Set up the workspace
+description: >
+  pnpm, Node and a frozen install — the three steps every job that touches the
+  code needs, in one place so the pinned versions cannot drift between jobs.
+
+  Checkout is deliberately NOT here. A local action is read from the working
+  copy, so the repository has to be on disk before this file can be resolved at
+  all; a checkout inside it would be a step that cannot run until it has already
+  run. Each job checks out first, then calls this.
+
+inputs:
+  node-version:
+    description: Node major to run on.
+    required: true
+  pnpm-version:
+    description: pnpm version, which must match the packageManager field.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v6
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    # `cache: pnpm` keys the module store on pnpm-lock.yaml, so an unchanged
+    # lockfile means no network in the install below.
+    - uses: actions/setup-node@v5
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: pnpm
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      with:
+        version: '0.8.17'
+        enable-cache: true
+        cache-dependency-glob: server/uv.lock
+
+    # Frozen on purpose: a lockfile that does not match package.json should stop
+    # the run rather than be quietly resolved into something CI alone has seen.
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

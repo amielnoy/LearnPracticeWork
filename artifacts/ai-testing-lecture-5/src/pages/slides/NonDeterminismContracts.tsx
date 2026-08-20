@@ -113,7 +113,14 @@ export default function NonDeterminismContracts() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Assert on Shape, Not Value', 'קבעו על צורה, לא על ערך')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function NonDeterminismContracts() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Enum Checks for Categorical Fields', 'בדיקות enum עבור שדות קטגוריים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function NonDeterminismContracts() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Range Assertions for Numeric Fields', 'קביעות טווח עבור שדות מספריים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -187,10 +208,25 @@ export default function NonDeterminismContracts() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#DC2626', marginBottom: '0.8vh', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '0.8vh',
+                textTransform: 'uppercase',
+              }}
+            >
               {t('Brittle', 'שבירה')}
             </div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.95vw', color: '#475569', lineHeight: 1.7 }}>
+            <div
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '0.95vw',
+                color: '#475569',
+                lineHeight: 1.7,
+              }}
+            >
               <div>{t('assert body["summary"] ==', 'assert body["summary"] ==')}</div>
               <div>&nbsp;&nbsp;{t('"Customer requests refund"', '"Customer requests refund"')}</div>
             </div>
@@ -204,16 +240,48 @@ export default function NonDeterminismContracts() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#059669', marginBottom: '0.8vh', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#059669',
+                marginBottom: '0.8vh',
+                textTransform: 'uppercase',
+              }}
+            >
               {t('Resilient', 'חסינה')}
             </div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.95vw', color: '#475569', lineHeight: 1.7 }}>
-              <div>{t('assert isinstance(body["summary"], str)', 'assert isinstance(body["summary"], str)')}</div>
+            <div
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '0.95vw',
+                color: '#475569',
+                lineHeight: 1.7,
+              }}
+            >
+              <div>
+                {t(
+                  'assert isinstance(body["summary"], str)',
+                  'assert isinstance(body["summary"], str)',
+                )}
+              </div>
               <div>{t('assert len(body["summary"]) > 10', 'assert len(body["summary"]) > 10')}</div>
-              <div>{t('assert body["category"] in VALID_CATEGORIES', 'assert body["category"] in VALID_CATEGORIES')}</div>
+              <div>
+                {t(
+                  'assert body["category"] in VALID_CATEGORIES',
+                  'assert body["category"] in VALID_CATEGORIES',
+                )}
+              </div>
             </div>
           </div>
-          <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.5, textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              color: '#64748B',
+              lineHeight: 1.5,
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {t(
               'Resilient assertions survive model variation while still catching genuine breakage.',
               'קביעות חסינות שורדות שינויים במודל תוך תפיסת תקלות אמיתיות.',

@@ -6,10 +6,7 @@ import { useEffect, useState } from 'react';
  * rejects — this returns `null` and the caller keeps rendering its bundled
  * default. See `contentClient.ts` for why that fallback matters here.
  */
-export function useRemoteContent<T>(
-  fetcher: () => Promise<T>,
-  deps: readonly unknown[],
-): T | null {
+export function useRemoteContent<T>(fetcher: () => Promise<T>, deps: readonly unknown[]): T | null {
   const [data, setData] = useState<T | null>(null);
 
   useEffect(() => {

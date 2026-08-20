@@ -39,14 +39,25 @@ export default function CommonPitfalls() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -101,7 +112,14 @@ export default function CommonPitfalls() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Running the full AI suite on every commit', 'הרצת חבילת AI מלאה על כל commit')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -112,8 +130,18 @@ export default function CommonPitfalls() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
-              {t('Hardcoding API keys in workflow YAML', 'קידוד קשיח של מפתחות API ב-YAML של הצינור')}
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
+              {t(
+                'Hardcoding API keys in workflow YAML',
+                'קידוד קשיח של מפתחות API ב-YAML של הצינור',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -123,8 +151,18 @@ export default function CommonPitfalls() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.4vh' }}>
-              {t('Treating a passing retry as a clean signal', 'התייחסות לניסיון חוזר מצליח כאות נקי')}
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.4vh',
+              }}
+            >
+              {t(
+                'Treating a passing retry as a clean signal',
+                'התייחסות לניסיון חוזר מצליח כאות נקי',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -166,7 +204,9 @@ export default function CommonPitfalls() {
           >
             {t('Two More to Watch For', 'עוד שניים לשים לב אליהם')}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', position: 'relative' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', position: 'relative' }}
+          >
             <div
               style={
                 {
@@ -180,7 +220,13 @@ export default function CommonPitfalls() {
               }
             />
             <div
-              style={{ display: 'flex', gap: '2vw', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'flex-start',
+                position: 'relative',
+                zIndex: 1,
+              }}
             >
               <div
                 style={{
@@ -194,7 +240,9 @@ export default function CommonPitfalls() {
                   marginTop: '0.3vw',
                 }}
               />
-              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F', lineHeight: 1.5 }}>
+              <div
+                style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F', lineHeight: 1.5 }}
+              >
                 {t(
                   'No visibility into per-PR AI spend means one expensive new test can quadruple the bill before anyone notices.',
                   'אין נראות להוצאות AI לכל PR אומר שבדיקה יקרה חדשה אחת יכולה לרבע את החשבון לפני שמישהו שם לב.',
@@ -202,7 +250,13 @@ export default function CommonPitfalls() {
               </div>
             </div>
             <div
-              style={{ display: 'flex', gap: '2vw', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'flex-start',
+                position: 'relative',
+                zIndex: 1,
+              }}
             >
               <div
                 style={{
@@ -216,7 +270,9 @@ export default function CommonPitfalls() {
                   marginTop: '0.3vw',
                 }}
               />
-              <div style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F', lineHeight: 1.5 }}>
+              <div
+                style={{ fontSize: '1.1vw', fontWeight: 500, color: '#1E3A5F', lineHeight: 1.5 }}
+              >
                 {t(
                   'Blocking merges on a single non-deterministic run with no retry policy means one flaky response stops the whole team.',
                   'חסימת מיזוגים על ריצה לא-דטרמיניסטית בודדת ללא מדיניות ניסיון חוזר אומר שתגובה אחת לא יציבה עוצרת את כל הצוות.',

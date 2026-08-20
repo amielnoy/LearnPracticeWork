@@ -246,7 +246,10 @@ export default function TamingFlakinessAtScale() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('PR gate \u2014 mocked model, deterministic, fast', 'אישור PR \u2014 מודל ממויין, דטרמיניסטי, מהיר')}
+                {t(
+                  'PR gate \u2014 mocked model, deterministic, fast',
+                  'אישור PR \u2014 מודל ממויין, דטרמיניסטי, מהיר',
+                )}
               </div>
             </div>
             <div
@@ -269,7 +272,10 @@ export default function TamingFlakinessAtScale() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Nightly run \u2014 live model, small critical suite', 'הרצה לילית \u2014 מודל חי, סוויטה קריטית קטנה')}
+                {t(
+                  'Nightly run \u2014 live model, small critical suite',
+                  'הרצה לילית \u2014 מודל חי, סוויטה קריטית קטנה',
+                )}
               </div>
             </div>
             <div
@@ -292,7 +298,10 @@ export default function TamingFlakinessAtScale() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Retries only on model variability, never on logic bugs', 'ניסיונות חוזרים רק על שונות מודל, לא על באגים לוגיים')}
+                {t(
+                  'Retries only on model variability, never on logic bugs',
+                  'ניסיונות חוזרים רק על שונות מודל, לא על באגים לוגיים',
+                )}
               </div>
             </div>
             <div
@@ -315,7 +324,10 @@ export default function TamingFlakinessAtScale() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Track flake rate to detect drift over time', 'עקבו אחר שיעור רעידות לזיהוי סחיפה לאורך זמן')}
+                {t(
+                  'Track flake rate to detect drift over time',
+                  'עקבו אחר שיעור רעידות לזיהוי סחיפה לאורך זמן',
+                )}
               </div>
             </div>
           </div>

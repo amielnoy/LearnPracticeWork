@@ -44,23 +44,67 @@ const num: React.CSSProperties = {
 export default function AnatomyOfAPrompt() {
   return (
     <div style={wrap} dir={dir}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #E2E8F0', paddingBottom: '2vh' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid #E2E8F0',
+          paddingBottom: '2vh',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('FOUNDATIONS', 'יסודות')}</div>
           <div>{t('LECTURE 02', 'הרצאה 02')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', justifyContent: 'center' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', justifyContent: 'center' }}
+      >
         <div style={{ textAlign: 'center', marginBottom: '0.5vh' }}>
-          <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+          <div
+            style={{
+              fontSize: '1.2vw',
+              fontWeight: 600,
+              color: '#0D9488',
+              marginBottom: '1vh',
+              textTransform: isHe ? 'none' : 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             {t('Foundations', 'יסודות')}
           </div>
-          <h1 style={{ fontSize: '3.2vw', fontWeight: 800, margin: 0, lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          <h1
+            style={{
+              fontSize: '3.2vw',
+              fontWeight: 800,
+              margin: 0,
+              lineHeight: 1.1,
+              letterSpacing: '-0.02em',
+            }}
+          >
             {t('Anatomy of a Prompt', 'האנטומיה של פרומפט')}
           </h1>
         </div>
@@ -80,7 +124,10 @@ export default function AnatomyOfAPrompt() {
             {t('Context', 'הקשר')}
           </div>
           <div style={{ fontSize: '1.15vw', color: '#475569' }}>
-            {t('the facts and documents the model should use', 'העובדות והמסמכים שהמודל אמור להשתמש בהם')}
+            {t(
+              'the facts and documents the model should use',
+              'העובדות והמסמכים שהמודל אמור להשתמש בהם',
+            )}
           </div>
         </div>
         <div style={row}>
@@ -112,7 +159,18 @@ export default function AnatomyOfAPrompt() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '2vh', fontSize: '0.9vw', color: '#94A3B8', fontWeight: 500 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid #E2E8F0',
+          paddingTop: '2vh',
+          fontSize: '0.9vw',
+          color: '#94A3B8',
+          fontWeight: 500,
+        }}
+      >
         <div>{t('Prompt Engineering for Testers', 'הנדסת פרומפטים לבודקים')}</div>
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>

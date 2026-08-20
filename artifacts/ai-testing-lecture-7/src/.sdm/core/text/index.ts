@@ -1,8 +1,5 @@
 /* oxlint-disable @replit/web/no-barrel-file -- package subpath entry: @replit/sdm-core/text is consumed as one module and mirrored file-by-file into the slides artifact */
-export {
-  formattingContinuityPlugin,
-  initializeFormattingContinuity,
-} from './formattingContinuity';
+export { formattingContinuityPlugin, initializeFormattingContinuity } from './formattingContinuity';
 export {
   effectiveRunStyleCss,
   paragraphLayoutCss,
@@ -48,7 +45,4 @@ export {
 } from './pmDoc';
 export { sdmTextSchema } from './pmSchema';
 export { deepEqual, runStyleOverrides } from './styleUtils';
-export {
-  selectionFormatting,
-  type SdmSelectionFormatting,
-} from './selectionFormatting';
+export { selectionFormatting, type SdmSelectionFormatting } from './selectionFormatting';

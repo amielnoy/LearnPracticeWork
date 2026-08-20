@@ -65,10 +65,7 @@ export const SdmTextBulletUpdateSchema = Type.Union([
       kind: Type.Literal('number'),
       style: Type.Optional(Type.String({ minLength: 1 })),
       startAt: Type.Optional(
-        Type.Union([
-          Type.Integer({ minimum: 1, maximum: SDM_MAX_NUMBER_START_AT }),
-          Type.Null(),
-        ]),
+        Type.Union([Type.Integer({ minimum: 1, maximum: SDM_MAX_NUMBER_START_AT }), Type.Null()]),
       ),
     },
     strict,
@@ -81,10 +78,7 @@ export const SdmTextBulletUpdateSchema = Type.Union([
  * updated `sdm:textSelection`.
  */
 export const SdmTextCommandSchema = Type.Union([
-  Type.Object(
-    { kind: Type.Literal('setRunStyle'), style: RunStyleSchema },
-    strict,
-  ),
+  Type.Object({ kind: Type.Literal('setRunStyle'), style: RunStyleSchema }, strict),
   Type.Object({ kind: Type.Literal('setAlignment'), align: textAlign }, strict),
   Type.Object(
     {
@@ -98,17 +92,11 @@ export const SdmTextCommandSchema = Type.Union([
   Type.Object(
     {
       kind: Type.Literal('toggleBullets'),
-      bulletKind: Type.Union([
-        Type.Literal('character'),
-        Type.Literal('number'),
-      ]),
+      bulletKind: Type.Union([Type.Literal('character'), Type.Literal('number')]),
     },
     strict,
   ),
-  Type.Object(
-    { kind: Type.Literal('setBullet'), bullet: SdmTextBulletUpdateSchema },
-    strict,
-  ),
+  Type.Object({ kind: Type.Literal('setBullet'), bullet: SdmTextBulletUpdateSchema }, strict),
   Type.Object({ kind: Type.Literal('indent') }, strict),
   Type.Object({ kind: Type.Literal('outdent') }, strict),
   Type.Object({ kind: Type.Literal('undo') }, strict),
@@ -134,9 +122,7 @@ export const SdmTextSelectionFormattingSchema = Type.Object(
   strict,
 );
 
-export type SdmTextSelectionFormatting = Static<
-  typeof SdmTextSelectionFormattingSchema
->;
+export type SdmTextSelectionFormatting = Static<typeof SdmTextSelectionFormattingSchema>;
 
 export const WorkspaceToRuntimeMessageSchema = Type.Union([
   Type.Object(
@@ -255,11 +241,7 @@ export const RuntimeToWorkspaceMessageSchema = Type.Union([
     {
       ...envelope,
       type: Type.Literal('sdm:saveStatus'),
-      state: Type.Union([
-        Type.Literal('saving'),
-        Type.Literal('saved'),
-        Type.Literal('error'),
-      ]),
+      state: Type.Union([Type.Literal('saving'), Type.Literal('saved'), Type.Literal('error')]),
       message: Type.Optional(Type.String()),
     },
     strict,
@@ -280,27 +262,19 @@ export const RuntimeToWorkspaceMessageSchema = Type.Union([
   ),
 ]);
 
-export type WorkspaceToRuntimeMessage = Static<
-  typeof WorkspaceToRuntimeMessageSchema
->;
-export type RuntimeToWorkspaceMessage = Static<
-  typeof RuntimeToWorkspaceMessageSchema
->;
+export type WorkspaceToRuntimeMessage = Static<typeof WorkspaceToRuntimeMessageSchema>;
+export type RuntimeToWorkspaceMessage = Static<typeof RuntimeToWorkspaceMessageSchema>;
 
 export type ParseSdmMessageResult<Message> =
   | { ok: true; message: Message }
   | { ok: false; reason: 'invalid'; issues: Array<SdmIssue> }
   | { ok: false; reason: 'unsupportedVersion'; version: number };
 
-export function isWorkspaceToRuntimeMessage(
-  input: unknown,
-): input is WorkspaceToRuntimeMessage {
+export function isWorkspaceToRuntimeMessage(input: unknown): input is WorkspaceToRuntimeMessage {
   return parseWorkspaceToRuntimeMessage(input).ok;
 }
 
-export function isRuntimeToWorkspaceMessage(
-  input: unknown,
-): input is RuntimeToWorkspaceMessage {
+export function isRuntimeToWorkspaceMessage(input: unknown): input is RuntimeToWorkspaceMessage {
   return parseRuntimeToWorkspaceMessage(input).ok;
 }
 
@@ -309,10 +283,7 @@ function probeUnsupportedVersion(input: unknown): number | undefined {
     return undefined;
   }
   const candidate = input as Record<string, unknown>;
-  if (
-    typeof candidate.type !== 'string' ||
-    !candidate.type.startsWith('sdm:')
-  ) {
+  if (typeof candidate.type !== 'string' || !candidate.type.startsWith('sdm:')) {
     return undefined;
   }
   return typeof candidate.protocolVersion === 'number' &&
@@ -322,9 +293,7 @@ function probeUnsupportedVersion(input: unknown): number | undefined {
     : undefined;
 }
 
-function embeddedDocumentIssues(
-  message: Record<string, unknown>,
-): Array<SdmIssue> {
+function embeddedDocumentIssues(message: Record<string, unknown>): Array<SdmIssue> {
   if (!('document' in message)) {
     return [];
   }
@@ -333,7 +302,7 @@ function embeddedDocumentIssues(
     return [];
   }
   if (result.reason === 'invalid') {
-    return result.issues.map((issue) => ({
+    return result.issues.map(issue => ({
       path: issue.path === '/' ? '/document' : `/document${issue.path}`,
       message: issue.message,
     }));
@@ -347,9 +316,7 @@ function embeddedDocumentIssues(
 }
 
 function parseMessage<Message>(
-  schema:
-    | typeof WorkspaceToRuntimeMessageSchema
-    | typeof RuntimeToWorkspaceMessageSchema,
+  schema: typeof WorkspaceToRuntimeMessageSchema | typeof RuntimeToWorkspaceMessageSchema,
   input: unknown,
 ): ParseSdmMessageResult<Message> {
   const futureVersion = probeUnsupportedVersion(input);
@@ -357,15 +324,13 @@ function parseMessage<Message>(
     return { ok: false, reason: 'unsupportedVersion', version: futureVersion };
   }
   if (!Value.Check(schema, input)) {
-    const issues = [...Value.Errors(schema, input)].map((error) => ({
+    const issues = [...Value.Errors(schema, input)].map(error => ({
       path: error.path || '/',
       message: error.message,
     }));
     return { ok: false, reason: 'invalid', issues };
   }
-  const documentIssues = embeddedDocumentIssues(
-    input as Record<string, unknown>,
-  );
+  const documentIssues = embeddedDocumentIssues(input as Record<string, unknown>);
   if (documentIssues.length > 0) {
     return { ok: false, reason: 'invalid', issues: documentIssues };
   }

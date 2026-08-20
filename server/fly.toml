@@ -1,0 +1,62 @@
+# Fly.io configuration for the API server.
+#
+# Deploy from the repository root, because the Docker build context has to
+# include `pnpm-workspace.yaml` and `lib/`:
+#
+#     fly deploy --config server/fly.toml --dockerfile server/Dockerfile .
+#
+# Secrets are set once and stored by Fly, never committed:
+#
+#     fly secrets set GEMINI_API_KEY=... SUPABASE_DB_PASSWORD=... \
+#       SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... STRIPE_SECRET_KEY=...
+#
+# `fly secrets list` shows names and digests, not values.
+
+app = "ata-api"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # The container listens on this port.
+  PORT = "8080"
+  NODE_ENV = "production"
+
+  # Canonical browser origin for Stripe success/cancellation redirects. It must
+  # also appear in ALLOWED_ORIGINS; checkout fails closed if the two disagree.
+  PUBLIC_APP_ORIGIN = "https://free-tier-insights--amielpeled.replit.app"
+
+  # Sales stay off until the approved Stripe catalog, automatic tax, legal
+  # identity, address and support configuration are supplied as Fly secrets.
+  SALES_ENABLED = "false"
+
+  # CORS allowlist. The API is called from the browser by the academy and the
+  # lecture decks, so every origin that serves them belongs here — comma
+  # separated, no trailing slashes. Update this when the static host changes.
+  ALLOWED_ORIGINS = "https://amielnoy.github.io,https://free-tier-insights--amielpeled.replit.app"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+
+  # Stripe webhooks benefit from a warm endpoint. Quotas are now stored
+  # atomically in Postgres, so they remain correct across workers and restarts.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    # Readiness includes the database used for quotas and entitlements.
+    path = "/api/readyz"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+    method = "GET"
+
+[[vm]]
+  # The server is I/O bound — it proxies model calls and talks to Postgres — so
+  # it wants headroom for concurrent requests rather than CPU. 512MB leaves
+  # room for concurrent proxy requests and Python's runtime.
+  size = "shared-cpu-1x"
+  memory = "512mb"

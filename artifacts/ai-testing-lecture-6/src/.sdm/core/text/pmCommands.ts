@@ -1,18 +1,9 @@
 import { Value } from '@sinclair/typebox/value';
 import { splitBlockKeepMarks } from 'prosemirror-commands';
-import type {
-  Mark,
-  MarkType,
-  Node as ProseMirrorNode,
-} from 'prosemirror-model';
+import type { Mark, MarkType, Node as ProseMirrorNode } from 'prosemirror-model';
 import type { Command, EditorState, Transaction } from 'prosemirror-state';
 
-import {
-  RunStyleSchema,
-  type Bullet,
-  type Paragraph,
-  type RunStyle,
-} from '../schema';
+import { RunStyleSchema, type Bullet, type Paragraph, type RunStyle } from '../schema';
 import { effectiveParagraph, SDM_DEFAULT_LIST_INDENT_PT } from './listStyles';
 import {
   defaultRunStyleAttr,
@@ -110,15 +101,13 @@ function updateParagraphAttrs(update: ParagraphAttrsUpdate): Command {
 }
 
 export function setParagraphAlignment(align: Paragraph['align']): Command {
-  return updateParagraphAttrs((attrs) => ({ ...attrs, align: align ?? null }));
+  return updateParagraphAttrs(attrs => ({ ...attrs, align: align ?? null }));
 }
 
 export function setParagraphSpacing(
-  values: Partial<
-    Pick<Paragraph, 'lineHeight' | 'spaceAfterPt' | 'spaceBeforePt'>
-  >,
+  values: Partial<Pick<Paragraph, 'lineHeight' | 'spaceAfterPt' | 'spaceBeforePt'>>,
 ): Command {
-  return updateParagraphAttrs((attrs) => {
+  return updateParagraphAttrs(attrs => {
     const next = { ...attrs };
     if (Object.hasOwn(values, 'lineHeight')) {
       next.lineHeight = values.lineHeight ?? null;
@@ -150,11 +139,7 @@ function shiftedParagraphAttrs(
     indentPt:
       paragraph.indentPt === undefined
         ? null
-        : Math.max(
-            0,
-            paragraph.indentPt +
-              (level - currentLevel) * SDM_DEFAULT_LIST_INDENT_PT,
-          ),
+        : Math.max(0, paragraph.indentPt + (level - currentLevel) * SDM_DEFAULT_LIST_INDENT_PT),
     level: level === 0 ? null : level,
   };
 }
@@ -209,9 +194,7 @@ export const backspaceParagraphFormatting: Command = (state, dispatch) => {
   const attrs: Record<string, unknown> = parent.attrs;
   const paragraph = paragraphFromPmAttrs(attrs);
   const effective = effectiveParagraph(paragraph);
-  const hasBullet =
-    effective.bullet?.kind === 'character' ||
-    effective.bullet?.kind === 'number';
+  const hasBullet = effective.bullet?.kind === 'character' || effective.bullet?.kind === 'number';
   const level = effective.level;
   const hasResidualIndent = paragraph.indentPt !== undefined;
   if (!hasBullet && level === 0 && !hasResidualIndent) {
@@ -260,18 +243,11 @@ export function setBulletProperties(update: SdmBulletUpdate): Command {
       };
     }
     const current =
-      isRecord(attrs.bullet) && attrs.bullet.kind === 'number'
-        ? attrs.bullet
-        : undefined;
-    const style =
-      update.style ??
-      (typeof current?.style === 'string' ? current.style : undefined);
-    const currentStartAt =
-      typeof current?.startAt === 'number' ? current.startAt : undefined;
+      isRecord(attrs.bullet) && attrs.bullet.kind === 'number' ? attrs.bullet : undefined;
+    const style = update.style ?? (typeof current?.style === 'string' ? current.style : undefined);
+    const currentStartAt = typeof current?.startAt === 'number' ? current.startAt : undefined;
     const startAt =
-      isHead && update.startAt !== undefined
-        ? (update.startAt ?? undefined)
-        : currentStartAt;
+      isHead && update.startAt !== undefined ? (update.startAt ?? undefined) : currentStartAt;
 
     return {
       ...attrs,
@@ -284,10 +260,7 @@ export function setBulletProperties(update: SdmBulletUpdate): Command {
   });
 }
 
-function toggleBullets(
-  kind: 'character' | 'number',
-  create: (index: number) => Bullet,
-): Command {
+function toggleBullets(kind: 'character' | 'number', create: (index: number) => Bullet): Command {
   return (state, dispatch) => {
     const targets = paragraphTargets(state);
     if (targets.length === 0) {
@@ -339,7 +312,7 @@ export function toggleNumberedBullets({
   startAt?: number;
   style?: string;
 } = {}): Command {
-  return toggleBullets('number', (index) => ({
+  return toggleBullets('number', index => ({
     kind: 'number',
     ...(style === undefined ? {} : { style }),
     ...(index === 0 && startAt !== undefined ? { startAt } : {}),
@@ -369,10 +342,7 @@ function markTypeForStyle(key: keyof RunStyle): MarkType {
   }
 }
 
-function markForStyle(
-  key: keyof RunStyle,
-  value: RunStyle[keyof RunStyle],
-): Mark | undefined {
+function markForStyle(key: keyof RunStyle, value: RunStyle[keyof RunStyle]): Mark | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -431,10 +401,7 @@ export function setRunStyle(values: Partial<RunStyle>): Command {
         marks = updateStoredMark(marks, key, value);
       }
       transaction.setStoredMarks(marks);
-      if (
-        parent.type === sdmTextSchema.nodes.paragraph &&
-        parent.content.size === 0
-      ) {
+      if (parent.type === sdmTextSchema.nodes.paragraph && parent.content.size === 0) {
         const defaultRunStyle = defaultRunStyleAttr(runStyleFromMarks(marks));
         transaction.setNodeMarkup(state.selection.$from.before(), undefined, {
           ...parent.attrs,
@@ -459,10 +426,7 @@ export function setRunStyle(values: Partial<RunStyle>): Command {
         if (target.node.content.size !== 0) {
           continue;
         }
-        const merged: RunStyle = Value.Check(
-          RunStyleSchema,
-          target.node.attrs.defaultRunStyle,
-        )
+        const merged: RunStyle = Value.Check(RunStyleSchema, target.node.attrs.defaultRunStyle)
           ? { ...target.node.attrs.defaultRunStyle }
           : {};
         for (const [key, value] of entries) {
@@ -503,10 +467,7 @@ function continuedBullet(value: unknown): unknown {
   ) {
     return value;
   }
-  const style =
-    'style' in value && typeof value.style === 'string'
-      ? value.style
-      : undefined;
+  const style = 'style' in value && typeof value.style === 'string' ? value.style : undefined;
 
   return { kind: 'number', ...(style === undefined ? {} : { style }) };
 }
@@ -557,9 +518,7 @@ export const splitSdmParagraph: Command = (state, dispatch, view) => {
               level: null,
               markerStyle: null,
             };
-      dispatch(
-        state.tr.setNodeMarkup(state.selection.$from.before(), undefined, next),
-      );
+      dispatch(state.tr.setNodeMarkup(state.selection.$from.before(), undefined, next));
     }
 
     return true;
@@ -577,15 +536,9 @@ export const splitSdmParagraph: Command = (state, dispatch, view) => {
     state,
     dispatch === undefined
       ? undefined
-      : (transaction) => {
+      : transaction => {
           transaction.removeStoredMark(sdmTextSchema.marks.action);
-          dispatch(
-            withContinuedParagraphAttrs(
-              transaction,
-              sourceAttrs,
-              defaultRunStyle,
-            ),
-          );
+          dispatch(withContinuedParagraphAttrs(transaction, sourceAttrs, defaultRunStyle));
         },
     view,
   );

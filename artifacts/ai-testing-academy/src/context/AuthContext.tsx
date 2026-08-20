@@ -1,7 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
-  CREDENTIAL_STORAGE_KEY,
-  decodeCredential,
   googleClientId,
   loadGoogleIdentity,
   type GoogleButtonOptions,
@@ -12,7 +10,9 @@ interface AuthContextValue {
   /** False when the site was built without a client ID; sign-in stays hidden. */
   configured: boolean;
   user: GoogleUser | null;
-  signOut: () => void;
+  authenticating: boolean;
+  authError: boolean;
+  signOut: () => Promise<void>;
   /**
    * Renders Google's own button into `parent`. Google draws it itself — the
    * markup is theirs, in an iframe — so the caller supplies a container and
@@ -31,30 +31,6 @@ const BUTTON_OPTIONS: Omit<GoogleButtonOptions, 'locale'> = {
   text: 'signin_with',
 };
 
-/** The credential kept from a previous visit, if it is still worth anything. */
-function restoreUser(): GoogleUser | null {
-  let stored: string | null;
-  try {
-    stored = localStorage.getItem(CREDENTIAL_STORAGE_KEY);
-  } catch {
-    // Storage can be denied outright; that is a signed-out visit, not an error.
-    return null;
-  }
-  if (!stored) return null;
-
-  const user = decodeCredential(stored);
-  // An expired or unreadable credential is cleared rather than left to fail the
-  // same way on every future load.
-  if (!user) {
-    try {
-      localStorage.removeItem(CREDENTIAL_STORAGE_KEY);
-    } catch {
-      // Nothing further to do: the value is already treated as absent.
-    }
-  }
-  return user;
-}
-
 interface AuthProviderProps {
   children: React.ReactNode;
   /**
@@ -67,47 +43,115 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, clientId = googleClientId() }: AuthProviderProps) {
-  const configured = clientId !== '';
-  const [user, setUser] = useState<GoogleUser | null>(() => (configured ? restoreUser() : null));
+  const [resolvedClientId, setResolvedClientId] = useState(clientId);
+  const configured = resolvedClientId !== '';
+  const [user, setUser] = useState<GoogleUser | null>(null);
+  const [authenticating, setAuthenticating] = useState(false);
+  const [authError, setAuthError] = useState(false);
 
-  const handleCredential = useCallback((credential: string) => {
-    const next = decodeCredential(credential);
-    if (!next) return;
+  // A build-time client ID remains supported for local/offline builds. When it
+  // is absent, ask the same-origin API for the public ID at runtime so static
+  // Replit deployments do not need any authentication configuration of their own.
+  useEffect(() => {
+    if (clientId) return;
+    let active = true;
+    void fetch('/api/auth/config', { cache: 'no-store' })
+      .then(async response =>
+        response.ok ? ((await response.json()) as { clientId?: string }) : {},
+      )
+      .then(body => {
+        if (active && body.clientId) setResolvedClientId(body.clientId);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [clientId]);
+
+  const handleCredential = useCallback(async (credential: string) => {
+    setAuthenticating(true);
+    setAuthError(false);
     try {
-      localStorage.setItem(CREDENTIAL_STORAGE_KEY, credential);
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+      if (!response.ok) throw new Error('The server did not accept the Google credential');
+      const body = (await response.json()) as { user?: GoogleUser };
+      if (!body.user) throw new Error('The server returned no signed-in user');
+      setUser(body.user);
     } catch {
-      // Signing in still works for this visit; it just will not outlive it.
+      setAuthError(true);
+    } finally {
+      setAuthenticating(false);
     }
-    setUser(next);
   }, []);
 
   // Signing out drops the credential and tells Google not to re-select the same
   // account without being asked, so the next click is a real choice.
-  const signOut = useCallback(() => {
-    try {
-      localStorage.removeItem(CREDENTIAL_STORAGE_KEY);
-    } catch {
-      // The in-memory state below is what the page renders from either way.
-    }
+  const signOut = useCallback(async () => {
+    setAuthenticating(true);
+    setAuthError(false);
+    // Stop Google's automatic account selection immediately. The verified
+    // local session remains visible until our server confirms deletion below.
     window.google?.accounts.id.disableAutoSelect();
-    setUser(null);
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('The server did not end the session');
+      setUser(null);
+    } catch {
+      setAuthError(true);
+    } finally {
+      setAuthenticating(false);
+    }
   }, []);
+
+  // Versions before server sessions stored Google's raw credential here.
+  // Remove it once, even on deployments where sign-in is currently disabled.
+  useEffect(() => {
+    try {
+      localStorage.removeItem('ata_google_credential');
+    } catch {
+      // Storage may be unavailable; the application does not depend on it.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!configured) return;
+    let active = true;
+    void fetch('/api/auth/session', { credentials: 'include', cache: 'no-store' })
+      .then(async response =>
+        response.ok ? ((await response.json()) as { user?: GoogleUser }) : {},
+      )
+      .then(body => {
+        if (active && body.user) setUser(body.user);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [configured]);
 
   const renderButton = useCallback(
     async (parent: HTMLElement, locale: string) => {
       if (!configured) return;
       const api = await loadGoogleIdentity();
       api.initialize({
-        client_id: clientId,
+        client_id: resolvedClientId,
         callback: response => {
-          if (response.credential) handleCredential(response.credential);
+          if (response.credential) void handleCredential(response.credential);
         },
         auto_select: false,
         cancel_on_tap_outside: true,
       });
       api.renderButton(parent, { ...BUTTON_OPTIONS, locale });
     },
-    [clientId, configured, handleCredential],
+    [configured, handleCredential, resolvedClientId],
   );
 
   // A credential is only good until it expires. Rather than let a stale name sit
@@ -116,7 +160,7 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
     if (!user) return;
     const remaining = user.expiresAt - Date.now();
     if (remaining <= 0) {
-      signOut();
+      void signOut();
       return;
     }
     const timer = window.setTimeout(signOut, remaining);
@@ -124,8 +168,8 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
   }, [user, signOut]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ configured, user, signOut, renderButton }),
-    [configured, user, signOut, renderButton],
+    () => ({ configured, user, authenticating, authError, signOut, renderButton }),
+    [configured, user, authenticating, authError, signOut, renderButton],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -29,10 +29,27 @@ export default function CoverageGapAnalysis() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
@@ -40,10 +57,27 @@ export default function CoverageGapAnalysis() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3vh' }}>
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
-          <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+          <div
+            style={{
+              fontSize: '1.2vw',
+              fontWeight: 600,
+              color: '#0D9488',
+              marginBottom: '1vh',
+              textTransform: isHe ? 'none' : 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             {t('Coverage Analysis', 'ניתוח כיסוי')}
           </div>
-          <h1 style={{ fontSize: '3vw', fontWeight: 800, margin: '0 0 0.5vh 0', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          <h1
+            style={{
+              fontSize: '3vw',
+              fontWeight: 800,
+              margin: '0 0 0.5vh 0',
+              lineHeight: 1.1,
+              letterSpacing: '-0.02em',
+            }}
+          >
             {t('Identifying Where Tests Are Missing', 'זיהוי היכן חסרות בדיקות')}
           </h1>
         </div>
@@ -59,14 +93,27 @@ export default function CoverageGapAnalysis() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.5vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.5vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Step 1: Analyze', 'שלב 1: ניתוח')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#1E3A5F', fontWeight: 600, marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1vw', color: '#1E3A5F', fontWeight: 600, marginBottom: '1vh' }}
+            >
               {t('Run coverage tool on CI', 'הרצת כלי כיסוי ב-CI')}
             </div>
             <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
-              {t('Collect line, branch, and function coverage. Export a JSON report that AI agents can read.', 'אסוף כיסוי שורות, ענפים ופונקציות. ייצא דוח JSON שסוכני AI יכולים לקרוא.')}
+              {t(
+                'Collect line, branch, and function coverage. Export a JSON report that AI agents can read.',
+                'אסוף כיסוי שורות, ענפים ופונקציות. ייצא דוח JSON שסוכני AI יכולים לקרוא.',
+              )}
             </div>
           </div>
           <div
@@ -79,14 +126,27 @@ export default function CoverageGapAnalysis() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.5vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.5vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Step 2: Prioritize', 'שלב 2: תעדוף')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#1E3A5F', fontWeight: 600, marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1vw', color: '#1E3A5F', fontWeight: 600, marginBottom: '1vh' }}
+            >
               {t('Score uncovered code paths', 'ניקוד נתיבי קוד לא מכוסים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
-              {t('Weight by file change frequency and bug history. High-churn uncovered paths come first.', 'משקל לפי תדירות שינויים בקובץ והיסטוריית באגים. נתיבים לא מכוסים בתדירות גבוהה קודמים.')}
+              {t(
+                'Weight by file change frequency and bug history. High-churn uncovered paths come first.',
+                'משקל לפי תדירות שינויים בקובץ והיסטוריית באגים. נתיבים לא מכוסים בתדירות גבוהה קודמים.',
+              )}
             </div>
           </div>
           <div
@@ -99,14 +159,27 @@ export default function CoverageGapAnalysis() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: '#0D9488', marginBottom: '1.5vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1.5vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Step 3: Generate', 'שלב 3: יצירה')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#1E3A5F', fontWeight: 600, marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1vw', color: '#1E3A5F', fontWeight: 600, marginBottom: '1vh' }}
+            >
               {t('Pass gaps to AI for test creation', 'העברת פערים ל-AI ליצירת בדיקות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
-              {t('AI agent receives the source file, coverage gaps, and existing test patterns to produce new tests.', 'סוכן AI מקבל את קובץ המקור, פערי הכיסוי ותבניות בדיקות קיימות ליצירת בדיקות חדשות.')}
+              {t(
+                'AI agent receives the source file, coverage gaps, and existing test patterns to produce new tests.',
+                'סוכן AI מקבל את קובץ המקור, פערי הכיסוי ותבניות בדיקות קיימות ליצירת בדיקות חדשות.',
+              )}
             </div>
           </div>
         </div>
@@ -120,7 +193,9 @@ export default function CoverageGapAnalysis() {
             textAlign: isHe ? 'right' : 'left',
           }}
         >
-          <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#0D9488', marginBottom: '0.5vh' }}>
+          <div
+            style={{ fontSize: '1.1vw', fontWeight: 600, color: '#0D9488', marginBottom: '0.5vh' }}
+          >
             {t('Key Insight', 'תובנה מרכזית')}
           </div>
           <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5 }}>

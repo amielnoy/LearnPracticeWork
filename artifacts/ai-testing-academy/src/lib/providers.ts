@@ -37,7 +37,7 @@ export const PROVIDERS: Record<string, ProviderDef> = {
         body: {
           model,
           max_tokens: maxTokens,
-          // See the matching comment in api-server/src/routes/ai.ts.
+          // Keep this list in sync with server/app/main.py.
           reasoning_effort: 'low',
           messages: [{ role: 'system', content: system }, ...messages],
         },
@@ -125,6 +125,7 @@ async function callServerProxy(
   system: string,
   messages: Message[],
   maxTokens: number,
+  S: Locale['s'],
   grounded = false,
 ): Promise<string> {
   const res = await fetch('/api/ai/generate', {
@@ -133,8 +134,12 @@ async function callServerProxy(
     body: JSON.stringify({ model, system, messages, maxTokens, grounded }),
   });
   publishAnonymousQuota(res);
-  const data = (await res.json()) as { text?: string; error?: string };
+  const data = (await res.json()) as { text?: string; error?: string; truncated?: boolean };
   if (!res.ok) throw new Error(`API error (${res.status}): ${(data.error || '').slice(0, 300)}`);
+  // A truncated answer is not a shorter answer — it stops mid-sentence, and the
+  // JSON repair downstream will happily patch the half-written object into
+  // something that renders as if it were complete. Fail instead.
+  if (data.truncated) throw new Error(S.errTruncated);
   return data.text || '';
 }
 
@@ -151,7 +156,7 @@ export async function callAI(
 ): Promise<string> {
   const own = useOwnKey;
   if (!own && provider === 'groq' && serverDefaults.groq?.available) {
-    return callServerProxy(model, system, messages, maxTokens);
+    return callServerProxy(model, system, messages, maxTokens, S);
   }
   const key = apiKey.trim();
   if (!key) throw new Error(S.errNoKey);
@@ -194,6 +199,7 @@ export async function callGeminiGrounded(
       system,
       [{ role: 'user', content: user }],
       maxTokens,
+      S,
       true,
     );
   }
@@ -215,9 +221,11 @@ export async function callGeminiGrounded(
   if (!res.ok)
     throw new Error(S.errApiPrefix + res.status + '): ' + (await res.text()).slice(0, 300));
   const d = (await res.json()) as {
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> }; finishReason?: string }>;
   };
-  return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('\n');
+  const candidate = d.candidates?.[0];
+  if (candidate?.finishReason === 'MAX_TOKENS') throw new Error(S.errTruncated);
+  return (candidate?.content?.parts || []).map(p => p.text || '').join('\n');
 }
 
 /**

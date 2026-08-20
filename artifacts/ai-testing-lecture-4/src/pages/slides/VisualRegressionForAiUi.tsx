@@ -115,7 +115,12 @@ export default function VisualRegressionForAiUi() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('Mask Dynamic Text Regions', 'הסתרת אזורי טקסט דינמיים')}
             </div>
@@ -128,9 +133,17 @@ export default function VisualRegressionForAiUi() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
-              {t('Use Fixture Responses for Stable Snapshots', 'שימוש בתגובות Fixture ל-Snapshots יציבים')}
+              {t(
+                'Use Fixture Responses for Stable Snapshots',
+                'שימוש בתגובות Fixture ל-Snapshots יציבים',
+              )}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
               {t(
@@ -141,7 +154,12 @@ export default function VisualRegressionForAiUi() {
           </div>
           <div style={card}>
             <div
-              style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
             >
               {t('What Visual Tests Should Catch', 'מה בדיקות ויזואליות אמורות לזהות')}
             </div>
@@ -187,10 +205,16 @@ export default function VisualRegressionForAiUi() {
           </div>
           {[
             { label: t('Page chrome & navigation', 'Chrome ניווט ועמוד'), stable: true },
-            { label: t('Message bubble layout & spacing', 'פריסה ורווח של בועת הודעה'), stable: true },
+            {
+              label: t('Message bubble layout & spacing', 'פריסה ורווח של בועת הודעה'),
+              stable: true,
+            },
             { label: t('Input area & send button', 'אזור קלט וכפתור שליחה'), stable: true },
             { label: t('AI-generated response text', 'טקסט תגובה מיוצר AI'), stable: false },
-            { label: t('Streaming cursor / typing dots', 'סמן סטרימינג / נקודות הקלדה'), stable: false },
+            {
+              label: t('Streaming cursor / typing dots', 'סמן סטרימינג / נקודות הקלדה'),
+              stable: false,
+            },
           ].map((item, i) => (
             <div
               key={i}

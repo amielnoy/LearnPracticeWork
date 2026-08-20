@@ -4,11 +4,16 @@ import type { ReactNode } from 'react';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProviderContextProvider } from '@academy/context/ProviderContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';
-import { ConnectionSetup } from '@academy/components/ConnectionSetup';
-import { QuestionBank } from '@academy/components/QuestionBank';
-import { ResumeAgent } from '@academy/components/ResumeAgent';
-import { GoogleSignIn } from '@academy/components/GoogleSignIn';
+import { ConnectionSetup } from '@academy/components/agents/ConnectionSetup';
+import { QuestionBank } from '@academy/components/practice/QuestionBank';
+import { ResumeAgent } from '@academy/components/agents/ResumeAgent';
+import { GoogleSignIn } from '@academy/components/account/GoogleSignIn';
 import { AuthProvider } from '@academy/context/AuthContext';
+import { CodingChallenges } from '@academy/components/practice/CodingChallenges';
+import {
+  meaningfulReporting,
+  type MeaningfulReportingFixture,
+} from '../support/meaningfulReporting';
 
 /**
  * Component fixtures. The provider context probes `/api/ai/config` on mount, so
@@ -23,6 +28,11 @@ const NO_SERVER_KEY = { groq: { available: false }, gemini: { available: false }
 type QuestionBankHarness = {
   component: Locator;
   openAllStages: () => Promise<void>;
+};
+
+type CodingChallengesHarness = {
+  component: Locator;
+  openAllLevels: () => Promise<void>;
 };
 
 /**
@@ -68,11 +78,17 @@ interface GoogleStubWindow extends Window {
 /** How the sign-in control is mounted, and what a test can do to it afterwards. */
 type GoogleSignInHarness = {
   /** Mounts the control. An empty `clientId` stands for a build without one. */
-  mount: (options?: { clientId?: string; lang?: 'en' | 'he' }) => Promise<Locator>;
-  /** Puts a credential in storage before mounting, as a returning visit would. */
+  mount: (options?: {
+    clientId?: string;
+    runtimeClientId?: string;
+    lang?: 'en' | 'he';
+  }) => Promise<Locator>;
+  /** Seeds the API session and a legacy browser credential before mounting. */
   seedCredential: (credential: string) => Promise<void>;
   /** Clicks Google's button, which hands `credential` back through its callback. */
   signInWith: (credential: string) => Promise<void>;
+  /** Starts sign-in and holds the API response until the returned function runs. */
+  beginSignInWith: (credential: string) => Promise<() => Promise<void>>;
   /** What the stubbed Google client was told and asked to do. */
   stub: () => Promise<{ clientId?: string; locales: string[]; autoSelectDisabled: boolean }>;
 };
@@ -114,7 +130,11 @@ const GOOGLE_STUB = `
   };
 `;
 
-type ComponentFixtures = {
+type ComponentFixtures = MeaningfulReportingFixture & {
+  /** Mount any component inside the real locale provider. */
+  mountLocalized: (node: ReactNode) => Promise<Locator>;
+  /** CodingChallenges mounted with progress state and helpers for its closed levels. */
+  codingChallenges: CodingChallengesHarness;
   /** Mount ConnectionSetup against a chosen server config, wrapped in its providers. */
   mountSetup: (config: unknown) => Promise<Locator>;
   /** QuestionBank mounted with no server key (its stages start collapsed). */
@@ -134,6 +154,29 @@ const withProviders = (node: ReactNode) => (
 );
 
 export const test = base.extend<ComponentFixtures>({
+  _meaningfulReporting: [meaningfulReporting, { auto: true }],
+  mountLocalized: async ({ mount }, use) => {
+    await use((node: ReactNode) => mount(<LocaleProvider>{node}</LocaleProvider>));
+  },
+
+  codingChallenges: async ({ mount }, use) => {
+    const component = await mount(
+      <LocaleProvider>
+        <ProgressProvider>
+          <CodingChallenges />
+        </ProgressProvider>
+      </LocaleProvider>,
+    );
+    const openAllLevels = async () => {
+      const levels = component.locator('details.challenge-level');
+      const count = await levels.count();
+      for (let index = 0; index < count; index++) {
+        await levels.nth(index).locator('summary').click();
+      }
+    };
+    await use({ component, openAllLevels });
+  },
+
   mountSetup: async ({ mount, page }, use) => {
     await use(async (config: unknown) => {
       await page.route('**/api/ai/config', route => route.fulfill({ json: config }));
@@ -187,9 +230,63 @@ export const test = base.extend<ComponentFixtures>({
   },
 
   googleSignIn: async ({ mount, page }, use) => {
+    type SessionUser = { name: string; email: string; picture: string; expiresAt: number };
+    let sessionUser: SessionUser | null = null;
+    let pauseNextLogin = false;
+    let releaseLogin: (() => void) | undefined;
+
+    const verifiedUser = (credential: string): SessionUser | null => {
+      try {
+        const claims = JSON.parse(
+          Buffer.from(credential.split('.')[1] ?? '', 'base64url').toString('utf8'),
+        ) as { name?: string; email?: string; picture?: string; exp?: number };
+        if (!claims.name || !claims.email || !claims.exp || claims.exp * 1000 <= Date.now()) {
+          return null;
+        }
+        return {
+          name: claims.name,
+          email: claims.email,
+          picture: claims.picture ?? '',
+          expiresAt: claims.exp * 1000,
+        };
+      } catch {
+        return null;
+      }
+    };
+
     await page.route('https://accounts.google.com/gsi/client', route =>
       route.fulfill({ contentType: 'text/javascript', body: GOOGLE_STUB }),
     );
+    await page.route('**/api/auth/session', route =>
+      route.fulfill(
+        sessionUser
+          ? { status: 200, json: { user: sessionUser } }
+          : { status: 401, json: { error: 'Not signed in' } },
+      ),
+    );
+    let runtimeClientId = '';
+    await page.route('**/api/auth/config', route =>
+      route.fulfill({ status: 200, json: { clientId: runtimeClientId } }),
+    );
+    await page.route('**/api/auth/google', async route => {
+      const body = route.request().postDataJSON() as { credential?: string };
+      sessionUser = body.credential ? verifiedUser(body.credential) : null;
+      if (pauseNextLogin) {
+        pauseNextLogin = false;
+        await new Promise<void>(resolve => {
+          releaseLogin = resolve;
+        });
+      }
+      await route.fulfill(
+        sessionUser
+          ? { status: 200, json: { user: sessionUser } }
+          : { status: 401, json: { error: 'Google sign-in could not be verified.' } },
+      );
+    });
+    await page.route('**/api/auth/logout', async route => {
+      sessionUser = null;
+      await route.fulfill({ status: 200, json: { ok: true } });
+    });
 
     // Nothing here navigates, so state written before `mount` is still there
     // when the component reads it — which is how a returning visit and a
@@ -198,25 +295,41 @@ export const test = base.extend<ComponentFixtures>({
       page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, value] as const);
 
     await use({
-      mount: async ({
-        clientId = 'test-client-id.apps.googleusercontent.com',
-        lang = 'en',
-      } = {}) => {
+      mount: async ({ clientId, runtimeClientId: apiClientId = '', lang = 'en' } = {}) => {
+        runtimeClientId = apiClientId;
+        const configuredClientId =
+          clientId ?? (apiClientId ? '' : 'test-client-id.apps.googleusercontent.com');
         await setBeforeMount('ata_lang', lang);
         return mount(
           <LocaleProvider>
-            <AuthProvider clientId={clientId}>
+            <AuthProvider clientId={configuredClientId}>
               <GoogleSignIn />
             </AuthProvider>
           </LocaleProvider>,
         );
       },
-      seedCredential: credential => setBeforeMount('ata_google_credential', credential),
+      seedCredential: async credential => {
+        sessionUser = verifiedUser(credential);
+        await setBeforeMount('ata_google_credential', credential);
+      },
       signInWith: async credential => {
         await page.evaluate(value => {
           (window as GoogleStubWindow).__credential = value;
         }, credential);
         await page.locator('#fakeGoogleButton').click();
+      },
+      beginSignInWith: async credential => {
+        pauseNextLogin = true;
+        await page.evaluate(value => {
+          (window as GoogleStubWindow).__credential = value;
+        }, credential);
+        const requestStarted = page.waitForRequest('**/api/auth/google');
+        const clickFinished = page.locator('#fakeGoogleButton').click();
+        await requestStarted;
+        return async () => {
+          releaseLogin?.();
+          await clickFinished;
+        };
       },
       stub: async () =>
         page.evaluate(

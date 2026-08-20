@@ -90,7 +90,15 @@ export default function WhenSchemaValidPassesAreNotEnough() {
         >
           {t('Schema-Valid ≠ Semantically Correct', 'תקינות סכמה ≠ נכונות סמנטית')}
         </h1>
-        <p style={{ fontSize: '1.4vw', color: '#475569', margin: 0, lineHeight: 1.6, maxWidth: '60vw' }}>
+        <p
+          style={{
+            fontSize: '1.4vw',
+            color: '#475569',
+            margin: 0,
+            lineHeight: 1.6,
+            maxWidth: '60vw',
+          }}
+        >
           {t(
             'A response can pass every schema constraint and still carry a completely wrong value. Schema validation checks shape, not sense.',
             'תגובה יכולה לעבור כל אילוץ סכמה ועדיין להכיל ערך שגוי לחלוטין. אימות סכמה בודק צורה, לא משמעות.',
@@ -108,7 +116,15 @@ export default function WhenSchemaValidPassesAreNotEnough() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#0D9488',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Schema Validation View', 'מבט אימות סכמה')}
             </div>
             <div
@@ -129,7 +145,10 @@ export default function WhenSchemaValidPassesAreNotEnough() {
               <div>{'}'}</div>
             </div>
             <div style={{ fontSize: '0.9vw', color: '#0D9488', fontWeight: 600 }}>
-              {t('✔ Schema passes — type: number, currency: valid enum', '✔ סכמה עוברת — סוג: מספר, מטבע: enum תקין')}
+              {t(
+                '✔ Schema passes — type: number, currency: valid enum',
+                '✔ סכמה עוברת — סוג: מספר, מטבע: enum תקין',
+              )}
             </div>
           </div>
 
@@ -142,7 +161,15 @@ export default function WhenSchemaValidPassesAreNotEnough() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.9vw', fontWeight: 700, color: '#DC2626', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.9vw',
+                fontWeight: 700,
+                color: '#DC2626',
+                marginBottom: '1vh',
+                textTransform: isHe ? 'none' : 'uppercase',
+              }}
+            >
               {t('Semantic Reality', 'מציאות סמנטית')}
             </div>
             <div
@@ -157,14 +184,19 @@ export default function WhenSchemaValidPassesAreNotEnough() {
                 marginBottom: '1.5vh',
               }}
             >
-              <div style={{ color: '#94A3B8' }}>// {t('Expected price: $12.99', 'מחיר צפוי: $12.99')}</div>
+              <div style={{ color: '#94A3B8' }}>
+                // {t('Expected price: $12.99', 'מחיר צפוי: $12.99')}
+              </div>
               <div>{'{'}</div>
               <div style={{ paddingLeft: '1.5vw', color: '#DC2626' }}>"price": 9999.99,</div>
               <div style={{ paddingLeft: '1.5vw', color: '#F59E0B' }}>"currency": "USD"</div>
               <div>{'}'}</div>
             </div>
             <div style={{ fontSize: '0.9vw', color: '#DC2626', fontWeight: 600 }}>
-              {t('✘ Semantically wrong — price is 770× too high', '✘ שגוי סמנטית — המחיר גבוה פי 770')}
+              {t(
+                '✘ Semantically wrong — price is 770× too high',
+                '✘ שגוי סמנטית — המחיר גבוה פי 770',
+              )}
             </div>
           </div>
         </div>

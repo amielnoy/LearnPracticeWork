@@ -1,0 +1,50 @@
+# Cloudflare Pages response headers. Copied to the site root by the `Assemble
+# the site` step in .github/workflows/ci.yml; GitHub Pages ignores this file.
+#
+# The caching split is the point. Vite fingerprints everything under /assets/
+# with a content hash, so those URLs can never change meaning and are safe to
+# cache forever. The HTML shells are the opposite: their names are stable and
+# their contents change on every deploy, so a long cache there is how a visitor
+# ends up holding an index.html that points at assets which no longer exist.
+
+/*
+  # Clickjacking and MIME-sniffing defences. The decks are meant to be embedded
+  # by the platform's own preview, which is same-origin, so SAMEORIGIN rather
+  # than DENY.
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.groq.com https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://www.youtube.com https://www.youtube-nocookie.com https://*.gamma.site; worker-src 'self' blob:; upgrade-insecure-requests
+  # No camera or microphone anywhere on the static site. The mock interview's
+  # voice mode runs in the academy, which is listed separately below.
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Hashed build output — the filename changes whenever the bytes do.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/ai-testing-academy/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/ai-testing-lecture-*/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Shells and crawler files: stable names, changing contents. Revalidate every
+# time so a deploy is visible immediately.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+# The academy asks for the microphone: the mock interview has a voice mode.
+# Listed after the site-wide rule so it wins for this prefix.
+/ai-testing-academy/*
+  Permissions-Policy: camera=(), microphone=(self), geolocation=()

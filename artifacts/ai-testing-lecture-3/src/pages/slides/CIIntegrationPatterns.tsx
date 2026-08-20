@@ -104,7 +104,14 @@ export default function CIIntegrationPatterns() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Blocking Checks', 'בדיקות חוסמות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -115,7 +122,14 @@ export default function CIIntegrationPatterns() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Warning Checks', 'בדיקות אזהרה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -126,7 +140,14 @@ export default function CIIntegrationPatterns() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Pass / Fail Threshold', 'סף עבר / נכשל')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -183,10 +204,10 @@ export default function CIIntegrationPatterns() {
           >
             <div style={{ color: '#94A3B8' }}>$ pnpm run test:llm-outputs</div>
             <div style={{ color: '#E2E8F0', marginTop: '0.5vh' }}>Running 120 test cases...</div>
-            <div style={{ color: '#0D9488' }}>✔ Similarity   116/120 (96.7%)  PASS</div>
-            <div style={{ color: '#0D9488' }}>✔ Factuality   118/120 (98.3%)  PASS</div>
-            <div style={{ color: '#0D9488' }}>✔ Safety       120/120 (100%)   PASS</div>
-            <div style={{ color: '#DC2626' }}>✘ Schema        114/120 (95.0%)  FAIL</div>
+            <div style={{ color: '#0D9488' }}>✔ Similarity 116/120 (96.7%) PASS</div>
+            <div style={{ color: '#0D9488' }}>✔ Factuality 118/120 (98.3%) PASS</div>
+            <div style={{ color: '#0D9488' }}>✔ Safety 120/120 (100%) PASS</div>
+            <div style={{ color: '#DC2626' }}>✘ Schema 114/120 (95.0%) FAIL</div>
             <div style={{ color: '#E2E8F0', marginTop: '0.5vh' }}>
               {t('─────────────────────────────', '─────────────────────────────')}
             </div>
@@ -195,13 +216,29 @@ export default function CIIntegrationPatterns() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2vh', textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.2vh',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {[
               t('Schema threshold: 100% required, 95% actual', 'סף סכמה: נדרש 100%, בפועל 95%'),
               t('6 cases missing required "currency" field', '6 מקרים חסרים שדה "currency" נדרש'),
               t('Merge blocked until schema fixes land', 'מיזוג חסום עד שתיקון הסכמה מיושם'),
             ].map((note, i) => (
-              <div key={i} style={{ display: 'flex', gap: '0.8vw', alignItems: 'flex-start', fontSize: '0.95vw', color: '#64748B' }}>
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  gap: '0.8vw',
+                  alignItems: 'flex-start',
+                  fontSize: '0.95vw',
+                  color: '#64748B',
+                }}
+              >
                 <span style={{ color: '#D97706', fontWeight: 700, flexShrink: 0 }}>→</span>
                 <span>{note}</span>
               </div>

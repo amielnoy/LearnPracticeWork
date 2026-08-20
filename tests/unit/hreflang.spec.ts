@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../support/test';
 
 /**
  * Both public sites are bilingual on a single set of URLs — `?lang=` picks the

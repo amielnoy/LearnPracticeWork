@@ -18,17 +18,32 @@ const wrap: React.CSSProperties = {
 
 export default function SchemaDesignBestPractices() {
   const dos = [
-    t('Mark required fields explicitly — never infer from absence', 'סמן שדות חובה במפורש — לעולם אל תסיק מהיעדר'),
+    t(
+      'Mark required fields explicitly — never infer from absence',
+      'סמן שדות חובה במפורש — לעולם אל תסיק מהיעדר',
+    ),
     t('Use enum for fields with a fixed value set', 'השתמש ב-enum לשדות עם קבוצת ערכים קבועה'),
     t('Add minLength / maxLength to string fields', 'הוסף minLength / maxLength לשדות מחרוזת'),
-    t('Use format: "date" / "email" for well-typed strings', 'השתמש ב-format: "date" / "email" למחרוזות מוקלדות'),
-    t('Set additionalProperties: false in strict mode', 'הגדר additionalProperties: false במצב קשיח'),
+    t(
+      'Use format: "date" / "email" for well-typed strings',
+      'השתמש ב-format: "date" / "email" למחרוזות מוקלדות',
+    ),
+    t(
+      'Set additionalProperties: false in strict mode',
+      'הגדר additionalProperties: false במצב קשיח',
+    ),
   ];
   const donts = [
-    t('Do NOT make every field optional "just in case"', 'אל תהפוך כל שדה לאופציונלי "למקרה הצורך"'),
+    t(
+      'Do NOT make every field optional "just in case"',
+      'אל תהפוך כל שדה לאופציונלי "למקרה הצורך"',
+    ),
     t('Do NOT use type: "string" for numeric IDs', 'אל תשתמש ב-type: "string" עבור מזהים מספריים'),
     t('Do NOT omit descriptions — they guide the LLM', 'אל תשמיט תיאורים — הם מנחים את ה-LLM'),
-    t('Do NOT hard-code values that may vary by locale', 'אל תשמור ערכים קשיחים שעשויים להשתנות לפי locale'),
+    t(
+      'Do NOT hard-code values that may vary by locale',
+      'אל תשמור ערכים קשיחים שעשויים להשתנות לפי locale',
+    ),
   ];
 
   return (
@@ -121,14 +136,24 @@ export default function SchemaDesignBestPractices() {
             lineHeight: 1.7,
           }}
         >
-          <div style={{ color: '#64748B', marginBottom: '0.5vh' }}>// {t('Testable schema snippet', 'קטע סכמה הניתן לבדיקה')}</div>
+          <div style={{ color: '#64748B', marginBottom: '0.5vh' }}>
+            // {t('Testable schema snippet', 'קטע סכמה הניתן לבדיקה')}
+          </div>
           <div>{'{'}</div>
           <div style={{ paddingLeft: '1.5vw', color: '#0D9488' }}>"type": "object",</div>
-          <div style={{ paddingLeft: '1.5vw', color: '#0D9488' }}>"required": ["id", "price", "currency"],</div>
-          <div style={{ paddingLeft: '1.5vw', color: '#94A3B8' }}>"additionalProperties": false,</div>
+          <div style={{ paddingLeft: '1.5vw', color: '#0D9488' }}>
+            "required": ["id", "price", "currency"],
+          </div>
+          <div style={{ paddingLeft: '1.5vw', color: '#94A3B8' }}>
+            "additionalProperties": false,
+          </div>
           <div style={{ paddingLeft: '1.5vw' }}>"properties": {'{'}</div>
-          <div style={{ paddingLeft: '3vw', color: '#F59E0B' }}>"price": {'{'} "type": "number", "minimum": 0 {'}'},</div>
-          <div style={{ paddingLeft: '3vw', color: '#F59E0B' }}>"currency": {'{'} "type": "string", "enum": ["USD","EUR","GBP"] {'}'}</div>
+          <div style={{ paddingLeft: '3vw', color: '#F59E0B' }}>
+            "price": {'{'} "type": "number", "minimum": 0 {'}'},
+          </div>
+          <div style={{ paddingLeft: '3vw', color: '#F59E0B' }}>
+            "currency": {'{'} "type": "string", "enum": ["USD","EUR","GBP"] {'}'}
+          </div>
           <div style={{ paddingLeft: '1.5vw' }}>{'}'}</div>
           <div>{'}'}</div>
         </div>
@@ -166,8 +191,22 @@ export default function SchemaDesignBestPractices() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9vh' }}>
             {dos.map((item, i) => (
-              <div key={i} style={{ display: 'flex', gap: '0.8vw', alignItems: 'flex-start', fontSize: '0.95vw', color: '#1E3A5F', textAlign: isHe ? 'right' : 'left' }}>
-                <span style={{ color: '#0D9488', fontWeight: 700, flexShrink: 0, marginTop: '0.1vh' }}>✔</span>
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  gap: '0.8vw',
+                  alignItems: 'flex-start',
+                  fontSize: '0.95vw',
+                  color: '#1E3A5F',
+                  textAlign: isHe ? 'right' : 'left',
+                }}
+              >
+                <span
+                  style={{ color: '#0D9488', fontWeight: 700, flexShrink: 0, marginTop: '0.1vh' }}
+                >
+                  ✔
+                </span>
                 <span>{item}</span>
               </div>
             ))}
@@ -188,8 +227,22 @@ export default function SchemaDesignBestPractices() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9vh' }}>
             {donts.map((item, i) => (
-              <div key={i} style={{ display: 'flex', gap: '0.8vw', alignItems: 'flex-start', fontSize: '0.95vw', color: '#1E3A5F', textAlign: isHe ? 'right' : 'left' }}>
-                <span style={{ color: '#DC2626', fontWeight: 700, flexShrink: 0, marginTop: '0.1vh' }}>✘</span>
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  gap: '0.8vw',
+                  alignItems: 'flex-start',
+                  fontSize: '0.95vw',
+                  color: '#1E3A5F',
+                  textAlign: isHe ? 'right' : 'left',
+                }}
+              >
+                <span
+                  style={{ color: '#DC2626', fontWeight: 700, flexShrink: 0, marginTop: '0.1vh' }}
+                >
+                  ✘
+                </span>
                 <span>{item}</span>
               </div>
             ))}

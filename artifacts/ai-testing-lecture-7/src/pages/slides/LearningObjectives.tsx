@@ -181,18 +181,30 @@ export default function LearningObjectives() {
           >
             {t('Also in this lecture', 'גם בהרצאה זו')}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3vh', position: 'relative' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '3vh', position: 'relative' }}
+          >
+            <div
+              style={
+                {
+                  position: 'absolute',
+                  [isHe ? 'right' : 'left']: '0.5vw',
+                  top: '2vh',
+                  bottom: '2vh',
+                  width: '2px',
+                  backgroundColor: '#E2E8F0',
+                } as React.CSSProperties
+              }
+            />
             <div
               style={{
-                position: 'absolute',
-                [isHe ? 'right' : 'left']: '0.5vw',
-                top: '2vh',
-                bottom: '2vh',
-                width: '2px',
-                backgroundColor: '#E2E8F0',
-              } as React.CSSProperties}
-            />
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',
@@ -207,7 +219,15 @@ export default function LearningObjectives() {
                 {t('Run adversarial robustness tests', 'הרצת בדיקות עמידות עוינת')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',
@@ -222,7 +242,15 @@ export default function LearningObjectives() {
                 {t('Prevent denial-of-wallet attacks', 'מניעת מתקפות denial-of-wallet')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',
@@ -237,7 +265,15 @@ export default function LearningObjectives() {
                 {t('Wire guardrail tests into a CI pipeline', 'חיבור בדיקות guardrail לצינור CI')}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
               <div
                 style={{
                   width: '1vw',

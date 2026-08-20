@@ -14,6 +14,49 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
+# --regression widens the e2e layer from the two Chromium projects to every
+# engine: WebKit desktop and phone — the engine Safari and iOS actually run —
+# plus Firefox. Off by default because it roughly triples the e2e wall time, and
+# a push should not have to wait for it. The scheduled workflow of the same name
+# runs it nightly.
+REGRESSION=0
+for arg in "$@"; do
+  case "$arg" in
+    --regression) REGRESSION=1 ;;
+    -h|--help)
+      echo "usage: $0 [--regression]"
+      echo "  --regression  run the e2e layer on every engine, not just Chromium"
+      exit 0 ;;
+    *) echo "unknown option: $arg" >&2; exit 2 ;;
+  esac
+done
+
+if [ "$REGRESSION" -eq 1 ]; then
+  E2E_PROJECTS=""
+  E2E_LABEL="e2e (every engine — chromium, webkit, firefox)"
+else
+  E2E_PROJECTS="--project=e2e-desktop --project=e2e-mobile --project=deck"
+  E2E_LABEL="e2e (desktop + mobile)"
+fi
+
+# Prints "label  path" with the path as a terminal hyperlink when the terminal
+# will render one, and as a plain file:// URL when it will not.
+#
+# OSC 8 is the escape sequence terminals use for hyperlinks; iTerm2, VS Code,
+# Windows Terminal and GNOME Terminal honour it, and the ones that do not would
+# print the raw escape bytes as garbage. So it is used only on a real TTY and
+# never under CI, where the output is a log file. The fallback is still useful:
+# most terminals linkify a bare file:// URL, and every one of them lets you
+# copy it.
+link() {
+  local label="$1" rel="$2" url="file://$ROOT/$2"
+  if [ -t 1 ] && [ -z "${CI:-}" ]; then
+    printf '  %-18s \033]8;;%s\033\\%s\033]8;;\033\\\n' "$label" "$url" "$rel"
+  else
+    printf '  %-18s %s\n' "$label" "$url"
+  fi
+}
+
 PW_ROOT="./node_modules/.bin/playwright"
 PW_TESTS="./node_modules/.bin/playwright"
 ALLURE="./node_modules/.bin/allure"
@@ -26,29 +69,73 @@ for d in allure-results allure-report blob-report playwright-report; do
 done
 
 status=0
-layer() {
+
+# Resolve Python dependencies before launching workers. `uv sync` takes a lock,
+# so asking the backend API servers and pytest to perform it simultaneously only
+# serialises them invisibly and can make a fresh checkout look hung.
+echo "▶ prepare Python environment"
+if ! (cd server && uv sync --frozen); then
+  echo "✗ Python environment preparation failed"
+  exit 1
+fi
+
+# Every independent layer runs at the same time. Output is captured per layer
+# and printed as a group after it finishes, so parallel workers cannot interleave
+# their progress into an unreadable terminal stream. Playwright already gives
+# each config its own blob directory, while Allure uses UUID result filenames,
+# making both report formats safe for concurrent writers.
+RUN_LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/academy-tests.XXXXXX")"
+cleanup_logs() { rm -rf "$RUN_LOG_DIR"; }
+trap cleanup_logs EXIT INT TERM
+
+layer_titles=()
+layer_logs=()
+layer_pids=()
+
+launch_layer() {
   local title="$1"; shift
-  echo ""
-  echo "▶ ${title}"
-  if ! "$@"; then
-    status=1
-    echo "✗ ${title} failed"
-  fi
+  local index="${#layer_pids[@]}"
+  local log="$RUN_LOG_DIR/layer-$index.log"
+  layer_titles[$index]="$title"
+  layer_logs[$index]="$log"
+  echo "  ↗ ${title}"
+  ( "$@" ) >"$log" 2>&1 &
+  layer_pids[$index]=$!
 }
 
-# CI typechecks before it runs anything, and Playwright transpiles specs without
-# checking them — so a type error in a spec passes here and fails the pipeline.
-# Running it first closes that gap. Like every other layer it does not abort the
-# run; the exit status still reflects it.
-layer "typecheck (tests)" \
+echo ""
+echo "▶ parallel test layers"
+# Two workers inside each suite keeps the suites themselves parallel without
+# multiplying three Playwright processes into an unbounded browser stampede.
+# pytest-xdist reads its matching cap. Both remain overridable for larger CI or
+# developer machines.
+export PW_SUITE_WORKERS="${PW_SUITE_WORKERS:-2}"
+export PYTEST_XDIST_AUTO_NUM_WORKERS="${PYTEST_XDIST_AUTO_NUM_WORKERS:-2}"
+launch_layer "typecheck (tests)" \
   bash -c "cd tests && ./node_modules/.bin/tsc -p tsconfig.json --noEmit"
-
-layer "unit / api / contract" \
+launch_layer "backend fixtures (Python)" \
+  bash -c "cd server && uv run pytest"
+launch_layer "unit / api / contract" \
   "$PW_ROOT" test --config=playwright.config.mts
-layer "component (desktop + mobile)" \
+launch_layer "component (desktop + mobile)" \
   bash -c "cd tests && $PW_TESTS test --config=playwright-ct.config.ts"
-layer "e2e (desktop + mobile)" \
-  bash -c "cd tests && $PW_TESTS test --config=playwright-e2e.config.ts"
+launch_layer "$E2E_LABEL" \
+  bash -c "cd tests && $PW_TESTS test --config=playwright-e2e.config.ts $E2E_PROJECTS"
+
+for index in "${!layer_pids[@]}"; do
+  title="${layer_titles[$index]}"
+  log="${layer_logs[$index]}"
+  echo ""
+  echo "── ${title} ──"
+  if wait "${layer_pids[$index]}"; then
+    cat "$log"
+    echo "✓ ${title} passed"
+  else
+    cat "$log"
+    echo "✗ ${title} failed"
+    status=1
+  fi
+done
 
 echo ""
 echo "▶ allure report"
@@ -85,8 +172,18 @@ if [ "$status" -eq 0 ]; then
 else
   echo "✗ some suites failed (see above)"
 fi
-echo "  Allure report:     allure-report/index.html"
-echo "  Playwright report: playwright-report/index.html"
+# Allure and the architecture page are both single self-contained documents, so
+# file:// opens them and the link works. The Playwright report is not: its assets
+# cannot load over file://, which is why it is printed as a path and served
+# below rather than linked to somewhere that would open broken.
+link "Allure report:" "allure-report/index.html"
+echo "  Playwright report: playwright-report/index.html  (needs serving — see below)"
+# The same page CI links from its run summary. Locally it is the copy in the
+# working tree, not the one on Pages, so it describes the branch just tested
+# rather than whatever main last published.
+link "Architecture:" "architecture.html"
+GRAFANA_BASE_URL="${GRAFANA_URL:-http://localhost:3000}"
+echo "  Grafana dashboard: ${GRAFANA_BASE_URL%/}/d/academy-overview/academy-servers-and-test-history"
 
 # Open both reports when running interactively (never in CI / the container,
 # where CI=true is set and show-report would block forever).

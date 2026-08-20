@@ -3,7 +3,7 @@ import { EN_BANK } from '@academy/lib/questionBank';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';
 import { ProviderContextProvider } from '@academy/context/ProviderContext';
-import { QuestionBank } from '@academy/components/QuestionBank';
+import { QuestionBank } from '@academy/components/practice/QuestionBank';
 
 /**
  * The section that wires the content to the cards. These tests assert the

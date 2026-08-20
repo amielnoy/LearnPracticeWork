@@ -10,9 +10,7 @@ import { sdmTextSchema } from './pmSchema';
 
 // OOXML repeated-letter alphabetic numbering: 26 -> z, 27 -> aa, 53 -> aaa.
 function alphaNumber(value: number, uppercase: boolean): string {
-  const letter = String.fromCharCode(
-    (uppercase ? 65 : 97) + ((value - 1) % 26),
-  );
+  const letter = String.fromCharCode((uppercase ? 65 : 97) + ((value - 1) % 26));
 
   return letter.repeat(Math.floor((value - 1) / 26) + 1);
 }
@@ -56,12 +54,8 @@ const NUMBER_STYLE_ALIASES: Record<string, string> = {
 };
 
 export function formatBulletNumber(style: string | undefined, value: number) {
-  const scheme =
-    NUMBER_STYLE_ALIASES[style ?? 'arabicPeriod'] ?? style ?? 'arabicPeriod';
-  const count = Math.max(
-    1,
-    Math.min(SDM_MAX_NUMBER_START_AT, Math.trunc(value)),
-  );
+  const scheme = NUMBER_STYLE_ALIASES[style ?? 'arabicPeriod'] ?? style ?? 'arabicPeriod';
+  const count = Math.max(1, Math.min(SDM_MAX_NUMBER_START_AT, Math.trunc(value)));
   let body: string;
   if (scheme.startsWith('alphaUc')) {
     body = alphaNumber(count, true);
@@ -94,26 +88,19 @@ export function formatBulletNumber(style: string | undefined, value: number) {
  * empty line so typing previews its marker.
  */
 export function paragraphMarkers(
-  paragraphs: ReadonlyArray<
-    Pick<Paragraph, 'bullet' | 'level'> & Partial<Pick<Paragraph, 'runs'>>
-  >,
+  paragraphs: ReadonlyArray<Pick<Paragraph, 'bullet' | 'level'> & Partial<Pick<Paragraph, 'runs'>>>,
 ): Array<string> {
   const counters = new Map<number, number>();
 
-  return paragraphs.map((paragraph) => {
-    if (
-      paragraph.runs !== undefined &&
-      !paragraph.runs.some((run) => run.text !== '')
-    ) {
+  return paragraphs.map(paragraph => {
+    if (paragraph.runs !== undefined && !paragraph.runs.some(run => run.text !== '')) {
       return '';
     }
     const level = paragraph.level ?? 0;
     if (paragraph.bullet?.kind === 'number') {
       const startAt = paragraph.bullet.startAt ?? 1;
       const restart = paragraph.bullet.startAt !== undefined;
-      const count = restart
-        ? startAt
-        : (counters.get(level) ?? startAt - 1) + 1;
+      const count = restart ? startAt : (counters.get(level) ?? startAt - 1) + 1;
       counters.set(level, count);
       for (const counterLevel of counters.keys()) {
         if (counterLevel > level) {
@@ -129,15 +116,13 @@ export function paragraphMarkers(
       }
     }
 
-    return paragraph.bullet?.kind === 'character'
-      ? `${paragraph.bullet.character} `
-      : '';
+    return paragraph.bullet?.kind === 'character' ? `${paragraph.bullet.character} ` : '';
   });
 }
 
 function paragraphMetadata(doc: ProseMirrorNode): Array<EffectiveParagraph> {
   const paragraphs: Array<EffectiveParagraph> = [];
-  doc.forEach((node) => {
+  doc.forEach(node => {
     paragraphs.push(effectiveParagraph(paragraphForMarker(node)));
   });
 
@@ -150,9 +135,7 @@ function paragraphForMarker(node: ProseMirrorNode): Paragraph {
     runs: [
       {
         text: '',
-        ...(node.firstChild === null
-          ? {}
-          : runStyleFromMarks(node.firstChild.marks)),
+        ...(node.firstChild === null ? {} : runStyleFromMarks(node.firstChild.marks)),
       },
     ],
   };
@@ -165,9 +148,7 @@ export function createParagraphMarkerPlugin(theme?: Theme): Plugin {
         const paragraphs = paragraphMetadata(state.doc);
         const { $head } = state.selection;
         const headIndex =
-          $head.parent.type === sdmTextSchema.nodes.paragraph
-            ? $head.index(0)
-            : undefined;
+          $head.parent.type === sdmTextSchema.nodes.paragraph ? $head.index(0) : undefined;
         // Blank paragraphs stay markerless while editing, matching the
         // static render; only the caret's own empty line previews the
         // marker typing would produce.

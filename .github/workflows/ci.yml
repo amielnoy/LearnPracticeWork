@@ -1,5 +1,31 @@
 name: CI
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  gate ──▶ test ──┬──▶ build-pages ──▶ deploy-pages
+#                  └──▶ publish-allure
+#
+#  gate           Answers one question — should this run at all? The nightly
+#                 schedule fires twice and this drops the firing that is not
+#                 05:00 in Israel. Everything else waits on its answer.
+#
+#  test           Every push and every PR. Typecheck, lint and format first, then
+#                 Python, unit/API/contract, component and E2E workers run in
+#                 parallel on the same prepared runner. The runner collects every
+#                 result even when one worker fails, so Allure remains complete.
+#
+#  build-pages    main only. Builds the portfolio at the site root and mounts
+#                 the academy and all ten decks underneath it.
+#  deploy-pages   main only. Publishes what build-pages produced.
+#  publish-allure main only. Pushes the report to its own repository, so test
+#                 results keep their own URL and never land on the site.
+#
+#  Two rules make the reports trustworthy:
+#    · every layer carries `if: !cancelled()`, so one red layer never hides the
+#      rest — the report covers the whole run or it is not worth reading;
+#    · publishing does not depend on the tests passing, because a report you
+#      cannot open when the build is red is missing exactly when it is needed.
+# ─────────────────────────────────────────────────────────────────────────────
+
 # Runs on every push and pull request, plus a nightly check at 05:00 Israel
 # time. GitHub cron only understands UTC and Israel switches between UTC+2 and
 # UTC+3, so both candidate hours are scheduled and the `gate` job drops the one
@@ -53,19 +79,44 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      # First thing in the summary, before any report, because it is the thing
+      # someone reaches for when a step name means nothing to them. It runs
+      # early and unconditionally: the page is worth linking whether the run is
+      # green or red, and it does not depend on anything the run produces.
+      #
+      # The URL is asked of the Pages API rather than assembled from the repo
+      # name, so a custom domain or a user/org site is linked correctly; the
+      # conventional project-site URL is the fallback when the API says nothing
+      # (it needs Pages to be enabled, and the token may not be allowed to ask).
+      - name: Link the architecture page in the run summary
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          site=$(gh api "repos/${{ github.repository }}/pages" --jq .html_url 2>/dev/null || true)
+          if [ -z "$site" ]; then
+            site="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          fi
+          url="${site%/}/architecture.html"
+          {
+            echo "## 🏛️ How this repository is put together"
+            echo ""
+            echo "**➡️ [Architecture](${url})** — runtime shape, the AI layer, trust boundaries, the test strategy."
+            echo ""
+            if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+              echo "_Republished by this run once it reaches \`deploy-pages\`._"
+            else
+              echo "_Published from \`main\`, so it may not yet describe this branch._"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Resolve the Playwright version
         id: playwright
@@ -75,7 +126,7 @@ jobs:
 
       - name: Restore the browser download
         id: browser-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
@@ -83,46 +134,62 @@ jobs:
       - name: Install Chromium
         run: pnpm --filter @workspace/tests exec playwright install --with-deps chromium
 
-      # api-server and scripts do not compile today, for reasons that predate
-      # this pipeline: noImplicitReturns in the Express handlers, `unknown`
-      # response bodies from the Gemini and Replit connector fetches, and a
-      # MigrationConfig mismatch in stripe-replit-sync. Everything else is
-      # clean, so the gate covers everything else. Drop the exclusions — or
-      # switch back to plain `pnpm run typecheck` — once those two compile.
+      # The exclusions this step used to carry — api-server and scripts, on the
+      # grounds that neither compiled — are gone: both compile clean now, so the
+      # gate is the plain script again, which is what the note asked for.
       - name: Typecheck
+        run: pnpm run typecheck
+
+      # The two gates that used to exist only in package.json. Without them the
+      # repository drifted exactly where it was unwatched: typecheck stayed
+      # clean because this job enforced it, while lint reached 32 errors and
+      # 590 files fell off the Prettier config. A one-day-old `style: run
+      # Prettier over the sources` commit had already been undone by the time
+      # they were added, which is why the sweep alone was not the fix.
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: pnpm run lint
+
+      - name: Format
+        if: ${{ !cancelled() }}
+        run: pnpm run format:check
+
+      # `run-all-tests.sh` starts five isolated workers: TypeScript test
+      # typecheck, Python fixtures, unit/API/contract, component, and E2E/deck.
+      # Each worker writes a separate log and report directory; the script waits
+      # for all of them and returns non-zero if any failed. This keeps the full
+      # failure picture while cutting out the serial wait between layers.
+      - name: Run all test suites in parallel
+        if: ${{ !cancelled() }}
+        run: ./run-all-tests.sh
+
+      - name: Publish test history to Prometheus
+        if: ${{ !cancelled() }}
+        env:
+          PUSHGATEWAY_URL: ${{ secrets.PUSHGATEWAY_URL }}
+          PUSHGATEWAY_USERNAME: ${{ secrets.PUSHGATEWAY_USERNAME }}
+          PUSHGATEWAY_PASSWORD: ${{ secrets.PUSHGATEWAY_PASSWORD }}
+        run: pnpm --filter @workspace/api-server run publish:test-metrics
+
+      - name: Link Grafana in the run summary
+        if: ${{ !cancelled() }}
+        env:
+          GRAFANA_URL: ${{ vars.GRAFANA_URL }}
         run: |
-          pnpm run typecheck:libs
-          pnpm -r --if-present \
-            --filter "./artifacts/**" \
-            --filter "!@workspace/api-server" \
-            --filter "./tests" \
-            run typecheck
-
-      # Split per layer so a failure names the layer that broke, and
-      # `!cancelled()` lets every later layer still run — including after the
-      # typecheck fails, which otherwise silently drops a whole layer out of the
-      # Allure report.
-      - name: Unit tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:unit
-
-      - name: Component tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:component
-
-      - name: API tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:api
-
-      - name: Contract tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:contract
-
-      # Drives the real academy app in desktop + mobile Chrome; Playwright boots
-      # the app's own Vite server via the e2e config's `webServer`.
-      - name: E2E tests
-        if: ${{ !cancelled() }}
-        run: pnpm run test:e2e
+          if [ -n "$GRAFANA_URL" ]; then
+            dashboard="${GRAFANA_URL%/}/d/academy-overview/academy-servers-and-test-history"
+            {
+              echo "## 📈 Runtime and test history"
+              echo ""
+              echo "**➡️ [Open the Grafana dashboard](${dashboard})**"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## 📈 Runtime and test history"
+              echo ""
+              echo "Set the public repository variable \`GRAFANA_URL\` to show the deployed dashboard link here."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       # Every suite above wrote into the shared repo-root `allure-results`, so a
       # single generate covers the whole run.
@@ -220,19 +287,12 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
       # Turns Pages on if it is not already. Without this the whole pipeline
       # runs green and only the final deploy fails, with a 404 from the Pages
@@ -299,33 +359,78 @@ jobs:
           BASE_PATH: ${{ steps.base.outputs.prefix }}/
         run: pnpm --filter @workspace/portfolio run build
 
+      # VITE_GOOGLE_CLIENT_ID is inlined into the bundle at build time, so it has
+      # to be present *here* — a value added to the environment afterwards
+      # changes nothing, because the bundle is already written. It was set
+      # nowhere, which is why sign-in never appeared on the published site: the
+      # component renders null when it has no client ID.
+      #
+      # It is a repository variable, not a secret. An OAuth client ID is public
+      # by construction — it ships inside the JavaScript either way, and Google
+      # enforces which origins may use it. A client *secret* must never appear
+      # here, or in any VITE_ variable, because the browser would receive it.
       - name: Build the AI Testing Academy
         env:
           PORT: '5174'
           BASE_PATH: ${{ steps.base.outputs.prefix }}/ai-testing-academy/
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
         run: pnpm --filter @workspace/ai-testing-academy run build
 
-      - name: Build lecture 1
+      # All ten, not just the first. The academy's lecture catalogue links every
+      # one of them, so building only lecture 1 left nine "Open lecture" links
+      # reachable on exactly one host — the Replit deployment — and 404 here.
+      # A loop rather than ten near-identical steps: the only thing that varies
+      # is the number, and a copied step is where the eleventh lecture gets
+      # forgotten.
+      - name: Build the lecture decks
         env:
-          PORT: '5175'
-          BASE_PATH: ${{ steps.base.outputs.prefix }}/ai-testing-lecture-1/
-        run: pnpm --filter @workspace/ai-testing-lecture-1 run build
+          PREFIX: ${{ steps.base.outputs.prefix }}
+        run: |
+          set -euo pipefail
+          for n in $(seq 1 10); do
+            echo "::group::lecture $n"
+            # PORT is required by every artifact's vite.config.ts even for a
+            # build, which never listens; the value only has to parse.
+            PORT=$((5174 + n)) BASE_PATH="${PREFIX}/ai-testing-lecture-${n}/" \
+              pnpm --filter "@workspace/ai-testing-lecture-${n}" run build
+            echo "::endgroup::"
+          done
 
       - name: Assemble the site
         run: |
           set -euo pipefail
           mkdir -p _site
           cp -R artifacts/portfolio/dist/public/. _site/
-          mkdir -p _site/ai-testing-academy _site/ai-testing-lecture-1
+          mkdir -p _site/ai-testing-academy
           cp -R artifacts/ai-testing-academy/dist/public/. _site/ai-testing-academy/
-          cp -R artifacts/ai-testing-lecture-1/dist/public/. _site/ai-testing-lecture-1/
+          for n in $(seq 1 10); do
+            mkdir -p "_site/ai-testing-lecture-${n}"
+            cp -R "artifacts/ai-testing-lecture-${n}/dist/public/." "_site/ai-testing-lecture-${n}/"
+          done
           cp architecture.html _site/architecture.html
           # The Allure report is deliberately NOT copied here — it is published to
           # a separate repository's Pages by the `publish-allure` job, so it never
           # lands on the portfolio site.
-          # Client-side routing: Pages has no rewrite rules, so an unknown path
-          # has to fall back to the portfolio shell the way Replit's rewrite does.
+          # Client-side routing. Pages has no rewrite rules, so an unknown path
+          # is served the nearest 404.html — which is why each app gets its own
+          # copy of its own shell rather than sharing the portfolio's.
+          #
+          # It matters most for the decks: their routes are `/slide<N>`, no such
+          # file is ever built, and the academy's hreflang tags point Google
+          # directly at `/ai-testing-lecture-1/slide1?lang=en`. With only a root
+          # 404.html, every one of those deep links landed on the portfolio.
           cp _site/index.html _site/404.html
+          cp _site/ai-testing-academy/index.html _site/ai-testing-academy/404.html
+          for n in $(seq 1 10); do
+            cp "_site/ai-testing-lecture-${n}/index.html" "_site/ai-testing-lecture-${n}/404.html"
+          done
+
+          # Cloudflare Pages reads these two from the output root and ignores
+          # them elsewhere; GitHub Pages ignores them entirely. Shipping both
+          # means the same artifact deploys to either host — the rewrites below
+          # are what make deep links work properly rather than via 404 fallback.
+          cp deploy/cloudflare/_redirects _site/_redirects
+          cp deploy/cloudflare/_headers _site/_headers
           # Stops Pages from running the output through Jekyll, which would drop
           # any file or directory beginning with an underscore.
           touch _site/.nojekyll

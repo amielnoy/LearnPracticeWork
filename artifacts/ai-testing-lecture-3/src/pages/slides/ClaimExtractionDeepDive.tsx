@@ -125,7 +125,14 @@ export default function ClaimExtractionDeepDive() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('1. Claim Segmentation', '1. פילוח טענות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -136,7 +143,14 @@ export default function ClaimExtractionDeepDive() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('2. Source Retrieval', '2. אחזור מקורות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -147,7 +161,14 @@ export default function ClaimExtractionDeepDive() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('3. Entailment Verdict', '3. פסיקת גרירה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -199,7 +220,14 @@ export default function ClaimExtractionDeepDive() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '0.85vw', color: '#64748B', marginBottom: '0.5vh', fontWeight: 600 }}>
+            <div
+              style={{
+                fontSize: '0.85vw',
+                color: '#64748B',
+                marginBottom: '0.5vh',
+                fontWeight: 600,
+              }}
+            >
               {t('MODEL OUTPUT', 'פלט המודל')}
             </div>
             <div style={{ fontSize: '1vw', color: '#E2E8F0', lineHeight: 1.5 }}>
@@ -210,7 +238,14 @@ export default function ClaimExtractionDeepDive() {
             </div>
           </div>
 
-          <div style={{ fontSize: '1vw', fontWeight: 600, color: '#64748B', textAlign: isHe ? 'right' : 'left' }}>
+          <div
+            style={{
+              fontSize: '1vw',
+              fontWeight: 600,
+              color: '#64748B',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
             {t('→ Extracted Claims & Verdicts', '← טענות שחולצו ופסיקות')}
           </div>
 
@@ -225,12 +260,17 @@ export default function ClaimExtractionDeepDive() {
                 textAlign: isHe ? 'right' : 'left',
               }}
             >
-              <div style={{ fontSize: '1vw', color: '#1E3A5F', lineHeight: 1.4, marginBottom: '0.5vh' }}>
+              <div
+                style={{
+                  fontSize: '1vw',
+                  color: '#1E3A5F',
+                  lineHeight: 1.4,
+                  marginBottom: '0.5vh',
+                }}
+              >
                 {c.claim}
               </div>
-              <div style={{ fontSize: '0.9vw', fontWeight: 700, color: c.color }}>
-                {c.verdict}
-              </div>
+              <div style={{ fontSize: '0.9vw', fontWeight: 700, color: c.color }}>{c.verdict}</div>
             </div>
           ))}
         </div>

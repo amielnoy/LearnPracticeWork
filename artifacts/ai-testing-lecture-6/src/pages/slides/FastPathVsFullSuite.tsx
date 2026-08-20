@@ -32,14 +32,25 @@ export default function FastPathVsFullSuite() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -92,7 +103,9 @@ export default function FastPathVsFullSuite() {
             padding: '2.5vh 2vw',
           }}
         >
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}>
+          <div
+            style={{ fontSize: '1.2vw', fontWeight: 700, color: '#0D9488', marginBottom: '1vh' }}
+          >
             {t('PR Fast Path', 'נתיב מהיר לPR')}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
@@ -150,21 +163,32 @@ export default function FastPathVsFullSuite() {
               padding: '2.5vh 2vw',
             }}
           >
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}
+            >
               {t('Nightly Full Suite', 'חבילה מלאה לילית')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
               <div style={{ fontSize: '1vw', color: '#475569' }}>
-                {t('All tests including @extended and @regression', 'כל הבדיקות כולל @extended ו-@regression')}
+                {t(
+                  'All tests including @extended and @regression',
+                  'כל הבדיקות כולל @extended ו-@regression',
+                )}
               </div>
               <div style={{ fontSize: '1vw', color: '#475569' }}>
-                {t('Uncapped runtime; fresh live calls on new fixtures', 'זמן ריצה ללא גבול; קריאות חיות חדשות על קובעים חדשים')}
+                {t(
+                  'Uncapped runtime; fresh live calls on new fixtures',
+                  'זמן ריצה ללא גבול; קריאות חיות חדשות על קובעים חדשים',
+                )}
               </div>
               <div style={{ fontSize: '1vw', color: '#475569' }}>
                 {t('Results published to team dashboard', 'תוצאות מפורסמות ללוח המחוונים של הצוות')}
               </div>
               <div style={{ fontSize: '1vw', color: '#475569' }}>
-                {t('Failures alert on-call; do not block developer flow', 'כשלים מתריעים לכוננות; לא חוסמים זרימת מפתחים')}
+                {t(
+                  'Failures alert on-call; do not block developer flow',
+                  'כשלים מתריעים לכוננות; לא חוסמים זרימת מפתחים',
+                )}
               </div>
             </div>
           </div>

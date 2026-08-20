@@ -94,14 +94,25 @@ export default function ToolkitOverview() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -146,10 +157,19 @@ export default function ToolkitOverview() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: tools[0].accent, marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: tools[0].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
               {tools[0].name}
             </div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>{tools[0].desc}</div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>
+              {tools[0].desc}
+            </div>
           </div>
           <div
             style={{
@@ -160,10 +180,19 @@ export default function ToolkitOverview() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: tools[1].accent, marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: tools[1].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
               {tools[1].name}
             </div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>{tools[1].desc}</div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>
+              {tools[1].desc}
+            </div>
           </div>
           <div
             style={{
@@ -174,10 +203,19 @@ export default function ToolkitOverview() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: tools[2].accent, marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: tools[2].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
               {tools[2].name}
             </div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>{tools[2].desc}</div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>
+              {tools[2].desc}
+            </div>
           </div>
           <div
             style={{
@@ -188,10 +226,19 @@ export default function ToolkitOverview() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: tools[3].accent, marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: tools[3].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
               {tools[3].name}
             </div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>{tools[3].desc}</div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>
+              {tools[3].desc}
+            </div>
           </div>
           <div
             style={{
@@ -202,10 +249,19 @@ export default function ToolkitOverview() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: tools[4].accent, marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: tools[4].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
               {tools[4].name}
             </div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>{tools[4].desc}</div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>
+              {tools[4].desc}
+            </div>
           </div>
           <div
             style={{
@@ -216,10 +272,19 @@ export default function ToolkitOverview() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 700, color: tools[5].accent, marginBottom: '0.8vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 700,
+                color: tools[5].accent,
+                marginBottom: '0.8vh',
+              }}
+            >
               {tools[5].name}
             </div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>{tools[5].desc}</div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>
+              {tools[5].desc}
+            </div>
           </div>
         </div>
       </div>

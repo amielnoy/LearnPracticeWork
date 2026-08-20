@@ -181,7 +181,9 @@ export default function ToolsAndLibrariesRecap() {
               >
                 {tool.capability}
               </div>
-              <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.5 }}>{tool.desc}</div>
+              <div style={{ fontSize: '0.9vw', color: '#64748B', lineHeight: 1.5 }}>
+                {tool.desc}
+              </div>
             </div>
           ))}
         </div>

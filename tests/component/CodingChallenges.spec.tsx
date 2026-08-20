@@ -1,27 +1,28 @@
-import { test, expect } from '@playwright/experimental-ct-react';
-import { LocaleProvider } from '@academy/context/LocaleContext';
-import { ProgressProvider } from '@academy/context/ProgressContext';
-import { CodingChallenges } from '@academy/components/CodingChallenges';
+import { test, expect } from './fixtures';
 import { en } from '@academy/lib/locales';
 import { ProviderContextProvider } from '@academy/context/ProviderContext';
+import { LocaleProvider } from '@academy/context/LocaleContext';
+import { ProgressProvider } from '@academy/context/ProgressContext';
+import { CodingChallenges } from '@academy/components/practice/CodingChallenges';
 
 /**
  * The section renders whatever the locale contains, so these tests assert the
  * relationship between content and DOM rather than any particular challenge —
  * adding a challenge to the catalog must not require editing a test.
+ *
+ * The three levels are `<details>` and ship closed, the way the question bank's
+ * stages do, so anything below a `<summary>` is out of the accessibility tree
+ * until it is opened. Tests that assert on a level's body open it first;
+ * `openAllLevels` mirrors the `openAllStages` helper the question bank fixture
+ * already provides.
  */
 
 const t = en.codingChallenges;
 const totalChallenges = t.levels.reduce((sum, level) => sum + level.items.length, 0);
 
-test('renders every level in the catalog', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
+test('renders every level in the catalog', async ({ codingChallenges }) => {
+  const { component, openAllLevels } = codingChallenges;
+  await openAllLevels();
 
   await expect(component.locator('.challenge-level')).toHaveCount(t.levels.length);
 
@@ -31,40 +32,25 @@ test('renders every level in the catalog', async ({ mount }) => {
   }
 });
 
-test('renders one card per challenge', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
-
+test('renders one card per challenge', async ({ codingChallenges }) => {
+  const { component } = codingChallenges;
   await expect(component.locator('.agent-box')).toHaveCount(totalChallenges);
   expect(totalChallenges).toBeGreaterThan(0);
 });
 
-test('hides every hint and solution until asked', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
+test('hides every hint and solution until asked', async ({ codingChallenges }) => {
+  const { component, openAllLevels } = codingChallenges;
+  await openAllLevels();
 
   await expect(component.locator('pre')).toHaveCount(0);
   await expect(component.getByRole('button', { name: t.showHintBtn })).toHaveCount(totalChallenges);
 });
 
-test('reveals one card at a time, leaving its neighbours collapsed', async ({ mount }) => {
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
+test('reveals one card at a time, leaving its neighbours collapsed', async ({
+  codingChallenges,
+}) => {
+  const { component, openAllLevels } = codingChallenges;
+  await openAllLevels();
 
   await component.locator('.agent-box').first().getByRole('button').click();
 
@@ -74,17 +60,13 @@ test('reveals one card at a time, leaving its neighbours collapsed', async ({ mo
   );
 });
 
-test('gives every challenge a unique title, so the cards keep stable keys', async ({ mount }) => {
+test('gives every challenge a unique title, so the cards keep stable keys', async ({
+  codingChallenges,
+}) => {
   const titles = t.levels.flatMap(level => level.items.map(item => item.title));
   expect(new Set(titles).size).toBe(titles.length);
 
-  const component = await mount(
-    <LocaleProvider>
-      <ProgressProvider>
-        <CodingChallenges />
-      </ProgressProvider>
-    </LocaleProvider>,
-  );
+  const { component } = codingChallenges;
   await expect(component.locator('.agent-box h4')).toHaveCount(titles.length);
 });
 

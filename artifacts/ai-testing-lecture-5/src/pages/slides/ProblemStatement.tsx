@@ -113,7 +113,14 @@ export default function ProblemStatement() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#DC2626', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#DC2626',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Status 200 Is Not Success', 'סטטוס 200 אינו הצלחה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function ProblemStatement() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#D97706', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#D97706',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Format Drift Between Calls', 'סחיפת פורמט בין קריאות')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function ProblemStatement() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#DC2626', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#DC2626',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Unchecked Cost Growth', 'גידול עלויות לא מבוקר')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -187,10 +208,19 @@ export default function ProblemStatement() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#DC2626', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.1vw', fontWeight: 600, color: '#DC2626', marginBottom: '1vh' }}
+            >
               {t('What teams actually test', 'מה צוותים בפועל בודקים')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5, fontFamily: 'monospace' }}>
+            <div
+              style={{
+                fontSize: '1vw',
+                color: '#475569',
+                lineHeight: 1.5,
+                fontFamily: 'monospace',
+              }}
+            >
               {t('assert response.status_code == 200', 'assert response.status_code == 200')}
             </div>
           </div>
@@ -203,13 +233,28 @@ export default function ProblemStatement() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#059669', marginBottom: '1vh' }}>
+            <div
+              style={{ fontSize: '1.1vw', fontWeight: 600, color: '#059669', marginBottom: '1vh' }}
+            >
               {t('What they should also test', 'מה הם גם צריכים לבדוק')}
             </div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.8, fontFamily: 'monospace' }}>
-              <div>{t('jsonschema.validate(body, schema)', 'jsonschema.validate(body, schema)')}</div>
-              <div>{t('assert cosine_sim(body, ref) >= 0.85', 'assert cosine_sim(body, ref) >= 0.85')}</div>
-              <div>{t('assert elapsed_ms <= LATENCY_BUDGET', 'assert elapsed_ms <= LATENCY_BUDGET')}</div>
+            <div
+              style={{
+                fontSize: '1vw',
+                color: '#475569',
+                lineHeight: 1.8,
+                fontFamily: 'monospace',
+              }}
+            >
+              <div>
+                {t('jsonschema.validate(body, schema)', 'jsonschema.validate(body, schema)')}
+              </div>
+              <div>
+                {t('assert cosine_sim(body, ref) >= 0.85', 'assert cosine_sim(body, ref) >= 0.85')}
+              </div>
+              <div>
+                {t('assert elapsed_ms <= LATENCY_BUDGET', 'assert elapsed_ms <= LATENCY_BUDGET')}
+              </div>
             </div>
           </div>
           <div

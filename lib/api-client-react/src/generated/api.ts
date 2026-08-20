@@ -5,18 +5,46 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import type { HealthStatus } from './api.schemas';
+import type {
+  AiConfig,
+  AuthConfig,
+  AuthErrorResponse,
+  AuthSession,
+  CheckoutRequest,
+  CheckoutResponse,
+  CodingChallenges,
+  ContentUnavailableResponse,
+  CoursePrices,
+  EntitlementResponse,
+  GenerateRequest,
+  GenerateResponse,
+  GetCodingChallengesParams,
+  GetLectureSeriesParams,
+  GetQuestionBankParams,
+  GoogleCredential,
+  HealthStatus,
+  LectureSeries,
+  LogoutResponse,
+  QuestionBank,
+  ReadinessStatus,
+  RequestErrorResponse,
+  SeedResponse,
+  WebhookResponse,
+} from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
-import type { ErrorType } from '../custom-fetch';
+import type { ErrorType, BodyType } from '../custom-fetch';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -80,9 +108,1059 @@ export function useHealthCheck<
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Dependency readiness check
+ */
+export const getReadinessCheckUrl = () => {
+  return `/api/readyz`;
+};
+
+export const readinessCheck = async (options?: RequestInit): Promise<ReadinessStatus> => {
+  return customFetch<ReadinessStatus>(getReadinessCheckUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getReadinessCheckQueryKey = () => {
+  return [`/api/readyz`] as const;
+};
+
+export const getReadinessCheckQueryOptions = <
+  TData = Awaited<ReturnType<typeof readinessCheck>>,
+  TError = ErrorType<ReadinessStatus>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof readinessCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getReadinessCheckQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof readinessCheck>>> = ({ signal }) =>
+    readinessCheck({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof readinessCheck>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ReadinessCheckQueryResult = NonNullable<Awaited<ReturnType<typeof readinessCheck>>>;
+export type ReadinessCheckQueryError = ErrorType<ReadinessStatus>;
+
+/**
+ * @summary Dependency readiness check
+ */
+
+export function useReadinessCheck<
+  TData = Awaited<ReturnType<typeof readinessCheck>>,
+  TError = ErrorType<ReadinessStatus>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof readinessCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getReadinessCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Read public AI-provider availability and quota
+ */
+export const getGetAiConfigUrl = () => {
+  return `/api/ai/config`;
+};
+
+export const getAiConfig = async (options?: RequestInit): Promise<AiConfig> => {
+  return customFetch<AiConfig>(getGetAiConfigUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetAiConfigQueryKey = () => {
+  return [`/api/ai/config`] as const;
+};
+
+export const getGetAiConfigQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAiConfig>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAiConfig>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAiConfigQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAiConfig>>> = ({ signal }) =>
+    getAiConfig({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAiConfig>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAiConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getAiConfig>>>;
+export type GetAiConfigQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Read public AI-provider availability and quota
+ */
+
+export function useGetAiConfig<
+  TData = Awaited<ReturnType<typeof getAiConfig>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAiConfig>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAiConfigQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Generate one bounded AI response
+ */
+export const getGenerateAiResponseUrl = () => {
+  return `/api/ai/generate`;
+};
+
+export const generateAiResponse = async (
+  generateRequest: GenerateRequest,
+  options?: RequestInit,
+): Promise<GenerateResponse> => {
+  return customFetch<GenerateResponse>(getGenerateAiResponseUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(generateRequest),
+  });
+};
+
+export const getGenerateAiResponseMutationOptions = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateAiResponse>>,
+    TError,
+    { data: BodyType<GenerateRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateAiResponse>>,
+  TError,
+  { data: BodyType<GenerateRequest> },
+  TContext
+> => {
+  const mutationKey = ['generateAiResponse'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateAiResponse>>,
+    { data: BodyType<GenerateRequest> }
+  > = props => {
+    const { data } = props ?? {};
+
+    return generateAiResponse(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateAiResponseMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateAiResponse>>
+>;
+export type GenerateAiResponseMutationBody = BodyType<GenerateRequest>;
+export type GenerateAiResponseMutationError = ErrorType<RequestErrorResponse>;
+
+/**
+ * @summary Generate one bounded AI response
+ */
+export const useGenerateAiResponse = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateAiResponse>>,
+    TError,
+    { data: BodyType<GenerateRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateAiResponse>>,
+  TError,
+  { data: BodyType<GenerateRequest> },
+  TContext
+> => {
+  return useMutation(getGenerateAiResponseMutationOptions(options));
+};
+
+/**
+ * @summary Read the single server-approved course price
+ */
+export const getGetCoursePricesUrl = () => {
+  return `/api/stripe/prices`;
+};
+
+export const getCoursePrices = async (options?: RequestInit): Promise<CoursePrices> => {
+  return customFetch<CoursePrices>(getGetCoursePricesUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetCoursePricesQueryKey = () => {
+  return [`/api/stripe/prices`] as const;
+};
+
+export const getGetCoursePricesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCoursePrices>>,
+  TError = ErrorType<RequestErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getCoursePrices>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCoursePricesQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCoursePrices>>> = ({ signal }) =>
+    getCoursePrices({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCoursePrices>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCoursePricesQueryResult = NonNullable<Awaited<ReturnType<typeof getCoursePrices>>>;
+export type GetCoursePricesQueryError = ErrorType<RequestErrorResponse>;
+
+/**
+ * @summary Read the single server-approved course price
+ */
+
+export function useGetCoursePrices<
+  TData = Awaited<ReturnType<typeof getCoursePrices>>,
+  TError = ErrorType<RequestErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getCoursePrices>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCoursePricesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create checkout using the server-owned course price
+ */
+export const getCreateCourseCheckoutUrl = () => {
+  return `/api/stripe/checkout`;
+};
+
+export const createCourseCheckout = async (
+  checkoutRequest: CheckoutRequest,
+  options?: RequestInit,
+): Promise<CheckoutResponse> => {
+  return customFetch<CheckoutResponse>(getCreateCourseCheckoutUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(checkoutRequest),
+  });
+};
+
+export const getCreateCourseCheckoutMutationOptions = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCourseCheckout>>,
+    TError,
+    { data: BodyType<CheckoutRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createCourseCheckout>>,
+  TError,
+  { data: BodyType<CheckoutRequest> },
+  TContext
+> => {
+  const mutationKey = ['createCourseCheckout'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createCourseCheckout>>,
+    { data: BodyType<CheckoutRequest> }
+  > = props => {
+    const { data } = props ?? {};
+
+    return createCourseCheckout(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateCourseCheckoutMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCourseCheckout>>
+>;
+export type CreateCourseCheckoutMutationBody = BodyType<CheckoutRequest>;
+export type CreateCourseCheckoutMutationError = ErrorType<RequestErrorResponse>;
+
+/**
+ * @summary Create checkout using the server-owned course price
+ */
+export const useCreateCourseCheckout = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCourseCheckout>>,
+    TError,
+    { data: BodyType<CheckoutRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createCourseCheckout>>,
+  TError,
+  { data: BodyType<CheckoutRequest> },
+  TContext
+> => {
+  return useMutation(getCreateCourseCheckoutMutationOptions(options));
+};
+
+/**
+ * @summary Verify and process a raw Stripe event
+ */
+export const getReceiveStripeWebhookUrl = () => {
+  return `/api/stripe/webhook`;
+};
+
+export const receiveStripeWebhook = async (options?: RequestInit): Promise<WebhookResponse> => {
+  return customFetch<WebhookResponse>(getReceiveStripeWebhookUrl(), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getReceiveStripeWebhookMutationOptions = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof receiveStripeWebhook>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof receiveStripeWebhook>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ['receiveStripeWebhook'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof receiveStripeWebhook>>,
+    void
+  > = () => {
+    return receiveStripeWebhook(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReceiveStripeWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof receiveStripeWebhook>>
+>;
+
+export type ReceiveStripeWebhookMutationError = ErrorType<RequestErrorResponse>;
+
+/**
+ * @summary Verify and process a raw Stripe event
+ */
+export const useReceiveStripeWebhook = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof receiveStripeWebhook>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<Awaited<ReturnType<typeof receiveStripeWebhook>>, TError, void, TContext> => {
+  return useMutation(getReceiveStripeWebhookMutationOptions(options));
+};
+
+/**
+ * @summary Admin-only idempotent creation of the course product and price
+ */
+export const getSeedStripeCatalogUrl = () => {
+  return `/api/stripe/seed`;
+};
+
+export const seedStripeCatalog = async (options?: RequestInit): Promise<SeedResponse> => {
+  return customFetch<SeedResponse>(getSeedStripeCatalogUrl(), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getSeedStripeCatalogMutationOptions = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof seedStripeCatalog>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<Awaited<ReturnType<typeof seedStripeCatalog>>, TError, void, TContext> => {
+  const mutationKey = ['seedStripeCatalog'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof seedStripeCatalog>>, void> = () => {
+    return seedStripeCatalog(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SeedStripeCatalogMutationResult = NonNullable<
+  Awaited<ReturnType<typeof seedStripeCatalog>>
+>;
+
+export type SeedStripeCatalogMutationError = ErrorType<RequestErrorResponse>;
+
+/**
+ * @summary Admin-only idempotent creation of the course product and price
+ */
+export const useSeedStripeCatalog = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof seedStripeCatalog>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<Awaited<ReturnType<typeof seedStripeCatalog>>, TError, void, TContext> => {
+  return useMutation(getSeedStripeCatalogMutationOptions(options));
+};
+
+/**
+ * @summary Read entitlement for the verified signed-in user and approved course product
+ */
+export const getGetCourseEntitlementUrl = () => {
+  return `/api/entitlements/course`;
+};
+
+export const getCourseEntitlement = async (options?: RequestInit): Promise<EntitlementResponse> => {
+  return customFetch<EntitlementResponse>(getGetCourseEntitlementUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetCourseEntitlementQueryKey = () => {
+  return [`/api/entitlements/course`] as const;
+};
+
+export const getGetCourseEntitlementQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCourseEntitlement>>,
+  TError = ErrorType<RequestErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getCourseEntitlement>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCourseEntitlementQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCourseEntitlement>>> = ({ signal }) =>
+    getCourseEntitlement({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCourseEntitlement>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCourseEntitlementQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCourseEntitlement>>
+>;
+export type GetCourseEntitlementQueryError = ErrorType<RequestErrorResponse>;
+
+/**
+ * @summary Read entitlement for the verified signed-in user and approved course product
+ */
+
+export function useGetCourseEntitlement<
+  TData = Awaited<ReturnType<typeof getCourseEntitlement>>,
+  TError = ErrorType<RequestErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getCourseEntitlement>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCourseEntitlementQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Stages of interview questions, in reading order. Served from the content store so the bank can change without a redeploy.
+
+ * @summary Interview question bank
+ */
+export const getGetQuestionBankUrl = (params?: GetQuestionBankParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/content/question-bank?${stringifiedParams}`
+    : `/api/content/question-bank`;
+};
+
+export const getQuestionBank = async (
+  params?: GetQuestionBankParams,
+  options?: RequestInit,
+): Promise<QuestionBank> => {
+  return customFetch<QuestionBank>(getGetQuestionBankUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetQuestionBankQueryKey = (params?: GetQuestionBankParams) => {
+  return [`/api/content/question-bank`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetQuestionBankQueryOptions = <
+  TData = Awaited<ReturnType<typeof getQuestionBank>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetQuestionBankParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getQuestionBank>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetQuestionBankQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getQuestionBank>>> = ({ signal }) =>
+    getQuestionBank(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getQuestionBank>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetQuestionBankQueryResult = NonNullable<Awaited<ReturnType<typeof getQuestionBank>>>;
+export type GetQuestionBankQueryError = ErrorType<ContentUnavailableResponse>;
+
+/**
+ * @summary Interview question bank
+ */
+
+export function useGetQuestionBank<
+  TData = Awaited<ReturnType<typeof getQuestionBank>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetQuestionBankParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getQuestionBank>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetQuestionBankQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Challenge levels, each holding its own challenges in order.
+ * @summary Coding challenges
+ */
+export const getGetCodingChallengesUrl = (params?: GetCodingChallengesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/content/coding-challenges?${stringifiedParams}`
+    : `/api/content/coding-challenges`;
+};
+
+export const getCodingChallenges = async (
+  params?: GetCodingChallengesParams,
+  options?: RequestInit,
+): Promise<CodingChallenges> => {
+  return customFetch<CodingChallenges>(getGetCodingChallengesUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetCodingChallengesQueryKey = (params?: GetCodingChallengesParams) => {
+  return [`/api/content/coding-challenges`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetCodingChallengesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCodingChallenges>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetCodingChallengesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getCodingChallenges>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCodingChallengesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCodingChallenges>>> = ({ signal }) =>
+    getCodingChallenges(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCodingChallenges>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCodingChallengesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCodingChallenges>>
+>;
+export type GetCodingChallengesQueryError = ErrorType<ContentUnavailableResponse>;
+
+/**
+ * @summary Coding challenges
+ */
+
+export function useGetCodingChallenges<
+  TData = Awaited<ReturnType<typeof getCodingChallenges>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetCodingChallengesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getCodingChallenges>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCodingChallengesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Tracks, each holding its lectures in order.
+ * @summary Lecture series
+ */
+export const getGetLectureSeriesUrl = (params?: GetLectureSeriesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/content/lecture-series?${stringifiedParams}`
+    : `/api/content/lecture-series`;
+};
+
+export const getLectureSeries = async (
+  params?: GetLectureSeriesParams,
+  options?: RequestInit,
+): Promise<LectureSeries> => {
+  return customFetch<LectureSeries>(getGetLectureSeriesUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetLectureSeriesQueryKey = (params?: GetLectureSeriesParams) => {
+  return [`/api/content/lecture-series`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetLectureSeriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLectureSeries>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetLectureSeriesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getLectureSeries>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetLectureSeriesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getLectureSeries>>> = ({ signal }) =>
+    getLectureSeries(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLectureSeries>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLectureSeriesQueryResult = NonNullable<Awaited<ReturnType<typeof getLectureSeries>>>;
+export type GetLectureSeriesQueryError = ErrorType<ContentUnavailableResponse>;
+
+/**
+ * @summary Lecture series
+ */
+
+export function useGetLectureSeries<
+  TData = Awaited<ReturnType<typeof getLectureSeries>>,
+  TError = ErrorType<ContentUnavailableResponse>,
+>(
+  params?: GetLectureSeriesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getLectureSeries>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLectureSeriesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Verifies the Google ID token and, on success, sets the signed `ata_session` HttpOnly cookie. The raw credential is not returned or persisted by the client.
+
+ * @summary Exchange a Google credential for a server session
+ */
+export const getSignInWithGoogleUrl = () => {
+  return `/api/auth/google`;
+};
+
+export const signInWithGoogle = async (
+  googleCredential: GoogleCredential,
+  options?: RequestInit,
+): Promise<AuthSession> => {
+  return customFetch<AuthSession>(getSignInWithGoogleUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(googleCredential),
+  });
+};
+
+export const getSignInWithGoogleMutationOptions = <
+  TError = ErrorType<AuthErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof signInWithGoogle>>,
+    TError,
+    { data: BodyType<GoogleCredential> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof signInWithGoogle>>,
+  TError,
+  { data: BodyType<GoogleCredential> },
+  TContext
+> => {
+  const mutationKey = ['signInWithGoogle'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof signInWithGoogle>>,
+    { data: BodyType<GoogleCredential> }
+  > = props => {
+    const { data } = props ?? {};
+
+    return signInWithGoogle(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SignInWithGoogleMutationResult = NonNullable<
+  Awaited<ReturnType<typeof signInWithGoogle>>
+>;
+export type SignInWithGoogleMutationBody = BodyType<GoogleCredential>;
+export type SignInWithGoogleMutationError = ErrorType<AuthErrorResponse>;
+
+/**
+ * @summary Exchange a Google credential for a server session
+ */
+export const useSignInWithGoogle = <
+  TError = ErrorType<AuthErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof signInWithGoogle>>,
+    TError,
+    { data: BodyType<GoogleCredential> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof signInWithGoogle>>,
+  TError,
+  { data: BodyType<GoogleCredential> },
+  TContext
+> => {
+  return useMutation(getSignInWithGoogleMutationOptions(options));
+};
+
+/**
+ * Returns the public Google OAuth client ID. Static clients use this at runtime so Replit does not need authentication configuration or secrets.
+
+ * @summary Read public browser authentication configuration
+ */
+export const getGetAuthConfigUrl = () => {
+  return `/api/auth/config`;
+};
+
+export const getAuthConfig = async (options?: RequestInit): Promise<AuthConfig> => {
+  return customFetch<AuthConfig>(getGetAuthConfigUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetAuthConfigQueryKey = () => {
+  return [`/api/auth/config`] as const;
+};
+
+export const getGetAuthConfigQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAuthConfig>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthConfig>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAuthConfigQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthConfig>>> = ({ signal }) =>
+    getAuthConfig({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAuthConfig>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAuthConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthConfig>>>;
+export type GetAuthConfigQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Read public browser authentication configuration
+ */
+
+export function useGetAuthConfig<
+  TData = Awaited<ReturnType<typeof getAuthConfig>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthConfig>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAuthConfigQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Read the current signed browser session
+ */
+export const getGetAuthSessionUrl = () => {
+  return `/api/auth/session`;
+};
+
+export const getAuthSession = async (options?: RequestInit): Promise<AuthSession> => {
+  return customFetch<AuthSession>(getGetAuthSessionUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetAuthSessionQueryKey = () => {
+  return [`/api/auth/session`] as const;
+};
+
+export const getGetAuthSessionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAuthSession>>,
+  TError = ErrorType<AuthErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthSession>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAuthSessionQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthSession>>> = ({ signal }) =>
+    getAuthSession({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAuthSession>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAuthSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthSession>>>;
+export type GetAuthSessionQueryError = ErrorType<AuthErrorResponse>;
+
+/**
+ * @summary Read the current signed browser session
+ */
+
+export function useGetAuthSession<
+  TData = Awaited<ReturnType<typeof getAuthSession>>,
+  TError = ErrorType<AuthErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthSession>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAuthSessionQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Delete the browser session cookie
+ */
+export const getSignOutUrl = () => {
+  return `/api/auth/logout`;
+};
+
+export const signOut = async (options?: RequestInit): Promise<LogoutResponse> => {
+  return customFetch<LogoutResponse>(getSignOutUrl(), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getSignOutMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<Awaited<ReturnType<typeof signOut>>, TError, void, TContext>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<Awaited<ReturnType<typeof signOut>>, TError, void, TContext> => {
+  const mutationKey = ['signOut'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof signOut>>, void> = () => {
+    return signOut(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SignOutMutationResult = NonNullable<Awaited<ReturnType<typeof signOut>>>;
+
+export type SignOutMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete the browser session cookie
+ */
+export const useSignOut = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<Awaited<ReturnType<typeof signOut>>, TError, void, TContext>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<Awaited<ReturnType<typeof signOut>>, TError, void, TContext> => {
+  return useMutation(getSignOutMutationOptions(options));
+};

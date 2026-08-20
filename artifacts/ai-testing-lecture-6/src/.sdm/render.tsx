@@ -21,10 +21,7 @@ import {
   type TextBody,
   type Theme,
 } from './core/schema';
-import {
-  paragraphLayoutCss,
-  paragraphMarkerCss,
-} from './core/text/inlineStyles';
+import { paragraphLayoutCss, paragraphMarkerCss } from './core/text/inlineStyles';
 import { effectiveParagraph, paragraphMarkers } from './core/text';
 import { elementTransform } from './geometry';
 import { shapePathFor, type ShapePath } from './shapePaths';
@@ -37,10 +34,7 @@ import {
   strokeToBorder,
   textRunStyle,
 } from './style';
-import {
-  SdmTextEditor,
-  type SdmTextEditorOptions,
-} from './SdmTextEditor';
+import { SdmTextEditor, type SdmTextEditorOptions } from './SdmTextEditor';
 
 export type WidgetProps = Record<string, JsonValue>;
 export type WidgetModule = Record<string, unknown>;
@@ -100,7 +94,7 @@ function TextRunView({
         data-sdm-action={JSON.stringify(run.action)}
         data-sdm-text-run=""
         style={style}
-        onClick={(event) => event.stopPropagation()}
+        onClick={event => event.stopPropagation()}
       >
         {content}
       </a>
@@ -116,11 +110,11 @@ function TextRunView({
         data-sdm-action={JSON.stringify(action)}
         data-sdm-text-run=""
         style={{ ...style, cursor: 'pointer' }}
-        onClick={(event) => {
+        onClick={event => {
           event.stopPropagation();
           onAction?.(action);
         }}
-        onKeyDown={(event) => {
+        onKeyDown={event => {
           if (event.key !== 'Enter' && event.key !== ' ') {
             return;
           }
@@ -160,9 +154,7 @@ export function TextBodyView({
   }
   const inset = body.insetsPt;
   const contentRef = useRef<HTMLDivElement>(null);
-  const effectiveParagraphs = body.paragraphs.map((paragraph) =>
-    effectiveParagraph(paragraph),
-  );
+  const effectiveParagraphs = body.paragraphs.map(paragraph => effectiveParagraph(paragraph));
   const markers = paragraphMarkers(effectiveParagraphs);
 
   return (
@@ -191,8 +183,7 @@ export function TextBodyView({
               ...paragraph.runs[0],
             };
             const hasMarker =
-              effective.bullet?.kind === 'character' ||
-              effective.bullet?.kind === 'number';
+              effective.bullet?.kind === 'character' || effective.bullet?.kind === 'number';
 
             return (
               <div
@@ -201,10 +192,7 @@ export function TextBodyView({
                 style={paragraphLayoutCss(effective)}
               >
                 {hasMarker ? (
-                  <span
-                    data-sdm-text-marker=""
-                    style={paragraphMarkerCss(effective, theme)}
-                  >
+                  <span data-sdm-text-marker="" style={paragraphMarkerCss(effective, theme)}>
                     {marker}
                   </span>
                 ) : null}
@@ -218,9 +206,7 @@ export function TextBodyView({
                   />
                 ))}
                 {!hasMarker && paragraph.runs.length === 0 ? (
-                  <span style={textRunStyle(paragraphStyle, theme)}>
-                    {'\u200B'}
-                  </span>
+                  <span style={textRunStyle(paragraphStyle, theme)}>{'\u200B'}</span>
                 ) : null}
               </div>
             );
@@ -254,17 +240,11 @@ function gradientVector(angleDeg: number) {
 
 type ResolvedBackground = ReturnType<typeof paintToBackground>;
 
-export function backgroundValue(
-  resolved: ResolvedBackground,
-): string | undefined {
+export function backgroundValue(resolved: ResolvedBackground): string | undefined {
   return resolved?.opacity === undefined ? resolved?.background : undefined;
 }
 
-export function PaintLayer({
-  resolved,
-}: {
-  resolved: ResolvedBackground;
-}) {
+export function PaintLayer({ resolved }: { resolved: ResolvedBackground }) {
   if (!resolved || resolved.opacity === undefined) {
     return null;
   }
@@ -283,10 +263,7 @@ export function PaintLayer({
   );
 }
 
-function strokeDasharray(
-  dash: Stroke['dash'],
-  width: number,
-): string | undefined {
+function strokeDasharray(dash: Stroke['dash'], width: number): string | undefined {
   if (dash === 'dash') {
     return `${width * 3} ${width * 2}`;
   }
@@ -316,10 +293,7 @@ function ShapeGeometryView({
     ? {
         stroke: resolvePaint(stroke.color, stroke.opacity, theme),
         strokeWidth: stroke.widthPt * SDM_POINT_TO_UNIT,
-        strokeDasharray: strokeDasharray(
-          stroke.dash,
-          stroke.widthPt * SDM_POINT_TO_UNIT,
-        ),
+        strokeDasharray: strokeDasharray(stroke.dash, stroke.widthPt * SDM_POINT_TO_UNIT),
         vectorEffect: 'non-scaling-stroke' as const,
       }
     : { stroke: 'none' };
@@ -400,23 +374,14 @@ function ShapeGeometryView({
   );
 }
 
-const LINE_MARKERS: Record<string, { path: string; refX: number; size: number }> =
-  {
-    triangle: { path: 'M 0 0 L 6 3 L 0 6 Z', refX: 5, size: 6 },
-    stealth: { path: 'M 0 0 L 6 3 L 0 6 L 1.6 3 Z', refX: 5, size: 6 },
-    diamond: { path: 'M 3 0 L 6 3 L 3 6 L 0 3 Z', refX: 3, size: 6 },
-    oval: { path: 'M 3 0 A 3 3 0 1 0 3 6 A 3 3 0 1 0 3 0 Z', refX: 3, size: 6 },
-  };
+const LINE_MARKERS: Record<string, { path: string; refX: number; size: number }> = {
+  triangle: { path: 'M 0 0 L 6 3 L 0 6 Z', refX: 5, size: 6 },
+  stealth: { path: 'M 0 0 L 6 3 L 0 6 L 1.6 3 Z', refX: 5, size: 6 },
+  diamond: { path: 'M 3 0 L 6 3 L 3 6 L 0 3 Z', refX: 3, size: 6 },
+  oval: { path: 'M 3 0 A 3 3 0 1 0 3 6 A 3 3 0 1 0 3 0 Z', refX: 3, size: 6 },
+};
 
-function LineMarker({
-  id,
-  kind,
-  color,
-}: {
-  id: string;
-  kind: string;
-  color: string;
-}) {
+function LineMarker({ id, kind, color }: { id: string; kind: string; color: string }) {
   const marker = LINE_MARKERS[kind];
   if (!marker) {
     return null;
@@ -466,22 +431,14 @@ function LineView({
     >
       <defs>
         {startMarker ? (
-          <LineMarker
-            id={`${markerId}-start`}
-            kind={stroke.startArrow ?? ''}
-            color={color}
-          />
+          <LineMarker id={`${markerId}-start`} kind={stroke.startArrow ?? ''} color={color} />
         ) : null}
         {endMarker ? (
-          <LineMarker
-            id={`${markerId}-end`}
-            kind={stroke.endArrow ?? ''}
-            color={color}
-          />
+          <LineMarker id={`${markerId}-end`} kind={stroke.endArrow ?? ''} color={color} />
         ) : null}
       </defs>
       <polyline
-        points={element.points.map((point) => `${point.x},${point.y}`).join(' ')}
+        points={element.points.map(point => `${point.x},${point.y}`).join(' ')}
         fill="none"
         stroke={color}
         strokeWidth={width}
@@ -504,9 +461,7 @@ function CroppedImage({
   element: Extract<Element, { type: 'image' }>;
 }) {
   const crop = element.crop;
-  const hasCrop =
-    crop &&
-    (crop.top > 0 || crop.right > 0 || crop.bottom > 0 || crop.left > 0);
+  const hasCrop = crop && (crop.top > 0 || crop.right > 0 || crop.bottom > 0 || crop.left > 0);
   if (!hasCrop) {
     return (
       <img
@@ -554,55 +509,32 @@ function CroppedImage({
   );
 }
 
-function WidgetView({
-  element,
-}: {
-  element: Extract<Element, { type: 'widget' }>;
-}) {
+function WidgetView({ element }: { element: Extract<Element, { type: 'widget' }> }) {
   const { widgets } = useContext(SdmRenderContext);
   const moduleKey = `..${element.widget.module.slice(1)}`;
   const mod = Object.hasOwn(widgets, moduleKey) ? widgets[moduleKey] : undefined;
   const exportName = element.widget.exportName ?? 'default';
   const widgetTarget = `${element.widget.module}#${exportName}`;
   if (!mod) {
-    return (
-      <WidgetFallback
-        message={`Widget module not found: ${element.widget.module}`}
-      />
-    );
+    return <WidgetFallback message={`Widget module not found: ${element.widget.module}`} />;
   }
   if (!Object.hasOwn(mod, exportName)) {
-    return (
-      <WidgetFallback
-        message={`Widget export not found: ${widgetTarget}`}
-      />
-    );
+    return <WidgetFallback message={`Widget export not found: ${widgetTarget}`} />;
   }
 
   const candidate = mod[exportName];
   if (!isWidgetComponent(candidate)) {
-    return (
-      <WidgetFallback
-        message={`Widget export is not a component: ${widgetTarget}`}
-      />
-    );
+    return <WidgetFallback message={`Widget export is not a component: ${widgetTarget}`} />;
   }
 
   const Widget = candidate;
   const rendered = <Widget {...(element.widget.props ?? {})} />;
-  const fallback = (
-    <WidgetFallback message={`Widget failed to render: ${widgetTarget}`} />
-  );
+  const fallback = <WidgetFallback message={`Widget failed to render: ${widgetTarget}`} />;
 
   return (
-    <WidgetErrorBoundary
-      key={JSON.stringify(element.widget)}
-      fallback={fallback}
-    >
+    <WidgetErrorBoundary key={JSON.stringify(element.widget)} fallback={fallback}>
       {element.widget.sizing === 'fill' ? (
-        <div className="h-full w-full [&>*]:h-full [&>*]:w-full">
-          {rendered}
-        </div>
+        <div className="h-full w-full [&>*]:h-full [&>*]:w-full">{rendered}</div>
       ) : (
         rendered
       )}
@@ -611,11 +543,7 @@ function WidgetView({
 }
 
 function WidgetFallback({ message }: { message: string }) {
-  return (
-    <div style={{ padding: 24, color: '#B91C1C', fontFamily: 'system-ui' }}>
-      {message}
-    </div>
-  );
+  return <div style={{ padding: 24, color: '#B91C1C', fontFamily: 'system-ui' }}>{message}</div>;
 }
 
 class WidgetErrorBoundary extends Component<
@@ -633,18 +561,12 @@ class WidgetErrorBoundary extends Component<
   }
 }
 
-function isWidgetComponent(
-  value: unknown,
-): value is ElementType<WidgetProps> {
+function isWidgetComponent(value: unknown): value is ElementType<WidgetProps> {
   if (typeof value === 'function') {
     return true;
   }
 
-  if (
-    typeof value !== 'object' ||
-    value === null ||
-    !('$$typeof' in value)
-  ) {
+  if (typeof value !== 'object' || value === null || !('$$typeof' in value)) {
     return false;
   }
   if (value.$$typeof === Symbol.for('react.forward_ref')) {
@@ -660,22 +582,17 @@ function isWidgetComponent(
 function normalizedPercentages(weights: Array<number>): Array<string> {
   const total = weights.reduce((sum, weight) => sum + weight, 0);
 
-  return weights.map((weight) => `${(weight / total) * 100}%`);
+  return weights.map(weight => `${(weight / total) * 100}%`);
 }
 
 function placeTableCells(element: Extract<Element, { type: 'table' }>) {
-  const occupied = element.rows.map(() =>
-    element.columns.map(() => false),
-  );
+  const occupied = element.rows.map(() => element.columns.map(() => false));
 
   return element.rows.map((row, rowIndex) => {
     let columnIndex = 0;
 
     return row.cells.flatMap((cell, cellIndex) => {
-      while (
-        columnIndex < element.columns.length &&
-        occupied[rowIndex][columnIndex]
-      ) {
+      while (columnIndex < element.columns.length && occupied[rowIndex][columnIndex]) {
         columnIndex += 1;
       }
       if (columnIndex >= element.columns.length) {
@@ -732,13 +649,10 @@ function ElementInner({
 }) {
   const { baseUrl } = useContext(SdmRenderContext);
   const theme = document.theme;
-  const resolveAsset = (assetId: string) =>
-    resolveAssetSrc(document.assets, assetId, baseUrl);
+  const resolveAsset = (assetId: string) => resolveAssetSrc(document.assets, assetId, baseUrl);
   switch (element.type) {
     case 'text': {
-      const fill = element.fill
-        ? paintToBackground(element.fill, theme, resolveAsset)
-        : undefined;
+      const fill = element.fill ? paintToBackground(element.fill, theme, resolveAsset) : undefined;
 
       return (
         <div
@@ -764,11 +678,7 @@ function ElementInner({
       );
     }
     case 'shape': {
-      const shapePath = shapePathFor(
-        element.geometry,
-        element.frame.width,
-        element.frame.height,
-      );
+      const shapePath = shapePathFor(element.geometry, element.frame.width, element.frame.height);
       if (shapePath) {
         return (
           <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -831,9 +741,7 @@ function ElementInner({
     }
     case 'image': {
       const src = resolveAsset(element.assetId);
-      return src ? (
-        <CroppedImage src={src} alt={element.altText ?? ''} element={element} />
-      ) : null;
+      return src ? <CroppedImage src={src} alt={element.altText ?? ''} element={element} /> : null;
     }
     case 'line':
       return <LineView element={element} theme={theme} />;
@@ -851,7 +759,7 @@ function ElementInner({
             position: 'relative',
           }}
         >
-          {element.children.map((child) => (
+          {element.children.map(child => (
             <SdmElementView
               key={child.id}
               element={child}
@@ -863,13 +771,9 @@ function ElementInner({
       );
     }
     case 'table': {
-      const columnWidths = normalizedPercentages(
-        element.columns.map((column) => column.width),
-      );
+      const columnWidths = normalizedPercentages(element.columns.map(column => column.width));
       const rowHeights = normalizedPercentages(
-        element.rows.map(
-          (row) => row.height ?? element.frame.height / element.rows.length,
-        ),
+        element.rows.map(row => row.height ?? element.frame.height / element.rows.length),
       );
       const placedRows = placeTableCells(element);
 
@@ -914,11 +818,7 @@ function ElementInner({
                           inset: 0,
                         }}
                       >
-                        <TextBodyView
-                          body={cell.body}
-                          theme={theme}
-                          onAction={onAction}
-                        />
+                        <TextBodyView body={cell.body} theme={theme} onAction={onAction} />
                       </div>
                     </td>
                   );
@@ -976,9 +876,7 @@ export function SdmElementView({
     <div
       data-sdm-id={element.id}
       data-sdm-type={element.type}
-      data-sdm-action={
-        element.action ? JSON.stringify(element.action) : undefined
-      }
+      data-sdm-action={element.action ? JSON.stringify(element.action) : undefined}
       style={{
         ...frameStyle(element),
         cursor: element.action ? 'pointer' : undefined,

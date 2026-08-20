@@ -1,20 +1,11 @@
-import {
-  useEffect,
-  useRef,
-  type PointerEvent as ReactPointerEvent,
-  type RefObject,
-} from 'react';
+import { useEffect, useRef, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import {
   planRootPointerSelection,
   setElementFrame,
   translateRootElements,
   updateElement,
 } from './core/operations';
-import type {
-  Element as SdmElement,
-  Frame,
-  SlideDocument,
-} from './core/schema';
+import type { Element as SdmElement, Frame, SlideDocument } from './core/schema';
 import type { SdmTextCaretPoint } from './SdmTextEditor';
 import {
   HANDLE_CURSORS,
@@ -35,10 +26,7 @@ interface Props {
   stageRef: RefObject<HTMLDivElement | null>;
   onSelect: (ids: Array<string>) => void;
   textCaretElementId: string | null;
-  onActivateTextCaret: (
-    elementId: string,
-    point: SdmTextCaretPoint,
-  ) => boolean;
+  onActivateTextCaret: (elementId: string, point: SdmTextCaretPoint) => boolean;
   onExitTextCaret: () => SlideDocument | null;
   onPlaceTextCaret: (point: SdmTextCaretPoint) => boolean;
   onCommit: (document: SlideDocument, selectedIds: Array<string>) => void;
@@ -69,10 +57,7 @@ const ENTER_OWNER_SELECTOR = [
   'summary',
 ].join(',');
 
-function topLevelIdAt(
-  target: EventTarget | null,
-  stage: HTMLElement,
-): string | null {
+function topLevelIdAt(target: EventTarget | null, stage: HTMLElement): string | null {
   if (!(target instanceof Element)) {
     return null;
   }
@@ -90,10 +75,7 @@ function topLevelIdAt(
 }
 
 function isKeyOwnedByTarget(target: EventTarget | null): boolean {
-  return (
-    target instanceof Element &&
-    target.closest(KEYBOARD_OWNER_SELECTOR) !== null
-  );
+  return target instanceof Element && target.closest(KEYBOARD_OWNER_SELECTOR) !== null;
 }
 
 function isEnterOwnedByTarget(event: KeyboardEvent): boolean {
@@ -110,15 +92,13 @@ function hasNoModifiers(event: KeyboardEvent): boolean {
 
 function shouldSuppressForwardedDefault(event: KeyboardEvent): boolean {
   const isPlainDelete =
-    (event.key === 'Delete' || event.key === 'Backspace') &&
-    hasNoModifiers(event);
+    (event.key === 'Delete' || event.key === 'Backspace') && hasNoModifiers(event);
   const isArrow =
     event.key === 'ArrowLeft' ||
     event.key === 'ArrowRight' ||
     event.key === 'ArrowUp' ||
     event.key === 'ArrowDown';
-  const isNudge =
-    isArrow && !event.altKey && !event.ctrlKey && !event.metaKey;
+  const isNudge = isArrow && !event.altKey && !event.ctrlKey && !event.metaKey;
   const isSelectAll =
     event.key.toLowerCase() === 'a' &&
     (event.ctrlKey || event.metaKey) &&
@@ -126,10 +106,7 @@ function shouldSuppressForwardedDefault(event: KeyboardEvent): boolean {
     !event.shiftKey;
   const hasPrimaryModifier = event.ctrlKey || event.metaKey;
   const isDuplicate =
-    event.key.toLowerCase() === 'd' &&
-    hasPrimaryModifier &&
-    !event.altKey &&
-    !event.shiftKey;
+    event.key.toLowerCase() === 'd' && hasPrimaryModifier && !event.altKey && !event.shiftKey;
   const isArrange =
     hasPrimaryModifier &&
     !event.altKey &&
@@ -152,8 +129,7 @@ function isOverlayChrome(target: EventTarget | null): boolean {
 
 function isTextCaretTarget(target: EventTarget | null): boolean {
   return (
-    target instanceof Element &&
-    target.closest('[data-sdm-text-caret-active="true"]') !== null
+    target instanceof Element && target.closest('[data-sdm-text-caret-active="true"]') !== null
   );
 }
 
@@ -165,10 +141,7 @@ function isRenderedTextTarget(target: EventTarget | null): boolean {
 }
 
 function isEditableTextElement(element: SdmElement): boolean {
-  return (
-    element.type === 'text' ||
-    (element.type === 'shape' && element.body !== undefined)
-  );
+  return element.type === 'text' || (element.type === 'shape' && element.body !== undefined);
 }
 
 function sameFrame(left: Frame, right: Frame): boolean {
@@ -240,9 +213,7 @@ export function SdmInteractionLayer({
 
   const draftNodes = (elementId: string): Array<HTMLElement> => {
     const nodes: Array<HTMLElement> = [];
-    const stageNode = stageRef.current?.querySelector(
-      `[data-sdm-id="${CSS.escape(elementId)}"]`,
-    );
+    const stageNode = stageRef.current?.querySelector(`[data-sdm-id="${CSS.escape(elementId)}"]`);
     if (stageNode instanceof HTMLElement) {
       nodes.push(stageNode);
     }
@@ -256,13 +227,8 @@ export function SdmInteractionLayer({
     return nodes;
   };
 
-  const applyRotationDraft = (
-    element: SdmElement,
-    rotationDeg: number | undefined,
-  ) => {
-    const stageNode = stageRef.current?.querySelector(
-      `[data-sdm-id="${CSS.escape(element.id)}"]`,
-    );
+  const applyRotationDraft = (element: SdmElement, rotationDeg: number | undefined) => {
+    const stageNode = stageRef.current?.querySelector(`[data-sdm-id="${CSS.escape(element.id)}"]`);
     if (stageNode instanceof HTMLElement) {
       stageNode.style.transform = elementTransform(element, rotationDeg) ?? '';
     }
@@ -284,7 +250,10 @@ export function SdmInteractionLayer({
     gesture.controller.abort();
     try {
       gesture.captureTarget.releasePointerCapture(gesture.pointerId);
-    } catch {}
+    } catch {
+      // The capture is already gone — the element was detached, or the pointer
+      // was never captured. Either way there is nothing left to release.
+    }
   };
 
   const trackGesture = <Value,>({
@@ -299,12 +268,7 @@ export function SdmInteractionLayer({
   }: {
     startEvent: PointerEvent;
     startValue: Value;
-    valueAt: (
-      dxStage: number,
-      dyStage: number,
-      shiftKey: boolean,
-      event: PointerEvent,
-    ) => Value;
+    valueAt: (dxStage: number, dyStage: number, shiftKey: boolean, event: PointerEvent) => Value;
     valuesEqual: (left: Value, right: Value) => boolean;
     applyValue: (value: Value) => void;
     commitValue: (value: Value) => void;
@@ -337,12 +301,7 @@ export function SdmInteractionLayer({
       }
       moved = true;
       const stageScale = scaleRef.current || 1;
-      lastValue = valueAt(
-        dxClient / stageScale,
-        dyClient / stageScale,
-        event.shiftKey,
-        event,
-      );
+      lastValue = valueAt(dxClient / stageScale, dyClient / stageScale, event.shiftKey, event);
       applyValue(lastValue);
     };
 
@@ -381,7 +340,10 @@ export function SdmInteractionLayer({
     });
     try {
       captureTarget.setPointerCapture(startEvent.pointerId);
-    } catch {}
+    } catch {
+      // Capture is an optimisation: without it the gesture still tracks via the
+      // window listeners below, it just stops early if the pointer leaves.
+    }
   };
 
   const beginDragRef = useRef<
@@ -393,17 +355,11 @@ export function SdmInteractionLayer({
       onClick?: () => void,
     ) => void
   >(() => {});
-  beginDragRef.current = (
-    event,
-    element,
-    elementIds,
-    collapseTo,
-    onClick,
-  ) => {
-    const dragElements = documentRef.current.elements.filter((candidate) =>
+  beginDragRef.current = (event, element, elementIds, collapseTo, onClick) => {
+    const dragElements = documentRef.current.elements.filter(candidate =>
       elementIds.includes(candidate.id),
     );
-    const dragBlocked = dragElements.some((dragElement) => dragElement.locked);
+    const dragBlocked = dragElements.some(dragElement => dragElement.locked);
     trackGesture({
       startEvent: event,
       startValue: element.frame,
@@ -421,7 +377,7 @@ export function SdmInteractionLayer({
         };
       },
       valuesEqual: sameFrame,
-      applyValue: (frame) => {
+      applyValue: frame => {
         if (dragBlocked) {
           return;
         }
@@ -435,7 +391,7 @@ export function SdmInteractionLayer({
           });
         }
       },
-      commitValue: (frame) => {
+      commitValue: frame => {
         if (dragBlocked) {
           return;
         }
@@ -453,17 +409,14 @@ export function SdmInteractionLayer({
       restore: () => {
         for (const elementId of elementIds) {
           const currentElement = documentRef.current.elements.find(
-            (candidate) => candidate.id === elementId,
+            candidate => candidate.id === elementId,
           );
           if (currentElement !== undefined) {
             applyDraft(draftNodes(elementId), currentElement.frame);
           }
         }
       },
-      onClick:
-        collapseTo === undefined
-          ? onClick
-          : () => onSelectRef.current([collapseTo]),
+      onClick: collapseTo === undefined ? onClick : () => onSelectRef.current([collapseTo]),
     });
   };
 
@@ -488,25 +441,15 @@ export function SdmInteractionLayer({
       startEvent: event.nativeEvent,
       startValue: element.frame,
       valueAt: (dx, dy, shiftKey) =>
-        resizeFrame(
-          element.frame,
-          handle,
-          dx,
-          dy,
-          shiftKey,
-          element.rotationDeg,
-        ),
+        resizeFrame(element.frame, handle, dx, dy, shiftKey, element.rotationDeg),
       valuesEqual: sameFrame,
-      applyValue: (frame) => applyDraft(draftNodes(element.id), frame),
-      commitValue: (frame) => {
-        onCommitRef.current(
-          setElementFrame(documentRef.current, element.id, frame),
-          [element.id],
-        );
+      applyValue: frame => applyDraft(draftNodes(element.id), frame),
+      commitValue: frame => {
+        onCommitRef.current(setElementFrame(documentRef.current, element.id, frame), [element.id]);
       },
       restore: () => {
         const currentElement = documentRef.current.elements.find(
-          (candidate) => candidate.id === element.id,
+          candidate => candidate.id === element.id,
         );
         if (currentElement !== undefined) {
           applyDraft(draftNodes(element.id), currentElement.frame);
@@ -515,10 +458,7 @@ export function SdmInteractionLayer({
     });
   };
 
-  const beginRotation = (
-    event: ReactPointerEvent<HTMLDivElement>,
-    element: SdmElement,
-  ) => {
+  const beginRotation = (event: ReactPointerEvent<HTMLDivElement>, element: SdmElement) => {
     if (event.button !== 0) {
       return;
     }
@@ -537,19 +477,11 @@ export function SdmInteractionLayer({
     }
     const stageRect = stage.getBoundingClientRect();
     const stageScale = scaleRef.current || 1;
-    const centerX =
-      stageRect.left +
-      (element.frame.x + element.frame.width / 2) * stageScale;
-    const centerY =
-      stageRect.top +
-      (element.frame.y + element.frame.height / 2) * stageScale;
+    const centerX = stageRect.left + (element.frame.x + element.frame.width / 2) * stageScale;
+    const centerY = stageRect.top + (element.frame.y + element.frame.height / 2) * stageScale;
     const angleAt = (pointerEvent: PointerEvent) =>
       normalizeRotation(
-        (Math.atan2(
-          pointerEvent.clientY - centerY,
-          pointerEvent.clientX - centerX,
-        ) *
-          180) /
+        (Math.atan2(pointerEvent.clientY - centerY, pointerEvent.clientX - centerX) * 180) /
           Math.PI +
           90,
       );
@@ -559,30 +491,27 @@ export function SdmInteractionLayer({
       startEvent: event.nativeEvent,
       startValue: startRotation,
       valueAt: (_dx, _dy, shiftKey, pointerEvent) => {
-        const pointerDelta =
-          ((angleAt(pointerEvent) - startPointerAngle + 540) % 360) - 180;
+        const pointerDelta = ((angleAt(pointerEvent) - startPointerAngle + 540) % 360) - 180;
         const rotation = normalizeRotation(startRotation + pointerDelta);
         const increment = shiftKey ? 15 : 1;
 
         return normalizeRotation(Math.round(rotation / increment) * increment);
       },
       valuesEqual: (left, right) => left === right,
-      applyValue: (rotationDeg) =>
-        applyRotationDraft(element, rotationDeg),
-      commitValue: (rotationDeg) => {
+      applyValue: rotationDeg => applyRotationDraft(element, rotationDeg),
+      commitValue: rotationDeg => {
         const currentDocument = documentRef.current;
-        const nextDocument = updateElement(
-          currentDocument,
-          element.id,
-          (currentElement) => ({ ...currentElement, rotationDeg }),
-        );
+        const nextDocument = updateElement(currentDocument, element.id, currentElement => ({
+          ...currentElement,
+          rotationDeg,
+        }));
         if (nextDocument !== currentDocument) {
           onCommitRef.current(nextDocument, [element.id]);
         }
       },
       restore: () => {
         const currentElement = documentRef.current.elements.find(
-          (candidate) => candidate.id === element.id,
+          candidate => candidate.id === element.id,
         );
         if (currentElement !== undefined) {
           applyRotationDraft(currentElement, currentElement.rotationDeg);
@@ -623,8 +552,7 @@ export function SdmInteractionLayer({
         }
       }
       const currentIds = selectedIdsRef.current;
-      const hasSelectionModifier =
-        event.ctrlKey || event.metaKey || event.shiftKey;
+      const hasSelectionModifier = event.ctrlKey || event.metaKey || event.shiftKey;
       const selectionPlan = planRootPointerSelection(
         documentRef.current,
         currentIds,
@@ -638,19 +566,14 @@ export function SdmInteractionLayer({
 
         return;
       }
-      const element = documentRef.current.elements.find(
-        (candidate) => candidate.id === id,
-      );
+      const element = documentRef.current.elements.find(candidate => candidate.id === id);
       if (element === undefined) {
         return;
       }
       event.preventDefault();
       const selectionChanged =
         currentIds.length !== selectionPlan.selectedIds.length ||
-        currentIds.some(
-          (selectedId, index) =>
-            selectedId !== selectionPlan.selectedIds[index],
-        );
+        currentIds.some((selectedId, index) => selectedId !== selectionPlan.selectedIds[index]);
       if (selectionChanged) {
         onSelectRef.current(selectionPlan.selectedIds);
       }
@@ -663,8 +586,7 @@ export function SdmInteractionLayer({
         isEditableTextElement(element) &&
         selectionPlan.selectedIds.length === 1 &&
         selectionPlan.selectedIds[0] === id &&
-        ((currentIds.length === 1 && currentIds[0] === id) ||
-          isRenderedTextTarget(event.target))
+        ((currentIds.length === 1 && currentIds[0] === id) || isRenderedTextTarget(event.target))
           ? () =>
               onActivateTextCaretRef.current(id, {
                 clientX: event.clientX,
@@ -676,9 +598,7 @@ export function SdmInteractionLayer({
         element,
         selectionPlan.selectedIds,
         selectionPlan.collapseTo,
-        selectionPlan.collapseTo === undefined
-          ? activateTextCaret
-          : undefined,
+        selectionPlan.collapseTo === undefined ? activateTextCaret : undefined,
       );
     };
 
@@ -698,14 +618,8 @@ export function SdmInteractionLayer({
       if (id === null) {
         return;
       }
-      const element = documentRef.current.elements.find(
-        (candidate) => candidate.id === id,
-      );
-      if (
-        element === undefined ||
-        !isEditableTextElement(element) ||
-        element.locked
-      ) {
+      const element = documentRef.current.elements.find(candidate => candidate.id === id);
+      if (element === undefined || !isEditableTextElement(element) || element.locked) {
         return;
       }
       onActivateTextCaretRef.current(id, {
@@ -758,10 +672,7 @@ export function SdmInteractionLayer({
 
         return;
       }
-      if (
-        onForwardKeyRef.current(event) &&
-        shouldSuppressForwardedDefault(event)
-      ) {
+      if (onForwardKeyRef.current(event) && shouldSuppressForwardedDefault(event)) {
         event.preventDefault();
       }
     };
@@ -780,9 +691,7 @@ export function SdmInteractionLayer({
     endGesture();
   });
 
-  const selectedElements = document.elements.filter((element) =>
-    selectedIds.includes(element.id),
-  );
+  const selectedElements = document.elements.filter(element => selectedIds.includes(element.id));
   const resizeTarget =
     selectedElements.length === 1 &&
     selectedElements[0] !== undefined &&
@@ -807,7 +716,7 @@ export function SdmInteractionLayer({
         zIndex: 1000000,
       }}
     >
-      {selectedElements.map((element) => (
+      {selectedElements.map(element => (
         <div
           key={element.id}
           data-sdm-selection-id={element.id}
@@ -839,9 +748,7 @@ export function SdmInteractionLayer({
               />
               <div
                 data-sdm-rotate-handle=""
-                onPointerDown={(handleEvent) =>
-                  beginRotation(handleEvent, element)
-                }
+                onPointerDown={handleEvent => beginRotation(handleEvent, element)}
                 style={{
                   position: 'absolute',
                   left: '50%',
@@ -871,13 +778,11 @@ export function SdmInteractionLayer({
                   <path d="M21 2.25a.75.75 0 0 1 .75.75v5a.754.754 0 0 1-.058.286c-.012.03-.028.056-.044.083a.742.742 0 0 1-.118.161.755.755 0 0 1-.244.162c-.032.014-.065.022-.099.03-.013.004-.025.01-.039.012l-.016.003A.75.75 0 0 1 21 8.75h-5a.75.75 0 0 1 0-1.5h3.19l-.98-.98a9.01 9.01 0 0 0-5.777-2.51L12 3.75A8.25 8.25 0 1 0 20.25 12a.75.75 0 0 1 .75-.75l.076.004a.75.75 0 0 1 .674.746 9.751 9.751 0 0 1-16.645 6.895A9.75 9.75 0 0 1 12 2.25l.508.013a10.509 10.509 0 0 1 6.752 2.936l.99.99V3a.75.75 0 0 1 .75-.75Z" />
                 </svg>
               </div>
-              {HANDLES.map((handle) => (
+              {HANDLES.map(handle => (
                 <div
                   key={handle}
                   data-sdm-handle={handle}
-                  onPointerDown={(handleEvent) =>
-                    beginResize(handleEvent, element, handle)
-                  }
+                  onPointerDown={handleEvent => beginResize(handleEvent, element, handle)}
                   style={{
                     position: 'absolute',
                     left: HANDLE_POS[handle].left,

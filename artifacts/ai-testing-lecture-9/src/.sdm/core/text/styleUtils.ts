@@ -20,20 +20,11 @@ export function deepEqual(left: unknown, right: unknown): boolean {
   if (left === right) {
     return true;
   }
-  if (
-    typeof left !== 'object' ||
-    left === null ||
-    typeof right !== 'object' ||
-    right === null
-  ) {
+  if (typeof left !== 'object' || left === null || typeof right !== 'object' || right === null) {
     return false;
   }
   if (Array.isArray(left) || Array.isArray(right)) {
-    if (
-      !Array.isArray(left) ||
-      !Array.isArray(right) ||
-      left.length !== right.length
-    ) {
+    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) {
       return false;
     }
     for (let index = 0; index < left.length; index += 1) {
@@ -67,10 +58,7 @@ export function deepEqual(left: unknown, right: unknown): boolean {
   return leftDefinedKeys === rightDefinedKeys;
 }
 
-export function runStyleOverrides(
-  style: RunStyle,
-  inherited: RunStyle | undefined,
-): RunStyle {
+export function runStyleOverrides(style: RunStyle, inherited: RunStyle | undefined): RunStyle {
   const overrides: RunStyle = {};
   for (const key of RUN_STYLE_KEYS) {
     if (style[key] !== undefined && !deepEqual(style[key], inherited?.[key])) {

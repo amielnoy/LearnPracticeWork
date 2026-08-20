@@ -113,7 +113,14 @@ export default function RateLimitRetry() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Inject a 429 with the Mock Layer', 'הזרקת 429 עם שכבת ההדמייה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -124,7 +131,14 @@ export default function RateLimitRetry() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Assert on Back-Off Behavior', 'בדיקת התנהגות נסיגה')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -135,7 +149,14 @@ export default function RateLimitRetry() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.15vw', fontWeight: 600, color: '#1E3A5F', marginBottom: '0.5vh' }}>
+            <div
+              style={{
+                fontSize: '1.15vw',
+                fontWeight: 600,
+                color: '#1E3A5F',
+                marginBottom: '0.5vh',
+              }}
+            >
               {t('Cap the Retry Count', 'הגבלת מספר הניסיונות החוזרים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -193,17 +214,31 @@ export default function RateLimitRetry() {
             <div style={{ color: '#64748B' }}>import responses</div>
             <div style={{ color: '#64748B', marginTop: '0.5vh' }}># first call returns 429</div>
             <div style={{ color: '#38BDF8' }}>responses.add(</div>
-            <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;method=<span style={{ color: '#4ADE80' }}>"POST"</span>,</div>
-            <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;url=<span style={{ color: '#4ADE80' }}>ENDPOINT</span>,</div>
-            <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;status=<span style={{ color: '#F87171' }}>429</span>,</div>
+            <div style={{ color: '#38BDF8' }}>
+              &nbsp;&nbsp;method=<span style={{ color: '#4ADE80' }}>"POST"</span>,
+            </div>
+            <div style={{ color: '#38BDF8' }}>
+              &nbsp;&nbsp;url=<span style={{ color: '#4ADE80' }}>ENDPOINT</span>,
+            </div>
+            <div style={{ color: '#38BDF8' }}>
+              &nbsp;&nbsp;status=<span style={{ color: '#F87171' }}>429</span>,
+            </div>
             <div style={{ color: '#38BDF8' }}>)</div>
             <div style={{ color: '#64748B', marginTop: '0.5vh' }}># second call returns 200</div>
             <div style={{ color: '#38BDF8' }}>responses.add(</div>
-            <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;method=<span style={{ color: '#4ADE80' }}>"POST"</span>,</div>
-            <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;url=<span style={{ color: '#4ADE80' }}>ENDPOINT</span>,</div>
-            <div style={{ color: '#38BDF8' }}>&nbsp;&nbsp;json=MOCK_RESPONSE, status=<span style={{ color: '#F87171' }}>200</span>,</div>
+            <div style={{ color: '#38BDF8' }}>
+              &nbsp;&nbsp;method=<span style={{ color: '#4ADE80' }}>"POST"</span>,
+            </div>
+            <div style={{ color: '#38BDF8' }}>
+              &nbsp;&nbsp;url=<span style={{ color: '#4ADE80' }}>ENDPOINT</span>,
+            </div>
+            <div style={{ color: '#38BDF8' }}>
+              &nbsp;&nbsp;json=MOCK_RESPONSE, status=<span style={{ color: '#F87171' }}>200</span>,
+            </div>
             <div style={{ color: '#38BDF8' }}>)</div>
-            <div style={{ color: '#64748B', marginTop: '0.5vh' }}># assert final result is success</div>
+            <div style={{ color: '#64748B', marginTop: '0.5vh' }}>
+              # assert final result is success
+            </div>
             <div style={{ color: '#FBBF24' }}>result = my_service.call()</div>
             <div style={{ color: '#FBBF24' }}>assert result.ok</div>
           </div>

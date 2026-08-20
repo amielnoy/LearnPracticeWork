@@ -1,7 +1,7 @@
 /**
  * Playwright `webServer` entrypoint for the api and contract suites.
  *
- * Builds `artifacts/api-server` once, then runs two instances of it:
+ * Syncs the Python environment once, then runs three FastAPI instances:
  *
  *   1. keyed   — has a (throwaway) Gemini key, an admin token and an OAuth
  *                client ID, so the body-validation and authenticated branches run
@@ -9,23 +9,21 @@
  *
  * They are started in that order and the keyless one is what Playwright polls,
  * so by the time the health check passes both are listening. Building here
- * rather than in each webServer command keeps two esbuild runs from racing on
- * the same `dist/`.
+ * rather than in each webServer command keeps dependency setup deterministic.
  *
  * Every environment variable that changes server behaviour is pinned to an
  * explicit value so a developer's shell (or a Replit deployment) cannot leak
  * in and make the suite non-deterministic.
  *
- * Run straight from source as TypeScript: Node strips the types itself, so the
- * one file standing between the suites and a running server needs no build step
- * and no loader of its own.
+ * This orchestration stays TypeScript with the Playwright suite; all server
+ * implementation code it launches is Python.
  */
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const apiServerDir = path.resolve(here, '..', '..', 'artifacts', 'api-server');
+const apiServerDir = path.resolve(here, '..', '..', 'server');
 
 const KEYLESS_PORT = process.env.TEST_API_PORT ?? '8788';
 const KEYED_PORT = process.env.TEST_API_PORT_KEYED ?? '8789';
@@ -38,13 +36,24 @@ const DUMMY_GROQ_KEY = 'gsk_TEST-not-a-real-key-000000000000000';
 /** Env that must look the same on every machine for the assertions to hold. */
 const PINNED: Readonly<Record<string, string>> = {
   NODE_ENV: 'test',
-  // No database and no Replit connector: the Stripe routes are expected to
-  // fail as JSON, which is exactly what the api suite asserts.
+  // No database or Stripe secrets: those routes are expected to fail as JSON,
+  // which is exactly what the api suite asserts.
   DATABASE_URL: '',
-  REPLIT_CONNECTORS_HOSTNAME: '',
-  REPL_IDENTITY: '',
-  WEB_REPL_RENEWAL: '',
   REPLIT_DOMAINS: '',
+  UPSTREAM_API_BASE_URL: '',
+  METRICS_TOKEN: '',
+  STRIPE_SECRET_KEY: '',
+  STRIPE_WEBHOOK_SECRET: '',
+  SALES_ENABLED: '',
+  STRIPE_COURSE_PRICE_ID: '',
+  STRIPE_COURSE_PRODUCT_ID: '',
+  STRIPE_COURSE_AMOUNT: '',
+  STRIPE_COURSE_CURRENCY: '',
+  STRIPE_TAX_ENABLED: '',
+  BUSINESS_LEGAL_NAME: '',
+  BUSINESS_POSTAL_ADDRESS: '',
+  BUSINESS_SUPPORT_EMAIL: '',
+  PUBLIC_APP_ORIGIN: '',
   GEMINI_MODEL: 'gemini-2.5-flash',
   // Quieter output; the servers' logs are only interesting when a test fails.
   LOG_LEVEL: 'warn',
@@ -53,6 +62,7 @@ const PINNED: Readonly<Record<string, string>> = {
   // unconfigured deployment takes. The keyed server below sets both.
   ADMIN_API_TOKEN: '',
   GOOGLE_CLIENT_ID: '',
+  SESSION_SECRET: '',
   // Same reason as DATABASE_URL above: the Supabase-backed content route and
   // the Stripe connection string are expected to be unavailable, and a
   // developer who happens to have these exported must not get a different
@@ -97,10 +107,14 @@ async function waitForHealth(port: string, timeoutMs = 20_000): Promise<void> {
 }
 
 function startServer(port: string, extraEnv: Readonly<Record<string, string>>): ChildProcess {
-  const child = run(process.execPath, ['--enable-source-maps', './dist/index.mjs'], {
-    cwd: apiServerDir,
-    env: { ...process.env, ...PINNED, PORT: String(port), ...extraEnv },
-  });
+  const child = run(
+    'uv',
+    ['run', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', String(port)],
+    {
+      cwd: apiServerDir,
+      env: { ...process.env, ...PINNED, PORT: String(port), ...extraEnv },
+    },
+  );
   child.on('exit', code => {
     if (code !== 0 && code !== null) {
       console.error(`api-server on port ${port} exited with code ${code}`);
@@ -111,9 +125,9 @@ function startServer(port: string, extraEnv: Readonly<Record<string, string>>): 
 }
 
 await new Promise<void>((resolve, reject) => {
-  const build = run(process.execPath, ['./build.ts'], { cwd: apiServerDir });
+  const build = run('uv', ['sync', '--frozen'], { cwd: apiServerDir });
   build.on('exit', code =>
-    code === 0 ? resolve() : reject(new Error(`api-server build failed with code ${code}`)),
+    code === 0 ? resolve() : reject(new Error(`api-server setup failed with code ${code}`)),
   );
 });
 
@@ -122,6 +136,7 @@ startServer(KEYED_PORT, {
   GEMINI_API_KEY_B64: '',
   ADMIN_API_TOKEN: ADMIN_TOKEN,
   GOOGLE_CLIENT_ID,
+  SESSION_SECRET: 'test-session-secret-that-is-at-least-thirty-two-characters',
   GROQ_API_KEY: DUMMY_GROQ_KEY,
 });
 await waitForHealth(KEYED_PORT);

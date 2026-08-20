@@ -16,18 +16,10 @@ import {
   type SlideDocument,
   type TextBody,
 } from './core/schema';
-import {
-  backgroundValue,
-  PaintLayer,
-  SdmElementView,
-  SdmRenderContext,
-} from './render';
+import { backgroundValue, PaintLayer, SdmElementView, SdmRenderContext } from './render';
 import { resolveAssetSrc, paintToBackground } from './style';
 import { SdmInteractionLayer } from './SdmInteractionLayer';
-import type {
-  SdmTextCaretPoint,
-  SdmTextEditorOptions,
-} from './SdmTextEditor';
+import type { SdmTextCaretPoint, SdmTextEditorOptions } from './SdmTextEditor';
 import { SDM_BASE_URL, sdmWidgetModules } from './sdmRuntime';
 import { useSdmRuntimeSession } from './session';
 
@@ -46,16 +38,14 @@ const RENDER_CONTEXT = {
   widgets: sdmWidgetModules,
 };
 
-function describeParseFailure(
-  result: Exclude<ParseSlideDocumentResult, { ok: true }>,
-): string {
+function describeParseFailure(result: Exclude<ParseSlideDocumentResult, { ok: true }>): string {
   if (result.reason === 'unsupportedVersion') {
     return `document version ${result.version} is newer than this runtime supports`;
   }
 
   return result.issues
     .slice(0, 8)
-    .map((issue) => `${issue.path}: ${issue.message}`)
+    .map(issue => `${issue.path}: ${issue.message}`)
     .join('; ');
 }
 
@@ -96,9 +86,7 @@ function useStageScale(
 }
 
 export function SdmSlide({ slideId, initialDocument }: Props) {
-  const [state, setState] = useState<ParsedState>(() =>
-    tryParse(initialDocument),
-  );
+  const [state, setState] = useState<ParsedState>(() => tryParse(initialDocument));
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
@@ -111,24 +99,17 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
     documentRef.current = next;
     setState({ document: next, error: null });
   }, []);
-  const textCommandHandlerRef = useRef<
-    ((command: SdmTextCommand) => boolean) | null
-  >(null);
+  const textCommandHandlerRef = useRef<((command: SdmTextCommand) => boolean) | null>(null);
   const textCommitHandlerRef = useRef<(() => void) | null>(null);
-  const textPlacementHandlerRef = useRef<
-    ((point: SdmTextCaretPoint) => void) | null
-  >(null);
+  const textPlacementHandlerRef = useRef<((point: SdmTextCaretPoint) => void) | null>(null);
   const textCaretElementIdRef = useRef<string | null>(null);
-  const handleTextCommand = useCallback(
-    (elementId: string, command: SdmTextCommand): boolean => {
-      if (elementId !== textCaretElementIdRef.current) {
-        return false;
-      }
+  const handleTextCommand = useCallback((elementId: string, command: SdmTextCommand): boolean => {
+    if (elementId !== textCaretElementIdRef.current) {
+      return false;
+    }
 
-      return textCommandHandlerRef.current?.(command) ?? false;
-    },
-    [],
-  );
+    return textCommandHandlerRef.current?.(command) ?? false;
+  }, []);
   const handleBeforeTextCaretExit = useCallback(() => {
     textCommitHandlerRef.current?.();
   }, []);
@@ -144,15 +125,14 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
     requestHistory,
     forwardKey,
   } = useSdmRuntimeSession({
-      slideId,
-      document,
-      onBeforeTextCaretExit: handleBeforeTextCaretExit,
-      onDocumentReplaced: handleDocumentReplaced,
-      onTextCommand: handleTextCommand,
-    });
+    slideId,
+    document,
+    onBeforeTextCaretExit: handleBeforeTextCaretExit,
+    onDocumentReplaced: handleDocumentReplaced,
+    onTextCommand: handleTextCommand,
+  });
   textCaretElementIdRef.current = textCaretElementId;
-  const [textCaretPoint, setTextCaretPoint] =
-    useState<SdmTextCaretPoint | null>(null);
+  const [textCaretPoint, setTextCaretPoint] = useState<SdmTextCaretPoint | null>(null);
   const handleActivateTextCaret = useCallback(
     (elementId: string, point: SdmTextCaretPoint) => {
       setTextCaretPoint(point);
@@ -193,14 +173,10 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
         if (currentDocument === null) {
           return;
         }
-        const nextDocument = updateElement(
-          currentDocument,
-          textCaretElementId,
-          (element) =>
-            (element.type === 'text' || element.type === 'shape') &&
-            element.body !== body
-              ? { ...element, body }
-              : element,
+        const nextDocument = updateElement(currentDocument, textCaretElementId, element =>
+          (element.type === 'text' || element.type === 'shape') && element.body !== body
+            ? { ...element, body }
+            : element,
         );
         if (nextDocument !== currentDocument) {
           // The caret session survives its own commits; exits are explicit
@@ -208,10 +184,10 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
           commit(nextDocument, [textCaretElementId], { keepTextCaret: true });
         }
       },
-      onSelectionChange: (formatting) => {
+      onSelectionChange: formatting => {
         reportTextSelection(textCaretElementId, formatting);
       },
-      registerCommitHandler: (handler) => {
+      registerCommitHandler: handler => {
         textCommitHandlerRef.current = handler;
 
         return () => {
@@ -220,7 +196,7 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
           }
         };
       },
-      registerCommandHandler: (handler) => {
+      registerCommandHandler: handler => {
         textCommandHandlerRef.current = handler;
 
         return () => {
@@ -229,7 +205,7 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
           }
         };
       },
-      registerPlacementHandler: (handler) => {
+      registerPlacementHandler: handler => {
         textPlacementHandlerRef.current = handler;
 
         return () => {
@@ -242,7 +218,6 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
   }, [
     commit,
     document,
-    handleBeforeTextCaretExit,
     handleExitTextCaret,
     reportTextSelection,
     textCaretElementId,
@@ -287,13 +262,11 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
   }, []);
 
   const background = document
-    ? paintToBackground(document.background, document.theme, (assetId) =>
+    ? paintToBackground(document.background, document.theme, assetId =>
         resolveAssetSrc(document.assets, assetId, SDM_BASE_URL),
       )
     : undefined;
-  const stageBackground = document
-    ? (backgroundValue(background) ?? '#ffffff')
-    : '#1a1a1a';
+  const stageBackground = document ? (backgroundValue(background) ?? '#ffffff') : '#1a1a1a';
 
   return (
     <SdmRenderContext.Provider value={RENDER_CONTEXT}>
@@ -320,15 +293,13 @@ export function SdmSlide({ slideId, initialDocument }: Props) {
           }}
         >
           <PaintLayer resolved={background} />
-          {document?.elements.map((element) => (
+          {document?.elements.map(element => (
             <SdmElementView
               key={element.id}
               element={element}
               document={document}
               onAction={handleAction}
-              textEditor={
-                textCaretElementId === element.id ? textEditor : undefined
-              }
+              textEditor={textCaretElementId === element.id ? textEditor : undefined}
             />
           ))}
           {editing && document ? (

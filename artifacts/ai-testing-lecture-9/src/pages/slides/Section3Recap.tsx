@@ -29,10 +29,27 @@ export default function Section3Recap() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
@@ -40,29 +57,112 @@ export default function Section3Recap() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3vh' }}>
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
-          <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+          <div
+            style={{
+              fontSize: '1.2vw',
+              fontWeight: 600,
+              color: '#0D9488',
+              marginBottom: '1vh',
+              textTransform: isHe ? 'none' : 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             {t('Section 3 Recap', 'סיכום חלק 3')}
           </div>
-          <h1 style={{ fontSize: '3vw', fontWeight: 800, margin: '0 0 0.5vh 0', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+          <h1
+            style={{
+              fontSize: '3vw',
+              fontWeight: 800,
+              margin: '0 0 0.5vh 0',
+              lineHeight: 1.1,
+              letterSpacing: '-0.02em',
+            }}
+          >
             {t('Quality Control for Generated Tests', 'בקרת איכות לבדיקות שנוצרו')}
           </h1>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2vw' }}>
-          <div style={{ background: '#FFFFFF', padding: '3vh 2vw', borderRadius: '1vw', border: '2px solid rgba(13,148,136,0.3)', boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)', textAlign: isHe ? 'right' : 'left' }}>
-            <div style={{ fontSize: '3vw', fontWeight: 800, color: '#0D9488', marginBottom: '1vh' }}>1</div>
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}>{t('Review every test', 'סקור כל בדיקה')}</div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>{t('Check for intent-based assertions, realistic mocks, and descriptive names before approving.', 'בדוק אסרציות מבוססות כוונה, מocks ריאליסטיים ושמות תיאוריים לפני האישור.')}</div>
+          <div
+            style={{
+              background: '#FFFFFF',
+              padding: '3vh 2vw',
+              borderRadius: '1vw',
+              border: '2px solid rgba(13,148,136,0.3)',
+              boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
+            <div
+              style={{ fontSize: '3vw', fontWeight: 800, color: '#0D9488', marginBottom: '1vh' }}
+            >
+              1
+            </div>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}
+            >
+              {t('Review every test', 'סקור כל בדיקה')}
+            </div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
+              {t(
+                'Check for intent-based assertions, realistic mocks, and descriptive names before approving.',
+                'בדוק אסרציות מבוססות כוונה, מocks ריאליסטיים ושמות תיאוריים לפני האישור.',
+              )}
+            </div>
           </div>
-          <div style={{ background: '#FFFFFF', padding: '3vh 2vw', borderRadius: '1vw', border: '2px solid rgba(13,148,136,0.3)', boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)', textAlign: isHe ? 'right' : 'left' }}>
-            <div style={{ fontSize: '3vw', fontWeight: 800, color: '#0D9488', marginBottom: '1vh' }}>2</div>
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}>{t('Prune before merging', 'גזום לפני מיזוג')}</div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>{t('Coverage diff + semantic similarity catch redundant tests that inflate suite size without adding value.', 'diff כיסוי + דמיון סמנטי תופסים בדיקות מיותרות שמנפחות את גודל החבילה ללא ערך נוסף.')}</div>
+          <div
+            style={{
+              background: '#FFFFFF',
+              padding: '3vh 2vw',
+              borderRadius: '1vw',
+              border: '2px solid rgba(13,148,136,0.3)',
+              boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
+            <div
+              style={{ fontSize: '3vw', fontWeight: 800, color: '#0D9488', marginBottom: '1vh' }}
+            >
+              2
+            </div>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}
+            >
+              {t('Prune before merging', 'גזום לפני מיזוג')}
+            </div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
+              {t(
+                'Coverage diff + semantic similarity catch redundant tests that inflate suite size without adding value.',
+                'diff כיסוי + דמיון סמנטי תופסים בדיקות מיותרות שמנפחות את גודל החבילה ללא ערך נוסף.',
+              )}
+            </div>
           </div>
-          <div style={{ background: '#FFFFFF', padding: '3vh 2vw', borderRadius: '1vw', border: '2px solid rgba(13,148,136,0.3)', boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)', textAlign: isHe ? 'right' : 'left' }}>
-            <div style={{ fontSize: '3vw', fontWeight: 800, color: '#0D9488', marginBottom: '1vh' }}>3</div>
-            <div style={{ fontSize: '1.2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}>{t('Triage with AI, decide with humans', 'סווג עם AI, החלט עם בני אדם')}</div>
-            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>{t('AI classifies failure cause; a human confirms real_bug before filing a ticket.', 'AI מסווג סיבת כשל; אדם מאשר real_bug לפני פתיחת כרטיס.')}</div>
+          <div
+            style={{
+              background: '#FFFFFF',
+              padding: '3vh 2vw',
+              borderRadius: '1vw',
+              border: '2px solid rgba(13,148,136,0.3)',
+              boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
+              textAlign: isHe ? 'right' : 'left',
+            }}
+          >
+            <div
+              style={{ fontSize: '3vw', fontWeight: 800, color: '#0D9488', marginBottom: '1vh' }}
+            >
+              3
+            </div>
+            <div
+              style={{ fontSize: '1.2vw', fontWeight: 700, color: '#1E3A5F', marginBottom: '1vh' }}
+            >
+              {t('Triage with AI, decide with humans', 'סווג עם AI, החלט עם בני אדם')}
+            </div>
+            <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.5 }}>
+              {t(
+                'AI classifies failure cause; a human confirms real_bug before filing a ticket.',
+                'AI מסווג סיבת כשל; אדם מאשר real_bug לפני פתיחת כרטיס.',
+              )}
+            </div>
           </div>
         </div>
       </div>

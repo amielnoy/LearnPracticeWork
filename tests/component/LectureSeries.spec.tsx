@@ -1,23 +1,15 @@
 import { test, expect } from '@playwright/experimental-ct-react';
 import { LocaleProvider } from '@academy/context/LocaleContext';
 import { ProgressProvider } from '@academy/context/ProgressContext';
-import { LectureSeries } from '@academy/components/LectureSeries';
-import * as LectureSeriesModule from '@academy/components/LectureSeries';
+import { LectureSeries } from '@academy/components/practice/LectureSeries';
+import { EN as EN_BANK } from '@academy/lib/lectures';
 
 /**
  * Tracks now also come from `/api/content/lecture-series` (see
  * `lib/contentClient.ts`), with the bundled `EN`/`HE` banks only used when
  * that call fails — the same fallback contract as `QuestionBank` and
  * `CodingChallenges`.
- *
- * `EN`/`HE` are read through a namespace import rather than a named one: a
- * named `{ EN }` import here triggers a component-test bundler scope bug
- * ("Identifier 'LectureSeries' has already been declared") specific to this
- * module, most likely a rolldown/esbuild chunk-merging collision — see
- * lecture-series-spec-bundler-quirk.md.
  */
-const EN_BANK = LectureSeriesModule.EN;
-
 test('renders the bundled tracks by default', async ({ mount }) => {
   const component = await mount(
     <LocaleProvider>

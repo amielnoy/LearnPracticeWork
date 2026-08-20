@@ -130,7 +130,7 @@ export default function CaseStudyChatSupportWidget() {
             letterSpacing: '-0.02em',
           }}
         >
-          {t('A Chat Support Widget', 'ווידג\'ט תמיכת צ\'אט')}
+          {t('A Chat Support Widget', "ווידג'ט תמיכת צ'אט")}
         </h1>
         <p
           style={{
@@ -144,7 +144,7 @@ export default function CaseStudyChatSupportWidget() {
         >
           {t(
             'A realistic test suite for an AI chat support widget wires together dynamic-content assertions, streaming waits, resilient selectors, and error simulation in a single test.',
-            'סוויטת בדיקות ריאליסטית לווידג\'ט תמיכת צ\'אט AI מחברת יחד אסרציות תוכן דינמי, המתנות סטרימינג, סלקטורים עמידים וסימולציית שגיאות בבדיקה אחת.',
+            "סוויטת בדיקות ריאליסטית לווידג'ט תמיכת צ'אט AI מחברת יחד אסרציות תוכן דינמי, המתנות סטרימינג, סלקטורים עמידים וסימולציית שגיאות בבדיקה אחת.",
           )}
         </p>
 
@@ -156,7 +156,9 @@ export default function CaseStudyChatSupportWidget() {
             padding: '1.5vh 1.5vw',
           }}
         >
-          <div style={{ fontSize: '0.95vw', fontWeight: 700, color: '#0D9488', marginBottom: '0.4vh' }}>
+          <div
+            style={{ fontSize: '0.95vw', fontWeight: 700, color: '#0D9488', marginBottom: '0.4vh' }}
+          >
             {t('Techniques applied', 'טכניקות מיושמות')}
           </div>
           <div style={{ fontSize: '0.9vw', color: '#475569', lineHeight: 1.5 }}>

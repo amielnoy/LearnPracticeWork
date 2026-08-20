@@ -128,7 +128,10 @@ export default function ClosingSlide() {
             {t('Coming Next', 'בא בהמשך')}
           </div>
           <div style={{ fontSize: '1.5vw', fontWeight: 700, color: '#FFFFFF' }}>
-            {t('Lecture 6 \u2014 CI/CD for AI Test Suites', 'הרצאה 6 \u2014 CI/CD לחבילות בדיקות AI')}
+            {t(
+              'Lecture 6 \u2014 CI/CD for AI Test Suites',
+              'הרצאה 6 \u2014 CI/CD לחבילות בדיקות AI',
+            )}
           </div>
           <div style={{ fontSize: '1.1vw', color: 'rgba(255,255,255,0.7)', marginTop: '0.8vh' }}>
             {t(

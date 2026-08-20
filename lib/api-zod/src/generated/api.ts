@@ -14,3 +14,265 @@ import * as zod from 'zod';
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary Dependency readiness check
+ */
+export const ReadinessCheckResponse = zod.object({
+  status: zod.string(),
+  database: zod.string(),
+});
+
+/**
+ * @summary Read public AI-provider availability and quota
+ */
+export const GetAiConfigResponse = zod.object({
+  groq: zod.object({
+    available: zod.boolean(),
+    defaultModel: zod.string(),
+    anonymousDailyQuota: zod.number(),
+  }),
+  gemini: zod.object({
+    available: zod.boolean(),
+    defaultModel: zod.string(),
+    anonymousDailyQuota: zod.number(),
+  }),
+});
+
+/**
+ * @summary Generate one bounded AI response
+ */
+export const generateAiResponseBodyModelMax = 100;
+
+export const generateAiResponseBodySystemMax = 12000;
+
+export const generateAiResponseBodyMessagesItemContentMax = 50000;
+
+export const generateAiResponseBodyMessagesMax = 20;
+
+export const generateAiResponseBodyMaxTokensDefault = 2500;
+export const generateAiResponseBodyMaxTokensMax = 8192;
+
+export const generateAiResponseBodyGroundedDefault = false;
+
+export const GenerateAiResponseBody = zod.object({
+  model: zod.string().max(generateAiResponseBodyModelMax).optional(),
+  system: zod.string().max(generateAiResponseBodySystemMax).optional(),
+  messages: zod
+    .array(
+      zod.object({
+        role: zod.enum(['user', 'assistant']),
+        content: zod.string().min(1).max(generateAiResponseBodyMessagesItemContentMax),
+      }),
+    )
+    .min(1)
+    .max(generateAiResponseBodyMessagesMax),
+  maxTokens: zod
+    .number()
+    .min(1)
+    .max(generateAiResponseBodyMaxTokensMax)
+    .default(generateAiResponseBodyMaxTokensDefault),
+  grounded: zod.boolean().default(generateAiResponseBodyGroundedDefault),
+});
+
+export const GenerateAiResponseResponse = zod.object({
+  text: zod.string(),
+  truncated: zod.boolean(),
+});
+
+/**
+ * @summary Read the single server-approved course price
+ */
+export const GetCoursePricesResponse = zod.object({
+  data: zod.array(zod.record(zod.string(), zod.unknown())),
+  salesEnabled: zod.boolean(),
+});
+
+/**
+ * @summary Create checkout using the server-owned course price
+ */
+export const createCourseCheckoutBodyEmailMax = 320;
+
+export const createCourseCheckoutBodyLocaleDefault = `en`;
+
+export const CreateCourseCheckoutBody = zod.object({
+  email: zod.string().email().max(createCourseCheckoutBodyEmailMax).optional(),
+  acceptedTerms: zod.boolean(),
+  locale: zod.enum(['en', 'he']).default(createCourseCheckoutBodyLocaleDefault),
+});
+
+export const CreateCourseCheckoutResponse = zod.object({
+  url: zod.string().url(),
+});
+
+/**
+ * @summary Verify and process a raw Stripe event
+ */
+export const ReceiveStripeWebhookResponse = zod.object({
+  received: zod.boolean(),
+});
+
+/**
+ * @summary Admin-only idempotent creation of the course product and price
+ */
+export const SeedStripeCatalogResponse = zod.object({
+  status: zod.enum(['created', 'already_exists']),
+  productId: zod.string(),
+  priceId: zod.string().nullable(),
+});
+
+/**
+ * @summary Read entitlement for the verified signed-in user and approved course product
+ */
+export const GetCourseEntitlementResponse = zod.object({
+  hasAccess: zod.boolean(),
+  purchasedAt: zod.coerce.date().nullable(),
+});
+
+/**
+ * Stages of interview questions, in reading order. Served from the content store so the bank can change without a redeploy.
+
+ * @summary Interview question bank
+ */
+export const getQuestionBankQueryLangDefault = `en`;
+
+export const GetQuestionBankQueryParams = zod.object({
+  lang: zod
+    .enum(['en', 'he'])
+    .default(getQuestionBankQueryLangDefault)
+    .describe(
+      'Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.\n',
+    ),
+});
+
+export const GetQuestionBankResponse = zod.object({
+  stages: zod.array(
+    zod.object({
+      icon: zod.string(),
+      title: zod.string(),
+      items: zod.array(
+        zod.object({
+          q: zod.string(),
+          hint: zod.string(),
+          answer: zod.string(),
+        }),
+      ),
+    }),
+  ),
+});
+
+/**
+ * Challenge levels, each holding its own challenges in order.
+ * @summary Coding challenges
+ */
+export const getCodingChallengesQueryLangDefault = `en`;
+
+export const GetCodingChallengesQueryParams = zod.object({
+  lang: zod
+    .enum(['en', 'he'])
+    .default(getCodingChallengesQueryLangDefault)
+    .describe(
+      'Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.\n',
+    ),
+});
+
+export const GetCodingChallengesResponse = zod.object({
+  levels: zod.array(
+    zod.object({
+      label: zod.string(),
+      blurb: zod.string(),
+      items: zod.array(
+        zod.object({
+          title: zod.string(),
+          prompt: zod.string(),
+          hint: zod.string(),
+          code: zod.string(),
+          complexity: zod.string(),
+        }),
+      ),
+    }),
+  ),
+});
+
+/**
+ * Tracks, each holding its lectures in order.
+ * @summary Lecture series
+ */
+export const getLectureSeriesQueryLangDefault = `en`;
+
+export const GetLectureSeriesQueryParams = zod.object({
+  lang: zod
+    .enum(['en', 'he'])
+    .default(getLectureSeriesQueryLangDefault)
+    .describe(
+      'Which language to serve. Anything other than the two below is treated as `en` rather than refused, because this parameter travels in links.\n',
+    ),
+});
+
+export const GetLectureSeriesResponse = zod.object({
+  tracks: zod.array(
+    zod.object({
+      title: zod.string(),
+      lead: zod.string(),
+      lectures: zod.array(
+        zod.object({
+          num: zod.number(),
+          ready: zod.boolean(),
+          title: zod.string(),
+          desc: zod.string(),
+          url: zod.string().optional().describe('Present only once the lecture is published.'),
+        }),
+      ),
+    }),
+  ),
+});
+
+/**
+ * Verifies the Google ID token and, on success, sets the signed `ata_session` HttpOnly cookie. The raw credential is not returned or persisted by the client.
+
+ * @summary Exchange a Google credential for a server session
+ */
+export const signInWithGoogleBodyCredentialMax = 10000;
+
+export const SignInWithGoogleBody = zod.object({
+  credential: zod.string().min(1).max(signInWithGoogleBodyCredentialMax),
+});
+
+export const SignInWithGoogleResponse = zod.object({
+  user: zod.object({
+    name: zod.string(),
+    email: zod.string().email(),
+    picture: zod.string(),
+    expiresAt: zod.number().describe('Google token expiry as Unix epoch milliseconds.'),
+  }),
+});
+
+/**
+ * Returns the public Google OAuth client ID. Static clients use this at runtime so Replit does not need authentication configuration or secrets.
+
+ * @summary Read public browser authentication configuration
+ */
+export const GetAuthConfigResponse = zod.object({
+  clientId: zod
+    .string()
+    .describe('Public Google OAuth client ID, or an empty string when sign-in is disabled.'),
+});
+
+/**
+ * @summary Read the current signed browser session
+ */
+export const GetAuthSessionResponse = zod.object({
+  user: zod.object({
+    name: zod.string(),
+    email: zod.string().email(),
+    picture: zod.string(),
+    expiresAt: zod.number().describe('Google token expiry as Unix epoch milliseconds.'),
+  }),
+});
+
+/**
+ * @summary Delete the browser session cookie
+ */
+export const SignOutResponse = zod.object({
+  ok: zod.boolean(),
+});

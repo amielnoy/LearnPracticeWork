@@ -9,7 +9,9 @@
     "test:api": "playwright test --config=../playwright.config.mts --project=api",
     "test:contract": "playwright test --config=../playwright.config.mts --project=contract",
     "test:component": "playwright test --config=playwright-ct.config.ts",
-    "test:e2e": "playwright test --config=playwright-e2e.config.ts",
+    "test:e2e": "playwright test --config=playwright-e2e.config.ts --project=e2e-desktop --project=e2e-mobile --project=deck",
+    "test:e2e:all": "playwright test --config=playwright-e2e.config.ts --workers=2",
+    "test:browsers:all": "playwright install chromium webkit firefox",
     "test:browsers": "playwright install chromium",
     "report:allure": "allure awesome ../allure-results --output ../allure-report",
     "report:allure:single": "allure awesome ../allure-results --single-file --output ../allure-report-single",
@@ -17,6 +19,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/experimental-ct-react": "^1.62.1",
     "@playwright/test": "^1.62.1",
     "@types/node": "catalog:",

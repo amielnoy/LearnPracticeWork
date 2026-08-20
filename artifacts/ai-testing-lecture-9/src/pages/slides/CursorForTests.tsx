@@ -47,45 +47,134 @@ export default function CursorForTests() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '1vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: isHe ? 'right' : 'left',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '1vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {t('Tool', 'כלי')}
         </div>
-        <h1 style={{ fontSize: '2.8vw', fontWeight: 800, margin: '0 0 2vh 0', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '2.8vw',
+            fontWeight: 800,
+            margin: '0 0 2vh 0',
+            lineHeight: 1.15,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {t('Cursor for Test Generation', 'Cursor ליצירת בדיקות')}
         </h1>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2vh' }}>
           <div style={{ display: 'flex', gap: '1.2vw', alignItems: 'flex-start' }}>
-            <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', marginTop: '0.7vw' }} />
+            <div
+              style={{
+                width: '0.6vw',
+                height: '0.6vw',
+                minWidth: '0.6vw',
+                borderRadius: '50%',
+                backgroundColor: '#0D9488',
+                marginTop: '0.7vw',
+              }}
+            />
             <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5 }}>
-              {t('@file references pull multiple source files into the prompt simultaneously', 'הפניות @file מושכות מספר קבצי מקור לפרומפט בו-זמנית')}
+              {t(
+                '@file references pull multiple source files into the prompt simultaneously',
+                'הפניות @file מושכות מספר קבצי מקור לפרומפט בו-זמנית',
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', gap: '1.2vw', alignItems: 'flex-start' }}>
-            <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', marginTop: '0.7vw' }} />
+            <div
+              style={{
+                width: '0.6vw',
+                height: '0.6vw',
+                minWidth: '0.6vw',
+                borderRadius: '50%',
+                backgroundColor: '#0D9488',
+                marginTop: '0.7vw',
+              }}
+            />
             <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5 }}>
-              {t('Composer mode generates complete test files, not just snippets', 'מצב Composer מייצר קבצי בדיקות מלאים, לא רק קטעים')}
+              {t(
+                'Composer mode generates complete test files, not just snippets',
+                'מצב Composer מייצר קבצי בדיקות מלאים, לא רק קטעים',
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', gap: '1.2vw', alignItems: 'flex-start' }}>
-            <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', marginTop: '0.7vw' }} />
+            <div
+              style={{
+                width: '0.6vw',
+                height: '0.6vw',
+                minWidth: '0.6vw',
+                borderRadius: '50%',
+                backgroundColor: '#0D9488',
+                marginTop: '0.7vw',
+              }}
+            />
             <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5 }}>
-              {t('@codebase lets Cursor retrieve relevant context from the entire repo', '@codebase מאפשר ל-Cursor לאחזר הקשר רלוונטי מכל ה-repo')}
+              {t(
+                '@codebase lets Cursor retrieve relevant context from the entire repo',
+                '@codebase מאפשר ל-Cursor לאחזר הקשר רלוונטי מכל ה-repo',
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', gap: '1.2vw', alignItems: 'flex-start' }}>
-            <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '0.6vw', borderRadius: '50%', backgroundColor: '#0D9488', marginTop: '0.7vw' }} />
+            <div
+              style={{
+                width: '0.6vw',
+                height: '0.6vw',
+                minWidth: '0.6vw',
+                borderRadius: '50%',
+                backgroundColor: '#0D9488',
+                marginTop: '0.7vw',
+              }}
+            />
             <div style={{ fontSize: '1.1vw', color: '#1E3A5F', lineHeight: 1.5 }}>
-              {t('Use .cursorrules to define project-wide test conventions once', 'השתמש ב-.cursorrules כדי להגדיר מוסכמות בדיקות רחבות-פרויקט פעם אחת')}
+              {t(
+                'Use .cursorrules to define project-wide test conventions once',
+                'השתמש ב-.cursorrules כדי להגדיר מוסכמות בדיקות רחבות-פרויקט פעם אחת',
+              )}
             </div>
           </div>
         </div>
@@ -93,7 +182,16 @@ export default function CursorForTests() {
 
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={codePanel}>
-          <div style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: '#38BDF8' }}>.cursorrules SNIPPET</div>
+          <div
+            style={{
+              fontSize: '0.85vw',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              color: '#38BDF8',
+            }}
+          >
+            .cursorrules SNIPPET
+          </div>
           <div style={{ height: '1px', background: '#1E293B' }} />
           <div style={{ fontSize: '1.05vw', lineHeight: 1.65, color: '#94A3B8' }}>
             {'# Test generation rules'}
@@ -114,9 +212,21 @@ export default function CursorForTests() {
             {'- Add data-testid to any new element'}
           </div>
           <div style={{ height: '1px', background: '#1E293B' }} />
-          <div style={{ fontSize: '0.85vw', fontWeight: 700, letterSpacing: '0.08em', color: '#FBBF24' }}>WHY THIS MATTERS</div>
+          <div
+            style={{
+              fontSize: '0.85vw',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              color: '#FBBF24',
+            }}
+          >
+            WHY THIS MATTERS
+          </div>
           <div style={{ fontSize: '1.05vw', lineHeight: 1.65, color: '#E2E8F0' }}>
-            {t('Rules are injected into every test-generation prompt, eliminating framework drift across 50+ generated files.', 'כללים מוזרקים לכל פרומפט יצירת בדיקות, ומבטלים סטייה בפריימוורק בין 50+ קבצים שנוצרו.')}
+            {t(
+              'Rules are injected into every test-generation prompt, eliminating framework drift across 50+ generated files.',
+              'כללים מוזרקים לכל פרומפט יצירת בדיקות, ומבטלים סטייה בפריימוורק בין 50+ קבצים שנוצרו.',
+            )}
           </div>
         </div>
       </div>

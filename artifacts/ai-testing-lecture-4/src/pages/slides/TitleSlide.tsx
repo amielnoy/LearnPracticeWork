@@ -210,7 +210,7 @@ export default function TitleSlide() {
           }}
         >
           <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#1E3A5F' }}>
-            {t("Today\u2019s Roadmap", 'מפת הדרך להיום')}
+            {t('Today\u2019s Roadmap', 'מפת הדרך להיום')}
           </div>
 
           <div

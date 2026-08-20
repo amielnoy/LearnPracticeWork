@@ -20,7 +20,9 @@ const blobDir = path.resolve(here, '..', 'blob-report', 'component');
  */
 export default defineConfig({
   testDir: './component',
+  outputDir: '../test-results/component',
   fullyParallel: true,
+  workers: process.env.PW_SUITE_WORKERS ? Number(process.env.PW_SUITE_WORKERS) : undefined,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [

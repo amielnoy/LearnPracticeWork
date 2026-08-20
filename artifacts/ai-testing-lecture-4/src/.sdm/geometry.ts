@@ -43,9 +43,7 @@ export function elementTransform(
   );
 }
 
-export function rotationTransform(
-  rotationDeg: number | undefined,
-): string | undefined {
+export function rotationTransform(rotationDeg: number | undefined): string | undefined {
   return rotationDeg ? `rotate(${rotationDeg}deg)` : undefined;
 }
 
@@ -93,14 +91,8 @@ export function resizeFrame(
     const widthScale = width / start.width;
     const heightScale = height / start.height;
     const requestedScale =
-      Math.abs(widthScale - 1) >= Math.abs(heightScale - 1)
-        ? widthScale
-        : heightScale;
-    const scale = Math.max(
-      requestedScale,
-      MIN_SIZE / start.width,
-      MIN_SIZE / start.height,
-    );
+      Math.abs(widthScale - 1) >= Math.abs(heightScale - 1) ? widthScale : heightScale;
+    const scale = Math.max(requestedScale, MIN_SIZE / start.width, MIN_SIZE / start.height);
     width = start.width * scale;
     height = start.height * scale;
   }
@@ -109,16 +101,8 @@ export function resizeFrame(
   const localY = north ? start.height - height : 0;
   const localCenterX = localX + width / 2 - start.width / 2;
   const localCenterY = localY + height / 2 - start.height / 2;
-  const centerX =
-    start.x +
-    start.width / 2 +
-    localCenterX * cos -
-    localCenterY * sin;
-  const centerY =
-    start.y +
-    start.height / 2 +
-    localCenterX * sin +
-    localCenterY * cos;
+  const centerX = start.x + start.width / 2 + localCenterX * cos - localCenterY * sin;
+  const centerY = start.y + start.height / 2 + localCenterX * sin + localCenterY * cos;
 
   return {
     x: Math.round(centerX - width / 2),

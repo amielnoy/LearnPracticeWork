@@ -31,10 +31,27 @@ export default function WhySecurityTestingMatters() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
-          <div style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }} />
-          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>AI Testing Academy</div>
+          <div
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
+          />
+          <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
+            AI Testing Academy
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
+        >
           <div>{t('SECURITY TESTING', 'בדיקות אבטחה')}</div>
           <div>{t('LECTURE 07', 'הרצאה 07')}</div>
         </div>
@@ -42,10 +59,27 @@ export default function WhySecurityTestingMatters() {
 
       {/* Title */}
       <div style={{ gridColumn: '1 / -1', textAlign: isHe ? 'right' : 'left' }}>
-        <div style={{ fontSize: '1.2vw', fontWeight: 600, color: '#0D9488', marginBottom: '0.8vh', textTransform: isHe ? 'none' : 'uppercase', letterSpacing: '0.05em' }}>
+        <div
+          style={{
+            fontSize: '1.2vw',
+            fontWeight: 600,
+            color: '#0D9488',
+            marginBottom: '0.8vh',
+            textTransform: isHe ? 'none' : 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
           {t('Stakes & Motivation', 'הסיכונים והמוטיבציה')}
         </div>
-        <h1 style={{ fontSize: '3vw', fontWeight: 800, margin: 0, lineHeight: 1.1, letterSpacing: '-0.02em' }}>
+        <h1
+          style={{
+            fontSize: '3vw',
+            fontWeight: 800,
+            margin: 0,
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+          }}
+        >
           {t('Why AI Security Testing Cannot Wait', 'למה לא ניתן להמתין עם בדיקות אבטחה ל-AI')}
         </h1>
       </div>
@@ -127,7 +161,19 @@ export default function WhySecurityTestingMatters() {
       </div>
 
       {/* Footer */}
-      <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '2vh', fontSize: '0.9vw', color: '#94A3B8', fontWeight: 500 }}>
+      <div
+        style={{
+          gridColumn: '1 / -1',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid #E2E8F0',
+          paddingTop: '2vh',
+          fontSize: '0.9vw',
+          color: '#94A3B8',
+          fontWeight: 500,
+        }}
+      >
         <div>{t('Security Testing for AI', 'בדיקות אבטחה ל-AI')}</div>
         <div style={{ display: 'flex', gap: '1vw' }}>
           <span>AI Testing Academy</span>

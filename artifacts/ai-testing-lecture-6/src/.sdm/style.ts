@@ -9,21 +9,13 @@ import {
   type Stroke,
   type Theme,
 } from './core/schema';
-import {
-  effectiveRunStyleCss,
-  resolveTextColor,
-  resolveTextFont,
-} from './core/text/inlineStyles';
+import { effectiveRunStyleCss, resolveTextColor, resolveTextFont } from './core/text/inlineStyles';
 
 export function resolveColor(color: Color, theme?: Theme): string {
   return resolveTextColor(color, theme);
 }
 
-export function resolvePaint(
-  color: Color,
-  opacity: number | undefined,
-  theme?: Theme,
-): string {
+export function resolvePaint(color: Color, opacity: number | undefined, theme?: Theme): string {
   const hex = resolveColor(color, theme);
   if (opacity === undefined || opacity >= 1) {
     return hex;
@@ -47,10 +39,7 @@ export function sanitizeActionUrl(url: string): string | undefined {
   }
 }
 
-export function resolveFont(
-  font: Font | undefined,
-  theme?: Theme,
-): string | undefined {
+export function resolveFont(font: Font | undefined, theme?: Theme): string | undefined {
   return resolveTextFont(font, theme);
 }
 
@@ -60,9 +49,7 @@ export function resolveAssetSrc(
   baseUrl: string,
 ): string | undefined {
   const src =
-    assets !== undefined && Object.hasOwn(assets, assetId)
-      ? assets[assetId].src
-      : undefined;
+    assets !== undefined && Object.hasOwn(assets, assetId) ? assets[assetId].src : undefined;
   if (!src) {
     return undefined;
   }
@@ -74,10 +61,7 @@ export function resolveAssetSrc(
 }
 
 function cssUrl(src: string): string {
-  const escaped = src.replace(
-    /["\\\n\r\f]/g,
-    (char) => `\\${char.charCodeAt(0).toString(16)} `,
-  );
+  const escaped = src.replace(/["\\\n\r\f]/g, char => `\\${char.charCodeAt(0).toString(16)} `);
 
   return `url("${escaped}")`;
 }
@@ -96,7 +80,7 @@ export function paintToBackground(
       return {
         background: `linear-gradient(${paint.angleDeg}deg, ${paint.stops
           .map(
-            (stop) =>
+            stop =>
               `${resolvePaint(stop.color, stop.opacity, theme)} ${Math.round(stop.offset * 100)}%`,
           )
           .join(', ')})`,
@@ -115,10 +99,7 @@ export function paintToBackground(
   }
 }
 
-export function strokeToBorder(
-  stroke: Stroke | undefined,
-  theme?: Theme,
-): string | undefined {
+export function strokeToBorder(stroke: Stroke | undefined, theme?: Theme): string | undefined {
   if (!stroke) {
     return undefined;
   }

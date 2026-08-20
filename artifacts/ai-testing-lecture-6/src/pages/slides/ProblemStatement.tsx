@@ -39,14 +39,25 @@ export default function ProblemStatement() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('CI/CD PIPELINES', 'צינורות CI/CD')}</div>
           <div>{t('LECTURE 06', 'הרצאה 06')}</div>
@@ -93,7 +104,14 @@ export default function ProblemStatement() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#DC2626', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#DC2626',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Slow PRs', 'PRs איטיים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -104,7 +122,14 @@ export default function ProblemStatement() {
             </div>
           </div>
           <div style={card}>
-            <div style={{ fontSize: '1.1vw', fontWeight: 600, color: '#DC2626', marginBottom: '0.4vh' }}>
+            <div
+              style={{
+                fontSize: '1.1vw',
+                fontWeight: 600,
+                color: '#DC2626',
+                marginBottom: '0.4vh',
+              }}
+            >
               {t('Surprise Bills', 'חשבונות מפתיעים')}
             </div>
             <div style={{ fontSize: '1vw', color: '#64748B', lineHeight: 1.4 }}>
@@ -163,7 +188,13 @@ export default function ProblemStatement() {
               }
             />
             <div
-              style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
             >
               <div
                 style={{
@@ -180,7 +211,13 @@ export default function ProblemStatement() {
               </div>
             </div>
             <div
-              style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
             >
               <div
                 style={{
@@ -197,7 +234,13 @@ export default function ProblemStatement() {
               </div>
             </div>
             <div
-              style={{ display: 'flex', gap: '2vw', alignItems: 'center', position: 'relative', zIndex: 1 }}
+              style={{
+                display: 'flex',
+                gap: '2vw',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
             >
               <div
                 style={{
@@ -226,10 +269,7 @@ export default function ProblemStatement() {
               textAlign: isHe ? 'right' : 'left',
             }}
           >
-            {t(
-              'This lecture is the fix for all three.',
-              'הרצאה זו היא הפתרון לכל שלושת הבעיות.',
-            )}
+            {t('This lecture is the fix for all three.', 'הרצאה זו היא הפתרון לכל שלושת הבעיות.')}
           </div>
         </div>
       </div>

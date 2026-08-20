@@ -38,7 +38,10 @@ export default function AnatomyOfEvaluation() {
     },
     {
       label: t('LLM-as-Judge', 'LLM כשופט'),
-      desc: t('A second model grades the first model\'s output', 'מודל שני מדרג את פלט המודל הראשון'),
+      desc: t(
+        "A second model grades the first model's output",
+        'מודל שני מדרג את פלט המודל הראשון',
+      ),
       speed: t('🐢 Slow', '🐢 איטי'),
       cost: t('$$$ LLM inference', '$$$ הסקת LLM'),
       precision: t('✦ Nuanced rubric', '✦ רובריקה עדינה'),
@@ -87,7 +90,9 @@ export default function AnatomyOfEvaluation() {
       </div>
 
       {/* Body */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2.5vh' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2.5vh' }}
+      >
         <div style={{ textAlign: isHe ? 'right' : 'left' }}>
           <div
             style={{
@@ -130,9 +135,21 @@ export default function AnatomyOfEvaluation() {
             height: '1vh',
           }}
         >
-          <div style={{ flex: 1, height: '0.6vh', background: 'linear-gradient(90deg, #0D9488 0%, #1E3A5F 100%)', borderRadius: '1vw' }} />
-          <div style={{ fontSize: '0.9vw', color: '#64748B', padding: '0 1vw', whiteSpace: 'nowrap' }}>
-            {t('← cheaper / faster    more nuanced / costly →', '← זול יותר / מהיר יותר    עדין יותר / יקר →')}
+          <div
+            style={{
+              flex: 1,
+              height: '0.6vh',
+              background: 'linear-gradient(90deg, #0D9488 0%, #1E3A5F 100%)',
+              borderRadius: '1vw',
+            }}
+          />
+          <div
+            style={{ fontSize: '0.9vw', color: '#64748B', padding: '0 1vw', whiteSpace: 'nowrap' }}
+          >
+            {t(
+              '← cheaper / faster    more nuanced / costly →',
+              '← זול יותר / מהיר יותר    עדין יותר / יקר →',
+            )}
           </div>
         </div>
 
@@ -156,10 +173,24 @@ export default function AnatomyOfEvaluation() {
                 {col.label}
               </div>
               <div style={{ fontSize: '1vw', color: '#475569', lineHeight: 1.4 }}>{col.desc}</div>
-              <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '1.5vh', display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                <div style={{ fontSize: '0.95vw', color: '#64748B', fontWeight: 500 }}>{col.speed}</div>
-                <div style={{ fontSize: '0.95vw', color: '#64748B', fontWeight: 500 }}>{col.cost}</div>
-                <div style={{ fontSize: '0.95vw', color: '#64748B', fontWeight: 500 }}>{col.precision}</div>
+              <div
+                style={{
+                  borderTop: '1px solid #E2E8F0',
+                  paddingTop: '1.5vh',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.8vh',
+                }}
+              >
+                <div style={{ fontSize: '0.95vw', color: '#64748B', fontWeight: 500 }}>
+                  {col.speed}
+                </div>
+                <div style={{ fontSize: '0.95vw', color: '#64748B', fontWeight: 500 }}>
+                  {col.cost}
+                </div>
+                <div style={{ fontSize: '0.95vw', color: '#64748B', fontWeight: 500 }}>
+                  {col.precision}
+                </div>
               </div>
             </div>
           ))}
@@ -179,7 +210,8 @@ export default function AnatomyOfEvaluation() {
             boxShadow: '0 0.5vw 1.5vw rgba(30,58,95,0.05)',
           }}
         >
-          💡 {t(
+          💡{' '}
+          {t(
             'This lecture focuses on the first two tiers — techniques you can run in CI without incurring heavy per-call LLM costs.',
             'הרצאה זו מתמקדת בשתי הרמות הראשונות — טכניקות שניתן להריץ ב-CI ללא עלויות כבדות של LLM.',
           )}

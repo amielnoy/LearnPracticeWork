@@ -32,14 +32,25 @@ export default function TitleSlide() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
           <div
-            style={{ width: '2vw', height: '2vw', backgroundColor: '#0D9488', borderRadius: '0.4vw' }}
+            style={{
+              width: '2vw',
+              height: '2vw',
+              backgroundColor: '#0D9488',
+              borderRadius: '0.4vw',
+            }}
           />
           <div style={{ fontSize: '1.2vw', fontWeight: 700, letterSpacing: '0.02em' }}>
             AI Testing Academy
           </div>
         </div>
         <div
-          style={{ display: 'flex', gap: '2vw', fontSize: '1vw', fontWeight: 500, color: '#64748B' }}
+          style={{
+            display: 'flex',
+            gap: '2vw',
+            fontSize: '1vw',
+            fontWeight: 500,
+            color: '#64748B',
+          }}
         >
           <div>{t('AI-ASSISTED TEST GENERATION', 'יצירת בדיקות בסיוע AI')}</div>
           <div>{t('LECTURE 09', 'הרצאה 09')}</div>
@@ -202,24 +213,69 @@ export default function TitleSlide() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2vh', marginTop: '2vh' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.5vw', height: '4vh', backgroundColor: 'rgba(13,148,136,0.3)', borderRadius: '2px' }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>{t('Why AI test generation', 'למה יצירת בדיקות AI')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '4vh',
+                  backgroundColor: 'rgba(13,148,136,0.3)',
+                  borderRadius: '2px',
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>
+                {t('Why AI test generation', 'למה יצירת בדיקות AI')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.5vw', height: '4vh', backgroundColor: 'rgba(13,148,136,0.5)', borderRadius: '2px' }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>{t('AI agents generating tests', 'AI agents מייצרים בדיקות')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '4vh',
+                  backgroundColor: 'rgba(13,148,136,0.5)',
+                  borderRadius: '2px',
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>
+                {t('AI agents generating tests', 'AI agents מייצרים בדיקות')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.5vw', height: '4vh', backgroundColor: 'rgba(13,148,136,0.7)', borderRadius: '2px' }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>{t('Tooling in practice', 'כלים בפועל')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '4vh',
+                  backgroundColor: 'rgba(13,148,136,0.7)',
+                  borderRadius: '2px',
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>
+                {t('Tooling in practice', 'כלים בפועל')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.5vw', height: '4vh', backgroundColor: 'rgba(13,148,136,0.85)', borderRadius: '2px' }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>{t('Quality control', 'בקרת איכות')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '4vh',
+                  backgroundColor: 'rgba(13,148,136,0.85)',
+                  borderRadius: '2px',
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>
+                {t('Quality control', 'בקרת איכות')}
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
-              <div style={{ width: '0.5vw', height: '4vh', backgroundColor: '#0D9488', borderRadius: '2px' }} />
-              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>{t('End-to-end pipeline', 'צינור מקצה לקצה')}</div>
+              <div
+                style={{
+                  width: '0.5vw',
+                  height: '4vh',
+                  backgroundColor: '#0D9488',
+                  borderRadius: '2px',
+                }}
+              />
+              <div style={{ fontSize: '1.1vw', color: '#475569', fontWeight: 500 }}>
+                {t('End-to-end pipeline', 'צינור מקצה לקצה')}
+              </div>
             </div>
           </div>
         </div>

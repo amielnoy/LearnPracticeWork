@@ -246,7 +246,10 @@ export default function ThePlaywrightAiToolkit() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Concept slide \u2192 worked example per technique', 'שקופית מושג \u2192 דוגמה מעשית לכל טכניקה')}
+                {t(
+                  'Concept slide \u2192 worked example per technique',
+                  'שקופית מושג \u2192 דוגמה מעשית לכל טכניקה',
+                )}
               </div>
             </div>
             <div
@@ -269,7 +272,10 @@ export default function ThePlaywrightAiToolkit() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Each example uses a real Playwright test shape', 'כל דוגמה משתמשת בצורת בדיקת Playwright אמיתית')}
+                {t(
+                  'Each example uses a real Playwright test shape',
+                  'כל דוגמה משתמשת בצורת בדיקת Playwright אמיתית',
+                )}
               </div>
             </div>
             <div
@@ -292,7 +298,10 @@ export default function ThePlaywrightAiToolkit() {
                 }}
               />
               <div style={{ fontSize: '1.15vw', fontWeight: 500, color: '#1E3A5F' }}>
-                {t('Closes with CI scale and common pitfalls', 'מסתיים עם קנה מידה CI ומלכודות נפוצות')}
+                {t(
+                  'Closes with CI scale and common pitfalls',
+                  'מסתיים עם קנה מידה CI ומלכודות נפוצות',
+                )}
               </div>
             </div>
           </div>
