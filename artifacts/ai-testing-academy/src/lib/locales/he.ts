@@ -239,6 +239,8 @@ export const he: Locale = {
     errScannedPdf:
       'ל-PDF הזה אין שכבת טקסט — זו סריקה או ייצוא כתמונה בלבד, שגם מערכת ATS לא תוכל לקרוא. ייצא אותו מחדש כ-PDF טקסטואלי, או הדבק את הטקסט למטה.',
     signInAria: 'התחברות עם Google',
+    signingInStatus: 'מתחבר…',
+    signInError: 'ההתחברות נכשלה. נסה שוב.',
     signOutBtn: 'התנתקות',
     uploadPrompt: '📁 לחץ או גרור את קורות החיים לכאן — PDF, DOCX, או TXT',
     uploadLoadedMid: ' · ',

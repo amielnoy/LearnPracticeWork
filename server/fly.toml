@@ -19,8 +19,7 @@ primary_region = "fra"
   dockerfile = "Dockerfile"
 
 [env]
-  # src/index.ts throws without PORT, so it is set here rather than left to a
-  # platform default.
+  # The container listens on this port.
   PORT = "8080"
   NODE_ENV = "production"
 
@@ -67,7 +66,6 @@ primary_region = "fra"
 [[vm]]
   # The server is I/O bound — it proxies model calls and talks to Postgres — so
   # it wants headroom for concurrent requests rather than CPU. 512MB leaves
-  # room for the pino worker threads and Node's heap; 256MB also runs but has
-  # little margin during the Stripe backfill on boot.
+  # room for concurrent proxy requests and Python's runtime.
   size = "shared-cpu-1x"
   memory = "512mb"

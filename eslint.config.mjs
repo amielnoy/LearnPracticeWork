@@ -22,6 +22,7 @@ export default tseslint.config(
     ignores: [
       '**/dist/**',
       '**/node_modules/**',
+      '**/.venv/**',
       // Dropped-in reference material, not source. `format` does not cover it
       // either — the globs in package.json are the same list.
       'attached_assets/**',

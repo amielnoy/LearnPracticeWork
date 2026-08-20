@@ -243,6 +243,8 @@ export const en = {
     errScannedPdf:
       'This PDF has no text layer — it is a scan or an image-only export, which an applicant tracking system cannot read either. Re-export it as a text PDF, or paste the text below.',
     signInAria: 'Sign in with Google',
+    signingInStatus: 'Signing in…',
+    signInError: 'Sign-in failed. Please try again.',
     signOutBtn: 'Sign out',
     uploadPrompt: '📁 Click or drag your resume here — PDF, DOCX, or TXT',
     uploadLoadedMid: ' · ',

@@ -45,7 +45,8 @@ test.describe('CORS', () => {
       },
     });
 
-    expect(response.status()).toBe(204);
+    // Starlette answers a successful CORS preflight with an empty 200.
+    expect(response.status()).toBe(200);
     expect(response.headers()['access-control-allow-origin']).toBe('https://academy.example');
   });
 
@@ -63,7 +64,7 @@ test.describe('CORS', () => {
       },
     });
 
-    expect(response.status()).toBe(204);
+    expect(response.status()).toBe(200);
     expect(response.headers()['access-control-allow-headers']?.toLowerCase()).toContain(
       'authorization',
     );
@@ -89,7 +90,7 @@ test.describe('request handling', () => {
     const response = await api.get('/api/healthz');
     const poweredBy = response.headers()['x-powered-by'];
 
-    // Express sends a bare "Express" by default. A version number here would be
+    // Framework/version headers are unnecessary fingerprinting. A version here would be
     // a free hint for anyone scanning for known CVEs.
     if (poweredBy) expect(poweredBy).not.toMatch(/\d/);
   });

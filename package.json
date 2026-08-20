@@ -1,18 +1,19 @@
 {
   "name": "workspace",
   "version": "0.0.0",
+  "packageManager": "pnpm@11.20.0",
   "license": "MIT",
   "scripts": {
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in npm/*|yarn/*) echo \"Use pnpm instead\" >&2; exit 1 ;; *) ;; esac'",
     "build": "pnpm run typecheck && pnpm run lint && pnpm -r --if-present run build",
-    "format": "prettier --write \"artifacts/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\" \"scripts/**/*.{ts,tsx}\" \"*.mts\"",
-    "format:check": "prettier --check \"artifacts/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\" \"scripts/**/*.{ts,tsx}\" \"*.mts\"",
-    "lint": "eslint .",
+    "format": "prettier --write \"artifacts/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\" \"scripts/**/*.{ts,tsx}\" \"*.mts\" && pnpm --filter @workspace/api-server run format",
+    "format:check": "prettier --check \"artifacts/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\" \"scripts/**/*.{ts,tsx}\" \"*.mts\" && pnpm --filter @workspace/api-server exec uv run ruff format --check app tests",
+    "lint": "eslint . && pnpm --filter @workspace/api-server exec uv run ruff check app tests",
     "lint:fix": "eslint . --fix",
     "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --filter \"./tests\" --if-present run typecheck",
-    "test": "pnpm --filter @workspace/tests run test",
-    "test:unit": "pnpm --filter @workspace/tests run test:unit",
+    "typecheck": "pnpm run typecheck:libs && pnpm --filter @workspace/api-server run typecheck && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --filter \"./tests\" --if-present run typecheck",
+    "test": "pnpm --filter @workspace/api-server run test && pnpm --filter @workspace/tests run test",
+    "test:unit": "pnpm --filter @workspace/api-server run test && pnpm --filter @workspace/tests run test:unit",
     "test:component": "pnpm --filter @workspace/tests run test:component",
     "test:api": "pnpm --filter @workspace/tests run test:api",
     "test:contract": "pnpm --filter @workspace/tests run test:contract",
@@ -34,7 +35,6 @@
     "typescript-eslint": "^8.67.0"
   },
   "dependencies": {
-    "stripe": "^22.3.1",
-    "stripe-replit-sync": "^1.0.0"
+    "stripe": "^22.3.1"
   }
 }

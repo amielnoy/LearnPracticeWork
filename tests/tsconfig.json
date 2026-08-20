@@ -16,7 +16,6 @@
     "types": ["node"],
     "paths": {
       "@academy/*": ["../artifacts/ai-testing-academy/src/*"],
-      "@api-server/*": ["../server/src/*"],
       "@lib/*": ["../lib/*"]
     }
   }

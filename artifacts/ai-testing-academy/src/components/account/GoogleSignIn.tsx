@@ -9,18 +9,17 @@ import { useLocale } from '../../context/LocaleContext';
  * how a deployment that has not been given one stays whole rather than showing
  * a button that cannot work.
  *
- * Signed in, this shows which account is in use and offers the way out. It
- * gates nothing: see `lib/googleIdentity.ts` for why an unverified credential
- * is only good for saying who someone says they are.
+ * Signed in, this shows the account the Python API verified and offers the way
+ * out. The session itself is an HttpOnly cookie and cannot be read by scripts.
  */
 export function GoogleSignIn() {
-  const { configured, user, signOut, renderButton } = useAuth();
+  const { configured, user, authenticating, authError, signOut, renderButton } = useAuth();
   const { lang, S } = useLocale();
   const buttonHost = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const host = buttonHost.current;
-    if (!host || user) return;
+    if (!host || user || authenticating) return;
     let cancelled = false;
     // Google draws into the container, so anything from a previous language is
     // cleared first — otherwise switching language stacks a second button.
@@ -34,7 +33,7 @@ export function GoogleSignIn() {
     return () => {
       cancelled = true;
     };
-  }, [renderButton, lang, user]);
+  }, [renderButton, lang, user, authenticating]);
 
   if (!configured) return null;
 
@@ -66,13 +65,28 @@ export function GoogleSignIn() {
     );
   }
 
+  if (authenticating) {
+    return (
+      <div className="nav-account nav-account-status" role="status">
+        {S.signingInStatus}
+      </div>
+    );
+  }
+
   return (
-    <div
-      key="signin"
-      className="nav-account"
-      id="googleSignIn"
-      ref={buttonHost}
-      aria-label={S.signInAria}
-    />
+    <div className="nav-account-wrap">
+      <div
+        key="signin"
+        className="nav-account"
+        id="googleSignIn"
+        ref={buttonHost}
+        aria-label={S.signInAria}
+      />
+      {authError && (
+        <p className="nav-account-error" role="alert">
+          {S.signInError}
+        </p>
+      )}
+    </div>
   );
 }

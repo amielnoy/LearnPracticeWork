@@ -8,12 +8,9 @@ import { credentialWith, oneHourFrom, validCredential } from '../support/googleC
  * Google's real client is stubbed — see `GOOGLE_STUB` in the fixtures for why —
  * so what is under test is this site's half of the arrangement: that the button
  * appears only on a build configured for it, that the language reaches Google
- * (which renders the button's own label), that a credential becomes a name in
- * the header, and that signing out actually lets go.
- *
- * Nothing here is an authorisation test, because sign-in grants nothing: the
- * credential is read and never verified, which is exactly why it is confined to
- * saying who someone says they are.
+ * (which renders the button's own label), that the verified server session
+ * becomes a name in the header, and that signing out actually lets go. The
+ * Python fixture suite independently exercises cryptographic verification.
  */
 
 const signedIn = { name: 'Amiel Peled', email: 'amiel@organuz.ai' };
@@ -63,6 +60,19 @@ test.describe('signing in', () => {
     await expect(component.locator('#fakeGoogleButton')).toHaveCount(0);
   });
 
+  test('shows progress while the server verifies Google’s answer', async ({
+    googleSignIn,
+    page,
+  }) => {
+    const component = await googleSignIn.mount();
+
+    const finishSignIn = await googleSignIn.beginSignInWith(validCredential());
+
+    await expect(page.getByRole('status')).toHaveText(en.s.signingInStatus);
+    await finishSignIn();
+    await expect(component.locator('.nav-account-name')).toHaveText(signedIn.name);
+  });
+
   test('keeps the address for the tooltip rather than crowding the drawer', async ({
     googleSignIn,
   }) => {
@@ -80,6 +90,7 @@ test.describe('signing in', () => {
 
     await expect(component.locator('#fakeGoogleButton')).toBeVisible();
     await expect(component.locator('.nav-account-name')).toHaveCount(0);
+    await expect(component.getByRole('alert')).toHaveText(en.s.signInError);
   });
 
   test('stays signed out for a credential that has already expired', async ({ googleSignIn }) => {
@@ -214,9 +225,7 @@ test.describe('the credential’s lifetime', () => {
     // rather than the test's own patience.
     const component = await googleSignIn.mount();
 
-    await googleSignIn.signInWith(
-      credentialWith({ name: 'Amiel Peled', exp: Math.floor((Date.now() + 2000) / 1000) }),
-    );
+    await googleSignIn.signInWith(validCredential({ exp: Math.floor((Date.now() + 2000) / 1000) }));
     await expect(component.locator('.nav-account-name')).toBeVisible();
 
     await expect(component.locator('#fakeGoogleButton')).toBeVisible({ timeout: 10_000 });
@@ -225,9 +234,7 @@ test.describe('the credential’s lifetime', () => {
   test('does not sign out early on a credential with an hour left', async ({ googleSignIn }) => {
     const component = await googleSignIn.mount();
 
-    await googleSignIn.signInWith(
-      credentialWith({ name: 'Amiel Peled', exp: oneHourFrom(Date.now()) }),
-    );
+    await googleSignIn.signInWith(validCredential({ exp: oneHourFrom(Date.now()) }));
 
     await expect(component.locator('.nav-account-name')).toBeVisible();
     await component.page().waitForTimeout(1000);

@@ -86,6 +86,9 @@ layer() {
 layer "typecheck (tests)" \
   bash -c "cd tests && ./node_modules/.bin/tsc -p tsconfig.json --noEmit"
 
+layer "backend fixtures (Python)" \
+  bash -c "cd server && uv run pytest"
+
 layer "unit / api / contract" \
   "$PW_ROOT" test --config=playwright.config.mts
 layer "component (desktop + mobile)" \

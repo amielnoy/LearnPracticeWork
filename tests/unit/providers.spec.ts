@@ -53,7 +53,7 @@ test.describe('provider registry', () => {
   });
 
   test('the Groq models match the ones the server proxy allows', () => {
-    // Mirrors ALLOWED_GROQ_MODELS in server/src/routes/ai.ts —
+    // Mirrors GROQ_MODELS in server/app/main.py —
     // a model offered here but rejected there silently downgrades the request.
     expect(PROVIDERS.groq!.models).toEqual([
       'openai/gpt-oss-120b',

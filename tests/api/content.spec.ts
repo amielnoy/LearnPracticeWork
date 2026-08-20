@@ -60,15 +60,15 @@ test.describe('the language parameter', () => {
    * `isLang` accepts 'en' and 'he' and falls back to 'en' for anything else,
    * which is right for a parameter a link can carry — and it means an unknown
    * value must never reach a different code path. The odd shapes are the ones
-   * worth naming: Express turns `?lang=a&lang=b` into an array and `?lang[]=a`
-   * into one too, so `req.query.lang` is not always a string.
+   * worth naming: repeated and array-shaped parameters must not bypass the
+   * two-value language allowlist.
    */
   const SHAPES = [
     { name: 'English', query: '?lang=en' },
     { name: 'Hebrew', query: '?lang=he' },
     { name: 'an unknown language', query: '?lang=fr' },
     { name: 'an empty value', query: '?lang=' },
-    { name: 'a repeated parameter, which Express makes an array', query: '?lang=en&lang=he' },
+    { name: 'a repeated parameter', query: '?lang=en&lang=he' },
     { name: 'an array-shaped parameter', query: '?lang[]=en' },
     { name: 'an injection attempt', query: "?lang=' OR 1=1--" },
     { name: 'no parameter at all', query: '' },
@@ -87,10 +87,10 @@ test.describe('the language parameter', () => {
   }
 });
 
-test('the routes are reads, so POST is not routed', async ({ api }) => {
+test('the routes are reads, so POST is rejected', async ({ api }) => {
   for (const route of ROUTES) {
     await allure.step(`POST ${route}`, async () => {
-      expect((await api.post(route, { data: {} })).status()).toBe(404);
+      expect((await api.post(route, { data: {} })).status()).toBe(405);
     });
   }
 });

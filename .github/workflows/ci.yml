@@ -350,10 +350,21 @@ jobs:
           BASE_PATH: ${{ steps.base.outputs.prefix }}/
         run: pnpm --filter @workspace/portfolio run build
 
+      # VITE_GOOGLE_CLIENT_ID is inlined into the bundle at build time, so it has
+      # to be present *here* — a value added to the environment afterwards
+      # changes nothing, because the bundle is already written. It was set
+      # nowhere, which is why sign-in never appeared on the published site: the
+      # component renders null when it has no client ID.
+      #
+      # It is a repository variable, not a secret. An OAuth client ID is public
+      # by construction — it ships inside the JavaScript either way, and Google
+      # enforces which origins may use it. A client *secret* must never appear
+      # here, or in any VITE_ variable, because the browser would receive it.
       - name: Build the AI Testing Academy
         env:
           PORT: '5174'
           BASE_PATH: ${{ steps.base.outputs.prefix }}/ai-testing-academy/
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
         run: pnpm --filter @workspace/ai-testing-academy run build
 
       # All ten, not just the first. The academy's lecture catalogue links every

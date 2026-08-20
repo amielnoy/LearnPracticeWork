@@ -69,10 +69,12 @@ interface GoogleStubWindow extends Window {
 type GoogleSignInHarness = {
   /** Mounts the control. An empty `clientId` stands for a build without one. */
   mount: (options?: { clientId?: string; lang?: 'en' | 'he' }) => Promise<Locator>;
-  /** Puts a credential in storage before mounting, as a returning visit would. */
+  /** Seeds the API session and a legacy browser credential before mounting. */
   seedCredential: (credential: string) => Promise<void>;
   /** Clicks Google's button, which hands `credential` back through its callback. */
   signInWith: (credential: string) => Promise<void>;
+  /** Starts sign-in and holds the API response until the returned function runs. */
+  beginSignInWith: (credential: string) => Promise<() => Promise<void>>;
   /** What the stubbed Google client was told and asked to do. */
   stub: () => Promise<{ clientId?: string; locales: string[]; autoSelectDisabled: boolean }>;
 };
@@ -187,9 +189,59 @@ export const test = base.extend<ComponentFixtures>({
   },
 
   googleSignIn: async ({ mount, page }, use) => {
+    type SessionUser = { name: string; email: string; picture: string; expiresAt: number };
+    let sessionUser: SessionUser | null = null;
+    let pauseNextLogin = false;
+    let releaseLogin: (() => void) | undefined;
+
+    const verifiedUser = (credential: string): SessionUser | null => {
+      try {
+        const claims = JSON.parse(
+          Buffer.from(credential.split('.')[1] ?? '', 'base64url').toString('utf8'),
+        ) as { name?: string; email?: string; picture?: string; exp?: number };
+        if (!claims.name || !claims.email || !claims.exp || claims.exp * 1000 <= Date.now()) {
+          return null;
+        }
+        return {
+          name: claims.name,
+          email: claims.email,
+          picture: claims.picture ?? '',
+          expiresAt: claims.exp * 1000,
+        };
+      } catch {
+        return null;
+      }
+    };
+
     await page.route('https://accounts.google.com/gsi/client', route =>
       route.fulfill({ contentType: 'text/javascript', body: GOOGLE_STUB }),
     );
+    await page.route('**/api/auth/session', route =>
+      route.fulfill(
+        sessionUser
+          ? { status: 200, json: { user: sessionUser } }
+          : { status: 401, json: { error: 'Not signed in' } },
+      ),
+    );
+    await page.route('**/api/auth/google', async route => {
+      const body = route.request().postDataJSON() as { credential?: string };
+      sessionUser = body.credential ? verifiedUser(body.credential) : null;
+      if (pauseNextLogin) {
+        pauseNextLogin = false;
+        await new Promise<void>(resolve => {
+          releaseLogin = resolve;
+        });
+      }
+      await route.fulfill(
+        sessionUser
+          ? { status: 200, json: { user: sessionUser } }
+          : { status: 401, json: { error: 'Google sign-in could not be verified.' } },
+      );
+    });
+    await page.route('**/api/auth/logout', async route => {
+      sessionUser = null;
+      await route.fulfill({ status: 200, json: { ok: true } });
+    });
 
     // Nothing here navigates, so state written before `mount` is still there
     // when the component reads it — which is how a returning visit and a
@@ -211,12 +263,28 @@ export const test = base.extend<ComponentFixtures>({
           </LocaleProvider>,
         );
       },
-      seedCredential: credential => setBeforeMount('ata_google_credential', credential),
+      seedCredential: async credential => {
+        sessionUser = verifiedUser(credential);
+        await setBeforeMount('ata_google_credential', credential);
+      },
       signInWith: async credential => {
         await page.evaluate(value => {
           (window as GoogleStubWindow).__credential = value;
         }, credential);
         await page.locator('#fakeGoogleButton').click();
+      },
+      beginSignInWith: async credential => {
+        pauseNextLogin = true;
+        await page.evaluate(value => {
+          (window as GoogleStubWindow).__credential = value;
+        }, credential);
+        const requestStarted = page.waitForRequest('**/api/auth/google');
+        const clickFinished = page.locator('#fakeGoogleButton').click();
+        await requestStarted;
+        return async () => {
+          releaseLogin?.();
+          await clickFinished;
+        };
       },
       stub: async () =>
         page.evaluate(

@@ -10,6 +10,8 @@
 # and under emulation on Apple-Silicon Macs.
 FROM --platform=linux/amd64 mcr.microsoft.com/playwright:v1.62.1-noble
 
+COPY --from=ghcr.io/astral-sh/uv:0.8.17 /uv /uvx /bin/
+
 WORKDIR /app
 
 # pnpm drives the monorepo. corepack works fine in this image (unlike the dev
@@ -22,6 +24,7 @@ RUN npm install -g pnpm@11.20.0
 ENV CI=true
 COPY . .
 RUN pnpm install --frozen-lockfile
+RUN cd server && uv sync --frozen
 
 # Run the whole suite and build the Allure report by default. Chromium needs a
 # roomy /dev/shm — compose sets shm_size; `docker run` callers should pass

@@ -1,7 +1,7 @@
 /**
  * Playwright `webServer` entrypoint for the api and contract suites.
  *
- * Builds `server` once, then runs two instances of it:
+ * Syncs the Python environment once, then runs three FastAPI instances:
  *
  *   1. keyed   — has a (throwaway) Gemini key, an admin token and an OAuth
  *                client ID, so the body-validation and authenticated branches run
@@ -9,16 +9,14 @@
  *
  * They are started in that order and the keyless one is what Playwright polls,
  * so by the time the health check passes both are listening. Building here
- * rather than in each webServer command keeps two esbuild runs from racing on
- * the same `dist/`.
+ * rather than in each webServer command keeps dependency setup deterministic.
  *
  * Every environment variable that changes server behaviour is pinned to an
  * explicit value so a developer's shell (or a Replit deployment) cannot leak
  * in and make the suite non-deterministic.
  *
- * Run straight from source as TypeScript: Node strips the types itself, so the
- * one file standing between the suites and a running server needs no build step
- * and no loader of its own.
+ * This orchestration stays TypeScript with the Playwright suite; all server
+ * implementation code it launches is Python.
  */
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -97,10 +95,14 @@ async function waitForHealth(port: string, timeoutMs = 20_000): Promise<void> {
 }
 
 function startServer(port: string, extraEnv: Readonly<Record<string, string>>): ChildProcess {
-  const child = run(process.execPath, ['--enable-source-maps', './dist/index.mjs'], {
-    cwd: apiServerDir,
-    env: { ...process.env, ...PINNED, PORT: String(port), ...extraEnv },
-  });
+  const child = run(
+    'uv',
+    ['run', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', String(port)],
+    {
+      cwd: apiServerDir,
+      env: { ...process.env, ...PINNED, PORT: String(port), ...extraEnv },
+    },
+  );
   child.on('exit', code => {
     if (code !== 0 && code !== null) {
       console.error(`api-server on port ${port} exited with code ${code}`);
@@ -111,9 +113,9 @@ function startServer(port: string, extraEnv: Readonly<Record<string, string>>): 
 }
 
 await new Promise<void>((resolve, reject) => {
-  const build = run(process.execPath, ['./build.ts'], { cwd: apiServerDir });
+  const build = run('uv', ['sync', '--frozen'], { cwd: apiServerDir });
   build.on('exit', code =>
-    code === 0 ? resolve() : reject(new Error(`api-server build failed with code ${code}`)),
+    code === 0 ? resolve() : reject(new Error(`api-server setup failed with code ${code}`)),
   );
 });
 
@@ -122,6 +124,7 @@ startServer(KEYED_PORT, {
   GEMINI_API_KEY_B64: '',
   ADMIN_API_TOKEN: ADMIN_TOKEN,
   GOOGLE_CLIENT_ID,
+  SESSION_SECRET: 'test-session-secret-that-is-at-least-thirty-two-characters',
   GROQ_API_KEY: DUMMY_GROQ_KEY,
 });
 await waitForHealth(KEYED_PORT);

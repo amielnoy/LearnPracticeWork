@@ -37,7 +37,7 @@ export const PROVIDERS: Record<string, ProviderDef> = {
         body: {
           model,
           max_tokens: maxTokens,
-          // See the matching comment in api-server/src/routes/ai.ts.
+          // Keep this list in sync with server/app/main.py.
           reasoning_effort: 'low',
           messages: [{ role: 'system', content: system }, ...messages],
         },
