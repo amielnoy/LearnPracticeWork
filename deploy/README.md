@@ -60,9 +60,10 @@ scale-to-zero host loses:
 The same API also serves the academy's localized content at
 `/api/content/question-bank`, `/api/content/coding-challenges`, and
 `/api/content/lecture-series`. Each accepts the optional `lang=en|he` query parameter,
-reads ordered rows from Supabase, and returns `503` with a fixed error body when the content
-store is unavailable. The academy currently renders bundled content, so these routes can be
-deployed independently while the client migration is completed.
+reads ordered rows from Supabase with the read-only `SUPABASE_ANON_KEY`, and returns `503`
+with a fixed error body when the content store is unavailable. The academy currently renders
+bundled content, so these routes can be deployed independently while the client migration is
+completed.
 
 `fly.toml` therefore sets `min_machines_running = 1` and leaves
 `auto_stop_machines` off. Give the rate limiter a shared store (Redis, or the
@@ -79,6 +80,7 @@ fly secrets set \
   SUPABASE_DB_PASSWORD=... \
   SUPABASE_URL=... \
   SUPABASE_SERVICE_ROLE_KEY=... \
+  SUPABASE_ANON_KEY=... \
   STRIPE_SECRET_KEY=...
 
 fly deploy --config server/fly.toml \
@@ -102,12 +104,18 @@ Set in `fly.toml` (not secret):
 
 Set via `fly secrets` (never committed): `GEMINI_API_KEY`,
 `SUPABASE_DB_PASSWORD`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-`STRIPE_SECRET_KEY`.
+`SUPABASE_ANON_KEY`, `STRIPE_SECRET_KEY`.
 
-`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are also required for the content endpoints.
-Populate the content tables with the repository's seed workflow before switching a client to
-the API; an empty or unavailable store is reported as a controlled `503`, not as fabricated
-content.
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints. Generate the
+content seed SQL with:
+
+```bash
+pnpm --filter @workspace/scripts exec tsx src/extract-academy-content.ts
+pnpm --filter @workspace/scripts exec tsx src/generate-academy-seed-sql.ts
+```
+
+Apply the generated SQL to the Supabase database before switching a client to the API; an
+empty or unavailable store is reported as a controlled `503`, not as fabricated content.
 
 `PUBLIC_BASE_URL` replaced a hardcoded read of `REPLIT_DOMAINS`. Off Replit that
 variable is unset, and the old code interpolated it anyway — registering

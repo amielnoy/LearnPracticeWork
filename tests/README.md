@@ -125,6 +125,13 @@ Neither the admin token nor the client ID is a credential. The token guards a ro
 fails on absent Stripe credentials, so no test can create a product; the client ID is only ever
 compared against an `aud` claim on tokens that are rejected before a signature is checked.
 
+The API and contract projects also cover the three localized content routes:
+`GET /api/content/question-bank`, `GET /api/content/coding-challenges`, and
+`GET /api/content/lecture-series`. They run with the content store unavailable in the test
+environment, so the suite verifies the documented `503` response and fixed error body. The
+successful response shapes are checked by the OpenAPI contract and generated Zod schemas;
+the academy's browser flows do not call these routes yet because they still use bundled data.
+
 `/api/stripe/seed` is still listed in the contract suite's inventory and still never called
 there — it is a write endpoint. What keeps it safe is no longer that list, though: it is behind
 an admin token, and `api/adminAuth.spec.ts` is what asserts so.
@@ -210,9 +217,9 @@ and a plain `docker run` needs `--shm-size=1g`.
 - **Component** → `component/`. Import it through `@academy/…`; wrap in `LocaleProvider` (and
   `ProviderContextProvider` if it reads provider state). Intercept `/api/ai/config` with
   `page.route` instead of relying on a server.
-- **New route** → `api/`, and add it to `UNDOCUMENTED_ROUTES` in `contract/openapi.spec.ts`
-  until it is in `openapi.yaml`. Once documented, delete it from that list — the spec-driven
-  tests will cover it automatically.
+- **New route** → `api/`, add its request and response shape to `lib/api-spec/openapi.yaml`,
+  regenerate with `pnpm --filter @workspace/api-spec run codegen`, and add focused API coverage.
+  The contract suite will then reject undocumented routes automatically.
 - **User flow** → `e2e/`. Put selectors in a page or component object, never in the spec, and
   reach the nav through `NavComponent.reveal()` so the same test works on both viewports. Guard
   layout-specific tests with the `isMobile` fixture rather than writing two specs.
