@@ -305,3 +305,23 @@ test.describe('when the server refuses the credential', () => {
     await expect(component.locator('.nav-account-name')).toHaveCount(0);
   });
 });
+
+test('asks the browser to mediate the dialog rather than opening a popup', async ({
+  googleSignIn,
+}) => {
+  /**
+   * The popup flow navigates to accounts.google.com. On Android that host is a
+   * verified App Link for the Google app, so Chrome hands the navigation to the
+   * OS: the reader gets an "Open with application" chooser and comes back not
+   * signed in. It reproduces in ordinary Chrome and not in Incognito, which is
+   * what identified it — Incognito does not do the app handoff.
+   *
+   * FedCM has the browser draw the dialog itself, so there is no navigation for
+   * the OS to intercept. Browsers without FedCM fall back to the popup flow, so
+   * asking for it costs nothing where it is not available.
+   */
+  const component = await googleSignIn.mount();
+
+  await expect(component.locator('#fakeGoogleButton')).toBeVisible();
+  expect((await googleSignIn.stub()).useFedcmForButton).toBe(true);
+});

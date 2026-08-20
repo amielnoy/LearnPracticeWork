@@ -176,6 +176,13 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
         },
         auto_select: false,
         cancel_on_tap_outside: true,
+        // The popup flow navigates to accounts.google.com, and on Android that
+        // host is a verified App Link for the Google app: Chrome hands the
+        // navigation to the OS, the reader gets an "Open with" chooser, and the
+        // sign-in never completes. FedCM has the browser draw the dialog itself,
+        // so there is no navigation for the OS to intercept. Browsers without
+        // FedCM fall back to the popup flow unchanged.
+        use_fedcm_for_button: true,
       });
       api.renderButton(parent, { ...BUTTON_OPTIONS, locale });
     },
