@@ -86,6 +86,38 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
 
+      # First thing in the summary, before any report, because it is the thing
+      # someone reaches for when a step name means nothing to them. It runs
+      # early and unconditionally: the page is worth linking whether the run is
+      # green or red, and it does not depend on anything the run produces.
+      #
+      # The URL is asked of the Pages API rather than assembled from the repo
+      # name, so a custom domain or a user/org site is linked correctly; the
+      # conventional project-site URL is the fallback when the API says nothing
+      # (it needs Pages to be enabled, and the token may not be allowed to ask).
+      - name: Link the architecture page in the run summary
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          site=$(gh api "repos/${{ github.repository }}/pages" --jq .html_url 2>/dev/null || true)
+          if [ -z "$site" ]; then
+            site="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          fi
+          url="${site%/}/architecture.html"
+          {
+            echo "## 🏛️ How this repository is put together"
+            echo ""
+            echo "**➡️ [Architecture](${url})** — runtime shape, the AI layer, trust boundaries, the test strategy."
+            echo ""
+            if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+              echo "_Republished by this run once it reaches \`deploy-pages\`._"
+            else
+              echo "_Published from \`main\`, so it may not yet describe this branch._"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Resolve the Playwright version
         id: playwright
         run: |
