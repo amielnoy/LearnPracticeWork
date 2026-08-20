@@ -176,3 +176,37 @@ async def test_readiness_stays_quiet_when_quotas_can_count(
 
     assert response.status_code == 200
     assert "rateLimiting" not in response.json()
+
+
+@pytest.mark.asyncio
+async def test_sign_in_survives_a_production_deployment_with_no_salt(
+    api_client, production
+) -> None:
+    """The reported outage, as a test.
+
+    A production deployment with no RATE_LIMIT_SALT used to answer every
+    credential POST with 429, so nobody could sign in and the site told them
+    they had tried too often. The login quota degrades now, so the request
+    reaches verification and is judged on the credential itself — 401 here,
+    because this one is not a Google token. Any status but 429 is the point.
+    """
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+
+    response = await api_client.post("/api/auth/google", json={"credential": "not-a-token"})
+
+    assert response.status_code != 429, "a missing salt must not present as an exhausted quota"
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_the_ai_proxy_still_refuses_when_the_quota_cannot_count(
+    api_client, production
+) -> None:
+    """The other half of the trade: sign-in recovers, the billed key stays shut."""
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+
+    response = await api_client.post(
+        "/api/ai/generate", json={"messages": [{"role": "user", "content": "hi"}]}
+    )
+
+    assert response.status_code == 429
