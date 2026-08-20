@@ -241,6 +241,8 @@ export const he: Locale = {
     signInAria: 'התחברות עם Google',
     signingInStatus: 'מתחבר…',
     signInError: 'ההתחברות נכשלה. נסה שוב.',
+    signInBusy: 'יותר מדי ניסיונות התחברות כרגע. יש להמתין דקה ולנסות שוב.',
+    signInUnavailable: 'ההתחברות אינה זמינה כרגע בשרת הזה.',
     signOutBtn: 'התנתקות',
     uploadPrompt: '📁 לחץ או גרור את קורות החיים לכאן — PDF, DOCX, או TXT',
     uploadLoadedMid: ' · ',

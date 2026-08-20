@@ -33,10 +33,15 @@ logger = logging.getLogger(__name__)
 
 DatabaseProbeFn = Callable[[], Awaitable[bool]]
 
+# The two AI quotas guard a key that is billed per call, so they refuse rather
+# than guess when the shared store is unavailable. The two credential quotas
+# guard secrets that are verified independently — a Google signature, an admin
+# token compared in constant time — where refusing everyone is an authentication
+# outage that protects nothing, so they fall back to a per-worker bound.
 burst_limiter = SharedRateLimiter("ai-burst", BURST_LIMIT, BURST_WINDOW)
 daily_limiter = SharedRateLimiter("ai-daily", DAILY_QUOTA, 24 * 60 * 60)
-admin_limiter = SharedRateLimiter("admin", 20, 15 * 60)
-login_limiter = SharedRateLimiter("login", 10, 5 * 60)
+admin_limiter = SharedRateLimiter("admin", 20, 15 * 60, when_unavailable="degrade")
+login_limiter = SharedRateLimiter("login", 10, 5 * 60, when_unavailable="degrade")
 
 
 def bearer_token(authorization: str | None) -> str:

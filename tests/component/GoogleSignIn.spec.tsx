@@ -252,3 +252,56 @@ test.describe('the credential’s lifetime', () => {
     await expect(component.locator('.nav-account-name')).toBeVisible();
   });
 });
+
+test.describe('when the server refuses the credential', () => {
+  /**
+   * The three refusals are not the same problem, and for a long time they all
+   * produced one line: "Sign-in failed. Please try again."
+   *
+   * The 429 is the case that matters. The API refuses sign-in when its rate
+   * limiter cannot reach its store — a server misconfiguration — and that
+   * arrives as a quota response. A visitor told to try again does exactly that,
+   * in a loop that cannot succeed, while the message insists the problem is
+   * theirs. Naming it costs one string and is the difference between a visitor
+   * waiting and a visitor concluding the site is broken.
+   */
+  test('a rate-limited sign-in says to wait, not to try again', async ({ googleSignIn }) => {
+    const component = await googleSignIn.mount();
+    googleSignIn.refuseNextSignInWith(429);
+
+    await googleSignIn.signInWith(validCredential());
+
+    await expect(component.getByRole('alert')).toHaveText(en.s.signInBusy);
+    await expect(component.getByRole('alert')).not.toHaveText(en.s.signInError);
+  });
+
+  test('a server fault says so, rather than blaming the visitor', async ({ googleSignIn }) => {
+    const component = await googleSignIn.mount();
+    googleSignIn.refuseNextSignInWith(503);
+
+    await googleSignIn.signInWith(validCredential());
+
+    await expect(component.getByRole('alert')).toHaveText(en.s.signInUnavailable);
+  });
+
+  test('a rejected credential keeps the generic message', async ({ googleSignIn }) => {
+    // 401 is the visitor's own credential being refused, which is what the
+    // original wording actually describes.
+    const component = await googleSignIn.mount();
+    googleSignIn.refuseNextSignInWith(401);
+
+    await googleSignIn.signInWith(validCredential());
+
+    await expect(component.getByRole('alert')).toHaveText(en.s.signInError);
+  });
+
+  test('the button stays available, whatever the reason', async ({ googleSignIn }) => {
+    const component = await googleSignIn.mount();
+    googleSignIn.refuseNextSignInWith(429);
+
+    await googleSignIn.signInWith(validCredential());
+
+    await expect(component.locator('#fakeGoogleButton')).toBeVisible();
+    await expect(component.locator('.nav-account-name')).toHaveCount(0);
+  });
+});

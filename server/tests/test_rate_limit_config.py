@@ -72,7 +72,7 @@ def test_a_missing_database_is_named(production) -> None:
 
 
 @pytest.mark.asyncio
-async def test_an_unconfigured_production_quota_refuses_every_caller(production) -> None:
+async def test_a_quota_guarding_a_billed_key_refuses_every_caller(production) -> None:
     """The behaviour is deliberate: no quota means no paid API calls get through."""
     production.delenv("RATE_LIMIT_SALT", raising=False)
     limiter = SharedRateLimiter("ai-burst", 15, 60)
@@ -84,18 +84,59 @@ async def test_an_unconfigured_production_quota_refuses_every_caller(production)
 
 
 @pytest.mark.asyncio
+async def test_a_credential_quota_degrades_instead_of_taking_authentication_down(
+    production,
+) -> None:
+    """Refusing every sign-in protects nothing — the token is verified either way."""
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+    limiter = SharedRateLimiter("login", 10, 300, when_unavailable="degrade")
+
+    allowed, remaining = await limiter.hit("ip:198.51.100.4")
+
+    assert allowed is True
+    assert remaining == 9
+
+
+@pytest.mark.asyncio
+async def test_a_degraded_quota_is_still_a_quota(production) -> None:
+    """Degrading is a fallback to a per-worker bound, not to no bound at all."""
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+    limiter = SharedRateLimiter("login", 3, 300, when_unavailable="degrade")
+
+    results = [await limiter.hit("ip:198.51.100.4") for _ in range(5)]
+
+    assert [allowed for allowed, _ in results] == [True, True, True, False, False]
+
+
+@pytest.mark.asyncio
+async def test_a_degraded_quota_still_separates_callers(production) -> None:
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+    limiter = SharedRateLimiter("login", 1, 300, when_unavailable="degrade")
+
+    first, _ = await limiter.hit("ip:198.51.100.4")
+    other, _ = await limiter.hit("ip:203.0.113.9")
+
+    assert (first, other) == (True, True), "one caller must not spend another's allowance"
+
+
+def test_refusing_is_the_default_so_a_new_bucket_cannot_inherit_leniency() -> None:
+    assert SharedRateLimiter("something-new", 5, 60).when_unavailable == "refuse"
+
+
+@pytest.mark.asyncio
 async def test_the_refusal_is_logged_with_its_cause(
     production, caplog: pytest.LogCaptureFixture
 ) -> None:
     """Without this the outage is a 429 and nothing else, which is how it hid."""
     production.delenv("RATE_LIMIT_SALT", raising=False)
-    limiter = SharedRateLimiter("login", 10, 300)
+    limiter = SharedRateLimiter("login", 10, 300, when_unavailable="degrade")
 
     with caplog.at_level(logging.ERROR, logger="app.rate_limit"):
         await limiter.hit("ip:198.51.100.4")
 
-    assert any("RATE_LIMIT_SALT" in record.message for record in caplog.records)
-    assert any("login" in record.message for record in caplog.records)
+    logged = " ".join(record.getMessage() for record in caplog.records)
+    assert "RATE_LIMIT_SALT" in logged
+    assert "login" in logged
 
 
 @pytest.mark.asyncio

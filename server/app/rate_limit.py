@@ -7,6 +7,7 @@ import logging
 import os
 import time
 from collections import defaultdict, deque
+from typing import Literal
 
 from .config import database_url, env
 from .database import hit_rate_limit
@@ -50,13 +51,40 @@ class MemoryRateLimiter:
             return True, self.limit - len(hits)
 
 
-class SharedRateLimiter:
-    """Postgres-backed in production, deterministic in-memory in local/test runs."""
+WhenUnavailable = Literal["refuse", "degrade"]
 
-    def __init__(self, bucket: str, limit: int, window_seconds: float) -> None:
+
+class SharedRateLimiter:
+    """Postgres-backed in production, deterministic in-memory in local/test runs.
+
+    `when_unavailable` decides what happens if the shared store cannot be used,
+    and the right answer differs by what the quota protects:
+
+    "refuse"   the quota guards something that costs money on every call. A
+               limiter that cannot count must not wave those through, so the
+               caller is turned away. This is the default: a new bucket has to
+               opt into being lenient rather than inherit it.
+
+    "degrade"  the quota is a brute-force bound on a credential that is itself
+               verified — a Google-signed token, an admin token compared with
+               hmac.compare_digest. Refusing everyone here does not protect
+               anything; it takes authentication down. Falling back to the
+               in-memory limiter keeps a real bound per worker, and loses only
+               the sharing between workers and across restarts.
+    """
+
+    def __init__(
+        self,
+        bucket: str,
+        limit: int,
+        window_seconds: float,
+        *,
+        when_unavailable: WhenUnavailable = "refuse",
+    ) -> None:
         self.bucket = bucket
         self.limit = limit
         self.window_seconds = window_seconds
+        self.when_unavailable = when_unavailable
         self.memory = MemoryRateLimiter(limit, window_seconds)
         self._warned: set[str] = set()
 
@@ -64,23 +92,31 @@ class SharedRateLimiter:
         if os.getenv("NODE_ENV") != "production":
             return await self.memory.hit(key)
         if problem := shared_quota_problem():
-            # A production quota without a shared database and private salt is
-            # not a quota. Fail closed instead of silently exposing paid APIs —
-            # but say so, because the caller only sees "too many requests".
-            self._warn_once(f"{problem}; every {self.bucket!r} request is refused until it is set")
-            return False, 0
+            self._warn_once(problem)
+            return await self._unavailable(key)
         salt = env("RATE_LIMIT_SALT") or env("METRICS_ID_SALT")
-        digest = hmac.new(salt.encode(), key.encode(), hashlib.sha256).hexdigest()  # type: ignore[union-attr]
+        assert salt is not None  # shared_quota_problem() has just established this
+        digest = hmac.new(salt.encode(), key.encode(), hashlib.sha256).hexdigest()
         try:
             return await hit_rate_limit(self.bucket, digest, self.limit, self.window_seconds)
         except Exception:
-            self._warn_once(f"the {self.bucket!r} quota store could not be reached")
+            self._warn_once("the shared quota store could not be reached")
             logger.exception("Shared rate limit lookup failed for bucket %r", self.bucket)
-            return False, 0
+            return await self._unavailable(key)
 
-    def _warn_once(self, message: str) -> None:
+    async def _unavailable(self, key: str) -> tuple[bool, int]:
+        if self.when_unavailable == "degrade":
+            return await self.memory.hit(key)
+        return False, 0
+
+    def _warn_once(self, problem: str) -> None:
         """Loud, but once per cause — this runs on the hot path of every request."""
-        if message in self._warned:
+        if problem in self._warned:
             return
-        self._warned.add(message)
-        logger.error("Rate limiting is failing closed: %s", message)
+        self._warned.add(problem)
+        consequence = (
+            f"every {self.bucket!r} request is refused"
+            if self.when_unavailable == "refuse"
+            else f"the {self.bucket!r} quota is per-worker only"
+        )
+        logger.error("Shared rate limiting is unavailable: %s; %s", problem, consequence)
