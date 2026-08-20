@@ -6,7 +6,7 @@ hosted separately because they cost very different amounts.
 | | What it is | Where it goes | Cost |
 |---|---|---|---|
 | Static | 12 Vite SPAs — portfolio, academy, 10 lecture decks | GitHub Pages (wired) or Cloudflare Pages | $0 |
-| API | One Express server: AI proxy, Stripe, entitlements | Fly.io | ~$2–5/month |
+| API | One FastAPI server: auth, AI proxy, content, Stripe, entitlements | Fly.io | ~$2–5/month |
 | Database | Postgres | Supabase | $0 on the free tier |
 
 ## Static
@@ -47,11 +47,11 @@ nominate for indexing. Cloudflare rewrites them properly at 200.
 
 ## API server
 
-Fly runs the API because the server has two pieces of per-process state that a
+Fly runs the Python API because the server has two pieces of per-process state that a
 scale-to-zero host loses:
 
-- `src/routes/ai.ts` builds its burst and daily limiters on
-  `express-rate-limit`'s default in-memory store. The daily window is 24 hours,
+- `app/main.py` owns in-memory burst, daily, login and admin rate limiters. The AI daily window
+  is 24 hours,
   so a machine that stops and restarts hands every caller a fresh anonymous
   allowance — the free-tier quota stops being a quota.
 - Stripe webhooks need a URL that answers immediately; a cold start inside a
@@ -76,19 +76,22 @@ fly launch --no-deploy --config server/fly.toml \
   --dockerfile server/Dockerfile
 
 fly secrets set \
+  GROQ_API_KEY=... \
   GEMINI_API_KEY=... \
+  GOOGLE_CLIENT_ID=... \
+  SESSION_SECRET=... \
   SUPABASE_DB_PASSWORD=... \
   SUPABASE_URL=... \
-  SUPABASE_SERVICE_ROLE_KEY=... \
   SUPABASE_ANON_KEY=... \
-  STRIPE_SECRET_KEY=...
+  STRIPE_SECRET_KEY=... \
+  STRIPE_WEBHOOK_SECRET=...
 
 fly deploy --config server/fly.toml \
   --dockerfile server/Dockerfile .
 ```
 
-The trailing `.` matters: the build context is the repository root, because the
-image needs `pnpm-workspace.yaml` and `lib/` to resolve the workspace packages.
+The trailing `.` matters because it is the Docker build context. The image installs uv, syncs
+the locked Python dependencies, copies `server/app`, and runs Uvicorn as a non-root user.
 
 Verify: `curl https://<app>.fly.dev/api/healthz` returns `{"status":"ok"}`.
 
@@ -98,13 +101,13 @@ Set in `fly.toml` (not secret):
 
 | Variable | Why |
 |---|---|
-| `PORT` | `src/index.ts` throws without it |
-| `PUBLIC_BASE_URL` | The origin Stripe webhooks are registered against |
+| `PORT` | Uvicorn's listening port; the package start command defaults to 8080 |
 | `ALLOWED_ORIGINS` | CORS allowlist — every origin serving the static site |
 
-Set via `fly secrets` (never committed): `GEMINI_API_KEY`,
-`SUPABASE_DB_PASSWORD`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-`SUPABASE_ANON_KEY`, `STRIPE_SECRET_KEY`.
+Set via `fly secrets` (never committed): `GROQ_API_KEY`, `GEMINI_API_KEY`,
+`GOOGLE_CLIENT_ID`, a random `SESSION_SECRET` of at least 32 characters,
+`SUPABASE_DB_PASSWORD`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `STRIPE_SECRET_KEY`, and
+`STRIPE_WEBHOOK_SECRET`.
 
 `SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints. Generate the
 content seed SQL with:
@@ -117,21 +120,18 @@ pnpm --filter @workspace/scripts exec tsx src/generate-academy-seed-sql.ts
 Apply the generated SQL to the Supabase database before switching a client to the API; an
 empty or unavailable store is reported as a controlled `503`, not as fabricated content.
 
-`PUBLIC_BASE_URL` replaced a hardcoded read of `REPLIT_DOMAINS`. Off Replit that
-variable is unset, and the old code interpolated it anyway — registering
-`https://undefined/api/stripe/webhook` with Stripe. That fails silently: the
-server starts, and every payment event is simply never delivered.
-`REPLIT_DOMAINS` still works as a fallback, so the Replit deployment is
-unaffected.
+Configure Stripe to send events to `https://<app>.fly.dev/api/stripe/webhook`. The webhook
+secret is verified against the raw request body. Ordinary `STRIPE_*` secrets take precedence;
+on Replit, the connected Stripe integration is used as a fallback when they are absent.
 
 ### The image
 
 `server/Dockerfile`, not the one at the repository root — that one
 builds the Playwright test image and its `CMD` runs the suite.
 
-`build.ts` bundles the server with esbuild into a self-contained
-`dist/index.mjs`, so the runtime stage copies `dist/` and nothing else: no
-`node_modules`, no pnpm, no source. It runs as the non-root `node` user.
+The multi-stage image uses uv's locked install, copies only the Python application and virtual
+environment into the runtime stage, and runs Uvicorn as a non-root `app` user. Node and pnpm are
+not part of the API runtime image.
 
 ## Moving the decks to a new origin
 

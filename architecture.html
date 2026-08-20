@@ -298,14 +298,14 @@
 
   <text class="grp" x="352" y="20">Server · server/</text>
   <rect class="bx" x="352" y="30" width="196" height="194" fill="var(--c-server)" stroke="var(--c-server-line)"/>
-  <text class="lbl" x="368" y="54"  fill="var(--c-server-ink)">api-server · Express 5</text>
+  <text class="lbl" x="368" y="54"  fill="var(--c-server-ink)">api-server · FastAPI</text>
   <text class="sub" x="368" y="78"  fill="var(--c-server-ink)">/ai/generate · /ai/config</text>
   <text class="sub" x="368" y="96"  fill="var(--c-server-ink)">/content/*</text>
   <text class="sub" x="368" y="114" fill="var(--c-server-ink)">/stripe/checkout · /prices</text>
   <text class="sub" x="368" y="132" fill="var(--c-server-ink)">/stripe/seed  (admin)</text>
   <text class="sub" x="368" y="150" fill="var(--c-server-ink)">/stripe/webhook</text>
   <text class="sub" x="368" y="168" fill="var(--c-server-ink)">/entitlements/course</text>
-  <text class="sub" x="368" y="186" fill="var(--c-server-ink)">/healthz</text>
+  <text class="sub" x="368" y="186" fill="var(--c-server-ink)">/auth/* · /healthz</text>
   <text class="sub" x="368" y="208" fill="var(--c-server-ink)">holds every secret</text>
 
   <text class="grp" x="700" y="20">Outside</text>
@@ -683,37 +683,42 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <h3>🔐 Sign in with Google</h3>
 <p>
   <code>AuthProvider</code> plus a <code>GoogleSignIn</code> control in the nav drawer. Google's
-  hosted client is loaded on demand, draws its own button, and hands back an ID token;
-  <code>lib/googleIdentity.ts</code> reads the name, address and picture out of it and nothing
-  else. Google renders the button's label itself, so the current language is passed to
-  <code>renderButton</code> — that half of the translation cannot come from a strings file.
+  hosted client is loaded on demand, draws its own button, and hands back an ID token. The
+  browser immediately posts that credential to <code>POST /api/auth/google</code>; it never
+  decodes or persists it. Google renders the button's label itself, so the current language is
+  passed to <code>renderButton</code> — that half of the translation cannot come from a strings
+  file.
 </p>
 <p>
-  <b>In the browser it is identity, not authorisation.</b> The token is read here and never
-  verified: checking a signature needs Google's keys and a server trusted to use them, and the
-  page has neither. Anyone can hand it a hand-written token and appear signed in as anybody, so
-  nothing on the client is gated on it — the profile is good for a name and an avatar in the
-  corner and for nothing else.
+  <b>The browser trusts only the API response.</b> While verification is in flight the nav shows
+  a localized progress state; a refusal or network failure leaves the visitor signed out and
+  shows a localized error. On success the response contains only the public profile fields the
+  header needs. No client-side claim grants access to anything.
 </p>
 <p>
-  <b>On the server it is verified, and that is where decisions are made.</b> The condition this
-  page used to state — “if any of that arrives, the token has to go to <code>api-server</code>
-  and come back verified first” — is what now happens. When the token is sent to
-  <code>api-server</code> as a bearer credential, <code>lib/googleAuth.ts</code> checks the
-  signature against Google's published keys and then the issuer, audience, expiry and
-  <code>email_verified</code> before any claim in it counts. The algorithm is pinned to RS256
-  rather than read out of the token, which is how <code>alg: none</code> and key-confusion
-  attacks get in. That is what <code>GET /api/entitlements/course</code> answers from.
+  <b>The Python server verifies before it creates a session.</b>
+  <code>app/google_auth.py</code> pins RS256, selects a key from Google's cached JWKS, verifies
+  the signature, issuer, audience, expiry, issue/not-before times and
+  <code>email_verified</code>, then exchanges the result for an HMAC-signed cookie. The cookie is
+  <code>HttpOnly</code>, <code>SameSite=Lax</code>, secure in production, scoped to
+  <code>/api</code>, and cannot outlive the Google token. Login is rate-limited to ten attempts
+  per IP per five minutes.
 </p>
 <p>
-  The two halves are not in tension: reading a token for display and verifying one for a
-  decision are different jobs, and only the second needs a server. A Pages build still has no
-  server, so it still has no entitlements — it renders the profile and nothing more.
+  Reloads restore the public profile through <code>GET /api/auth/session</code>; logout deletes
+  the cookie through <code>POST /api/auth/logout</code>. Entitlements and checkout accept that
+  verified session. Bearer ID tokens remain accepted on those server endpoints for API-client
+  compatibility, but the academy UI uses the cookie path.
 </p>
 <p>
   A build with no <code>VITE_GOOGLE_CLIENT_ID</code> renders no sign-in at all and never
   contacts Google, so a deployment that has not been given an OAuth client stays whole rather
   than showing a button that cannot work.
+</p>
+<p>
+  Sign-in requires the static app and API to share an origin (or an equivalent reverse proxy
+  for <code>/api</code>). GitHub Pages is static-only: leave its repository variable unset unless
+  such a proxy exists, otherwise verification correctly ends in the visible signed-out error.
 </p>
 
 <h3>🎙️ Interview Agent</h3>
@@ -795,7 +800,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr><td><code>ata_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>local</td><td>The user's own API key, one slot per vendor, saved only while “remember” is on.</td></tr>
     <tr><td><code>ata_session_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>session</td><td>The same key when “remember” is off — the default. Keys written by older versions are migrated here on first read.</td></tr>
     <tr><td><code>ata_remember_key_&lt;provider&gt;</code></td><td>ProviderContext</td><td>local</td><td>Which of the two slots above is in use.</td></tr>
-    <tr><td><code>ata_google_credential</code></td><td>AuthContext</td><td>local</td><td>The last Google ID token, so a reload does not sign the reader out. Dropped the moment it fails to parse or its <code>exp</code> passes.</td></tr>
+    <tr><td><code>ata_google_credential</code></td><td>AuthContext migration cleanup</td><td>local</td><td>Legacy only. Current code deletes this raw-token key on mount and never writes it; authentication persists solely in the server-issued HttpOnly cookie.</td></tr>
     <tr><td><code>ata_interview_session_v1</code></td><td>InterviewAgent</td><td>session</td><td>A partly-finished interview, so a reload does not lose it. Every element validated: <code>text</code> is rendered as a child and <code>cls</code> as a class name.</td></tr>
     <tr><td><code>ata_resume_draft_&lt;lang&gt;_*</code></td><td>ResumeAgent</td><td>session</td><td>The résumé, target role and job description in progress. Three keys per language.</td></tr>
   </tbody>
@@ -806,7 +811,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <code>resetSettings()</code> deliberately does <b>not</b> sweep the whole prefix. It removes
   the provider selection, the per-vendor keys and their remember flags, and nothing else:
   resetting which model you talk to should not also erase your progress, your interview
-  history, your résumé drafts, or which account you are signed in as.
+  history or your résumé drafts. Authentication is a server cookie and is not part of settings.
 </p>
 
 <div class="callout good">
@@ -904,10 +909,10 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <div class="callout">
   <b>Be explicit about the key.</b> In own-key mode the API key lives in
-  <code>localStorage</code> and is sent from the page to the vendor. That is the accepted
-  trade for a backend-free teaching site — any script running on this origin could read it,
-  and the key is exposed to the browser's network log. The proxy path exists precisely so a
-  casual visitor never has to make that trade.
+  <code>sessionStorage</code> by default and is sent from the page to the vendor. A clearly
+  labelled “remember” choice moves it to <code>localStorage</code>. Either way any script on this
+  origin and the browser's network log can reach it; the proxy path exists precisely so a casual
+  visitor never has to make that trade.
 </div>
 
 <ul class="notes">
@@ -915,8 +920,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <li><b>No secret is bundled.</b> Server-side keys stay in <code>api-server</code>; the client only ever learns the boolean <code>available</code> and a default model name.</li>
   <li><b>Error bodies are truncated</b> to 300 characters before display, which keeps a verbose upstream error from dumping a wall of text into the UI.</li>
   <li><b>One third-party script, by necessity.</b> Google's sign-in client is loaded from <code>accounts.google.com</code> and runs on this origin — there is no packaged equivalent, the credential flow only exists inside the hosted client. It is the only runtime code on the site that does not ship with it, it is requested only when an OAuth client is configured, and the résumé libraries that used to be fetched from public CDNs are now bundled dependencies.</li>
-  <li><b>Sign-in proves nothing <i>in the browser</i>.</b> The ID token is read here, not verified, so identity on the client is a display convenience and not a security claim — nothing on the page is gated on it, because treating it as authorisation would mean trusting a value any visitor can forge.</li>
-  <li><b>It proves something once the server has checked it.</b> Sent to <code>api-server</code> as a bearer credential, the same token is verified against Google's published keys — signature, issuer, audience, expiry, <code>email_verified</code> — and only then does a claim in it decide anything. That is the whole difference between the two halves, and it is why the entitlement answer lives on the server and not in the bundle.</li>
+  <li><b>The raw Google token never becomes browser state.</b> It is posted once to the Python API and discarded. The UI renders only the verified public user returned by the server.</li>
+  <li><b>The session is server-authenticated and script-inaccessible.</b> The API checks Google's signature and claims before issuing its own short-lived, HMAC-signed HttpOnly cookie. Entitlement decisions are made from that verified identity, never from a browser-decoded claim.</li>
   <li><b>A purchase record is never written by a browser.</b> Rows in <code>course_purchases</code> come from a signature-verified Stripe webhook and from nowhere else. The <code>googleSubject</code> a row carries is stamped into the checkout session from a token the server verified, so it is not a field any client can set — the checkout schema is strict and rejects the attempt.</li>
   <li><b>The seed route is an admin route.</b> <code>POST /api/stripe/seed</code> writes a product and a price to a live Stripe account. It requires <code>ADMIN_API_TOKEN</code> as a bearer token, compared in constant time over hashes so a length mismatch cannot leak through an exception, and answers <code>404</code> rather than <code>401</code> when no token is configured — an unconfigured deployment should not advertise that the surface exists, and forgetting the variable should fail closed.</li>
 </ul>
@@ -972,18 +977,17 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <table>
   <thead><tr><th>Variable</th><th>Required</th><th>Effect</th></tr></thead>
   <tbody>
-    <tr><td><code>PORT</code></td><td>yes</td><td>Dev and preview server port. Missing or malformed throws at config time.</td></tr>
-    <tr><td><code>BASE_PATH</code></td><td>yes</td><td>Deploy sub-path, threaded to both asset URLs and the router.</td></tr>
+    <tr><td><code>PORT</code></td><td>no</td><td>Dev and preview server port; defaults to 5000. A malformed explicit value still fails.</td></tr>
+    <tr><td><code>BASE_PATH</code></td><td>no</td><td>Deploy sub-path, threaded to asset URLs and the router; defaults to <code>/</code>.</td></tr>
     <tr><td><code>VITE_GOOGLE_CLIENT_ID</code></td><td>no</td><td>OAuth client for Sign in with Google. Absent, the control is not rendered and Google is never contacted.</td></tr>
   </tbody>
 </table>
 </div>
 
 <div class="callout good">
-  <b>Config fails loudly.</b> <code>vite.config.ts</code> throws if <code>PORT</code> or
-  <code>BASE_PATH</code> is missing or malformed, rather than defaulting. Under a sub-path
-  deploy a silently wrong base produces a blank page with 404s on every asset — a startup
-  error is far cheaper to diagnose.
+  <b>Clean builds have safe defaults.</b> Every Vite config builds from a clean shell with
+  <code>PORT=5000</code> and <code>BASE_PATH=/</code>. Deployment jobs still pass an explicit
+  base for every sub-path; malformed explicit ports fail at config time.
 </div>
 
 <p>
@@ -1032,39 +1036,32 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <b>The API image is not the one at the repository root.</b> That one builds the Playwright
   test image and its <code>CMD</code> runs the suite.
   <code>server/Dockerfile</code> ships the server, and its runtime stage is
-  unusually thin: <code>build.ts</code> already bundles the whole server — workspace packages,
-  express, drizzle, supabase — with esbuild into a self-contained
-  <code>dist/index.mjs</code>, so the image copies <code>dist/</code> and nothing else. No
-  <code>node_modules</code>, no pnpm, no source, non-root user. <code>fly.toml</code>
+  unusually thin: uv installs the exact <code>server/uv.lock</code>, and the runtime stage copies
+  the virtual environment plus <code>server/app</code>. No Node, pnpm or TypeScript server code;
+  Uvicorn runs FastAPI as a non-root <code>app</code> user. <code>fly.toml</code>
   deliberately keeps one machine running rather than scaling to zero, because
-  <code>routes/ai.ts</code> builds its rate limiters on an in-memory store with a 24-hour
+  <code>app/main.py</code> builds its rate limiters on an in-memory store with a 24-hour
   window — a machine that stops and restarts hands every caller a fresh anonymous allowance,
   and the free-tier quota stops being a quota.
 </div>
 
 <div class="callout good">
-  <b>The tooling is TypeScript too.</b> <code>api-server/build.ts</code> (the esbuild driver)
-  and <code>tests/support/start-api-servers.ts</code> (the Playwright <code>webServer</code>
-  entry point) are run straight from source as <code>node ./build.ts</code>. Node strips the
-  types itself from 22.18 on, and CI pins 24, so neither needs a loader, a build step, or a
-  dependency to earn the same typechecking as the rest of the repo — <code>build.ts</code>
-  through its own <code>tsconfig.tools.json</code>, since it sits outside <code>rootDir</code>.
+  <b>The language boundary is deliberate.</b> All browser and repository tooling remains
+  TypeScript. The backend is Python under <code>server/app</code>, managed by uv and checked by
+  Ruff, compileall and pytest. <code>tests/support/start-api-servers.ts</code> remains TypeScript
+  because it belongs to the Playwright harness; it launches three locked Uvicorn processes.
 </div>
 
 <!-- ───────────────────────── 11 ───────────────────────── -->
 <h2 id="testing">11 · Testing</h2>
 
 <p>
-  One Playwright package at <code>tests/</code> covers six layers — 612 cases as this was
-  written (221 unit, 152 component, 58 api, 31 contract, 145 e2e, 5 deck), though that total
-  is the least durable sentence on this page: it has been wrong twice in a day, once because
-  suites grew and once because the e2e config picked up WebKit and Firefox projects, which
-  multiplies a layer without anyone adding a test. The layer <em>structure</em> below is the
-  stable part; for the current split, ask the runner —
+  Pytest covers backend rules under <code>server/tests</code>, and one Playwright package at
+  <code>tests/</code> covers six TypeScript/browser layers. Counts change often; ask the runners —
+  <code>uv run --directory server pytest --collect-only -q</code> and
   <code>pnpm --filter @workspace/tests exec playwright test --list</code>. Playwright is used as
   the runner throughout, not just as a browser driver: the unit project never launches a browser,
-  it executes the same TypeScript modules the app imports — the academy's, and the server's too,
-  wherever a module has no Express import to drag in.
+  and executes the same TypeScript modules the academy imports.
 </p>
 
 <h3>What decides which layer a test belongs in</h3>
@@ -1114,8 +1111,9 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <span>
       The unit suite stubs <code>fetch</code>. The API suite runs servers whose model key is a
       throwaway that only ever receives invalid requests, whose admin token guards a route that
-      then fails on absent Stripe credentials, and whose <code>DATABASE_URL</code> is blank. A
-      developer's shell cannot change any of it.
+      then fails on absent Stripe credentials. Database, Supabase, direct Stripe, Replit
+      connector and session variables are pinned empty; a developer's shell cannot change any
+      of it.
     </span>
   </div>
 </div>
@@ -1127,7 +1125,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr>
       <td><code>tests/unit</code></td>
       <td>Node</td>
-      <td><code>domUtils</code> escaping and linkifying, language resolution, the whole provider registry — request building, key validation, error mapping, proxy-vs-direct routing. Also the two things that must hold before a browser is involved: the résumé PDF builders, checked by parsing the emitted file back with pdf.js rather than by asserting which jsPDF calls were made, and the Google ID token reader, checked for reading a Hebrew name intact and for answering “nobody” to every malformed or expired token instead of throwing on page load. Two more since: <code>lib/storage.ts</code>, including the case no real <code>localStorage</code> can be made to produce — one that throws on every call — and the server's token verifier, signing real tokens with a keypair generated in the test process.</td>
+      <td><code>domUtils</code> escaping and linkifying, language resolution, the provider registry, storage hardening, and résumé PDF builders checked by parsing emitted files back with pdf.js rather than asserting which jsPDF calls were made.</td>
     </tr>
     <tr>
       <td><code>tests/component</code></td>
@@ -1137,7 +1135,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
     <tr>
       <td><code>tests/api</code></td>
       <td>Node → live server</td>
-      <td>Status codes, CORS, malformed bodies, the webhook signature gate, and the raw-body registration order in <code>app.ts</code>. Also the two authenticated surfaces: the admin token in front of the seed route — including that the right token gets <em>through</em> it, and then fails on Stripe rather than on auth — and the entitlements route, sent tokens shaped exactly like real ones to prove none of them work.</td>
+      <td>Status codes, CORS, malformed bodies, webhook signature handling, rate limits, and live FastAPI behavior. It also covers the admin token in front of the seed route and the entitlement route's closed failure modes.</td>
     </tr>
     <tr>
       <td><code>tests/contract</code></td>
@@ -1157,6 +1155,12 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   </tbody>
 </table>
 </div>
+
+<p>
+  The Python fixture layer separately generates RSA keys and signed Google tokens, serves JWKS
+  through <code>httpx.MockTransport</code>, drives routes through <code>ASGITransport</code>, and
+  covers session cookies plus direct/fallback integration configuration without live services.
+</p>
 
 <p>
   Component and e2e both run twice, at a desktop viewport and as an emulated phone, so a layout
@@ -1204,14 +1208,14 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <b>No test can reach a model vendor — or create a product.</b> The unit suite stubs
   <code>fetch</code>; the API suite runs one server with a throwaway Gemini key that only ever
   receives invalid requests, and one with no key at all. All instances start with
-  <code>DATABASE_URL</code> and the Replit connector variables blanked, so a developer's shell
-  cannot make the suite pass or fail by accident — and so the furthest an authorised call to the
-  seed route can get is failing to fetch Stripe credentials.
+  database, Supabase, direct Stripe, Replit connector and session variables blanked, so a
+  developer's shell cannot make the suite pass or fail by accident — and so the furthest an
+  authorised call to the seed route can get is failing to fetch Stripe credentials.
 </div>
 
 <p>
   There are three instances, because most of these routes answer “not configured”
-  <em>before</em> they validate anything. <code>routes/ai.ts</code> answers <code>503</code> for
+  <em>before</em> they validate anything. <code>app/main.py</code> answers <code>503</code> for
   a missing key before it reads the body, so on a keyless server the
   <code>400 messages is required</code> branch is unreachable; the seed route answers
   <code>404</code> with no admin token, so its <code>401</code> branch is unreachable there too.
@@ -1223,7 +1227,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <div class="callout">
   <b>Assert the acceptance, not only the refusals.</b> A verifier that returns “no” to
   everything passes every rejection test ever written for it, and signs nobody in while looking
-  perfectly secure. <code>tests/unit/googleAuth.spec.ts</code> therefore generates an RSA
+  perfectly secure. <code>server/tests/test_google_auth.py</code> therefore uses fixtures to generate an RSA
   keypair, serves a key set in place of Google's, signs a token, and asserts first that it is
   <em>accepted</em> — every rejection after that is the same token with one property changed, so
   each failure is attributable to exactly one rule. The suite was checked by mutation: deleting
@@ -1240,9 +1244,9 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 <dl class="kv">
   <dt>./run-all-tests.sh</dt><dd>Every layer plus both reports. Does <b>not</b> fail fast, so one broken layer still leaves a complete report — and still exits non-zero.</dd>
   <dt>pnpm test</dt><dd>Every layer in order, stopping at the first failure.</dd>
-  <dt>pnpm test:unit</dt><dd>Node only — no server, no browser, sub-second.</dd>
+  <dt>pnpm test:unit</dt><dd>Python fixtures followed by Node unit tests; no live server or browser.</dd>
   <dt>pnpm test:component</dt><dd>Needs <code>pnpm --filter @workspace/tests run test:browsers</code> once.</dd>
-  <dt>pnpm test:api</dt><dd>Boots both api-server instances automatically.</dd>
+  <dt>pnpm test:api</dt><dd>Boots all three FastAPI instances automatically.</dd>
   <dt>pnpm test:contract</dt><dd>Same servers; fails when the spec, the codegen and the routes disagree.</dd>
   <dt>pnpm test:e2e</dt><dd>Boots the academy on port 5273.</dd>
   <dt>docker compose run --rm tests</dt><dd>The lot, in the pinned Playwright image; reports land on the host.</dd>

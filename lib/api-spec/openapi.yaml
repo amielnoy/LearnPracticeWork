@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: content
     description: Academy teaching content, served from the content store
+  - name: auth
+    description: Google credential exchange and signed browser sessions
 paths:
   /healthz:
     get:
@@ -79,6 +81,61 @@ paths:
                 $ref: "#/components/schemas/LectureSeries"
         "503":
           $ref: "#/components/responses/ContentUnavailable"
+  /auth/google:
+    post:
+      operationId: signInWithGoogle
+      tags: [auth]
+      summary: Exchange a Google credential for a server session
+      description: >
+        Verifies the Google ID token and, on success, sets the signed `ata_session`
+        HttpOnly cookie. The raw credential is not returned or persisted by the client.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleCredential"
+      responses:
+        "200":
+          description: Signed in; the session cookie accompanies this response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          $ref: "#/components/responses/AuthError"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "429":
+          $ref: "#/components/responses/AuthError"
+        "503":
+          $ref: "#/components/responses/AuthError"
+  /auth/session:
+    get:
+      operationId: getAuthSession
+      tags: [auth]
+      summary: Read the current signed browser session
+      responses:
+        "200":
+          description: Current verified public profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "401":
+          $ref: "#/components/responses/AuthError"
+  /auth/logout:
+    post:
+      operationId: signOut
+      tags: [auth]
+      summary: Delete the browser session cookie
+      responses:
+        "200":
+          description: Signed out, including when no session existed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResponse"
 components:
   parameters:
     Lang:
@@ -93,6 +150,12 @@ components:
         enum: [en, he]
         default: en
   responses:
+    AuthError:
+      description: Authentication failed, is unavailable, or was rate-limited.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     ContentUnavailable:
       description: >
         The content store could not be reached. Deliberately a 503 and not a
@@ -117,6 +180,48 @@ components:
           type: string
       required:
         - error
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    GoogleCredential:
+      type: object
+      additionalProperties: false
+      properties:
+        credential:
+          type: string
+          minLength: 1
+          maxLength: 10000
+      required: [credential]
+    GoogleUser:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        picture:
+          type: string
+        expiresAt:
+          type: integer
+          description: Google token expiry as Unix epoch milliseconds.
+      required: [name, email, picture, expiresAt]
+    AuthSession:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/GoogleUser"
+      required: [user]
+    LogoutResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          const: true
+      required: [ok]
     QuestionBankItem:
       type: object
       properties:
@@ -216,4 +321,3 @@ components:
           items:
             $ref: "#/components/schemas/LectureTrack"
       required: [tracks]
-

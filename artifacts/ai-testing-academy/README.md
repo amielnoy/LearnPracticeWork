@@ -28,7 +28,7 @@ src/
 ├── context/
 │   ├── LocaleContext.tsx     resolves the language once, exposes locale + switcher
 │   ├── ProviderContext.tsx   provider/model/key state and the AI call surface
-│   ├── AuthContext.tsx       Google sign-in; identity only, gates nothing
+│   ├── AuthContext.tsx       Google sign-in → verified HttpOnly server session
 │   └── ProgressContext.tsx   per-tool progress, so the launcher can offer to resume
 ├── hooks/                    useDisclosure, useReveal, useVoice
 ├── scripts/
@@ -108,7 +108,7 @@ Connection Setup lets a visitor use a **server-side default key** or **their own
   and never sent to the browser. This is the site's default free chat provider for resume
   scoring and the mock interview. The client calls `GET /api/ai/config` for a boolean and a
   default model name, and `POST /api/ai/generate` to run a completion. See
-  `server/src/routes/ai.ts`.
+  `server/app/main.py`.
 - **Gemini (search-only default)** — a separate Replit Secret (`GEMINI_API_KEY`) also held on
   `server`. It is used exclusively for the live Google Search grounding feature
   in the Practice Library's question enrichment (`grounded: true` requests) and is not offered
@@ -131,7 +131,7 @@ search grounding, respectively). Anthropic and OpenAI are own-key or nothing, an
 default exists the "use my own key" checkbox is dropped entirely rather than rendered ticked
 and disabled.
 
-To add a default for another vendor: add a handler to `routes/ai.ts`, report its availability
+To add a default for another vendor: add a handler to `server/app/main.py`, report its availability
 from `GET /api/ai/config`, and let `callAI` route through the proxy for it in `providers.ts`.
 
 > **Never** serve a plaintext `.env` to the browser. Any key placed there is readable by every
@@ -143,10 +143,20 @@ from `GET /api/ai/config`, and let `callAI` route through the proxy for it in `p
 pnpm --filter @workspace/ai-testing-academy run dev
 ```
 
-`vite.config.ts` throws unless `PORT` and `BASE_PATH` are set — under a sub-path deploy a
-silently wrong base gives a blank page and 404s on every asset, so it fails at startup instead.
+`vite.config.ts` defaults to `PORT=5000` and `BASE_PATH=/` for a clean local build; deployments
+override both explicitly so the router and emitted asset URLs agree with their mounted path.
 Vite proxies `/api` to `localhost:$API_PORT` (default 8787); without `api-server` running, the
 AI panel decides no server key exists and offers bring-your-own-key only.
+
+### Sign in
+
+Google's hosted button returns a short-lived credential to `AuthContext`, which immediately
+posts it to `POST /api/auth/google`. The Python API verifies RS256, issuer, audience, time
+claims and `email_verified`, then returns public profile fields and sets an HMAC-signed,
+HttpOnly, `SameSite=Lax` cookie. The raw Google credential is never persisted in browser
+storage. Reloads restore the profile through `GET /api/auth/session`; logout calls
+`POST /api/auth/logout`. Set the same OAuth client in `VITE_GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_ID`, plus a random server-only `SESSION_SECRET` of at least 32 characters.
 
 ### Content API
 
@@ -173,7 +183,7 @@ Covered by the workspace suite in `tests/`, not by a per-package runner. Three o
 layers point at this package:
 
 ```bash
-pnpm test:unit         # lib/domUtils, lib/i18n, lib/providers
+pnpm test:unit         # Python fixtures + TypeScript library unit tests
 pnpm test:component    # ChallengeCard, CodingChallenges, QuestionCard, QuestionBank,
                        # ConnectionSetup, Footer, BackToTop
 pnpm test:e2e          # this app end to end, desktop + mobile

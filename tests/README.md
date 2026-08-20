@@ -1,7 +1,7 @@
 # @workspace/tests
 
-Five test layers, one runner. Playwright is used as a general test runner here, not only as a
-browser driver — the unit project never opens a browser.
+Six Playwright layers plus a Python fixture layer. Playwright is used as a general test runner,
+not only as a browser driver — the TypeScript unit project never opens a browser.
 
 ```
 tests/
@@ -14,14 +14,15 @@ tests/
 │   └── components/            reusable fragments (NavComponent, HeroComponent)
 ├── deck/        Chromium      one lecture deck, really running
 └── support/     fixtures, fakes, and the server launcher
+server/tests/    pytest fixtures for Google verification, sessions, and integrations
 ```
 
 ## Running
 
 ```bash
 ./run-all-tests.sh        # everything + the Allure report, from the repo root
-pnpm test                 # everything, in order, stopping at the first failure
-pnpm test:unit            # ~1s, no server, no browser
+pnpm test                 # Python fixtures + Playwright, stopping at the first failure
+pnpm test:unit            # Python fixtures + TS unit tests, no live server/browser
 pnpm test:component       # needs a browser, see below
 pnpm test:api
 pnpm test:contract
@@ -103,12 +104,12 @@ carries `if: !cancelled()` so a failure in one layer still leaves the others in 
 
 ### api / contract
 
-`support/start-api-servers.ts` builds `server` once and starts three instances:
+`support/start-api-servers.ts` syncs `server/uv.lock` once and starts three Uvicorn instances:
 
 | Port | Configured with | Why |
 | --- | --- | --- |
 | 8788 | nothing — no Gemini key, no admin token, no OAuth client | `baseURL` for the api and contract projects. Every "not configured" branch runs here: `503` from the AI proxy, `404` from the seed route, `503` from entitlements |
-| 8789 | a throwaway Gemini key, `ADMIN_API_TOKEN`, `GOOGLE_CLIENT_ID` | The branches that sit *behind* a configuration check — request validation, `401` on a bad admin token, `401` on a bad ID token |
+| 8789 | a throwaway Gemini key, `ADMIN_API_TOKEN`, `GOOGLE_CLIENT_ID`, `SESSION_SECRET` | The branches behind configuration checks — request validation, bad admin auth, and bad Google credentials |
 | 8790 | the same, with `AI_DAILY_QUOTA=2` | The rate-limit spec, which needs a quota small enough to exhaust |
 
 More than one is needed because most of these routes answer "not configured" *before* they
@@ -117,11 +118,12 @@ server with no `ADMIN_API_TOKEN` the seed route's `401` branch is too. Splitting
 configuration across instances is what makes both sides reachable without a mock.
 
 The keyed instance is only ever sent invalid requests, so **no test can reach a model vendor**.
-All three start with `DATABASE_URL`, `REPLIT_CONNECTORS_HOSTNAME` and friends blanked, so a
-developer's shell or a deployment's secrets cannot change the result — and so the Stripe routes
-fail predictably as JSON, which is what `api/stripe.spec.ts` asserts.
+All three start with database, direct Stripe, Replit connector, Supabase and session variables
+blanked, so a developer's shell or deployment secrets cannot change the result. The keyed
+instance overrides only the inert values its cases need, and Stripe routes fail predictably as
+JSON, which is what `api/stripe.spec.ts` asserts.
 
-Neither the admin token nor the client ID is a credential. The token guards a route that then
+The admin token is a deliberately inert test secret; the OAuth client ID is public. The token guards a route that then
 fails on absent Stripe credentials, so no test can create a product; the client ID is only ever
 compared against an `aud` claim on tokens that are rejected before a signature is checked.
 
@@ -151,10 +153,9 @@ turned on a portrait phone, and really left alone once the phone is turned.
 
 ### e2e
 
-The academy's own Vite dev server on port 5273 with `BASE_PATH=/` (its `vite.config.ts` throws
-without `PORT` and `BASE_PATH`). No API server is started: the `/api` proxy has nothing behind
-it, so Connection Setup falls back to bring-your-own-key, which is the state these flows
-exercise.
+The academy's own Vite dev server on port 5273 with `BASE_PATH=/`. No API server is started:
+the `/api` proxy has nothing behind it, so Connection Setup falls back to bring-your-own-key,
+which is the state these flows exercise.
 
 ## The wide pass
 
@@ -198,21 +199,20 @@ docker compose run --rm tests
 
 Reports land on the host in `allure-report/`, `allure-results/` and `test-results/`.
 
-The image is pinned to `linux/amd64` on purpose: `pnpm-workspace.yaml`'s `overrides` strip every
-platform-native optional dependency except the linux-x64-gnu ones, so an arm64 image would be
-missing `@rollup/rollup-linux-arm64-gnu` and the academy's Vite server — and with it the e2e
-layer — would not boot. Chromium also needs a roomy `/dev/shm`: compose sets `shm_size: 1gb`,
-and a plain `docker run` needs `--shm-size=1g`.
+The image is pinned to `linux/amd64` to match the official Playwright browser image. Chromium
+also needs a roomy `/dev/shm`: compose sets `shm_size: 1gb`, and a plain `docker run` needs
+`--shm-size=1g`.
 
 ## Adding tests
 
-- **Pure function** → `unit/`. Stub browser globals with `support/fakeBrowser.ts` and network
-  calls with `support/fetchStub.ts` rather than adding jsdom. Server-side logic is reachable
-  here too, through `@api-server/…`, as long as the module has no Express import — which is why
-  `lib/googleAuth.ts` and `middlewares/requireGoogleUser.ts` are two files rather than one.
+- **Pure TypeScript function** → `unit/`. Stub browser globals with `support/fakeBrowser.ts` and
+  network calls with `support/fetchStub.ts` rather than adding jsdom.
+- **Python backend rule** → `server/tests/`. Prefer fixtures in `conftest.py`; use
+  `httpx.MockTransport` for upstreams and `ASGITransport` for routes so tests never need a real
+  Google, Stripe, model-vendor, or database connection.
 - **Anything that decides whether to accept something** → assert the *acceptance* first. A
   verifier that refuses everything passes every rejection test ever written;
-  `unit/googleAuth.spec.ts` signs a real token with a keypair generated in the test process so
+  `server/tests/test_google_auth.py` signs a real token with a fixture keypair so
   that "a valid token is accepted" is a case that can fail.
 - **Component** → `component/`. Import it through `@academy/…`; wrap in `LocaleProvider` (and
   `ProviderContextProvider` if it reads provider state). Intercept `/api/ai/config` with

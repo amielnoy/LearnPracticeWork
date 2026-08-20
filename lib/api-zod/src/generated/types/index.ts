@@ -6,19 +6,25 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './authErrorResponse';
+export * from './authSession';
 export * from './codingChallenge';
 export * from './codingChallengeLevel';
 export * from './codingChallenges';
 export * from './contentError';
 export * from './contentUnavailableResponse';
+export * from './errorResponse';
 export * from './getCodingChallengesParams';
 export * from './getLectureSeriesParams';
 export * from './getQuestionBankParams';
+export * from './googleCredential';
+export * from './googleUser';
 export * from './healthStatus';
 export * from './langParameter';
 export * from './lecture';
 export * from './lectureSeries';
 export * from './lectureTrack';
+export * from './logoutResponse';
 export * from './questionBank';
 export * from './questionBankItem';
 export * from './questionBankStage';

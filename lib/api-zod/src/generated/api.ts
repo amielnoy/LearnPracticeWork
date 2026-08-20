@@ -112,3 +112,42 @@ export const GetLectureSeriesResponse = zod.object({
     }),
   ),
 });
+
+/**
+ * Verifies the Google ID token and, on success, sets the signed `ata_session` HttpOnly cookie. The raw credential is not returned or persisted by the client.
+
+ * @summary Exchange a Google credential for a server session
+ */
+export const signInWithGoogleBodyCredentialMax = 10000;
+
+export const SignInWithGoogleBody = zod.object({
+  credential: zod.string().min(1).max(signInWithGoogleBodyCredentialMax),
+});
+
+export const SignInWithGoogleResponse = zod.object({
+  user: zod.object({
+    name: zod.string(),
+    email: zod.string().email(),
+    picture: zod.string(),
+    expiresAt: zod.number().describe('Google token expiry as Unix epoch milliseconds.'),
+  }),
+});
+
+/**
+ * @summary Read the current signed browser session
+ */
+export const GetAuthSessionResponse = zod.object({
+  user: zod.object({
+    name: zod.string(),
+    email: zod.string().email(),
+    picture: zod.string(),
+    expiresAt: zod.number().describe('Google token expiry as Unix epoch milliseconds.'),
+  }),
+});
+
+/**
+ * @summary Delete the browser session cookie
+ */
+export const SignOutResponse = zod.object({
+  ok: zod.boolean(),
+});

@@ -43,6 +43,8 @@ const PINNED: Readonly<Record<string, string>> = {
   REPL_IDENTITY: '',
   WEB_REPL_RENEWAL: '',
   REPLIT_DOMAINS: '',
+  STRIPE_SECRET_KEY: '',
+  STRIPE_WEBHOOK_SECRET: '',
   GEMINI_MODEL: 'gemini-2.5-flash',
   // Quieter output; the servers' logs are only interesting when a test fails.
   LOG_LEVEL: 'warn',
@@ -51,6 +53,7 @@ const PINNED: Readonly<Record<string, string>> = {
   // unconfigured deployment takes. The keyed server below sets both.
   ADMIN_API_TOKEN: '',
   GOOGLE_CLIENT_ID: '',
+  SESSION_SECRET: '',
   // Same reason as DATABASE_URL above: the Supabase-backed content route and
   // the Stripe connection string are expected to be unavailable, and a
   // developer who happens to have these exported must not get a different

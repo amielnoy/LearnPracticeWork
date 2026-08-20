@@ -13,6 +13,35 @@ export interface ContentError {
   error: string;
 }
 
+export interface ErrorResponse {
+  error: string;
+}
+
+export interface GoogleCredential {
+  /**
+   * @minLength 1
+   * @maxLength 10000
+   */
+  credential: string;
+}
+
+export interface GoogleUser {
+  name: string;
+  email: string;
+  picture: string;
+  /** Google token expiry as Unix epoch milliseconds. */
+  expiresAt: number;
+}
+
+export interface AuthSession {
+  user: GoogleUser;
+}
+
+export const LogoutResponseValue = {
+  ok: true,
+} as const;
+export type LogoutResponse = typeof LogoutResponseValue;
+
 export interface QuestionBankItem {
   q: string;
   hint: string;
@@ -65,6 +94,11 @@ export interface LectureTrack {
 export interface LectureSeries {
   tracks: LectureTrack[];
 }
+
+/**
+ * Authentication failed, is unavailable, or was rate-limited.
+ */
+export type AuthErrorResponse = ErrorResponse;
 
 /**
  * The content store could not be reached. Deliberately a 503 and not a 500: the request was fine, the dependency was not, and the message is fixed so nothing about the store leaks to an unauthenticated caller.
