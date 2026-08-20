@@ -19,6 +19,7 @@ from .database import find_course_access, initialize_database, record_purchase
 from .google_auth import GoogleUser, verify_google_id_token
 from .integrations import stripe_client, stripe_credentials
 from .rate_limit import MemoryRateLimiter
+from .relay import relay_api_request, upstream_api_base_url
 from .sessions import COOKIE_NAME, create_session, read_session, sessions_configured
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO").upper())
@@ -79,6 +80,9 @@ async def request_size_limit(request: Request, call_next):
     length = request.headers.get("content-length")
     if length and length.isdigit() and int(length) > 96 * 1024:
         return JSONResponse({"error": "Request body is too large"}, status_code=413)
+    if request.url.path.startswith("/api/") and request.url.path != "/api/healthz":
+        if upstream := upstream_api_base_url():
+            return await relay_api_request(request, upstream)
     return await call_next(request)
 
 
@@ -123,6 +127,11 @@ async def _user_from_request(authorization: str | None, cookie: str | None) -> G
 @app.get("/api/healthz")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/auth/config")
+async def auth_config() -> dict[str, str]:
+    return {"clientId": env("GOOGLE_CLIENT_ID") or ""}
 
 
 class GoogleLogin(BaseModel):

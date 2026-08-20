@@ -43,10 +43,30 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, clientId = googleClientId() }: AuthProviderProps) {
-  const configured = clientId !== '';
+  const [resolvedClientId, setResolvedClientId] = useState(clientId);
+  const configured = resolvedClientId !== '';
   const [user, setUser] = useState<GoogleUser | null>(null);
   const [authenticating, setAuthenticating] = useState(false);
   const [authError, setAuthError] = useState(false);
+
+  // A build-time client ID remains supported for local/offline builds. When it
+  // is absent, ask the same-origin API for the public ID at runtime so static
+  // Replit deployments do not need any authentication configuration of their own.
+  useEffect(() => {
+    if (clientId) return;
+    let active = true;
+    void fetch('/api/auth/config', { cache: 'no-store' })
+      .then(async response =>
+        response.ok ? ((await response.json()) as { clientId?: string }) : {},
+      )
+      .then(body => {
+        if (active && body.clientId) setResolvedClientId(body.clientId);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [clientId]);
 
   const handleCredential = useCallback(async (credential: string) => {
     setAuthenticating(true);
@@ -109,7 +129,7 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
       if (!configured) return;
       const api = await loadGoogleIdentity();
       api.initialize({
-        client_id: clientId,
+        client_id: resolvedClientId,
         callback: response => {
           if (response.credential) void handleCredential(response.credential);
         },
@@ -118,7 +138,7 @@ export function AuthProvider({ children, clientId = googleClientId() }: AuthProv
       });
       api.renderButton(parent, { ...BUTTON_OPTIONS, locale });
     },
-    [clientId, configured, handleCredential],
+    [configured, handleCredential, resolvedClientId],
   );
 
   // A credential is only good until it expires. Rather than let a stale name sit

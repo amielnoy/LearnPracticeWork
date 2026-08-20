@@ -219,6 +219,7 @@ test.describe('spec ↔ running server', () => {
  * that. This entry is back to being about spec drift and nothing else.
  */
 const UNDOCUMENTED_ROUTES: Array<{ method: 'GET' | 'POST'; route: string; probe?: boolean }> = [
+  { method: 'GET', route: '/auth/config' },
   { method: 'GET', route: '/ai/config' },
   { method: 'POST', route: '/ai/generate' },
   { method: 'GET', route: '/stripe/prices' },

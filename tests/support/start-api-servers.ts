@@ -40,6 +40,7 @@ const PINNED: Readonly<Record<string, string>> = {
   // which is exactly what the api suite asserts.
   DATABASE_URL: '',
   REPLIT_DOMAINS: '',
+  UPSTREAM_API_BASE_URL: '',
   STRIPE_SECRET_KEY: '',
   STRIPE_WEBHOOK_SECRET: '',
   GEMINI_MODEL: 'gemini-2.5-flash',

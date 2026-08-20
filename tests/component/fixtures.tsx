@@ -68,7 +68,11 @@ interface GoogleStubWindow extends Window {
 /** How the sign-in control is mounted, and what a test can do to it afterwards. */
 type GoogleSignInHarness = {
   /** Mounts the control. An empty `clientId` stands for a build without one. */
-  mount: (options?: { clientId?: string; lang?: 'en' | 'he' }) => Promise<Locator>;
+  mount: (options?: {
+    clientId?: string;
+    runtimeClientId?: string;
+    lang?: 'en' | 'he';
+  }) => Promise<Locator>;
   /** Seeds the API session and a legacy browser credential before mounting. */
   seedCredential: (credential: string) => Promise<void>;
   /** Clicks Google's button, which hands `credential` back through its callback. */
@@ -223,6 +227,10 @@ export const test = base.extend<ComponentFixtures>({
           : { status: 401, json: { error: 'Not signed in' } },
       ),
     );
+    let runtimeClientId = '';
+    await page.route('**/api/auth/config', route =>
+      route.fulfill({ status: 200, json: { clientId: runtimeClientId } }),
+    );
     await page.route('**/api/auth/google', async route => {
       const body = route.request().postDataJSON() as { credential?: string };
       sessionUser = body.credential ? verifiedUser(body.credential) : null;
@@ -250,14 +258,14 @@ export const test = base.extend<ComponentFixtures>({
       page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, value] as const);
 
     await use({
-      mount: async ({
-        clientId = 'test-client-id.apps.googleusercontent.com',
-        lang = 'en',
-      } = {}) => {
+      mount: async ({ clientId, runtimeClientId: apiClientId = '', lang = 'en' } = {}) => {
+        runtimeClientId = apiClientId;
+        const configuredClientId =
+          clientId ?? (apiClientId ? '' : 'test-client-id.apps.googleusercontent.com');
         await setBeforeMount('ata_lang', lang);
         return mount(
           <LocaleProvider>
-            <AuthProvider clientId={clientId}>
+            <AuthProvider clientId={configuredClientId}>
               <GoogleSignIn />
             </AuthProvider>
           </LocaleProvider>,

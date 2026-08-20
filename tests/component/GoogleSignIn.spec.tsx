@@ -36,6 +36,17 @@ test.describe('a build with no client ID', () => {
 });
 
 test.describe('signing in', () => {
+  test('loads the public client ID from the API when the static build has none', async ({
+    googleSignIn,
+  }) => {
+    const component = await googleSignIn.mount({
+      runtimeClientId: 'runtime-client.apps.googleusercontent.com',
+    });
+
+    await expect(component.locator('#fakeGoogleButton')).toBeVisible();
+    expect((await googleSignIn.stub()).clientId).toBe('runtime-client.apps.googleusercontent.com');
+  });
+
   test('offers Google’s button, initialised with the configured client', async ({
     googleSignIn,
   }) => {
