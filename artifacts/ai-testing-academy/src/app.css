@@ -200,6 +200,22 @@ footer{text-align:center; color:var(--muted); font-size:.82rem; padding:30px; bo
 .legal-back{display:inline-block; min-height:44px; padding:8px 0; font-weight:700;}
 body.legal-route{padding-inline-start:0;}
 
+/* The operator's customer screen. It borrows .legal-page for the column and
+   .card for each purchase, so it inherits the site's spacing, dark mode and
+   right-to-left handling rather than restating any of them. */
+.admin-page .agent-box{margin-top:18px;}
+.admin-privacy{margin:14px 0 18px;}
+.admin-grid{display:grid; gap:14px; margin-top:6px; align-items:start;
+    grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));}
+.admin-customer-email{overflow-wrap:anywhere;}
+.admin-customer-facts{color:var(--muted); font-size:.85rem; margin:0 0 10px;}
+.admin-recommend{margin-top:4px;}
+.admin-actions{margin:14px 0 0; padding-inline-start:18px; display:grid; gap:10px;}
+.admin-actions li{font-size:.9rem; line-height:1.5;}
+.admin-why{display:block; color:var(--muted); font-size:.85rem; margin-top:2px;}
+.admin-raw{margin-top:12px; font-size:.8rem;}
+.admin-disconnect{margin-top:22px;}
+
 .video-card video{width:100%; border-radius:10px; margin-top:10px; background:#000;}
 .video-card .no-video{margin-top:10px; padding:22px 12px; border:2px dashed var(--border);
     border-radius:10px; text-align:center; color:var(--muted); font-size:.82rem;}
@@ -299,6 +315,16 @@ html[data-theme="dark"] body{background:var(--bg); color:var(--text);}
 html[data-theme="dark"] nav{background:rgba(23,21,28,.96);}
 html[data-theme="dark"] header{background:radial-gradient(ellipse at top,#2a2130 0%,var(--bg) 70%);}
 html[data-theme="dark"] .badge,html[data-theme="dark"] pre{background:var(--code-bg);}
+
+/* Placed after the dark-mode overrides on purpose: `html[data-theme="dark"]
+   .badge` is more specific than a two-class selector, so a badge colour
+   declared earlier is silently repainted in dark mode. Both selectors carry the
+   same declaration because the colours are already theme-aware tokens. */
+.badge.admin-linked,html[data-theme="dark"] .badge.admin-linked{background:var(--green); color:#fff;}
+.badge.admin-unlinked,html[data-theme="dark"] .badge.admin-unlinked{background:var(--yellow); color:#3a2a00;}
+.badge.admin-priority-high,html[data-theme="dark"] .badge.admin-priority-high{background:var(--red); color:#fff;}
+.badge.admin-priority-medium,html[data-theme="dark"] .badge.admin-priority-medium{background:var(--yellow); color:#3a2a00;}
+.badge.admin-priority-low,html[data-theme="dark"] .badge.admin-priority-low{background:var(--border); color:var(--muted);}
 
 .scroll-progress{position:fixed; top:0; inset-inline-start:0; height:3px; width:0; z-index:200;
     background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .08s linear;}

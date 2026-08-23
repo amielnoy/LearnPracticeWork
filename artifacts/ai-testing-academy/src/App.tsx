@@ -8,6 +8,7 @@ import { ProgressProvider } from './context/ProgressContext';
 import { AuthProvider } from './context/AuthContext';
 import { HomePage } from './pages/HomePage';
 import { LegalPage } from './pages/LegalPage';
+import { AdminPage } from './pages/AdminPage';
 
 function Router() {
   return (
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/terms">{() => <LegalPage kind="terms" />}</Route>
       <Route path="/accessibility">{() => <LegalPage kind="accessibility" />}</Route>
       <Route path="/cancellation">{() => <LegalPage kind="cancellation" />}</Route>
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );

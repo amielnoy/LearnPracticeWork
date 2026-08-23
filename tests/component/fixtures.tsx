@@ -8,6 +8,7 @@ import { ConnectionSetup } from '@academy/components/agents/ConnectionSetup';
 import { QuestionBank } from '@academy/components/practice/QuestionBank';
 import { ResumeAgent } from '@academy/components/agents/ResumeAgent';
 import { GoogleSignIn } from '@academy/components/account/GoogleSignIn';
+import { AdminPage } from '@academy/pages/AdminPage';
 import { AuthProvider } from '@academy/context/AuthContext';
 import { CodingChallenges } from '@academy/components/practice/CodingChallenges';
 import {
@@ -152,6 +153,26 @@ type ComponentFixtures = MeaningfulReportingFixture & {
   resumeAgent: ResumeAgentHarness;
   /** Sign in with Google, against a stubbed Google client. */
   googleSignIn: GoogleSignInHarness;
+  /** The operator's customer screen, against a stubbed admin API. */
+  adminPage: AdminPageHarness;
+};
+
+/** What the stubbed admin API was asked, and how it should answer. */
+interface AdminPageOptions {
+  customers?: unknown[];
+  /** Status for the listing call; 200 unless a test wants a refusal. */
+  status?: number;
+  recommendation?: string;
+  recommendStatus?: number;
+}
+
+type AdminPageHarness = {
+  /** Mounts the screen with the answers the stubbed admin API should give. */
+  mount: (options?: AdminPageOptions) => Promise<Locator>;
+  /** Types a token and connects, which is what triggers the first call. */
+  connect: (token: string) => Promise<void>;
+  /** Every admin call the page made, in order. */
+  requests: () => Array<{ url: string; authorization: string | undefined }>;
 };
 
 const withProviders = (node: ReactNode) => (
@@ -235,6 +256,52 @@ export const test = base.extend<ComponentFixtures>({
       },
       error: component.locator('#resumeErr'),
       resumeText: component.locator('#resumeText'),
+    });
+  },
+
+  adminPage: async ({ mount, page }, use) => {
+    const seen: Array<{ url: string; authorization: string | undefined }> = [];
+    let options: AdminPageOptions = {};
+
+    await page.route('**/api/admin/customers', async route => {
+      seen.push({
+        url: route.request().url(),
+        authorization: route.request().headers()['authorization'],
+      });
+      const status = options.status ?? 200;
+      await route.fulfill(
+        status === 200
+          ? { status, json: { customers: options.customers ?? [] } }
+          : { status, json: { error: 'refused' } },
+      );
+    });
+    await page.route('**/api/admin/customers/*/recommendations*', async route => {
+      seen.push({
+        url: route.request().url(),
+        authorization: route.request().headers()['authorization'],
+      });
+      const status = options.recommendStatus ?? 200;
+      await route.fulfill(
+        status === 200
+          ? { status, json: { customerId: 'c-1', text: options.recommendation ?? '' } }
+          : { status, json: { error: 'busy' } },
+      );
+    });
+
+    await use({
+      mount: async (given: AdminPageOptions = {}) => {
+        options = given;
+        return mount(
+          <LocaleProvider>
+            <AdminPage />
+          </LocaleProvider>,
+        );
+      },
+      connect: async (token: string) => {
+        await page.locator('#adminToken').fill(token);
+        await page.getByRole('button', { name: 'Connect' }).click();
+      },
+      requests: () => seen,
     });
   },
 

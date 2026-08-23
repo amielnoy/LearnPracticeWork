@@ -26,6 +26,8 @@ import type {
   CodingChallenges,
   ContentUnavailableResponse,
   CoursePrices,
+  CustomerList,
+  CustomerRecommendations,
   EntitlementResponse,
   GenerateRequest,
   GenerateResponse,
@@ -595,6 +597,150 @@ export const useSeedStripeCatalog = <
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<Awaited<ReturnType<typeof seedStripeCatalog>>, TError, void, TContext> => {
   return useMutation(getSeedStripeCatalogMutationOptions(options));
+};
+
+/**
+ * @summary Admin-only list of recorded course purchases
+ */
+export const getListCustomersUrl = () => {
+  return `/api/admin/customers`;
+};
+
+export const listCustomers = async (options?: RequestInit): Promise<CustomerList> => {
+  return customFetch<CustomerList>(getListCustomersUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListCustomersQueryKey = () => {
+  return [`/api/admin/customers`] as const;
+};
+
+export const getListCustomersQueryOptions = <
+  TData = Awaited<ReturnType<typeof listCustomers>>,
+  TError = ErrorType<RequestErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListCustomersQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listCustomers>>> = ({ signal }) =>
+    listCustomers({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listCustomers>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListCustomersQueryResult = NonNullable<Awaited<ReturnType<typeof listCustomers>>>;
+export type ListCustomersQueryError = ErrorType<RequestErrorResponse>;
+
+/**
+ * @summary Admin-only list of recorded course purchases
+ */
+
+export function useListCustomers<
+  TData = Awaited<ReturnType<typeof listCustomers>>,
+  TError = ErrorType<RequestErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listCustomers>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListCustomersQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Generated from the purchase's elapsed time and account state. The model is never given the customer's email or any other identifier, so the advice cannot depend on who they are.
+
+ * @summary Admin-only suggested next actions for one purchase
+ */
+export const getRecommendCustomerActionsUrl = (purchaseId: string) => {
+  return `/api/admin/customers/${purchaseId}/recommendations`;
+};
+
+export const recommendCustomerActions = async (
+  purchaseId: string,
+  options?: RequestInit,
+): Promise<CustomerRecommendations> => {
+  return customFetch<CustomerRecommendations>(getRecommendCustomerActionsUrl(purchaseId), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getRecommendCustomerActionsMutationOptions = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recommendCustomerActions>>,
+    TError,
+    { purchaseId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof recommendCustomerActions>>,
+  TError,
+  { purchaseId: string },
+  TContext
+> => {
+  const mutationKey = ['recommendCustomerActions'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof recommendCustomerActions>>,
+    { purchaseId: string }
+  > = props => {
+    const { purchaseId } = props ?? {};
+
+    return recommendCustomerActions(purchaseId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RecommendCustomerActionsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof recommendCustomerActions>>
+>;
+
+export type RecommendCustomerActionsMutationError = ErrorType<RequestErrorResponse>;
+
+/**
+ * @summary Admin-only suggested next actions for one purchase
+ */
+export const useRecommendCustomerActions = <
+  TError = ErrorType<RequestErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recommendCustomerActions>>,
+    TError,
+    { purchaseId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof recommendCustomerActions>>,
+  TError,
+  { purchaseId: string },
+  TContext
+> => {
+  return useMutation(getRecommendCustomerActionsMutationOptions(options));
 };
 
 /**

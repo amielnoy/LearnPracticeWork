@@ -74,7 +74,7 @@ the module that owns it.
 
 | Module | Holds |
 | --- | --- |
-| `routes/{ops,auth,content,ai,commerce,entitlements}.py` | One `APIRouter` each; HTTP shape only |
+| `routes/{ops,auth,content,ai,commerce,entitlements,admin}.py` | One `APIRouter` each; HTTP shape only |
 | `routes/__init__.py` | `ROUTERS` — the mount list, so `create_app` never changes |
 | `dependencies.py` | Every `Depends` provider, plus the four shared rate limiters |
 | `ai_gateway.py` | One strategy object per AI provider, and the proxy that dispatches to it |
@@ -82,6 +82,7 @@ the module that owns it.
 | `commerce.py` | Checkout, catalogue seeding, prices and the Stripe webhook |
 | `catalog.py` | The one course this deployment may sell, or `None` |
 | `entitlements.py` | Whether a verified identity has bought it |
+| `customers.py` | Recorded purchases, and the AI-written next action for one |
 | `origins.py` | Which origins a redirect may point at |
 | `errors.py` | `ServiceError`, rendered by a single handler |
 | `schemas.py` · `settings.py` | Request bodies; deployment-wide limits |
@@ -99,6 +100,16 @@ Two consequences worth knowing before editing:
 
 `GOOGLE_CLIENT_ID` is returned publicly by `/api/auth/config` and compared against the Google
 token's `aud` claim. A build-time `VITE_GOOGLE_CLIENT_ID` still works but is optional.
+
+### Customers screen
+
+`/ai-testing-academy/admin` lists recorded purchases and asks the AI proxy for a next action per
+customer. It is behind `ADMIN_API_TOKEN`, entered in the page and kept in `sessionStorage` only.
+
+The model is never told who the customer is. The profile it receives carries days since
+purchase, whether the buyer ever signed in, and the amount — an email address is what makes the
+record personal data, and no part of the advice depends on it. A test asserts the address never
+reaches the provider.
 
 `ADMIN_API_TOKEN` is a secret you choose — any long random string. Rotate it by setting a new
 value; there is nothing else to update.

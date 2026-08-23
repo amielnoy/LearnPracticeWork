@@ -143,6 +143,58 @@ def _release_rate_limit(bucket: str, key_hash: str) -> int:
     return int(row[0]) if row else 0
 
 
+async def list_course_purchases(limit: int = 200) -> list[dict]:
+    """Recorded purchases, newest first. Returns [] when no database is configured."""
+    if not database_url():
+        return []
+    return await asyncio.to_thread(_list_course_purchases, limit)
+
+
+def _list_course_purchases(limit: int) -> list[dict]:
+    with psycopg.connect(database_url()) as connection:
+        rows = connection.execute(
+            """SELECT id, email, google_subject, amount_total, currency, purchased_at
+               FROM course_purchases ORDER BY purchased_at DESC LIMIT %s""",
+            (limit,),
+        ).fetchall()
+    return [
+        {
+            "id": str(row[0]),
+            "email": row[1],
+            "google_subject": row[2],
+            "amount_total": row[3],
+            "currency": row[4],
+            "purchased_at": row[5],
+        }
+        for row in rows
+    ]
+
+
+async def find_course_purchase(purchase_id: str) -> dict | None:
+    if not database_url():
+        return None
+    return await asyncio.to_thread(_find_course_purchase, purchase_id)
+
+
+def _find_course_purchase(purchase_id: str) -> dict | None:
+    with psycopg.connect(database_url()) as connection:
+        row = connection.execute(
+            """SELECT id, email, google_subject, amount_total, currency, purchased_at
+               FROM course_purchases WHERE id = %s""",
+            (purchase_id,),
+        ).fetchone()
+    if row is None:
+        return None
+    return {
+        "id": str(row[0]),
+        "email": row[1],
+        "google_subject": row[2],
+        "amount_total": row[3],
+        "currency": row[4],
+        "purchased_at": row[5],
+    }
+
+
 async def find_course_access(
     subject: str | None,
     email: str | None,
