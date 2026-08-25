@@ -14,9 +14,9 @@
 # consulting this file, so hashed assets under `/assets/` are untouched.
 #
 # Order matters — first match wins, so the specific prefixes precede the
-# catch-all that hands everything else to the portfolio.
+# catch-all that hands everything else to the academy, which is the site.
 
-/ai-testing-academy/*    /ai-testing-academy/index.html     200
+/portfolio/*             /portfolio/index.html              200
 
 /ai-testing-lecture-1/*  /ai-testing-lecture-1/index.html   200
 /ai-testing-lecture-2/*  /ai-testing-lecture-2/index.html   200

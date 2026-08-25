@@ -45,9 +45,9 @@ const FILES = new Set([
   '/architecture.html',
   '/robots.txt',
   '/sitemap.xml',
-  '/assets/main-BF6RpGR1.js',
-  '/ai-testing-academy/index.html',
-  '/ai-testing-academy/assets/index-Bu6FJ_WA.js',
+  '/assets/index-Bu6FJ_WA.js',
+  '/portfolio/index.html',
+  '/portfolio/assets/main-BF6RpGR1.js',
   ...Array.from({ length: 10 }, (_, i) => `/ai-testing-lecture-${i + 1}/index.html`),
 ]);
 
@@ -112,34 +112,32 @@ test.describe('client-side routes', () => {
     }
   });
 
-  test('rewrites an academy route to the academy shell', () => {
-    expect(serve('/ai-testing-academy/tools/resume').dest).toBe('/ai-testing-academy/index.html');
+  test('rewrites a portfolio route to the portfolio shell', () => {
+    expect(serve('/portfolio/ai-test-transformation').dest).toBe('/portfolio/index.html');
   });
 
-  test('hands anything else to the portfolio', () => {
+  test('hands anything else to the academy, which is the site', () => {
     expect(serve('/anything/at/all').dest).toBe('/index.html');
+    expect(serve('/tools/resume').dest).toBe('/index.html');
   });
 
   test('serves a real file rather than a shell', () => {
     // The catch-all sits after `handle: filesystem`, which is what stops it
     // from swallowing every asset request on the site.
-    expect(serve('/assets/main-BF6RpGR1.js').how).toBe('file');
+    expect(serve('/assets/index-Bu6FJ_WA.js').how).toBe('file');
     expect(serve('/architecture.html').how).toBe('file');
-    expect(serve('/ai-testing-academy/').how).toBe('file');
+    expect(serve('/portfolio/').how).toBe('file');
   });
 });
 
 test.describe('caching', () => {
   test('freezes hashed assets, in every app', () => {
-    for (const asset of [
-      '/assets/main-BF6RpGR1.js',
-      '/ai-testing-academy/assets/index-Bu6FJ_WA.js',
-    ])
+    for (const asset of ['/assets/index-Bu6FJ_WA.js', '/portfolio/assets/main-BF6RpGR1.js'])
       expect(serve(asset).headers['Cache-Control'], asset).toContain('immutable');
   });
 
   test('revalidates the shells, whose names are stable and contents are not', () => {
-    for (const shell of ['/', '/ai-testing-academy/', '/architecture.html'])
+    for (const shell of ['/', '/portfolio/', '/architecture.html'])
       expect(serve(shell).headers['Cache-Control'], shell).toContain('must-revalidate');
   });
 
@@ -161,8 +159,8 @@ test.describe('security headers', () => {
   const EVERYWHERE = [
     '/',
     '/architecture.html',
-    '/assets/main-BF6RpGR1.js',
-    '/ai-testing-academy/',
+    '/assets/index-Bu6FJ_WA.js',
+    '/portfolio/',
     '/ai-testing-lecture-7/slide2',
     '/anything/at/all',
   ];
@@ -177,19 +175,19 @@ test.describe('security headers', () => {
     }
   });
 
-  test('deny the microphone everywhere except the academy, which has a voice mode', () => {
-    expect(serve('/').headers['Permissions-Policy']).toContain('microphone=()');
-    expect(serve('/ai-testing-lecture-1/').headers['Permissions-Policy']).toContain(
-      'microphone=()',
-    );
-    // Both spellings of the academy's own root, because only one of them is a
-    // directory the filesystem handler can answer.
-    expect(serve('/ai-testing-academy').headers['Permissions-Policy']).toContain(
-      'microphone=(self)',
-    );
-    expect(serve('/ai-testing-academy/tools').headers['Permissions-Policy']).toContain(
-      'microphone=(self)',
-    );
+  test('grant the microphone to the academy, which has a voice mode, and nowhere else', () => {
+    // The academy is the root app, so it is the default — and the two apps that
+    // never ask for a microphone have it taken away by name.
+    expect(serve('/').headers['Permissions-Policy']).toContain('microphone=(self)');
+    expect(serve('/tools/interview').headers['Permissions-Policy']).toContain('microphone=(self)');
+
+    for (const quiet of [
+      '/portfolio',
+      '/portfolio/',
+      '/ai-testing-lecture-1/',
+      '/ai-testing-lecture-10/slide3',
+    ])
+      expect(serve(quiet).headers['Permissions-Policy'], quiet).toContain('microphone=()');
   });
 
   test('never allow the camera', () => {

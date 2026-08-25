@@ -1081,7 +1081,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <dl class="kv">
   <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, with a secretless same-origin <code>/api</code> relay to Fly.</dd>
-  <dt>Vercel</dt><dd><code>.github/workflows/deploy-vercel.yml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, built by Actions and shipped as a prebuilt directory on every push to <code>main</code>. Pull requests get their own preview URL.</dd>
+  <dt>Vercel</dt><dd><code>.github/workflows/deploy-vercel.yml</code> — <code>BASE_PATH=/</code>: this app <em>is</em> the deployed site, with the portfolio at <code>/portfolio/</code> and the decks beneath it. Built by Actions and shipped as a prebuilt directory on every push to <code>main</code>; pull requests get their own preview URL.</dd>
   <dt>Cloudflare Pages</dt><dd>Same artifact, still supported. <code>deploy/cloudflare/_redirects</code> and <code>_headers</code> say what <code>deploy/vercel/config.json</code> says, in that host's dialect.</dd>
   <dt>Fly.io</dt><dd><code>server/{Dockerfile,fly.toml}</code> — the API, separately, because it is the only piece that costs anything to run. <code>deploy/README.md</code> is the runbook.</dd>
   <dt>Grafana</dt><dd><code>monitoring/compose.yaml</code> — Prometheus server and test history, Python uptime probes, and dashboards for health, logins, client type, approximate country, and server-proxied AI usage.</dd>
@@ -1096,7 +1096,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 </div>
 
 <p>
-  The deploy job builds the portfolio at the site root and mounts this site and
+  The deploy job builds this site at the root and mounts the portfolio and
   <em>all ten</em> lecture decks underneath it, and copies this page in as
   <code>architecture.html</code>. Vercel builds nothing: Actions writes the Build Output API
   layout and <code>vercel deploy --prebuilt</code> hands it over, so what ships is what the

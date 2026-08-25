@@ -26,8 +26,8 @@ never by an HTML shell.
 | `/(.*)` | Security headers, and `must-revalidate` as the default cache policy |
 | `…/assets/(.*)` | Vite fingerprints these, so they are immutable for a year |
 | `robots.txt`, `sitemap.xml` | An hour, so a crawler is not served a stale copy for long |
-| `/ai-testing-academy/(.*)` | The academy asks for the microphone — the mock interview has a voice mode |
-| SPA rewrites | Each app serves its own shell; the catch-all hands the rest to the portfolio |
+| `/portfolio`, `/ai-testing-lecture-N` | Take the microphone back. The site-wide rule grants it because the root app is the academy, whose mock interview has a voice mode; nothing mounted underneath needs one |
+| SPA rewrites | The portfolio and the decks serve their own shells; the catch-all hands everything else to the academy, which is the site |
 
 The revalidate rule is the broad default rather than an `*.html` match, because
 a deep link like `/ai-testing-lecture-3/slide5` is served HTML from a path with

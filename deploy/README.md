@@ -24,16 +24,17 @@ lockfile rather than whatever a hosted build would resolve today.
 
 [bo]: https://vercel.com/docs/build-output-api/v3
 
-Each app gets a `BASE_PATH` matching where it is mounted, because Vite bakes it
-into every asset URL. On Vercel the site is served from the root, so the prefix
-is empty — the `/<repo>/` prefix that GitHub Pages needed is gone, and with it
-the step that had to ask the Pages API what the prefix was.
+The academy is the site: it is what the root URL serves, with the portfolio at
+`/portfolio/` and the ten decks at `/ai-testing-lecture-N/`. Each app gets a
+`BASE_PATH` matching where it is mounted, because Vite bakes it into every asset
+URL and each router reads it back. (The `/<repo>/` prefix GitHub Pages needed is
+gone too, along with the step that had to ask the Pages API what it was.)
 
 To reproduce the build locally:
 
 ```bash
-PORT=5173 BASE_PATH=/ pnpm --filter @workspace/portfolio run build
-PORT=5174 BASE_PATH=/ai-testing-academy/ pnpm --filter @workspace/ai-testing-academy run build
+PORT=5173 BASE_PATH=/portfolio/ pnpm --filter @workspace/portfolio run build
+PORT=5174 BASE_PATH=/ pnpm --filter @workspace/ai-testing-academy run build
 for n in $(seq 1 10); do
   PORT=$((5174 + n)) BASE_PATH="/ai-testing-lecture-${n}/" \
     pnpm --filter "@workspace/ai-testing-lecture-${n}" run build

@@ -201,8 +201,8 @@ fi
 echo ""
 if [ -n "$SITE_ORIGIN" ]; then
   SITE_ORIGIN="${SITE_ORIGIN%/}"
-  echo "  Deployed site:     $SITE_ORIGIN/"
-  echo "    · academy:       $SITE_ORIGIN/ai-testing-academy/"
+  echo "  Deployed site:     $SITE_ORIGIN/   (the academy)"
+  echo "    · portfolio:     $SITE_ORIGIN/portfolio/"
   echo "    · lecture decks: $SITE_ORIGIN/ai-testing-lecture-1/ … -10/"
   echo "    · architecture:  $SITE_ORIGIN/architecture.html"
 else
