@@ -1,0 +1,301 @@
+name: Deploy
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  preflight ──▶ deploy (build ▶ ship ▶ smoke-check)
+#
+#  The twelve static apps — the portfolio at the site root, the academy and the
+#  ten lecture decks mounted underneath it — built here and handed to Vercel as
+#  a finished directory. Vercel builds nothing: `vercel deploy --prebuilt` takes
+#  the Build Output API layout this workflow assembles, so what ships is exactly
+#  what CI produced and the build stays reproducible from this repository.
+#
+#  Separate from ci.yml on purpose. Tests gate nothing here, which is the same
+#  stance the GitHub Pages jobs took before this replaced them: a site that
+#  cannot publish while a test is red is a site that cannot ship a fix for the
+#  thing that made it red.
+#
+#  The API server is not part of this. It runs on Fly (see deploy/README.md);
+#  the browser reaches it cross-origin, so the Vercel origin has to appear in
+#  Fly's ALLOWED_ORIGINS or every API call from the deployed site is blocked by
+#  CORS.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time per ref. Not cancel-in-progress on main: a half-run
+# deploy that is killed after `vercel deploy` has been accepted still ships.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '11.20.0'
+  # Not pinned. The Vercel CLI is a deploy client talking to a hosted API that
+  # moves independently of this repository, and a pin here ages into a client
+  # the platform has stopped accepting. Everything that decides what ships —
+  # the apps, the build output layout, the routes — is pinned in the lockfile
+  # and in deploy/vercel/config.json.
+  VERCEL_CLI: 'vercel@latest'
+
+jobs:
+  # Checked before twenty minutes of building, and in its own job so the answer
+  # can skip the deploy rather than thread an `if` through every step below.
+  #
+  # All three are required: the token authenticates, and the two IDs are what
+  # `--prebuilt` deploys into without an interactive `vercel link`. Missing one
+  # otherwise surfaces at the very end as a message about scope, which is not
+  # the message someone needs.
+  #
+  # On main that is a hard failure — a push to main is meant to ship, and a
+  # deployment that silently did not happen is the worst of the three outcomes.
+  # On a pull request it is a skip with a note, because a contributor cannot add
+  # a secret and a red check they cannot fix teaches them to ignore red checks.
+  preflight:
+    name: Is Vercel configured?
+    runs-on: ubuntu-latest
+    # A fork's pull request cannot read these secrets at all, so a preview
+    # deployment is not something this workflow can offer there.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    outputs:
+      configured: ${{ steps.creds.outputs.configured }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - id: creds
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -n "${VERCEL_TOKEN:-}" ]      || missing+=("VERCEL_TOKEN")
+          [ -n "${VERCEL_ORG_ID:-}" ]     || missing+=("VERCEL_ORG_ID")
+          [ -n "${VERCEL_PROJECT_ID:-}" ] || missing+=("VERCEL_PROJECT_ID")
+          if [ ${#missing[@]} -eq 0 ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "configured=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "## ❌ Vercel is not configured"
+            echo ""
+            echo "Missing repository secret(s): \`${missing[*]}\`"
+            echo ""
+            echo "Add them under **Settings → Secrets and variables → Actions**."
+            echo "\`VERCEL_ORG_ID\` and \`VERCEL_PROJECT_ID\` are printed by \`vercel link\`"
+            echo "into \`.vercel/project.json\`; the token comes from your Vercel account settings."
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "::error::Missing Vercel secret(s): ${missing[*]} — main cannot deploy."
+            exit 1
+          fi
+          echo "::warning::Missing Vercel secret(s): ${missing[*]} — skipping the preview deployment."
+
+  deploy:
+    name: Build and deploy to Vercel
+    needs: preflight
+    if: ${{ needs.preflight.outputs.configured == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+
+      # Every app is mounted at the site root on Vercel, so the prefix is empty
+      # — unlike GitHub Pages, which served a project site from /<repo>/ and
+      # made that prefix part of every asset URL. This is the one build input
+      # that changes with the host.
+      - name: Build the portfolio (site root)
+        env:
+          PORT: '5173'
+          BASE_PATH: /
+        run: pnpm --filter @workspace/portfolio run build
+
+      # VITE_GOOGLE_CLIENT_ID is inlined into the bundle at build time, so it
+      # has to be present here — a value added to the environment afterwards
+      # changes nothing, because the bundle is already written. It is a
+      # repository variable, not a secret: an OAuth client ID is public by
+      # construction and Google enforces which origins may use it. A client
+      # *secret* must never appear here, or in any VITE_ variable.
+      #
+      # VITE_SITE_ORIGIN moves the twenty lecture links in one go (see
+      # lib/lectures.ts). Set the repository variable to the Vercel origin once
+      # the domain is settled; unset, the links keep their existing target
+      # rather than silently pointing at a preview URL.
+      - name: Build the AI Testing Academy
+        env:
+          PORT: '5174'
+          BASE_PATH: /ai-testing-academy/
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_SITE_ORIGIN: ${{ vars.VERCEL_SITE_ORIGIN }}
+        run: pnpm --filter @workspace/ai-testing-academy run build
+
+      # A loop rather than ten near-identical steps: the only thing that varies
+      # is the number, and a copied step is where the eleventh deck gets
+      # forgotten.
+      - name: Build the lecture decks
+        run: |
+          set -euo pipefail
+          for n in $(seq 1 10); do
+            echo "::group::lecture $n"
+            # PORT is required by every artifact's vite.config.ts even for a
+            # build, which never listens; the value only has to parse.
+            PORT=$((5174 + n)) BASE_PATH="/ai-testing-lecture-${n}/" \
+              pnpm --filter "@workspace/ai-testing-lecture-${n}" run build
+            echo "::endgroup::"
+          done
+
+      # No 404.html copies here, unlike the Pages build. They existed because
+      # Pages has no rewrites and answered every deep link through the nearest
+      # 404 document; deploy/vercel/config.json rewrites them at 200, which is
+      # the reason this deployment moved. The smoke check below is what holds
+      # that claim up.
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          cp -R artifacts/portfolio/dist/public/. _site/
+          mkdir -p _site/ai-testing-academy
+          cp -R artifacts/ai-testing-academy/dist/public/. _site/ai-testing-academy/
+          for n in $(seq 1 10); do
+            mkdir -p "_site/ai-testing-lecture-${n}"
+            cp -R "artifacts/ai-testing-lecture-${n}/dist/public/." "_site/ai-testing-lecture-${n}/"
+          done
+          cp architecture.html _site/architecture.html
+          # The Allure report is deliberately NOT copied here — ci.yml publishes
+          # it to a separate repository's Pages, so it never lands on the site.
+
+      # The Build Output API layout: a static directory and a config file. This
+      # is what `--prebuilt` uploads, so the routes in config.json are the ones
+      # that serve the deployment.
+      - name: Lay out the Vercel build output
+        run: |
+          set -euo pipefail
+          rm -rf .vercel/output
+          mkdir -p .vercel/output
+          cp -R _site .vercel/output/static
+          cp deploy/vercel/config.json .vercel/output/config.json
+          echo "Static files: $(find .vercel/output/static -type f | wc -l)"
+
+      # `--prod` on main, a preview deployment everywhere else. The URL the CLI
+      # prints on stdout is the one this run produced — the smoke check below
+      # runs against that exact deployment rather than against whatever the
+      # production alias currently points at.
+      # `pnpm dlx` rather than a global install: one invocation, no PATH or
+      # global-bin setup to get wrong on the runner, and the workspace's own
+      # node_modules stays untouched by a tool that is not part of it.
+      #
+      # The CLI writes progress and the inspect link to stderr and the
+      # deployment URL to stdout, but only the last line is guaranteed to be
+      # that URL — so it is taken from the tail and checked before use rather
+      # than trusted into a smoke check that would then test nothing.
+      - name: Deploy
+        id: deploy
+        run: |
+          set -euo pipefail
+          args=(deploy --prebuilt --yes --token "$VERCEL_TOKEN")
+          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" != "pull_request" ]; then
+            args+=(--prod)
+          fi
+          url=$(pnpm dlx "$VERCEL_CLI" "${args[@]}" | tail -n 1)
+          case "$url" in
+            https://*) ;;
+            *) echo "::error::The Vercel CLI did not print a deployment URL. Last line: '$url'"; exit 1 ;;
+          esac
+          echo "Deployed to $url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      # What the rewrites are for. A deck route (`/slide5`) and an academy route
+      # are files that were never built, and on the old host they came back as
+      # 404s carrying the right page. Asserting the status here is the
+      # difference between "the rewrite is configured" and "the rewrite works".
+      #
+      # The asset check is the other half: a filesystem hit must not be
+      # swallowed by the SPA catch-all, and it must carry the immutable cache
+      # header. It reads a real hashed filename out of the built shell rather
+      # than guessing one.
+      - name: Smoke-check the deployment
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          set -euo pipefail
+          fail=0
+          check() { # path, expected status, what it proves
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "${URL}$1")
+            if [ "$code" = "$2" ]; then
+              echo "✅ $1 → $code ($3)"
+            else
+              echo "::error::$1 returned $code, expected $2 ($3)"
+              fail=1
+            fi
+          }
+          check "/" 200 "portfolio shell"
+          check "/architecture.html" 200 "architecture page"
+          check "/ai-testing-academy/" 200 "academy shell"
+          check "/ai-testing-lecture-3/slide5" 200 "deck deep link, rewritten not 404-ed"
+          check "/ai-testing-academy/nope-not-a-page" 200 "academy client route"
+
+          asset=$(grep -o '/assets/[A-Za-z0-9._-]*\.js' _site/index.html | head -1)
+          if [ -z "$asset" ]; then
+            echo "::error::No hashed asset found in the built portfolio shell."
+            fail=1
+          else
+            cache=$(curl -sSI --max-time 30 "${URL}${asset}" | tr -d '\r' \
+              | awk -F': ' 'tolower($1)=="cache-control"{print $2}')
+            case "$cache" in
+              *immutable*) echo "✅ ${asset} → ${cache}" ;;
+              *) echo "::error::${asset} cache-control is '${cache}', expected immutable."; fail=1 ;;
+            esac
+          fi
+
+          csp=$(curl -sSI --max-time 30 "${URL}/" | tr -d '\r' \
+            | awk -F': ' 'tolower($1)=="content-security-policy"{print $2}')
+          if [ -n "$csp" ]; then
+            echo "✅ / carries a Content-Security-Policy"
+          else
+            echo "::error::/ has no Content-Security-Policy header."
+            fail=1
+          fi
+
+          exit "$fail"
+
+      - name: Link the deployment in the run summary
+        if: ${{ !cancelled() && steps.deploy.outputs.url != '' }}
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          {
+            if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+              echo "## 🚀 Deployed to production"
+            else
+              echo "## 🔍 Preview deployment"
+            fi
+            echo ""
+            echo "**➡️ [${URL}](${URL})**"
+            echo ""
+            echo "| App | URL |"
+            echo "| --- | --- |"
+            echo "| Portfolio | [${URL}/](${URL}/) |"
+            echo "| Academy | [${URL}/ai-testing-academy/](${URL}/ai-testing-academy/) |"
+            echo "| Lecture 1 | [${URL}/ai-testing-lecture-1/](${URL}/ai-testing-lecture-1/) |"
+            echo "| Architecture | [${URL}/architecture.html](${URL}/architecture.html) |"
+          } >> "$GITHUB_STEP_SUMMARY"

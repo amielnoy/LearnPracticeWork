@@ -5,23 +5,31 @@ hosted separately because they cost very different amounts.
 
 | | What it is | Where it goes | Cost |
 |---|---|---|---|
-| Static | 12 Vite SPAs — portfolio, academy, 10 lecture decks | GitHub Pages (wired) or Cloudflare Pages | $0 |
+| Static | 12 Vite SPAs — portfolio, academy, 10 lecture decks | Vercel (wired) — Cloudflare Pages still supported | $0 |
 | API | One FastAPI server: auth, AI proxy, content, Stripe, entitlements | Fly.io | ~$2–5/month |
 | Database | Postgres | Supabase | $0 on the free tier |
 | Monitoring | Python metrics/probes, Prometheus, Pushgateway, Grafana | Private host or managed equivalents | Depends on host |
 
 ## Static
 
-CI already does this. The `build-pages` job in `.github/workflows/ci.yml` builds
-all twelve apps, assembles them into `_site`, and `deploy-pages` publishes to
-GitHub Pages on every push to `main`.
+`.github/workflows/deploy-vercel.yml` builds all twelve apps, assembles them
+into `_site`, and hands the result to Vercel on every push to `main`. A pull
+request from this repository gets a preview deployment at its own URL; a pull
+request from a fork gets none, because a fork cannot read the secrets.
+
+Vercel builds nothing. The workflow writes the [Build Output API v3][bo] layout
+— `.vercel/output/static/` plus `.vercel/output/config.json` — and runs
+`vercel deploy --prebuilt`, so what ships is exactly what CI produced from this
+lockfile rather than whatever a hosted build would resolve today.
+
+[bo]: https://vercel.com/docs/build-output-api/v3
 
 Each app gets a `BASE_PATH` matching where it is mounted, because Vite bakes it
-into every asset URL. The job derives the prefix from what the Pages API
-reports rather than hardcoding `/<repo>`, so a custom domain does not break
-every asset link.
+into every asset URL. On Vercel the site is served from the root, so the prefix
+is empty — the `/<repo>/` prefix that GitHub Pages needed is gone, and with it
+the step that had to ask the Pages API what the prefix was.
 
-To reproduce it locally:
+To reproduce the build locally:
 
 ```bash
 PORT=5173 BASE_PATH=/ pnpm --filter @workspace/portfolio run build
@@ -32,19 +40,68 @@ for n in $(seq 1 10); do
 done
 ```
 
-### Moving to Cloudflare Pages
+### Why it moved off GitHub Pages
 
-The artifact is already portable — `_redirects` and `_headers` ship inside it
-and GitHub Pages ignores both. Point a Pages project at this repo with:
+Rewrites. Pages has none, so a deep link like `/ai-testing-lecture-3/slide5` was
+served through the nearest `404.html` — the right page under a 404 status, on
+URLs the academy's own hreflang tags nominate for indexing. `deploy/vercel/config.json`
+rewrites them at 200. The workflow's smoke check asserts that on the real
+deployment, and `tests/unit/vercelRoutes.spec.ts` asserts the whole routing
+table on every branch, before anything ships.
 
-- Build command: the three commands above
-- Output directory: `_site`
+The routes also carry the security and caching headers that used to live in
+`deploy/cloudflare/_headers`. See `deploy/vercel/README.md` for why they are
+ordered the way they are.
 
-The reason to bother is rewrites. GitHub Pages has no rewrite rules, so a deep
-link like `/ai-testing-lecture-3/slide5` is served through the nearest
-`404.html` — it works, but the response is a 404 status carrying the right
-page, which is not what you want on URLs the academy's own hreflang tags
-nominate for indexing. Cloudflare rewrites them properly at 200.
+### First deploy
+
+```bash
+pnpm dlx vercel login
+pnpm dlx vercel link          # creates .vercel/project.json (gitignored)
+cat .vercel/project.json      # orgId and projectId
+```
+
+Then add three **repository secrets** under Settings → Secrets and variables →
+Actions:
+
+| Secret | Where it comes from |
+|---|---|
+| `VERCEL_TOKEN` | Vercel account settings → Tokens |
+| `VERCEL_ORG_ID` | `orgId` in `.vercel/project.json` |
+| `VERCEL_PROJECT_ID` | `projectId` in `.vercel/project.json` |
+
+Until all three exist, a push to `main` fails the deploy loudly and a pull
+request skips it with a note. Nothing is published from a workflow that cannot
+authenticate.
+
+Two repository **variables** are read at build time:
+
+| Variable | Effect |
+|---|---|
+| `VITE_GOOGLE_CLIENT_ID` | Inlined into the academy bundle; sign-in renders nothing without it |
+| `VERCEL_SITE_ORIGIN` | The deployed origin. Sets `VITE_SITE_ORIGIN` for the twenty lecture links, and is what CI links the architecture page from |
+
+### After the origin changes
+
+Three things live outside this repository and do not follow a deployment:
+
+1. **Fly's `ALLOWED_ORIGINS`** must contain the Vercel origin, or every API call
+   from the deployed site is refused by CORS. `PUBLIC_APP_ORIGIN` must match one
+   of its entries, or Stripe checkout fails closed.
+2. **The Google OAuth client** must authorize the exact origin, or sign-in fails
+   on a domain Google has never heard of.
+3. **Each deck's `index.html`** still carries absolute `canonical`, `og:url` and
+   `hreflang` tags naming the Replit origin. Those are static HTML that
+   `VITE_SITE_ORIGIN` does not reach, and changing them changes URLs that are
+   already indexed — a decision, not a cleanup. See "Still pinned" below.
+
+### Cloudflare Pages, still supported
+
+`deploy/cloudflare/_redirects` and `_headers` remain in the tree and say the
+same thing the Vercel routes do. The assembled `_site` is portable: point a
+Pages project at this repo with the build commands above and `_site` as the
+output directory. The Vercel workflow does not copy those two files into its
+output, because Vercel ignores them.
 
 ## API server
 
@@ -215,7 +272,7 @@ builds the URL from a configurable origin.
 Set `VITE_SITE_ORIGIN` to move all twenty at once:
 
 ```bash
-VITE_SITE_ORIGIN=https://amielnoy.github.io/LearnPracticeWork \
+VITE_SITE_ORIGIN=https://<project>.vercel.app \
   pnpm --filter @workspace/ai-testing-academy run build
 ```
 

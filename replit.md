@@ -20,8 +20,8 @@ packages use pnpm; `server` uses uv and keeps a pnpm package only as a workspace
 - **Tests**: pytest fixtures for the backend; Playwright unit, component, API, contract and e2e
 - **Lint**: ESLint + Prettier for TypeScript; Ruff for Python
 - **Reporting**: Allure 3 (`allure-report/`, one report across all six layers)
-- **CI**: GitHub Actions — tests on every push/PR, nightly at 05:00 Israel time, and
-  GitHub Pages publishing from `main`
+- **CI**: GitHub Actions — tests on every push/PR, nightly at 05:00 Israel time
+- **Deploy**: GitHub Actions → Vercel (prebuilt) from `main`, preview URLs on pull requests
 
 ## Key Commands
 
@@ -223,17 +223,25 @@ Static and API are deployed separately, because only one of them costs anything 
 - **Replit** — `.replit-artifact/artifact.toml` per artifact. No production secret belongs in
   Replit. The API artifact relays same-origin `/api/*` requests to Fly over HTTPS, preserving
   first-party login cookies and Stripe request bodies without storing provider credentials.
-- **GitHub Pages** — `.github/workflows/ci.yml` publishes from `main`: the portfolio at the
-  site root, `ai-testing-academy/` and **all ten** `ai-testing-lecture-N/` beneath it, and
-  `architecture.html` alongside. Static only, so the academy's AI panel falls back to
-  bring-your-own-key. The Allure report is **not** part of this site — it is published to its
-  own reports repository, with its own Pages URL.
-- **Cloudflare Pages** — the same artifact, unchanged. `deploy/cloudflare/_redirects` and
-  `_headers` are copied into the site root by the same job and Pages ignores both. The reason
-  to prefer it is rewrites: every app here is a single-page app, and GitHub Pages has no
-  rewrite rules, so a deep link like `/ai-testing-lecture-3/slide5` is served through the
+- **Vercel** — `.github/workflows/deploy-vercel.yml` publishes from `main`: the portfolio at
+  the site root, `ai-testing-academy/` and **all ten** `ai-testing-lecture-N/` beneath it, and
+  `architecture.html` alongside. Actions builds; Vercel builds nothing and receives the
+  [Build Output API v3][bo] layout through `vercel deploy --prebuilt`, so what ships is what
+  this lockfile produced. A pull request from this repository gets its own preview URL. Static
+  only, so the academy's AI panel falls back to bring-your-own-key. The Allure report is
+  **not** part of this site — it is published to its own reports repository, with its own
+  Pages URL.
+- **Why not GitHub Pages** — rewrites. Every app here is a single-page app, and Pages has no
+  rewrite rules, so a deep link like `/ai-testing-lecture-3/slide5` was served through the
   nearest `404.html` — the right page carrying a 404 status, on URLs the academy's own
-  hreflang tags nominate for indexing.
+  hreflang tags nominate for indexing. `deploy/vercel/config.json` rewrites them at 200;
+  `tests/unit/vercelRoutes.spec.ts` holds the whole routing table to that on every branch, and
+  the deploy workflow smoke-checks it against the real deployment.
+- **Cloudflare Pages** — still supported and unchanged. `deploy/cloudflare/_redirects` and
+  `_headers` say what the Vercel routes say, in that host's dialect; the assembled `_site` is
+  portable to it as is.
+
+[bo]: https://vercel.com/docs/build-output-api/v3
 - **Fly.io** — `server/{Dockerfile,fly.toml}` for the Python API. It keeps one machine running
   rather than scaling to zero so the Stripe webhook endpoint stays warm. This used to be about
   the quota as well, and no longer is: in production `SharedRateLimiter` counts in atomic
@@ -253,11 +261,12 @@ Static and API are deployed separately, because only one of them costs anything 
   goes red, so a failure is never hidden; note that this also means a red build publishes the
   site, not just the report.
 
-The workflow enables Pages itself: `actions/configure-pages` runs with `enablement: true` and
-the `pages: write` permission, so the first run on `main` turns it on. Without that step the
-whole pipeline goes green and only the final deploy fails, with a bare `404` from the Pages
-API. The base path also comes from that step rather than being assumed, so a custom domain or
-a user/org site — both served from the root — does not break every asset URL.
+Deploying needs three repository secrets — `VERCEL_TOKEN`, `VERCEL_ORG_ID`,
+`VERCEL_PROJECT_ID`. The workflow checks all three in a `preflight` job before it builds
+anything: missing on `main` is a hard failure, because a push to `main` is meant to ship and a
+deployment that silently did not happen is the worst outcome of the three; missing on a pull
+request is a skip with a note, because a contributor cannot add a secret and a red check they
+cannot fix teaches them to ignore red checks.
 
-If automatic enablement is refused (some org policies disallow it), set it once by hand under
-repository **Settings → Pages → Source: GitHub Actions**.
+Every app is mounted at the site root, so `BASE_PATH` carries no repository prefix — the step
+that used to ask the Pages API what the prefix was is gone with the host that needed it.
