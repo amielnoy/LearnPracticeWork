@@ -97,6 +97,12 @@ export function ResumeScorecard({
         >
           {improving ? S.btnImproving : t.buildResumeBtn}
         </button>
+        <p
+          id="improvedEnglishNote"
+          style={{ marginTop: '8px', color: 'var(--muted)', fontSize: '.85rem' }}
+        >
+          {t.improvedEnglishNote}
+        </p>
       </div>
       <div id="improvedErr" className="error" role="alert">
         {improvedError}

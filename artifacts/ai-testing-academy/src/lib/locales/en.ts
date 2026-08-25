@@ -160,6 +160,8 @@ export const en = {
     recsTitle: '💡 Recommendations',
     buildResumeBtn: '✨ Build improved resume',
     improvedTitle: '✨ Improved resume',
+    improvedEnglishNote:
+      'The rewrite is always in English and aimed at the target role above — that is the version an applicant tracking system can read.',
     downloadPdfBtn: '⬇️ Download as PDF',
     tipsTitle: "📋 Resume Do's & Don'ts",
     tipsLead:

@@ -159,6 +159,8 @@ export const he: Locale = {
     recsTitle: '💡 המלצות לשיפור',
     buildResumeBtn: '✨ בנה קורות חיים משופרים',
     improvedTitle: '✨ קורות חיים משופרים',
+    improvedEnglishNote:
+      'השכתוב נכתב תמיד באנגלית ומכוון לתפקיד היעד שלמעלה — זו הגרסה שמערכת גיוס אוטומטית (ATS) יודעת לקרוא.',
     downloadPdfBtn: '⬇️ הורד כ-PDF',
     tipsTitle: '📋 טיפים: עשה ואל תעשה בקורות חיים',
     tipsLead:
