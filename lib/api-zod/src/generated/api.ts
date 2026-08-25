@@ -128,6 +128,39 @@ export const SeedStripeCatalogResponse = zod.object({
 });
 
 /**
+ * @summary Admin-only list of recorded course purchases
+ */
+export const ListCustomersResponse = zod.object({
+  customers: zod.array(
+    zod.object({
+      id: zod.string(),
+      email: zod.string().email(),
+      purchasedAt: zod.coerce.date(),
+      amountTotal: zod.number(),
+      currency: zod.string(),
+      linkedAccount: zod
+        .boolean()
+        .describe('Whether the purchase is linked to a signed-in Google account.'),
+      daysSincePurchase: zod.number(),
+    }),
+  ),
+});
+
+/**
+ * Generated from the purchase's elapsed time and account state. The model is never given the customer's email or any other identifier, so the advice cannot depend on who they are.
+
+ * @summary Admin-only suggested next actions for one purchase
+ */
+export const RecommendCustomerActionsParams = zod.object({
+  purchaseId: zod.coerce.string(),
+});
+
+export const RecommendCustomerActionsResponse = zod.object({
+  customerId: zod.string(),
+  text: zod.string(),
+});
+
+/**
  * @summary Read entitlement for the verified signed-in user and approved course product
  */
 export const GetCourseEntitlementResponse = zod.object({

@@ -111,6 +111,26 @@ export interface SeedResponse {
   priceId: string | null;
 }
 
+export interface Customer {
+  id: string;
+  email: string;
+  purchasedAt: string;
+  amountTotal: number;
+  currency: string;
+  /** Whether the purchase is linked to a signed-in Google account. */
+  linkedAccount: boolean;
+  daysSincePurchase: number;
+}
+
+export interface CustomerList {
+  customers: Customer[];
+}
+
+export interface CustomerRecommendations {
+  customerId: string;
+  text: string;
+}
+
 export interface EntitlementResponse {
   hasAccess: boolean;
   /** @nullable */

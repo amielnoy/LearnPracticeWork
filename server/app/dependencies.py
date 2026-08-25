@@ -21,7 +21,14 @@ from .catalog import CourseCatalog, course_catalog
 from .commerce import PurchaseRecorder, StripeGateway
 from .config import env
 from .content_store import ContentService, SupabaseContentStore
-from .database import database_ready, find_course_access, record_purchase
+from .customers import CustomerService, RecommendationService
+from .database import (
+    database_ready,
+    find_course_access,
+    find_course_purchase,
+    list_course_purchases,
+    record_purchase,
+)
 from .entitlements import EntitlementService
 from .errors import ServiceError
 from .google_auth import GoogleUser, verify_google_id_token
@@ -154,6 +161,14 @@ def get_purchase_recorder() -> PurchaseRecorder:
     return record_purchase
 
 
+def get_customer_service() -> CustomerService:
+    return CustomerService(list_course_purchases, find_course_purchase)
+
+
+def get_recommendation_service() -> RecommendationService:
+    return RecommendationService(get_customer_service(), AiGateway())
+
+
 def get_entitlement_service() -> EntitlementService:
     return EntitlementService(find_course_access)
 
@@ -167,4 +182,6 @@ Stripe = Annotated[StripeGateway, Depends(get_stripe_gateway)]
 Purchases = Annotated[PurchaseRecorder, Depends(get_purchase_recorder)]
 Entitlements = Annotated[EntitlementService, Depends(get_entitlement_service)]
 DatabaseProbe = Annotated[DatabaseProbeFn, Depends(get_database_probe)]
+Customers = Annotated[CustomerService, Depends(get_customer_service)]
+Recommendations = Annotated[RecommendationService, Depends(get_recommendation_service)]
 AdminOnly = Depends(require_admin)

@@ -159,6 +159,8 @@ export const he: Locale = {
     recsTitle: '💡 המלצות לשיפור',
     buildResumeBtn: '✨ בנה קורות חיים משופרים',
     improvedTitle: '✨ קורות חיים משופרים',
+    improvedEnglishNote:
+      'השכתוב נכתב תמיד באנגלית ומכוון לתפקיד היעד שלמעלה — זו הגרסה שמערכת גיוס אוטומטית (ATS) יודעת לקרוא.',
     downloadPdfBtn: '⬇️ הורד כ-PDF',
     tipsTitle: '📋 טיפים: עשה ואל תעשה בקורות חיים',
     tipsLead:
@@ -290,6 +292,8 @@ export const he: Locale = {
     errExtractFail: 'לא ניתן לחלץ טקסט. נסה להעתיק ולהדביק את הטקסט ידנית.',
     errResumeEmpty: 'אנא הדבק או העלה את קורות החיים שלך קודם.',
     errNoEval: 'אנא נתח את קורות החיים קודם לפני בניית הגרסה המשופרת.',
+    errImprovedNotEnglish:
+      'המודל המשיך לכתוב בשפת המקור. נסו שוב, או בחרו מודל חזק יותר בהגדרות — השכתוב חייב להיות באנגלית כדי שיהיה שווה שליחה.',
     btnEvaluating: '⏳ מנתח…',
     btnEvaluate: '📊 נתח קורות חיים',
     btnImproving: '⏳ בונה קורות חיים משופרים…',
@@ -298,10 +302,6 @@ export const he: Locale = {
     btnDownloadPdf: '⬇️ הורד כ-PDF',
     promptRolePrefix: 'תפקיד יעד: ',
     promptResumeLabel: '\n\nטקסט קורות החיים:\n',
-    promptRolePrefixImprove: 'כתוב מחדש את קורות החיים הבאים לתפקיד היעד: ',
-    promptJobDescLabel: '\n\nתיאור המשרה להתאמה:\n',
-    promptEvalResultsLabel: '\n\nתוצאות ניתוח קודם (פערים והמלצות לטיפול):\n',
-    promptOriginalResumeLabel: '\n\nקורות החיים המקוריים:\n',
     statusInterviewerThinking: '⏳ המראיין חושב…',
     statusGeneratingVerdict: '⏳ מייצר פסיקה…',
     errNoKeyInterview:
@@ -1019,10 +1019,9 @@ def top_errors(path, k=10, prefix="ERROR"):
     ],
   },
   prompts: {
-    resume: `You are an expert QA/SDET career coach reviewing a resume for QA Automation roles. The candidate communicates in Hebrew, so write your summary and all text fields in Hebrew.
+    resume: `You are an expert QA/SDET career coach reviewing a resume against the target role named in the user message. Score the resume for that role, not for roles in general, and name the categories that matter to it. The candidate communicates in Hebrew, so write your summary and all text fields in Hebrew.
 Evaluate the resume thoroughly and return ONLY valid JSON — no prose, no markdown outside the JSON:
-{"overall":75,"summary":"משפט תמציתי אחד על איכות קורות החיים והתאמתם לתפקידי QA.","categories":[{"name":"מיומנויות טכניות","score":80},{"name":"מסגרות בדיקות","score":75},{"name":"CI/CD ו-DevOps","score":65},{"name":"בדיקות AI ו-LLM","score":50},{"name":"בהירות והשפעה","score":80}],"strengths":["חוזקה ברורה 1","חוזקה ברורה 2","חוזקה ברורה 3"],"gaps":["פער 1","פער 2","פער 3"],"recommendations":["המלצה ספציפית 1","המלצה ספציפית 2","המלצה ספציפית 3"]}`,
-    improve: `You are an expert QA/SDET career coach and professional resume writer. The candidate communicates in Hebrew — write the improved resume in the same language as the original (Hebrew if Hebrew, English if English). Rewrite the resume to be compelling, ATS-friendly, and targeted for QA Automation and SDET roles. Use strong action verbs, quantify impact, and highlight test automation, CI/CD, and AI/LLM testing experience. Return ONLY the rewritten resume text — no JSON, no commentary.`,
+{"overall":75,"summary":"משפט תמציתי אחד על איכות קורות החיים והתאמתם לתפקיד היעד.","categories":[{"name":"מיומנויות טכניות","score":80},{"name":"מסגרות בדיקות","score":75},{"name":"CI/CD ו-DevOps","score":65},{"name":"בדיקות AI ו-LLM","score":50},{"name":"בהירות והשפעה","score":80}],"strengths":["חוזקה ברורה 1","חוזקה ברורה 2","חוזקה ברורה 3"],"gaps":["פער 1","פער 2","פער 3"],"recommendations":["המלצה ספציפית 1","המלצה ספציפית 2","המלצה ספציפית 3"]}`,
     interview: `אתה מראיין בכיר לתפקידי QA Automation ומנהל ראיון טכני מובנה. ענה תמיד בעברית.
 עבור דרך 5 שלבים אלה לפי הסדר, עם 2-3 שאלות לכל שלב לפני המעבר לבא:
 

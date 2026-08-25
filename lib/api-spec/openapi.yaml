@@ -170,6 +170,62 @@ paths:
           $ref: "#/components/responses/RequestError"
         "500":
           $ref: "#/components/responses/RequestError"
+  /admin/customers:
+    get:
+      operationId: listCustomers
+      tags: [admin]
+      summary: Admin-only list of recorded course purchases
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Recorded purchases, newest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerList"
+        "401":
+          $ref: "#/components/responses/RequestError"
+        "404":
+          $ref: "#/components/responses/RequestError"
+        "429":
+          $ref: "#/components/responses/RequestError"
+        "500":
+          $ref: "#/components/responses/RequestError"
+  /admin/customers/{purchaseId}/recommendations:
+    post:
+      operationId: recommendCustomerActions
+      tags: [admin]
+      summary: Admin-only suggested next actions for one purchase
+      description: >
+        Generated from the purchase's elapsed time and account state. The model
+        is never given the customer's email or any other identifier, so the
+        advice cannot depend on who they are.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: purchaseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Suggested actions for the purchase.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerRecommendations"
+        "401":
+          $ref: "#/components/responses/RequestError"
+        "404":
+          $ref: "#/components/responses/RequestError"
+        "429":
+          $ref: "#/components/responses/RequestError"
+        "500":
+          $ref: "#/components/responses/RequestError"
+        "503":
+          $ref: "#/components/responses/RequestError"
   /entitlements/course:
     get:
       operationId: getCourseEntitlement
@@ -488,6 +544,44 @@ components:
         priceId:
           type: [string, "null"]
       required: [status, productId, priceId]
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        purchasedAt:
+          type: string
+          format: date-time
+        amountTotal:
+          type: integer
+        currency:
+          type: string
+        linkedAccount:
+          type: boolean
+          description: Whether the purchase is linked to a signed-in Google account.
+        daysSincePurchase:
+          type: integer
+      required:
+        [id, email, purchasedAt, amountTotal, currency, linkedAccount, daysSincePurchase]
+    CustomerList:
+      type: object
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Customer"
+      required: [customers]
+    CustomerRecommendations:
+      type: object
+      properties:
+        customerId:
+          type: string
+        text:
+          type: string
+      required: [customerId, text]
     EntitlementResponse:
       type: object
       properties:
