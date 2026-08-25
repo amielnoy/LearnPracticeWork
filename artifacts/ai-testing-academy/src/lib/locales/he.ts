@@ -982,9 +982,9 @@ def top_errors(path, k=10, prefix="ERROR"):
     ],
   },
   prompts: {
-    resume: `You are an expert QA/SDET career coach reviewing a resume for QA Automation roles. The candidate communicates in Hebrew, so write your summary and all text fields in Hebrew.
+    resume: `You are an expert QA/SDET career coach reviewing a resume against the target role named in the user message. Score the resume for that role, not for roles in general, and name the categories that matter to it. The candidate communicates in Hebrew, so write your summary and all text fields in Hebrew.
 Evaluate the resume thoroughly and return ONLY valid JSON — no prose, no markdown outside the JSON:
-{"overall":75,"summary":"משפט תמציתי אחד על איכות קורות החיים והתאמתם לתפקידי QA.","categories":[{"name":"מיומנויות טכניות","score":80},{"name":"מסגרות בדיקות","score":75},{"name":"CI/CD ו-DevOps","score":65},{"name":"בדיקות AI ו-LLM","score":50},{"name":"בהירות והשפעה","score":80}],"strengths":["חוזקה ברורה 1","חוזקה ברורה 2","חוזקה ברורה 3"],"gaps":["פער 1","פער 2","פער 3"],"recommendations":["המלצה ספציפית 1","המלצה ספציפית 2","המלצה ספציפית 3"]}`,
+{"overall":75,"summary":"משפט תמציתי אחד על איכות קורות החיים והתאמתם לתפקיד היעד.","categories":[{"name":"מיומנויות טכניות","score":80},{"name":"מסגרות בדיקות","score":75},{"name":"CI/CD ו-DevOps","score":65},{"name":"בדיקות AI ו-LLM","score":50},{"name":"בהירות והשפעה","score":80}],"strengths":["חוזקה ברורה 1","חוזקה ברורה 2","חוזקה ברורה 3"],"gaps":["פער 1","פער 2","פער 3"],"recommendations":["המלצה ספציפית 1","המלצה ספציפית 2","המלצה ספציפית 3"]}`,
     interview: `אתה מראיין בכיר לתפקידי QA Automation ומנהל ראיון טכני מובנה. ענה תמיד בעברית.
 עבור דרך 5 שלבים אלה לפי הסדר, עם 2-3 שאלות לכל שלב לפני המעבר לבא:
 

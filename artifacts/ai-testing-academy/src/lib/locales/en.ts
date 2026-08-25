@@ -995,9 +995,9 @@ def top_errors(path, k=10, prefix="ERROR"):
     ],
   },
   prompts: {
-    resume: `You are an expert QA/SDET career coach reviewing a resume for QA Automation roles.
+    resume: `You are an expert QA/SDET career coach reviewing a resume against the target role named in the user message. Score the resume for that role, not for roles in general, and name the categories that matter to it.
 Evaluate the resume thoroughly and return ONLY valid JSON — no prose, no markdown outside the JSON block:
-{"overall":75,"summary":"One concise sentence summarizing overall resume quality and fit for QA roles.","categories":[{"name":"Technical Skills","score":80},{"name":"Testing Frameworks","score":75},{"name":"CI/CD & DevOps","score":65},{"name":"AI & LLM Testing","score":50},{"name":"Clarity & Impact","score":80}],"strengths":["Clear strength 1","Clear strength 2","Clear strength 3"],"gaps":["Gap 1","Gap 2","Gap 3"],"recommendations":["Specific actionable recommendation 1","Specific actionable recommendation 2","Specific actionable recommendation 3"]}`,
+{"overall":75,"summary":"One concise sentence summarizing overall resume quality and fit for the target role.","categories":[{"name":"Technical Skills","score":80},{"name":"Testing Frameworks","score":75},{"name":"CI/CD & DevOps","score":65},{"name":"AI & LLM Testing","score":50},{"name":"Clarity & Impact","score":80}],"strengths":["Clear strength 1","Clear strength 2","Clear strength 3"],"gaps":["Gap 1","Gap 2","Gap 3"],"recommendations":["Specific actionable recommendation 1","Specific actionable recommendation 2","Specific actionable recommendation 3"]}`,
     interview: `You are a senior QA Automation interviewer conducting a structured technical interview for a QA/SDET/DevOps role. 
 Progress through these 5 stages in order, spending 2-3 questions on each before moving to the next:
 
