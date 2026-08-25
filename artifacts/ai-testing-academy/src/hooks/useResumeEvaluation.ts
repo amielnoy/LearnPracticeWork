@@ -6,7 +6,10 @@ import { buildResumePdf, resumeFilename } from '../lib/resumeExport';
 import {
   DEFAULT_TARGET_ROLE,
   IMPROVE_RESUME_PROMPT,
+  TRANSLATE_RESUME_PROMPT,
   buildImproveRequest,
+  buildTranslateRequest,
+  needsEnglishRepair,
 } from '../lib/resumePrompt';
 
 /** What the model returns for a résumé, and what the scorecard renders. */
@@ -165,9 +168,26 @@ export function useResumeEvaluation({
       ],
       IMPROVE_MAX_TOKENS,
     );
-    improvedResumeRef.current = reply.trim();
+    let draft = reply.trim();
+
+    // Asking for English does not get English from a small model reading a
+    // Hebrew résumé, so the draft is checked and a Hebrew one is translated
+    // rather than shipped. If even the translation comes back in Hebrew the
+    // applicant is told, because the file this produces is the one an employer
+    // reads and a Hebrew one is worse than none.
+    if (needsEnglishRepair(draft)) {
+      const translated = await callClaude(
+        TRANSLATE_RESUME_PROMPT,
+        [{ role: 'user', content: buildTranslateRequest({ role: lastEval.role, draft }) }],
+        IMPROVE_MAX_TOKENS,
+      );
+      draft = translated.trim();
+    }
+    if (needsEnglishRepair(draft)) throw new Error(S.errImprovedNotEnglish);
+
+    improvedResumeRef.current = draft;
     return improvedResumeRef.current;
-  }, [hasConsent, messages.consentRequiredAgain, lastEval, jobDesc, S.errNoEval, callClaude]);
+  }, [hasConsent, messages.consentRequiredAgain, lastEval, jobDesc, S, callClaude]);
 
   const showImproved = useCallback(async () => {
     setImprovedError('');

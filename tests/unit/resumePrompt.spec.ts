@@ -2,7 +2,11 @@ import { test, expect } from '../support/test';
 import {
   DEFAULT_TARGET_ROLE,
   IMPROVE_RESUME_PROMPT,
+  TRANSLATE_RESUME_PROMPT,
   buildImproveRequest,
+  buildTranslateRequest,
+  needsEnglishRepair,
+  nonLatinShare,
 } from '@academy/lib/resumePrompt';
 
 /**
@@ -52,6 +56,12 @@ test.describe('buildImproveRequest', () => {
     const request = buildImproveRequest({ role: '   ', resume: 'Amiel Peled' });
 
     expect(request).toContain(DEFAULT_TARGET_ROLE);
+  });
+
+  test('closes with the English instruction, where a small model still has it', () => {
+    const request = buildImproveRequest({ role: 'Sales Engineer', resume: HEBREW_RESUME });
+
+    expect(request.trimEnd().endsWith('English only, targeted at: Sales Engineer')).toBe(true);
   });
 
   test('carries the job description when one is supplied', () => {
@@ -104,5 +114,66 @@ test.describe('buildImproveRequest', () => {
     expect(request).toContain(HEBREW_RESUME);
     expect(request.replace(HEBREW_RESUME, '')).not.toMatch(/[֐-׿]/);
     expect(request).toContain('the rewrite must be in English');
+  });
+});
+
+/**
+ * The check that does not depend on the model cooperating. A small model shown
+ * a Hebrew résumé under a Hebrew target role answers in Hebrew however the
+ * system prompt is worded, so the answer is measured rather than trusted.
+ */
+test.describe('needsEnglishRepair', () => {
+  test('passes a résumé that is written in English', () => {
+    expect(
+      needsEnglishRepair(
+        'Amiel Peled\nSales Engineer\nBuilt Playwright suites and Datadog dashboards.',
+      ),
+    ).toBe(false);
+  });
+
+  test('catches a rewrite that came back in Hebrew', () => {
+    expect(needsEnglishRepair(HEBREW_RESUME)).toBe(true);
+  });
+
+  test('catches a rewrite that is half English and half Hebrew', () => {
+    expect(needsEnglishRepair('Sales Engineer\nמהנדס מכירות טכני עם ניסיון רב')).toBe(true);
+  });
+
+  test('tolerates a name the model chose not to transliterate', () => {
+    const english =
+      'Amiel Peled — Sales Engineer\n'.repeat(20) +
+      'Built and shipped observability tooling across CI pipelines. (עמיאל)';
+
+    expect(needsEnglishRepair(english)).toBe(false);
+  });
+
+  test('says nothing about text with no letters in it at all', () => {
+    expect(nonLatinShare('')).toBe(0);
+    expect(nonLatinShare('2025 — 40% · 15/1.5')).toBe(0);
+    expect(needsEnglishRepair('')).toBe(false);
+  });
+
+  test('reads a fully Hebrew draft as almost entirely non-Latin', () => {
+    expect(nonLatinShare(HEBREW_RESUME)).toBeGreaterThan(0.5);
+  });
+});
+
+test.describe('the repair call', () => {
+  test('asks for a translation, not a second rewrite', () => {
+    expect(TRANSLATE_RESUME_PROMPT).toContain('Change nothing but the language');
+    expect(TRANSLATE_RESUME_PROMPT).toContain('do not improve it further');
+  });
+
+  test('hands back the draft under the role it was written for', () => {
+    const request = buildTranslateRequest({ role: 'Sales Engineer', draft: HEBREW_RESUME });
+
+    expect(request).toContain('Sales Engineer');
+    expect(request).toContain(HEBREW_RESUME);
+  });
+
+  test('falls back to the default role when the draft has none', () => {
+    expect(buildTranslateRequest({ role: '', draft: HEBREW_RESUME })).toContain(
+      DEFAULT_TARGET_ROLE,
+    );
   });
 });

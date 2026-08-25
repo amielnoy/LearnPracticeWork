@@ -263,6 +263,8 @@ export const en = {
     errExtractFail: 'Could not extract text. Try copying and pasting the text manually.',
     errResumeEmpty: 'Please paste or upload your resume first.',
     errNoEval: 'Please evaluate the resume first before building the improved version.',
+    errImprovedNotEnglish:
+      'The model kept writing in the language of the original. Try again, or pick a stronger model in Settings — the rewrite has to be in English to be worth sending.',
     btnEvaluating: '⏳ Evaluating…',
     btnEvaluate: '📊 Evaluate resume',
     btnImproving: '⏳ Building improved resume…',
