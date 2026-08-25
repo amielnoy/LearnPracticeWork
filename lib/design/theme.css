@@ -1,0 +1,139 @@
+/**
+ * The bridge between the palette an app defines and the utilities Tailwind
+ * generates: one `@theme inline` block, in one file, instead of the copy each
+ * app kept.
+ *
+ * How to use it, from an app's `index.css`:
+ *
+ *     @import 'tailwindcss';
+ *     @import '../../../lib/design/theme.css';
+ *
+ *     :root { --ds-background: #fff; --ds-foreground: #111; ... }
+ *
+ * `@import 'tailwindcss'` stays in the app because Tailwind decides which files
+ * to scan for class names from the stylesheet that imports it, and because the
+ * `@plugin` lines differ per app.
+ *
+ * The contract is `--ds-*`, and it takes complete colour values — `#c0392b`,
+ * `hsl(210 40% 97%)`, or a `var()` pointing at a colour the app already had.
+ * The namespace is not decoration: the academy's palette owns plain `--card`,
+ * `--muted`, `--accent` and `--border`, and the unprefixed shadcn contract this
+ * replaces collided with all four, so `bg-card` there resolved to `hsl(#ffffff)`
+ * and was dropped as invalid. Prefixed names cannot collide with an app's own.
+ *
+ * Every token below is optional in the sense that CSS will not complain, but a
+ * missing one is a utility that silently does nothing — see README.md for the
+ * full list and what each one is for.
+ */
+
+@import './scale.css';
+@import './elevate.css';
+@import './controls.css';
+
+@theme inline {
+  --color-background: var(--ds-background);
+  --color-foreground: var(--ds-foreground);
+  --color-border: var(--ds-border);
+  --color-input: var(--ds-input);
+  --color-ring: var(--ds-ring);
+
+  --color-card: var(--ds-card);
+  --color-card-foreground: var(--ds-card-foreground);
+  --color-card-border: var(--ds-card-border);
+
+  --color-popover: var(--ds-popover);
+  --color-popover-foreground: var(--ds-popover-foreground);
+  --color-popover-border: var(--ds-popover-border);
+
+  --color-primary: var(--ds-primary);
+  --color-primary-foreground: var(--ds-primary-foreground);
+  --color-primary-border: var(--ds-primary-border);
+
+  --color-secondary: var(--ds-secondary);
+  --color-secondary-foreground: var(--ds-secondary-foreground);
+  --color-secondary-border: var(--ds-secondary-border);
+
+  --color-muted: var(--ds-muted);
+  --color-muted-foreground: var(--ds-muted-foreground);
+  --color-muted-border: var(--ds-muted-border);
+
+  --color-accent: var(--ds-accent);
+  --color-accent-foreground: var(--ds-accent-foreground);
+  --color-accent-border: var(--ds-accent-border);
+
+  --color-destructive: var(--ds-destructive);
+  --color-destructive-foreground: var(--ds-destructive-foreground);
+  --color-destructive-border: var(--ds-destructive-border);
+
+  --color-chart-1: var(--ds-chart-1);
+  --color-chart-2: var(--ds-chart-2);
+  --color-chart-3: var(--ds-chart-3);
+  --color-chart-4: var(--ds-chart-4);
+  --color-chart-5: var(--ds-chart-5);
+
+  --color-sidebar: var(--ds-sidebar);
+  --color-sidebar-foreground: var(--ds-sidebar-foreground);
+  --color-sidebar-border: var(--ds-sidebar-border);
+  --color-sidebar-primary: var(--ds-sidebar-primary);
+  --color-sidebar-primary-foreground: var(--ds-sidebar-primary-foreground);
+  --color-sidebar-primary-border: var(--ds-sidebar-primary-border);
+  --color-sidebar-accent: var(--ds-sidebar-accent);
+  --color-sidebar-accent-foreground: var(--ds-sidebar-accent-foreground);
+  --color-sidebar-accent-border: var(--ds-sidebar-accent-border);
+  --color-sidebar-ring: var(--ds-sidebar-ring);
+
+  --font-sans: var(--ds-font-sans);
+  --font-serif: var(--ds-font-serif);
+  --font-mono: var(--ds-font-mono);
+
+  /* One radius per app, four steps derived from it. */
+  --radius-sm: calc(var(--ds-radius) - 4px);
+  --radius-md: calc(var(--ds-radius) - 2px);
+  --radius-lg: var(--ds-radius);
+  --radius-xl: calc(var(--ds-radius) + 4px);
+
+  /* Tailwind's own scale, stated rather than inherited, so a version bump
+     cannot resize every heading on the site without the change being visible
+     in this repository. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: calc(1 / 0.75);
+  --text-sm: 0.875rem;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: 1rem;
+  --text-base--line-height: calc(1.5 / 1);
+  --text-lg: 1.125rem;
+  --text-lg--line-height: calc(1.75 / 1.125);
+  --text-xl: 1.25rem;
+  --text-xl--line-height: calc(1.75 / 1.25);
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: calc(2 / 1.5);
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: calc(2.25 / 1.875);
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: calc(2.5 / 2.25);
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+  --text-8xl: 6rem;
+  --text-8xl--line-height: 1;
+  --text-9xl: 8rem;
+  --text-9xl--line-height: 1;
+
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+@layer base {
+  /* A border with no colour of its own is the palette's border, not the text
+     colour a browser would otherwise use. */
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
