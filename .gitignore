@@ -75,3 +75,6 @@ Thumbs.db
 # The assembled static site. Built by the `build-pages` job in CI and by anyone
 # reproducing it locally; never a source artefact.
 _site
+# Vercel CLI scratch: the prebuilt output the deploy workflow assembles, and
+# the project link (`vercel link`) whose IDs belong in repository secrets.
+.vercel
