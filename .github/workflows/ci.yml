@@ -1,8 +1,7 @@
 name: CI
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  gate ──▶ test ──┬──▶ build-pages ──▶ deploy-pages
-#                  └──▶ publish-allure
+#  gate ──▶ test ──▶ publish-allure
 #
 #  gate           Answers one question — should this run at all? The nightly
 #                 schedule fires twice and this drops the firing that is not
@@ -13,11 +12,12 @@ name: CI
 #                 parallel on the same prepared runner. The runner collects every
 #                 result even when one worker fails, so Allure remains complete.
 #
-#  build-pages    main only. Builds the portfolio at the site root and mounts
-#                 the academy and all ten decks underneath it.
-#  deploy-pages   main only. Publishes what build-pages produced.
 #  publish-allure main only. Pushes the report to its own repository, so test
 #                 results keep their own URL and never land on the site.
+#
+#  Publishing the site is not here. It moved to deploy-vercel.yml when the site
+#  moved off GitHub Pages, which is why this workflow no longer asks for
+#  `pages: write` anywhere.
 #
 #  Two rules make the reports trustworthy:
 #    · every layer carries `if: !cancelled()`, so one red layer never hides the
@@ -91,30 +91,32 @@ jobs:
       # early and unconditionally: the page is worth linking whether the run is
       # green or red, and it does not depend on anything the run produces.
       #
-      # The URL is asked of the Pages API rather than assembled from the repo
-      # name, so a custom domain or a user/org site is linked correctly; the
-      # conventional project-site URL is the fallback when the API says nothing
-      # (it needs Pages to be enabled, and the token may not be allowed to ask).
+      # The site lives on Vercel now, and a deployment URL is not derivable from
+      # anything this workflow can see — a production alias is a domain someone
+      # chose. So it comes from the repository variable, and when that is unset
+      # the summary says how to set it rather than linking somewhere wrong.
       - name: Link the architecture page in the run summary
         if: ${{ !cancelled() }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          SITE_ORIGIN: ${{ vars.VERCEL_SITE_ORIGIN }}
         run: |
           set -uo pipefail
-          site=$(gh api "repos/${{ github.repository }}/pages" --jq .html_url 2>/dev/null || true)
-          if [ -z "$site" ]; then
-            site="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          fi
-          url="${site%/}/architecture.html"
           {
             echo "## 🏛️ How this repository is put together"
             echo ""
-            echo "**➡️ [Architecture](${url})** — runtime shape, the AI layer, trust boundaries, the test strategy."
-            echo ""
-            if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-              echo "_Republished by this run once it reaches \`deploy-pages\`._"
+            if [ -n "$SITE_ORIGIN" ]; then
+              url="${SITE_ORIGIN%/}/architecture.html"
+              echo "**➡️ [Architecture](${url})** — runtime shape, the AI layer, trust boundaries, the test strategy."
+              echo ""
+              if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+                echo "_Republished by \`deploy-vercel.yml\` on this push._"
+              else
+                echo "_Published from \`main\`, so it may not yet describe this branch._"
+              fi
             else
-              echo "_Published from \`main\`, so it may not yet describe this branch._"
+              echo "\`architecture.html\` ships with the site — runtime shape, the AI layer, trust boundaries, the test strategy."
+              echo ""
+              echo "_Set the repository variable \`VERCEL_SITE_ORIGIN\` to the deployed origin to link it here._"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -271,201 +273,6 @@ jobs:
           path: allure-results
           retention-days: 7
           if-no-files-found: ignore
-
-  build-pages:
-    name: Build the site
-    # Publish even when the test job failed — `!cancelled()` overrides the
-    # skip-on-failed-dependency default, while `gate` still governs whether the
-    # run happens at all and the ref/event conditions keep this to a main push.
-    needs: [gate, test]
-    if: ${{ !cancelled() && needs.gate.outputs.run == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-    runs-on: ubuntu-latest
-    # `pages: write` is what lets the configure step below turn Pages on; the
-    # deploy job needs its own copy of these for the deployment itself.
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      # Turns Pages on if it is not already. Without this the whole pipeline
-      # runs green and only the final deploy fails, with a 404 from the Pages
-      # API — the symptom that "Ensure GitHub Pages has been enabled" describes.
-      # `enablement: true` needs `pages: write`, granted on this job above.
-      - name: Configure Pages
-        id: pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      # `configure-pages` enables Pages when it is missing, but it will not
-      # convert a site that is already enabled. A repo left on "Deploy from a
-      # branch" therefore keeps that setting, and GitHub's own
-      # pages-build-deployment publishes the branch root instead of `_site` —
-      # while every job here, deploy-pages included, still reports success.
-      #
-      # That is not hypothetical. It is how this site spent its time serving its
-      # own source tree (`/package.json` 200, `/` 404) across green runs. Failing
-      # loudly is the whole point: a deployment nobody serves is worse than one
-      # that does not run.
-      - name: Require Pages to build from this workflow
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          read_type() { gh api "repos/${{ github.repository }}/pages" --jq .build_type; }
-          current=$(read_type)
-          if [ "$current" != "workflow" ]; then
-            echo "Pages build_type is '$current' — setting it to 'workflow'."
-            gh api -X PUT "repos/${{ github.repository }}/pages" -f build_type=workflow
-            current=$(read_type)
-          fi
-          if [ "$current" != "workflow" ]; then
-            echo "::error::Pages build_type is '$current', not 'workflow'. The artifact uploaded below would never be served. Set Settings → Pages → Source to 'GitHub Actions'."
-            exit 1
-          fi
-          echo "Pages build_type is 'workflow'."
-
-      # Pages serves a project site from /<repo>/, so every artifact's Vite
-      # `base` has to carry that prefix or the hashed asset URLs 404. Prefer the
-      # path Pages itself reports — a custom domain or a user/org site is served
-      # from the root, where a hardcoded /<repo> would break every asset URL.
-      # Falls back to the repo name so a rename cannot silently break links.
-      - name: Work out the base path
-        id: base
-        run: |
-          set -euo pipefail
-          reported='${{ steps.pages.outputs.base_path }}'
-          if [ -z "$reported" ]; then
-            # Pages reported nothing — assume the usual project-site layout.
-            prefix="/${{ github.event.repository.name }}"
-          else
-            # "/" (root site) becomes "", "/repo" stays "/repo". Test the raw
-            # value before stripping, or a root site looks like an empty one.
-            prefix="${reported%/}"
-          fi
-          echo "Pages reported '${reported}'; using base '${prefix}/'"
-          echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
-
-      - name: Build the portfolio (site root)
-        env:
-          PORT: '5173'
-          BASE_PATH: ${{ steps.base.outputs.prefix }}/
-        run: pnpm --filter @workspace/portfolio run build
-
-      # VITE_GOOGLE_CLIENT_ID is inlined into the bundle at build time, so it has
-      # to be present *here* — a value added to the environment afterwards
-      # changes nothing, because the bundle is already written. It was set
-      # nowhere, which is why sign-in never appeared on the published site: the
-      # component renders null when it has no client ID.
-      #
-      # It is a repository variable, not a secret. An OAuth client ID is public
-      # by construction — it ships inside the JavaScript either way, and Google
-      # enforces which origins may use it. A client *secret* must never appear
-      # here, or in any VITE_ variable, because the browser would receive it.
-      - name: Build the AI Testing Academy
-        env:
-          PORT: '5174'
-          BASE_PATH: ${{ steps.base.outputs.prefix }}/ai-testing-academy/
-          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
-        run: pnpm --filter @workspace/ai-testing-academy run build
-
-      # All ten, not just the first. The academy's lecture catalogue links every
-      # one of them, so building only lecture 1 left nine "Open lecture" links
-      # reachable on exactly one host — the Replit deployment — and 404 here.
-      # A loop rather than ten near-identical steps: the only thing that varies
-      # is the number, and a copied step is where the eleventh lecture gets
-      # forgotten.
-      - name: Build the lecture decks
-        env:
-          PREFIX: ${{ steps.base.outputs.prefix }}
-        run: |
-          set -euo pipefail
-          for n in $(seq 1 10); do
-            echo "::group::lecture $n"
-            # PORT is required by every artifact's vite.config.ts even for a
-            # build, which never listens; the value only has to parse.
-            PORT=$((5174 + n)) BASE_PATH="${PREFIX}/ai-testing-lecture-${n}/" \
-              pnpm --filter "@workspace/ai-testing-lecture-${n}" run build
-            echo "::endgroup::"
-          done
-
-      - name: Assemble the site
-        run: |
-          set -euo pipefail
-          mkdir -p _site
-          cp -R artifacts/portfolio/dist/public/. _site/
-          mkdir -p _site/ai-testing-academy
-          cp -R artifacts/ai-testing-academy/dist/public/. _site/ai-testing-academy/
-          for n in $(seq 1 10); do
-            mkdir -p "_site/ai-testing-lecture-${n}"
-            cp -R "artifacts/ai-testing-lecture-${n}/dist/public/." "_site/ai-testing-lecture-${n}/"
-          done
-          cp architecture.html _site/architecture.html
-          # The Allure report is deliberately NOT copied here — it is published to
-          # a separate repository's Pages by the `publish-allure` job, so it never
-          # lands on the portfolio site.
-          # Client-side routing. Pages has no rewrite rules, so an unknown path
-          # is served the nearest 404.html — which is why each app gets its own
-          # copy of its own shell rather than sharing the portfolio's.
-          #
-          # It matters most for the decks: their routes are `/slide<N>`, no such
-          # file is ever built, and the academy's hreflang tags point Google
-          # directly at `/ai-testing-lecture-1/slide1?lang=en`. With only a root
-          # 404.html, every one of those deep links landed on the portfolio.
-          cp _site/index.html _site/404.html
-          cp _site/ai-testing-academy/index.html _site/ai-testing-academy/404.html
-          for n in $(seq 1 10); do
-            cp "_site/ai-testing-lecture-${n}/index.html" "_site/ai-testing-lecture-${n}/404.html"
-          done
-
-          # Cloudflare Pages reads these two from the output root and ignores
-          # them elsewhere; GitHub Pages ignores them entirely. Shipping both
-          # means the same artifact deploys to either host — the rewrites below
-          # are what make deep links work properly rather than via 404 fallback.
-          cp deploy/cloudflare/_redirects _site/_redirects
-          cp deploy/cloudflare/_headers _site/_headers
-          # Stops Pages from running the output through Jekyll, which would drop
-          # any file or directory beginning with an underscore.
-          touch _site/.nojekyll
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-  deploy-pages:
-    name: Publish to GitHub Pages
-    needs: build-pages
-    # Explicit rather than relying on the default "run if every dependency
-    # succeeded": `build-pages` itself runs through a failed `test` job, and the
-    # only thing that should stop the deployment is `build-pages` not producing
-    # an artifact. The whole point is that the Allure report is published when
-    # tests fail — that is when someone actually needs to read it.
-    # (Index syntax, not `needs.build-pages.result`: the expression parser reads
-    # the hyphen as subtraction.)
-    if: ${{ !cancelled() && needs['build-pages'].result == 'success' }}
-    runs-on: ubuntu-latest
-    # GitHub's Pages backend has recently taken slightly longer than the
-    # deploy action's 10-minute default even though the artifact was accepted.
-    # Keep the wait bounded, but leave enough room for a slow Pages publish.
-    timeout-minutes: 25
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          timeout: '1200000'
 
   publish-allure:
     name: Publish the Allure report
