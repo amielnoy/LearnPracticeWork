@@ -10,7 +10,8 @@ in Python:
 - AI counters group server-proxied requests by provider, model, status, approximate country,
   client type, and pseudonymous user identifier.
 - `python -m app.monitor` probes the local Scalar reference, Fly API, Replit site and academy,
-  and GitHub Pages.
+  and the deployed Vercel site (`VERCEL_SITE_ORIGIN` overrides the default in
+  `compose.yaml`).
 - `python -m app.test_history` converts the existing Allure result files into Prometheus
   metrics after every local or CI test run.
 
