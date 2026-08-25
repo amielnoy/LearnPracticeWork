@@ -1,0 +1,75 @@
+/**
+ * The lecture-deck layer: what a slide deck needs and the rest of the site
+ * does not.
+ *
+ * Ten decks shipped ten byte-identical copies of this file — the only
+ * difference between them was the comment naming the palette. One copy now,
+ * imported by each deck:
+ *
+ *     @import 'tailwindcss';
+ *     @import '../../../lib/design/deck.css';
+ *
+ * A deck that wants its own palette redefines the `--slide-*` values after the
+ * import. That is the seam the ten copies existed for, and it survives as three
+ * lines instead of forty-eight.
+ *
+ * The vocabulary is deliberately its own — `--slide-primary`, not
+ * `--ds-primary`. A deck is one full-viewport surface with a title, body text
+ * and an accent, not an application chrome of cards, popovers and sidebars, and
+ * naming it as if it were the latter would invite the rest of that contract to
+ * be half-implemented here.
+ */
+
+@theme inline {
+  --color-primary: var(--slide-primary);
+  --color-accent: var(--slide-accent);
+  --color-bg: var(--slide-bg);
+  --color-text: var(--slide-text);
+  --color-muted: var(--slide-muted);
+  --font-display: var(--font-display-family);
+  --font-body: var(--font-body-family);
+}
+
+:root {
+  /* The series palette, shared by every deck in the AI Testing Academy set. */
+  --slide-primary: #1e3a5f;
+  --slide-accent: #0d9488;
+  --slide-bg: #fafbfc;
+  --slide-text: #1e3a5f;
+  --slide-muted: #64748b;
+  --font-display-family: 'Inter', system-ui, sans-serif;
+  --font-body-family: 'Inter', system-ui, sans-serif;
+
+  /* Tells the engine which way the UA-painted parts go — form controls,
+     scrollbars, the canvas behind the slide. */
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--slide-bg);
+  color: var(--slide-text);
+}
+
+/* One slide fills the viewport exactly; anything wider is a layout bug rather
+   than something to scroll to. */
+.slide {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* The viewer handles its own pointer gestures — swiping between slides must
+   not start a text selection or a browser scroll. */
+.slide-viewer {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}

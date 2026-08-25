@@ -1,0 +1,86 @@
+/**
+ * The parts of the system that are not colour: the type scale, the radius
+ * steps, and the alpha values interaction states are painted with.
+ *
+ * These are shared because they were already identical in every app that had
+ * them — three copies of the same numbers, one of which was simply missing the
+ * type scale. What is *not* here is any palette: colour is where the apps
+ * genuinely differ, so each one supplies its own `--ds-*` values and this layer
+ * never names a hue.
+ */
+
+:root {
+  /* Painted on top of a surface on hover and while active. Alpha rather than a
+     colour, so one value works over every surface in the palette. */
+  --elevate-1: rgba(0, 0, 0, 0.03);
+  --elevate-2: rgba(0, 0, 0, 0.08);
+  --button-outline: rgba(0, 0, 0, 0.1);
+  --badge-outline: rgba(0, 0, 0, 0.05);
+
+  /* How far a button's own border is shifted in lightness from its fill, in
+     percentage points. Negative on a light theme (the border is darker than the
+     fill), positive on a dark one, because "further from the background"
+     changes direction with the background.
+     
+     Unitless on purpose. Inside `hsl(from …)` the `l` channel resolves to a
+     number, so `calc(l + -8)` is the arithmetic that works and `calc(l + -8%)`
+     is invalid at computed-value time — which does not fall back to the
+     declaration above it, because a value containing var() has already parsed.
+     It falls back to the property's initial value instead, so the wrong unit
+     here costs the border entirely rather than degrading to a flat colour. */
+  --opaque-button-border-intensity: -8;
+}
+
+.dark,
+[data-theme='dark'] {
+  --elevate-1: rgba(255, 255, 255, 0.04);
+  --elevate-2: rgba(255, 255, 255, 0.09);
+  --button-outline: rgba(255, 255, 255, 0.1);
+  --badge-outline: rgba(255, 255, 255, 0.05);
+  --opaque-button-border-intensity: 9;
+}
+
+/**
+ * Borders derived from the fill they sit on, so a palette change cannot leave a
+ * button outlined in the wrong colour. Each is declared twice: the first line
+ * is what a browser without relative colour syntax parses and keeps.
+ *
+ * They resolve against whatever `--ds-*` is in force on the same element, so
+ * the dark palette re-derives them without a second copy of these rules.
+ */
+:root {
+  --ds-primary-border: var(--ds-primary);
+  --ds-primary-border: hsl(
+    from var(--ds-primary) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  --ds-secondary-border: var(--ds-secondary);
+  --ds-secondary-border: hsl(
+    from var(--ds-secondary) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  --ds-muted-border: var(--ds-muted);
+  --ds-muted-border: hsl(
+    from var(--ds-muted) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  --ds-accent-border: var(--ds-accent);
+  --ds-accent-border: hsl(
+    from var(--ds-accent) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  --ds-destructive-border: var(--ds-destructive);
+  --ds-destructive-border: hsl(
+    from var(--ds-destructive) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  --ds-sidebar-primary-border: var(--ds-sidebar-primary);
+  --ds-sidebar-primary-border: hsl(
+    from var(--ds-sidebar-primary) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+
+  --ds-sidebar-accent-border: var(--ds-sidebar-accent);
+  --ds-sidebar-accent-border: hsl(
+    from var(--ds-sidebar-accent) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
+}

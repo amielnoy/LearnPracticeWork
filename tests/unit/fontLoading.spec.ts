@@ -27,7 +27,11 @@ const SITES: Site[] = [
   {
     name: 'ai-testing-academy',
     html: path.join(artifacts, 'ai-testing-academy', 'index.html'),
-    css: path.join(artifacts, 'ai-testing-academy', 'src', 'index.css'),
+    // `app.css`, because that is the stylesheet the academy actually loads —
+    // it is hand-written CSS and does not go through Tailwind at all. The
+    // `index.css` this used to read was Replit boilerplate no entry point ever
+    // imported, so the assertion below was guarding a file that never shipped.
+    css: path.join(artifacts, 'ai-testing-academy', 'src', 'app.css'),
   },
   {
     name: 'portfolio',

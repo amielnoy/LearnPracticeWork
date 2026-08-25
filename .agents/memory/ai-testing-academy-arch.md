@@ -22,7 +22,12 @@ see a false "RTL didn't apply" result.
 Old vanilla-JS files (`assets/js/*.js`, inline `<style>` in `index.html`) were
 deleted as part of the migration; CSS was ported near-verbatim into
 `src/app.css` rather than rewritten in Tailwind utilities, since the design
-is fully custom. PDF export (jsPDF/html2canvas) and doc parsing (PDF.js,
+is fully custom. `src/app.css` is the **only** stylesheet this app loads —
+`main.tsx` imports it and nothing else, and there is no Tailwind in the bundle.
+A `src/index.css` of shadcn boilerplate sat unimported beside it until it was
+deleted; the shared system in `lib/design` is for the apps that do use Tailwind
+(portfolio, sandbox, the ten decks), and `lib/design/README.md` records how this
+palette would map onto it. PDF export (jsPDF/html2canvas) and doc parsing (PDF.js,
 Mammoth) are npm dependencies reached through dynamic `import()`, so they are
 fetched on first use rather than on page load. The runtime-injection loader
 that used to walk cdnjs → jsDelivr → unpkg is gone; an earlier version of this
@@ -41,10 +46,17 @@ extension in `EXTRACTORS`), `lib/resumeExport.ts`, `lib/interviewSession.ts`
 (validates a restored transcript), and `useResumeDrafts` / `useResumeUpload` /
 `useResumeEvaluation` / `useInterviewSession`.
 
+The rewritten résumé is **always English, always aimed at the typed target
+role**, and that is enforced twice: `lib/resumePrompt.ts` holds one prompt
+outside the locale catalogs (a prompt per language is how a Hebrew CV came back
+in Hebrew), and the answer is measured — `needsEnglishRepair()` sends a draft
+that is still non-Latin back for a translation pass, and a second failure is
+reported to the applicant rather than exported as a PDF.
+
 **How to apply:** to support another résumé file format, add an entry to
 `EXTRACTORS` and widen the input's `accept` — do not add a branch to the
-component. To change how a transcript is restored, edit
-`lib/interviewSession.ts`; every element is validated because `text` is
+component. Do not move the rewrite prompt back into `locales/{en,he}.ts`.
+To change how a transcript is restored, edit `lib/interviewSession.ts`; every element is validated because `text` is
 rendered as a child and `cls` as a class name.
 
 The same reshaping happened on the server: `server/app/main.py` is a ~80-line

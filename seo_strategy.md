@@ -68,12 +68,12 @@ and `tests/e2e/seoHead.spec.ts` (each URL really serves that language, before hy
   marked a platform contract file ("do not restructure"). Declaring the root as a language
   variant would have pointed Google at three URLs that do not differ. This applies to all ten
   decks, every one of which is published now — it used to be only the first.
-- **Deep links depend on the host's rewrite rules.** A deck's routes (`/slide1`, `/allslides`)
-  are not files, so a static host has to rewrite them. GitHub Pages cannot, and serves them
-  through each app's own `404.html` — the right page under a 404 status, which is a weak
-  signal on exactly the URLs the `hreflang` declarations nominate. Cloudflare Pages rewrites
-  them at 200 via `deploy/cloudflare/_redirects`, which is the reason to prefer it for
-  anything meant to be indexed.
+- **Deep links depend on the host's rewrite rules — resolved.** A deck's routes (`/slide1`,
+  `/allslides`) are not files, so a static host has to rewrite them. GitHub Pages could not,
+  and served them through each app's own `404.html` — the right page under a 404 status, on
+  exactly the URLs the `hreflang` declarations nominate. That is what moved the deployment:
+  `deploy/vercel/config.json` rewrites them at 200, one rule covering all ten decks, and
+  `tests/unit/vercelRoutes.spec.ts` fails if that stops being true.
 
 ## Core Web Vitals
 

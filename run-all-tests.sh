@@ -185,6 +185,30 @@ link "Architecture:" "architecture.html"
 GRAFANA_BASE_URL="${GRAFANA_URL:-http://localhost:3000}"
 echo "  Grafana dashboard: ${GRAFANA_BASE_URL%/}/d/academy-overview/academy-servers-and-test-history"
 
+# Where the code just tested is actually served. The deployment lives on Vercel
+# and its origin is a domain someone chose, so it cannot be derived from
+# anything in the working tree — it is read from the environment, and when it is
+# not set the line says how to set it rather than printing a guess.
+#
+# VERCEL_URL is what Vercel itself exports inside a deployment (hostname only,
+# no scheme); VERCEL_SITE_ORIGIN is the repository variable the deploy workflow
+# and CI both read. Either answers "where is this live?", which is the question
+# someone has right after a green run.
+SITE_ORIGIN="${VERCEL_SITE_ORIGIN:-}"
+if [ -z "$SITE_ORIGIN" ] && [ -n "${VERCEL_URL:-}" ]; then
+  SITE_ORIGIN="https://${VERCEL_URL#https://}"
+fi
+echo ""
+if [ -n "$SITE_ORIGIN" ]; then
+  SITE_ORIGIN="${SITE_ORIGIN%/}"
+  echo "  Deployed site:     $SITE_ORIGIN/"
+  echo "    · academy:       $SITE_ORIGIN/ai-testing-academy/"
+  echo "    · lecture decks: $SITE_ORIGIN/ai-testing-lecture-1/ … -10/"
+  echo "    · architecture:  $SITE_ORIGIN/architecture.html"
+else
+  echo "  Deployed site:     set VERCEL_SITE_ORIGIN (or VERCEL_URL) to print the deployed URLs here"
+fi
+
 # Open both reports when running interactively (never in CI / the container,
 # where CI=true is set and show-report would block forever).
 if [ -z "${CI:-}" ]; then

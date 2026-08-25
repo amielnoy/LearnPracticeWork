@@ -1,4 +1,9 @@
-/* AI Testing Academy — hand-written CSS, ported from index.html inline <style> */
+/* AI Testing Academy — hand-written CSS, ported from index.html inline <style>.
+   
+   This is the only stylesheet the academy loads: no Tailwind, and no import of
+   the shared bridge in `lib/design`. The `:root` block below is therefore the
+   whole palette, and `lib/design/README.md` documents how it would map onto the
+   `--ds-*` contract if that ever changes. */
 
 :root{
   /* Tells the engine which way the UA-painted parts go — form controls,

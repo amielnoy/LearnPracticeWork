@@ -1,0 +1,23 @@
+/**
+ * Two defaults for form controls that every app here wanted and each one had
+ * its own copy of.
+ *
+ * Chrome paints a cancel button inside `input[type=search]` that cannot be
+ * styled to match anything, and a contentEditable div has no `placeholder`
+ * attribute — so the placeholder is drawn from a data attribute, in the
+ * palette's muted ink rather than in whatever colour the surrounding text is.
+ */
+
+@layer utilities {
+  /* Hide ugly search cancel button in Chrome until we can style it properly */
+  input[type='search']::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+
+  /* Placeholder styling for contentEditable div */
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--ds-muted-foreground);
+    pointer-events: none;
+  }
+}

@@ -33,7 +33,8 @@ src/
 │   ├── practice/             QuestionBank, CodingChallenges, LectureSeries and
 │   │                         their cards — static content, no model access
 │   ├── account/              GoogleSignIn — the only AuthContext consumer
-│   └── ui/                   tooltip.tsx, the one shadcn primitive still used
+│   └── ui/                   tooltip.tsx, the one shadcn primitive still used —
+│                              its Tailwind classes resolve to nothing here, see Styling
 ├── context/
 │   ├── LocaleContext.tsx     resolves the language once, exposes locale + switcher
 │   ├── ProviderContext.tsx   provider/model/key state and the AI call surface
@@ -60,6 +61,8 @@ src/
     ├── resumePdf.ts          jsPDF text builders, including the Hebrew face
     ├── resumeExport.ts       picks a builder, names the file, rasterises as a
     │                         last resort
+    ├── resumePrompt.ts       the rewrite prompt, the request built around it, and
+    │                         the check that the answer came back in English
     ├── resumeSamples.ts      the worked example the "try it" link loads
     ├── interviewSession.ts   validates a transcript restored from storage
     ├── challenges.ts         the challenge content model (types only)
@@ -189,7 +192,7 @@ storage. Reloads restore the profile through `GET /api/auth/session`; logout cal
 `POST /api/auth/logout`. When a build has no `VITE_GOOGLE_CLIENT_ID`, the client reads the
 public ID from `GET /api/auth/config`, so a static Replit build needs no authentication
 configuration. Set `GOOGLE_CLIENT_ID` and a random server-only `SESSION_SECRET` of at least
-32 characters on the Fly backend. Register the Replit and GitHub Pages origins in that Google
+32 characters on the Fly backend. Register the Vercel and Replit origins in that Google
 OAuth client's authorized JavaScript origins.
 
 ### Content API
@@ -219,7 +222,8 @@ layers point at this package:
 ```bash
 pnpm test:unit         # Python fixtures + TypeScript library unit tests
 pnpm test:component    # ChallengeCard, CodingChallenges, QuestionCard, QuestionBank,
-                       # ConnectionSetup, Footer, BackToTop
+                       # ConnectionSetup, Footer, BackToTop, ResumeAgent,
+                       # ResumeImprove (the rewrite, with the model stubbed)
 pnpm test:e2e          # this app end to end, desktop + mobile
 ./run-all-tests.sh     # everything, plus the Allure and Playwright reports
 ```
@@ -237,16 +241,27 @@ nav, and `#setup`, `#resume`, `#lecture-series`, `#interview-talk`, `#interview-
 `#coding-challenges` on the sections. Renaming one means updating `NavComponent` or
 `SECTION_IDS`. See `tests/README.md`.
 
+## Styling
+
+Hand-written CSS in `src/app.css`, and nothing else — this app loads no Tailwind. The `:root`
+block there is the whole palette, including the contrast measurements behind three of its
+colours, and both themes live in it (`html[data-theme="dark"]` swaps the same variable names).
+
+It is therefore not a consumer of the shared system in `lib/design`, which is the bridge the
+portfolio, the sandbox and the ten decks use. `lib/design/README.md` records how this palette
+would map onto that contract if the app ever adopts Tailwind. A `src/index.css` full of
+shadcn boilerplate used to sit here unimported, with every colour set to the literal word
+`red`; it was deleted rather than filled in.
+
 ## Deployment
 
+- **Vercel** — `.github/workflows/deploy-vercel.yml`, mounted at `/ai-testing-academy/`.
+  Static only, so the AI panel is bring-your-own-key there. Deep links are rewritten at 200
+  by `deploy/vercel/config.json`.
 - **Replit** — `.replit-artifact/artifact.toml`, `BASE_PATH=/ai-testing-academy/`, same origin
-  as the API server.
-- **GitHub Pages** — `.github/workflows/ci.yml`, mounted at `/<repo>/ai-testing-academy/`.
-  Static only, so the AI panel is bring-your-own-key there.
-- **Cloudflare Pages** — the same artifact. `deploy/cloudflare/_redirects` and `_headers` are
-  copied into the site root by the same job and GitHub Pages ignores both, so one build
-  deploys to either host. Cloudflare is the one that rewrites deep links at 200 rather than
-  serving them through a 404 shell.
+  as the API server through a secretless relay.
+- **Cloudflare Pages** — the same artifact, still supported. `deploy/cloudflare/_redirects`
+  and `_headers` say what the Vercel routes say, in that host's dialect.
 
 The API this app calls is deployed separately, to Fly — see `deploy/README.md` for what runs
 where, what it costs, and the first-deploy commands.
