@@ -347,8 +347,8 @@
   The shape to notice: thirteen client apps, one server, and every credential on
   one side of that line. A deck is static and talks to nothing. The academy is
   the only client with a server at all, and it works without one — the dashed
-  path is the bring-your-own-key fallback, which is what a GitHub Pages build
-  falls back to because Pages serves the static output and nothing else.
+  path is the bring-your-own-key fallback, which is what the Vercel build falls
+  back to, because that deployment serves the static output and nothing else.
 </figcaption>
 </figure>
 
@@ -642,9 +642,11 @@
     <span class="tag">prompts</span>
     <b>Prompts live in the locale</b>
     <span>
-      The resume, rewrite and interview system prompts sit under <code>locale.prompts</code>,
-      so tuning model behaviour is a content edit — and each language can steer the model
-      in its own words.
+      The scoring and interview system prompts sit under <code>locale.prompts</code>, so
+      tuning model behaviour is a content edit and each language can steer the model in its
+      own words. The rewrite prompt is the exception and lives in
+      <code>lib/resumePrompt.ts</code>: the site is bilingual, the résumé it produces is not,
+      and a prompt per language is how it came to answer a Hebrew CV in Hebrew.
     </span>
   </div>
 </div>
@@ -706,7 +708,9 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   <div class="arrow">→</div>
   <div class="stage"><span class="k">score</span><p><code>callClaude()</code> with the resume prompt, then <code>extractJSON()</code> into scores, strengths, gaps.</p></div>
   <div class="arrow">→</div>
-  <div class="stage"><span class="k">rewrite</span><p>A second call with the improve prompt returns ATS-friendly prose, not JSON.</p></div>
+  <div class="stage"><span class="k">rewrite</span><p>A second call with the improve prompt returns ATS-friendly prose, not JSON — in English, aimed at the role that was typed.</p></div>
+  <div class="arrow">→</div>
+  <div class="stage"><span class="k">check</span><p>The draft is measured, not trusted: too much non-Latin script and it goes back for a translation pass.</p></div>
   <div class="arrow">→</div>
   <div class="stage"><span class="k">export</span><p><code>lib/resumeExport.ts</code> picks a builder; <code>lib/resumePdf.ts</code> builds it with <b>jsPDF</b>, embedding a Hebrew face for RTL.</p></div>
 </div>
@@ -785,8 +789,9 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 </p>
 <p>
   Sign-in requires the static app and API to share an origin (or an equivalent reverse proxy
-  for <code>/api</code>). GitHub Pages is static-only: leave its repository variable unset unless
-  such a proxy exists, otherwise verification correctly ends in the visible signed-out error.
+  for <code>/api</code>). The Vercel deployment is static-only: leave its repository variable
+  unset unless such a proxy exists, otherwise verification correctly ends in the visible
+  signed-out error.
 </p>
 
 <h3>🎙️ Interview Agent</h3>
@@ -1036,7 +1041,7 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   Build-time configuration lives in a committed <code>.env</code> beside the Vite config.
   Committing it is deliberate and safe for exactly one reason: Vite inlines every
   <code>VITE_</code> value into the emitted JavaScript, so nothing there was ever private, and
-  keeping it in the repository is what lets the Pages build produce a working site without a
+  keeping it in the repository is what lets a static build produce a working site without a
   secret store. <code>.env.local</code> is git-ignored and is where anything you would not
   publish belongs.
 </p>
@@ -1076,8 +1081,8 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 
 <dl class="kv">
   <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, with a secretless same-origin <code>/api</code> relay to Fly.</dd>
-  <dt>GitHub Pages</dt><dd><code>.github/workflows/ci.yml</code> — <code>BASE_PATH=/&lt;repo&gt;/ai-testing-academy/</code>, built and published on every push to <code>main</code>.</dd>
-  <dt>Cloudflare Pages</dt><dd>Same artifact. <code>deploy/cloudflare/_redirects</code> and <code>_headers</code> are copied into the site root by the same job; GitHub Pages ignores both, so one output deploys to either host.</dd>
+  <dt>Vercel</dt><dd><code>.github/workflows/deploy-vercel.yml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, built by Actions and shipped as a prebuilt directory on every push to <code>main</code>. Pull requests get their own preview URL.</dd>
+  <dt>Cloudflare Pages</dt><dd>Same artifact, still supported. <code>deploy/cloudflare/_redirects</code> and <code>_headers</code> say what <code>deploy/vercel/config.json</code> says, in that host's dialect.</dd>
   <dt>Fly.io</dt><dd><code>server/{Dockerfile,fly.toml}</code> — the API, separately, because it is the only piece that costs anything to run. <code>deploy/README.md</code> is the runbook.</dd>
   <dt>Grafana</dt><dd><code>monitoring/compose.yaml</code> — Prometheus server and test history, Python uptime probes, and dashboards for health, logins, client type, approximate country, and server-proxied AI usage.</dd>
 </dl>
@@ -1091,23 +1096,26 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
 </div>
 
 <p>
-  The Pages job builds the portfolio at the site root and mounts this site and
-  <em>all ten</em> lecture decks underneath it, copies this page in as
-  <code>architecture.html</code>, and gives each app a <code>404.html</code> copy of its own
-  shell. The run's Allure report is published separately, to its own reports repository’s
-  Pages, so the test results keep their own URL and never land on the portfolio site.
+  The deploy job builds the portfolio at the site root and mounts this site and
+  <em>all ten</em> lecture decks underneath it, and copies this page in as
+  <code>architecture.html</code>. Vercel builds nothing: Actions writes the Build Output API
+  layout and <code>vercel deploy --prebuilt</code> hands it over, so what ships is what the
+  lockfile produced. The run's Allure report is published separately, to its own reports
+  repository’s Pages, so the test results keep their own URL and never land on the site.
 </p>
 
 <div class="callout">
-  <b>Why every app gets its own 404, and why the rewrites matter.</b> These are single-page
+  <b>Why the rewrites matter, and why they moved the deployment.</b> These are single-page
   apps: the decks serve <code>/slide1</code>, <code>/slide2</code>, <code>/allslides</code>
-  from one shell and none of those paths is a file. A single root <code>404.html</code>
-  holding the portfolio meant every unknown path fell back to the portfolio rather than the
-  app that owns it — and for the decks that is not a corner case, because the academy's
-  hreflang tags nominate <code>/ai-testing-lecture-1/slide1?lang=en</code> as a canonical URL.
-  GitHub Pages has no rewrite rules, so the nearest <code>404.html</code> is the best it can
-  do: the right page, carrying a 404 status. Cloudflare's <code>_redirects</code> rewrites the
-  same paths at 200, which is the reason to prefer it for anything meant to be indexed.
+  from one shell and none of those paths is a file. GitHub Pages has no rewrite rules, so the
+  nearest <code>404.html</code> was the best it could do — the right page, carrying a 404
+  status, on URLs the academy's hreflang tags nominate for indexing
+  (<code>/ai-testing-lecture-1/slide1?lang=en</code> among them). Worse, a single root
+  <code>404.html</code> holding the portfolio meant an unknown path fell back to the portfolio
+  rather than to the app that owns it. <code>deploy/vercel/config.json</code> rewrites all of
+  them at 200, in one rule for all ten decks; the deploy workflow smoke-checks that against
+  the real deployment and <code>tests/unit/vercelRoutes.spec.ts</code> holds the whole routing
+  table to it on every branch.
 </div>
 
 <div class="callout">

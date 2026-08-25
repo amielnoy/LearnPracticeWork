@@ -5,7 +5,8 @@ not only as a browser driver — the TypeScript unit project never opens a brows
 
 ```
 tests/
-├── unit/        Node          pure logic from the academy's lib modules
+├── unit/        Node          pure logic from the academy's lib modules, plus the
+│                             deploy routing table (`vercelRoutes.spec.ts`)
 ├── component/   Chromium      real React components, mounted (Playwright CT)
 ├── api/         Node → HTTP   the live api-server
 ├── contract/    Node → HTTP   openapi.yaml ↔ generated Zod ↔ the live server

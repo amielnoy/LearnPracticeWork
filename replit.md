@@ -17,6 +17,9 @@ packages use pnpm; `server` uses uv and keeps a pnpm package only as a workspace
 - **Validation**: Pydantic on the API, Zod (`zod/v4`) in generated TypeScript clients
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: Vite clients; Python bytecode/Docker validation for the API
+- **Styling**: `lib/design` — one Tailwind bridge, type scale and elevation layer for the
+  portfolio, the sandbox and the ten decks; each app keeps its own palette. The academy is
+  hand-written CSS (`src/app.css`) and does not consume it
 - **Tests**: pytest fixtures for the backend; Playwright unit, component, API, contract and e2e
 - **Lint**: ESLint + Prettier for TypeScript; Ruff for Python
 - **Reporting**: Allure 3 (`allure-report/`, one report across all six layers)
