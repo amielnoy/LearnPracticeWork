@@ -3,6 +3,11 @@ import type { Locale } from '../lib/locales';
 import type { Message } from '../lib/providers';
 import { isRtlText, linkifyHtml } from '../lib/domUtils';
 import { buildResumePdf, resumeFilename } from '../lib/resumeExport';
+import {
+  DEFAULT_TARGET_ROLE,
+  IMPROVE_RESUME_PROMPT,
+  buildImproveRequest,
+} from '../lib/resumePrompt';
 
 /** What the model returns for a résumé, and what the scorecard renders. */
 export interface EvalResult {
@@ -61,7 +66,6 @@ export interface ResumeEvaluation {
 }
 
 const MIN_RESUME_CHARACTERS = 80;
-const DEFAULT_ROLE = 'QA Automation Engineer';
 const IMPROVE_MAX_TOKENS = 4000;
 
 export function useResumeEvaluation({
@@ -109,7 +113,7 @@ export function useResumeEvaluation({
       onStart();
       setEvaluating(true);
       try {
-        const role = (roleOverride ?? targetRole).trim() || DEFAULT_ROLE;
+        const role = (roleOverride ?? targetRole).trim() || DEFAULT_TARGET_ROLE;
         const reply = await callClaude(prompts.resume, [
           { role: 'user', content: S.promptRolePrefix + role + S.promptResumeLabel + text },
         ]);
@@ -144,38 +148,26 @@ export function useResumeEvaluation({
     if (!hasConsent) throw new Error(messages.consentRequiredAgain);
     if (improvedResumeRef.current) return improvedResumeRef.current;
     if (!lastEval) throw new Error(S.errNoEval);
-    const jd = jobDesc.trim();
+    // English, and aimed at the applicant's role: see `lib/resumePrompt`.
     const reply = await callClaude(
-      prompts.improve,
+      IMPROVE_RESUME_PROMPT,
       [
         {
           role: 'user',
-          content:
-            S.promptRolePrefixImprove +
-            lastEval.role +
-            (jd ? S.promptJobDescLabel + jd : '') +
-            S.promptEvalResultsLabel +
-            JSON.stringify({
-              gaps: lastEval.evaluation.gaps,
-              recommendations: lastEval.evaluation.recommendations,
-            }) +
-            S.promptOriginalResumeLabel +
-            lastEval.resume,
+          content: buildImproveRequest({
+            role: lastEval.role,
+            jobDesc,
+            gaps: lastEval.evaluation.gaps,
+            recommendations: lastEval.evaluation.recommendations,
+            resume: lastEval.resume,
+          }),
         },
       ],
       IMPROVE_MAX_TOKENS,
     );
     improvedResumeRef.current = reply.trim();
     return improvedResumeRef.current;
-  }, [
-    hasConsent,
-    messages.consentRequiredAgain,
-    lastEval,
-    jobDesc,
-    S,
-    callClaude,
-    prompts.improve,
-  ]);
+  }, [hasConsent, messages.consentRequiredAgain, lastEval, jobDesc, S.errNoEval, callClaude]);
 
   const showImproved = useCallback(async () => {
     setImprovedError('');

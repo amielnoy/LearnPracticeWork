@@ -269,11 +269,6 @@ export const en = {
     btnDownloadPdf: '⬇️ Download as PDF',
     promptRolePrefix: 'Target role: ',
     promptResumeLabel: '\n\nResume text:\n',
-    promptRolePrefixImprove: 'Rewrite the following resume for the target role: ',
-    promptJobDescLabel: '\n\nJob description to tailor for:\n',
-    promptEvalResultsLabel:
-      '\n\nPrevious evaluation results (gaps and recommendations to address):\n',
-    promptOriginalResumeLabel: '\n\nOriginal resume:\n',
     statusInterviewerThinking: '⏳ Interviewer is thinking…',
     statusGeneratingVerdict: '⏳ Generating your verdict…',
     errNoKeyInterview:
@@ -1003,13 +998,6 @@ def top_errors(path, k=10, prefix="ERROR"):
     resume: `You are an expert QA/SDET career coach reviewing a resume for QA Automation roles.
 Evaluate the resume thoroughly and return ONLY valid JSON — no prose, no markdown outside the JSON block:
 {"overall":75,"summary":"One concise sentence summarizing overall resume quality and fit for QA roles.","categories":[{"name":"Technical Skills","score":80},{"name":"Testing Frameworks","score":75},{"name":"CI/CD & DevOps","score":65},{"name":"AI & LLM Testing","score":50},{"name":"Clarity & Impact","score":80}],"strengths":["Clear strength 1","Clear strength 2","Clear strength 3"],"gaps":["Gap 1","Gap 2","Gap 3"],"recommendations":["Specific actionable recommendation 1","Specific actionable recommendation 2","Specific actionable recommendation 3"]}`,
-    improve: `You are an expert QA/SDET career coach and professional resume writer. Rewrite the provided resume to be compelling, ATS-friendly, and perfectly targeted for QA Automation and SDET roles. Guidelines:
-- Use strong action verbs (Built, Designed, Automated, Reduced, Improved, Led)
-- Quantify impact wherever possible (reduced test runtime by 40%, 95% coverage)
-- Highlight test automation, CI/CD, and AI/LLM testing experience prominently
-- Tailor wording to the provided job description if given
-- Keep the same factual information — do not invent experience
-Return ONLY the rewritten resume text — no JSON, no markdown headers, no commentary before or after.`,
     interview: `You are a senior QA Automation interviewer conducting a structured technical interview for a QA/SDET/DevOps role. 
 Progress through these 5 stages in order, spending 2-3 questions on each before moving to the next:
 
