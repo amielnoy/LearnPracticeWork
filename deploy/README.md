@@ -232,20 +232,35 @@ VAT treatment for the selling entity.
 The three collections — question bank, coding challenges, lecture series — live in the client's
 TypeScript sources and are extracted from there. Regenerate, then apply:
 
+Put the database password in `.env.local` — that file is git-ignored, unlike `.env`, which
+this repository commits on purpose for public build-time config:
+
+```
+SUPABASE_DB_PASSWORD=…
+```
+
+It is the only value you have to supply. The host and role come from `server/app/config.py`,
+so the seed lands in the database the API reads.
+
 ```bash
 # 1. Extract from the TS sources and generate the SQL. Re-run both after any
 #    content edit; the generated files are committed, and drift is silent.
 pnpm --filter @workspace/scripts exec tsx src/extract-academy-content.ts
 pnpm --filter @workspace/scripts exec tsx src/generate-academy-seed-sql.ts
 
-# 2. Create the tables. Once per database — the seed only truncates and inserts.
-psql "$DATABASE_URL" -f scripts/src/academy-schema.sql
-
-# 3. Fill them. Idempotent: it truncates first, so re-running replaces the content.
-psql "$DATABASE_URL" -f scripts/src/academy-seed.sql
+# 2. Apply the schema, apply the seed, then count what landed.
+pnpm --filter @workspace/scripts run seed:academy
 ```
 
-Without `psql`, paste `academy-schema.sql` into the Supabase SQL editor, then the 38
+`seed:academy` uses `psql` when it is installed and the same client out of a container when it
+is not, so Docker is enough. The password goes through the environment, never the command
+line, and a password found in a git-tracked file is refused rather than used. `--schema-only`,
+`--seed-only` and `--check` (count and stop) narrow what it does.
+
+`DATABASE_URL` overrides the composed connection. Use the **session pooler on 5432**, not the
+transaction pooler on 6543: the seed is one long transaction ending in `setval` calls.
+
+Without a terminal at all, paste `academy-schema.sql` into the Supabase SQL editor, then the 38
 `seed-chunk-*.sql` files in order — they exist because the editor rejects a single statement
 list this long.
 
