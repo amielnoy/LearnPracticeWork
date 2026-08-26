@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { test, expect } from '../support/test';
+import { buildConfig } from '../../deploy/vercel/build-config.mjs';
 
 /**
  * The routing table the deployed site is served through.
@@ -193,5 +194,74 @@ test.describe('security headers', () => {
   test('never allow the camera', () => {
     for (const requestPath of EVERYWHERE)
       expect(serve(requestPath).headers['Permissions-Policy'], requestPath).toContain('camera=()');
+  });
+});
+
+/**
+ * `/api/*` is the one route that cannot be committed: the static site and the
+ * API deploy separately, and the API's home has already moved twice. It is
+ * added at deploy time from `API_ORIGIN`, and both outcomes have to be right.
+ *
+ * The failure being guarded is silent. Without an `/api` route the catch-all
+ * hands `/api/ai/config` the academy's HTML shell at HTTP 200; the client
+ * checks `res.ok`, the status passes, the JSON parse throws, the failure is
+ * swallowed, and the site decides no server key exists. Every server-backed
+ * feature vanishes and nothing looks broken.
+ */
+test.describe('the API route, decided at deploy time', () => {
+  const withProxy = buildConfig(config, 'https://api.example.com');
+  const without = buildConfig(config, undefined);
+
+  function serveWith(built: { routes: HeaderRule[] }, requestPath: string): Served {
+    const previous = config.routes;
+    (config as { routes: HeaderRule[] }).routes = built.routes;
+    try {
+      return serve(requestPath);
+    } finally {
+      (config as { routes: HeaderRule[] }).routes = previous;
+    }
+  }
+
+  test('proxies to the configured origin, keeping the path', () => {
+    expect(serveWith(withProxy, '/api/ai/config').dest).toBe(
+      'https://api.example.com/api/ai/config',
+    );
+    expect(serveWith(withProxy, '/api/content/question-bank').dest).toBe(
+      'https://api.example.com/api/content/question-bank',
+    );
+  });
+
+  test('never hands an API path to the SPA shell', () => {
+    for (const built of [withProxy, without])
+      for (const apiPath of ['/api/ai/config', '/api/auth/session', '/api/stripe/webhook'])
+        expect(serveWith(built, apiPath).dest, apiPath).not.toBe('/index.html');
+  });
+
+  test('fails loudly rather than silently when no origin is configured', () => {
+    const route = without.routes.find(r => r.src === '/api/(.*)') as HeaderRule & {
+      status?: number;
+    };
+    expect(route.status).toBe(503);
+    expect(route.headers?.['content-type']).toContain('application/json');
+  });
+
+  test('is settled before the filesystem, so nothing else can claim it', () => {
+    for (const built of [withProxy, without]) {
+      const api = built.routes.findIndex(r => r.src === '/api/(.*)');
+      const filesystem = built.routes.findIndex(r => r.handle === 'filesystem');
+      expect(api).toBeGreaterThan(-1);
+      expect(api).toBeLessThan(filesystem);
+    }
+  });
+
+  test('refuses an origin that is not an https origin', () => {
+    for (const bad of ['http://api.example.com', 'https://api.example.com/api', 'api.example.com'])
+      expect(() => buildConfig(config, bad), bad).toThrow(/https origin/);
+  });
+
+  test('leaves the static routes exactly as committed', () => {
+    // The deploy-time step adds one route; it must not reorder or rewrite the
+    // table the rest of this suite checks.
+    expect(withProxy.routes.filter(r => r.src !== '/api/(.*)')).toEqual(config.routes);
   });
 });

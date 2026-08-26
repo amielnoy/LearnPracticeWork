@@ -188,12 +188,17 @@ jobs:
       # is what `--prebuilt` uploads, so the routes in config.json are the ones
       # that serve the deployment.
       - name: Lay out the Vercel build output
+        env:
+          API_ORIGIN: ${{ vars.API_ORIGIN }}
         run: |
           set -euo pipefail
           rm -rf .vercel/output
           mkdir -p .vercel/output
           cp -R _site .vercel/output/static
-          cp deploy/vercel/config.json .vercel/output/config.json
+          # The route table plus the one decision that cannot be committed:
+          # where /api/* goes. Unset, it answers 503 rather than letting the
+          # SPA catch-all hand an API call the academy's HTML shell at 200.
+          node deploy/vercel/build-config.mjs .vercel/output/config.json
           echo "Static files: $(find .vercel/output/static -type f | wc -l)"
 
       # `--prod` on main, a preview deployment everywhere else. The URL the CLI
@@ -239,6 +244,29 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
+
+          # Preview deployments are protected (ssoProtection: preview), so every
+          # path answers with Vercel's login redirect and none of the route
+          # assertions below can run. Assert what is true there instead: the
+          # deployment exists and is protected. Production is public and gets
+          # the full pass.
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "${URL}/")
+            location=$(curl -sSI --max-time 30 "${URL}/" | tr -d '\r' \
+              | awk -F': ' 'tolower($1)=="location"{print $2}')
+            case "$code:$location" in
+              30?:https://vercel.com/sso-api*)
+                echo "✅ preview deployed and protected by Vercel Authentication"
+                exit 0 ;;
+              200:*)
+                echo "::warning::This preview is public — expected Vercel Authentication."
+                ;;
+              *)
+                echo "::error::Preview returned $code (location: ${location:-none})."
+                exit 1 ;;
+            esac
+          fi
+
           check() { # path, expected status, what it proves
             code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "${URL}$1")
             if [ "$code" = "$2" ]; then
@@ -266,6 +294,17 @@ jobs:
               *) echo "::error::${asset} cache-control is '${cache}', expected immutable."; fail=1 ;;
             esac
           fi
+
+          # The failure this is here for is silent: an API path answered by the
+          # HTML shell at 200 makes the client conclude there is no server.
+          api_type=$(curl -sSI --max-time 30 "${URL}/api/ai/config" | tr -d '\r' \
+            | awk -F': ' 'tolower($1)=="content-type"{print $2}')
+          case "$api_type" in
+            *text/html*)
+              echo "::error::/api/ai/config is served as HTML — the SPA catch-all is answering it."
+              fail=1 ;;
+            *) echo "✅ /api/ai/config → ${api_type:-no content-type} (not the SPA shell)" ;;
+          esac
 
           csp=$(curl -sSI --max-time 30 "${URL}/" | tr -d '\r' \
             | awk -F': ' 'tolower($1)=="content-security-policy"{print $2}')

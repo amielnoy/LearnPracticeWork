@@ -87,12 +87,17 @@ Until all three exist, a push to `main` fails the deploy loudly and a pull
 request skips it with a note. Nothing is published from a workflow that cannot
 authenticate.
 
-Two repository **variables** are read at build time:
+Three repository **variables** are read at deploy time:
 
 | Variable | Effect |
 |---|---|
+| `API_ORIGIN` | Where `/api/*` is proxied. Unset, those paths answer `503` instead of being swallowed by the SPA catch-all — see `deploy/vercel/README.md` |
 | `VITE_GOOGLE_CLIENT_ID` | Inlined into the academy bundle; sign-in renders nothing without it |
 | `VERCEL_SITE_ORIGIN` | The deployed origin. Sets `VITE_SITE_ORIGIN` for the twenty lecture links, and is what CI links the architecture page from |
+
+Proxying rather than pointing the client at another host is deliberate: the
+browser sees one origin, so the login cookie stays first-party (`SameSite=Lax`)
+and CORS never applies. It is the same shape as the Replit relay.
 
 ### After the origin changes
 

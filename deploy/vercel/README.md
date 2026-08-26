@@ -36,6 +36,27 @@ GitHub Pages has no rewrites, so those URLs were answered through `404.html` —
 the right page under a 404 status, on URLs the academy's own hreflang tags
 nominate for indexing.
 
+## `/api/*`, decided at deploy time
+
+The static site and the API deploy separately, and the API's home has already
+moved twice — so its origin is not in `config.json`. `build-config.mjs` reads the
+`API_ORIGIN` repository variable and writes the final table:
+
+| `API_ORIGIN` | `/api/*` |
+|---|---|
+| set | proxied there, so the browser sees one origin — the login cookie stays first-party and CORS never enters the picture |
+| unset | `503`, with a JSON content type |
+
+The 503 is the interesting half. Without an `/api` route the catch-all hands
+`/api/ai/config` the academy's HTML shell at HTTP 200, and the client checks
+`res.ok` before parsing: the status passes, the parse throws, the failure is
+swallowed, and the site concludes no server key exists. Every server-backed
+feature — the AI proxy, sign-in, the content API, checkout — quietly disappears
+while the page looks perfectly healthy. A 503 says the same thing out loud.
+
+The deploy workflow smoke-checks that `/api/ai/config` is not `text/html`, and
+`tests/unit/vercelRoutes.spec.ts` checks both variants of the table.
+
 ## Ten decks, one rule
 
 `/ai-testing-lecture-(\d+)/.*` → `/ai-testing-lecture-$1/index.html` replaces

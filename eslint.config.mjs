@@ -45,7 +45,8 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
 
   {
-    files: ['**/*.{ts,tsx,mts}'],
+    // `.mjs` for the handful of build-time Node scripts that are not TypeScript.
+    files: ['**/*.{ts,tsx,mts,mjs}'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
