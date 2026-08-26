@@ -24,6 +24,18 @@ lockfile rather than whatever a hosted build would resolve today.
 
 [bo]: https://vercel.com/docs/build-output-api/v3
 
+That is also why the root `vercel.json` says `git.deploymentEnabled: false`. A
+Vercel project connected to a GitHub repository builds on every push by default,
+and such a build has nowhere to land: the twelve apps each write their own
+`artifacts/<name>/dist/public/`, and the single directory Vercel wants only
+exists after the workflow's assembly step. Left on, it failed every push with
+*No Output Directory named "public" found* — a red deployment next to the green
+one that actually shipped. The setting is read from the pushed commit, so it
+only silences the branches that carry it.
+
+The file is inert for the deployment itself: `--prebuilt` serves the routes in
+`.vercel/output/config.json`, and never reads `vercel.json`.
+
 The academy is the site: it is what the root URL serves, with the portfolio at
 `/portfolio/` and the ten decks at `/ai-testing-lecture-N/`. Each app gets a
 `BASE_PATH` matching where it is mounted, because Vite bakes it into every asset
