@@ -226,8 +226,8 @@ Static and API are deployed separately, because only one of them costs anything 
 - **Replit** — `.replit-artifact/artifact.toml` per artifact. No production secret belongs in
   Replit. The API artifact relays same-origin `/api/*` requests to Fly over HTTPS, preserving
   first-party login cookies and Stripe request bodies without storing provider credentials.
-- **Vercel** — `.github/workflows/deploy-vercel.yml` publishes from `main`: the portfolio at
-  the site root, `ai-testing-academy/` and **all ten** `ai-testing-lecture-N/` beneath it, and
+- **Vercel** — `.github/workflows/deploy-vercel.yml` publishes from `main`: the academy at
+  the site root, `portfolio/` and **all ten** `ai-testing-lecture-N/` beneath it, and
   `architecture.html` alongside. Actions builds; Vercel builds nothing and receives the
   [Build Output API v3][bo] layout through `vercel deploy --prebuilt`, so what ships is what
   this lockfile produced. A pull request from this repository gets its own preview URL. Static

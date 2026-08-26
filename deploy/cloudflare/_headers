@@ -16,15 +16,16 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.groq.com https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://www.youtube.com https://www.youtube-nocookie.com https://*.gamma.site; worker-src 'self' blob:; upgrade-insecure-requests
-  # No camera or microphone anywhere on the static site. The mock interview's
-  # voice mode runs in the academy, which is listed separately below.
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  # No camera, ever. The microphone is granted because the root app is the
+  # academy, whose mock interview has a voice mode; the apps underneath it have
+  # it revoked below.
+  Permissions-Policy: camera=(), microphone=(self), geolocation=()
 
 # Hashed build output — the filename changes whenever the bytes do.
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/ai-testing-academy/assets/*
+/portfolio/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
 /ai-testing-lecture-*/assets/*
@@ -44,7 +45,11 @@
 /sitemap.xml
   Cache-Control: public, max-age=3600
 
-# The academy asks for the microphone: the mock interview has a voice mode.
-# Listed after the site-wide rule so it wins for this prefix.
-/ai-testing-academy/*
-  Permissions-Policy: camera=(), microphone=(self), geolocation=()
+# The academy asks for the microphone: the mock interview has a voice mode, and
+# the academy is what the root serves. The two apps mounted underneath it never
+# need one, so they are listed after the site-wide rule and lose it again.
+/portfolio/*
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/ai-testing-lecture-*/*
+  Permissions-Policy: camera=(), microphone=(), geolocation=()

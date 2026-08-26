@@ -26,6 +26,7 @@
  * full list and what each one is for.
  */
 
+@import './foundation.css';
 @import './scale.css';
 @import './elevate.css';
 @import './controls.css';

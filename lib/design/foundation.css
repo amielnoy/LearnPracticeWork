@@ -1,0 +1,90 @@
+/**
+ * The floor every app stands on, in plain CSS.
+ *
+ * No `@theme`, no `@apply`, nothing Tailwind has to compile — so the academy,
+ * which is hand-written CSS and loads no Tailwind at all, imports this file
+ * directly, and the Tailwind apps get it through `theme.css`. One floor, four
+ * kinds of app.
+ *
+ * It is not new design. Three of these four blocks were already written, well,
+ * in `artifacts/ai-testing-academy/src/app.css` — and nowhere else. The ten
+ * lecture decks and the sandbox had no visible keyboard focus and no reduced
+ * motion at all, which is the sort of thing a design system exists to stop
+ * happening app by app. So the good version was promoted rather than invented.
+ *
+ * Every value below is a token with a fallback, so importing this file into an
+ * app that has not defined a palette still produces something sensible rather
+ * than nothing.
+ */
+
+:root {
+  /* Motion. Three durations, because a system with more than three is a system
+     nobody can keep in their head: a state change, a small movement, a large
+     one. The easing is the same curve throughout — motion that decelerates into
+     place reads as physical; motion that eases in and out reads as animated. */
+  --ds-duration-fast: 0.15s;
+  --ds-duration-base: 0.22s;
+  --ds-duration-slow: 0.6s;
+  --ds-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* The keyboard focus ring. Its own token rather than the brand accent, so a
+     palette can move the accent without quietly making focus invisible — and so
+     an app whose accent is low-contrast can give focus a colour of its own. */
+  --ds-ring: var(--ds-accent, currentColor);
+  --ds-ring-width: 3px;
+  --ds-ring-offset: 2px;
+
+  /* Elevation, tinted rather than grey. A shadow is light that did not arrive,
+     so it carries the colour of the surface it falls on — warm on paper, near
+     black on a dark ground. One tint token, three heights. */
+  --ds-shadow-tint: 0deg 0% 0%;
+  --ds-shadow-sm: 0 1px 2px hsl(var(--ds-shadow-tint) / 0.06);
+  --ds-shadow-md: 0 2px 10px hsl(var(--ds-shadow-tint) / 0.08);
+  --ds-shadow-lg: 0 6px 22px hsl(var(--ds-shadow-tint) / 0.16);
+}
+
+/**
+ * Visible keyboard focus, on everything that can hold it.
+ *
+ * `:focus-visible` rather than `:focus`, so a mouse click does not leave a ring
+ * behind — which is the reason people remove focus styles in the first place,
+ * and why so many keyboard users end up navigating a page they cannot see
+ * themselves moving through.
+ *
+ * `:where()` keeps the whole selector at zero specificity: an app overrides it
+ * with a single class, and nothing here has to be fought with `!important`.
+ */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--ds-ring-width) solid var(--ds-ring);
+  outline-offset: var(--ds-ring-offset);
+}
+
+/**
+ * Motion is a preference, and the system asks.
+ *
+ * The blanket rule is deliberate — an app cannot be trusted to remember this
+ * per transition, and the ten decks proved it by never doing it at all.
+ *
+ * `[data-motion='essential']` is the way back out, for the one case where
+ * movement is the message rather than decoration: a spinner that does not spin
+ * is not a calmer spinner, it is a broken one. Slowed rather than stopped.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *:not([data-motion='essential']),
+  *:not([data-motion='essential'])::before,
+  *:not([data-motion='essential'])::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-motion='essential'] {
+    animation-duration: 1.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

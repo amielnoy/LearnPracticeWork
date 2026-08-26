@@ -255,9 +255,10 @@ shadcn boilerplate used to sit here unimported, with every colour set to the lit
 
 ## Deployment
 
-- **Vercel** — `.github/workflows/deploy-vercel.yml`, mounted at `/ai-testing-academy/`.
-  Static only, so the AI panel is bring-your-own-key there. Deep links are rewritten at 200
-  by `deploy/vercel/config.json`.
+- **Vercel** — `.github/workflows/deploy-vercel.yml`, at the **site root**: this app is what
+  the deployment serves, with the portfolio at `/portfolio/` and the decks beneath it. Static
+  only, so the AI panel is bring-your-own-key there. Client routes are rewritten at 200 by
+  `deploy/vercel/config.json`.
 - **Replit** — `.replit-artifact/artifact.toml`, `BASE_PATH=/ai-testing-academy/`, same origin
   as the API server through a secretless relay.
 - **Cloudflare Pages** — the same artifact, still supported. `deploy/cloudflare/_redirects`

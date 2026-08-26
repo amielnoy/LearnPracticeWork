@@ -3,7 +3,7 @@ name: Deploy
 # ─────────────────────────────────────────────────────────────────────────────
 #  preflight ──▶ deploy (build ▶ ship ▶ smoke-check)
 #
-#  The twelve static apps — the portfolio at the site root, the academy and the
+#  The twelve static apps — the academy at the site root, the portfolio and the
 #  ten lecture decks mounted underneath it — built here and handed to Vercel as
 #  a finished directory. Vercel builds nothing: `vercel deploy --prebuilt` takes
 #  the Build Output API layout this workflow assembles, so what ships is exactly
@@ -119,14 +119,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
 
-      # Every app is mounted at the site root on Vercel, so the prefix is empty
-      # — unlike GitHub Pages, which served a project site from /<repo>/ and
-      # made that prefix part of every asset URL. This is the one build input
-      # that changes with the host.
-      - name: Build the portfolio (site root)
+      # The academy is the site — it is what the root URL serves — and the
+      # portfolio and the ten decks sit underneath it. Vite bakes BASE_PATH into
+      # every asset URL and each router reads it back, so these three values are
+      # what decide where an app lives.
+      - name: Build the portfolio
         env:
           PORT: '5173'
-          BASE_PATH: /
+          BASE_PATH: /portfolio/
         run: pnpm --filter @workspace/portfolio run build
 
       # VITE_GOOGLE_CLIENT_ID is inlined into the bundle at build time, so it
@@ -140,10 +140,10 @@ jobs:
       # lib/lectures.ts). Set the repository variable to the Vercel origin once
       # the domain is settled; unset, the links keep their existing target
       # rather than silently pointing at a preview URL.
-      - name: Build the AI Testing Academy
+      - name: Build the AI Testing Academy (site root)
         env:
           PORT: '5174'
-          BASE_PATH: /ai-testing-academy/
+          BASE_PATH: /
           VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
           VITE_SITE_ORIGIN: ${{ vars.VERCEL_SITE_ORIGIN }}
         run: pnpm --filter @workspace/ai-testing-academy run build
@@ -173,9 +173,9 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          cp -R artifacts/portfolio/dist/public/. _site/
-          mkdir -p _site/ai-testing-academy
-          cp -R artifacts/ai-testing-academy/dist/public/. _site/ai-testing-academy/
+          cp -R artifacts/ai-testing-academy/dist/public/. _site/
+          mkdir -p _site/portfolio
+          cp -R artifacts/portfolio/dist/public/. _site/portfolio/
           for n in $(seq 1 10); do
             mkdir -p "_site/ai-testing-lecture-${n}"
             cp -R "artifacts/ai-testing-lecture-${n}/dist/public/." "_site/ai-testing-lecture-${n}/"
@@ -248,15 +248,15 @@ jobs:
               fail=1
             fi
           }
-          check "/" 200 "portfolio shell"
+          check "/" 200 "academy shell"
           check "/architecture.html" 200 "architecture page"
-          check "/ai-testing-academy/" 200 "academy shell"
+          check "/portfolio/" 200 "portfolio shell"
           check "/ai-testing-lecture-3/slide5" 200 "deck deep link, rewritten not 404-ed"
-          check "/ai-testing-academy/nope-not-a-page" 200 "academy client route"
+          check "/nope-not-a-page" 200 "academy client route"
 
           asset=$(grep -o '/assets/[A-Za-z0-9._-]*\.js' _site/index.html | head -1)
           if [ -z "$asset" ]; then
-            echo "::error::No hashed asset found in the built portfolio shell."
+            echo "::error::No hashed asset found in the built academy shell."
             fail=1
           else
             cache=$(curl -sSI --max-time 30 "${URL}${asset}" | tr -d '\r' \
@@ -294,8 +294,8 @@ jobs:
             echo ""
             echo "| App | URL |"
             echo "| --- | --- |"
-            echo "| Portfolio | [${URL}/](${URL}/) |"
-            echo "| Academy | [${URL}/ai-testing-academy/](${URL}/ai-testing-academy/) |"
+            echo "| Academy | [${URL}/](${URL}/) |"
+            echo "| Portfolio | [${URL}/portfolio/](${URL}/portfolio/) |"
             echo "| Lecture 1 | [${URL}/ai-testing-lecture-1/](${URL}/ai-testing-lecture-1/) |"
             echo "| Architecture | [${URL}/architecture.html](${URL}/architecture.html) |"
           } >> "$GITHUB_STEP_SUMMARY"
