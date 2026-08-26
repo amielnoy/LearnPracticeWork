@@ -78,9 +78,38 @@ interface Target {
   describe: string;
 }
 
+/**
+ * A value still carrying `<angle brackets>` is a copied example, not a setting.
+ * It is worth naming, because the shape of the failure otherwise is a DNS error
+ * about a host called `db.<ref>.supabase.co` — which reads like a network
+ * problem rather than an unedited placeholder.
+ */
+function rejectPlaceholders(name: string, value: string): void {
+  if (/[<>]/.test(value)) {
+    throw new Error(
+      `${name} still contains placeholders: ${value.replace(/:[^:@/]*@/, ':…@')}\n` +
+        `It was copied from an example. Either fix it, or \`unset ${name}\` and let ` +
+        'SUPABASE_DB_PASSWORD in .env.local compose the connection.',
+    );
+  }
+}
+
+/** user@host, never the password — this line is printed. */
+function describeUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.username || 'postgres'}@${parsed.hostname}:${parsed.port || DEFAULT_PORT}`;
+  } catch {
+    return 'the configured DATABASE_URL';
+  }
+}
+
 function target(): Target {
   const url = resolveEnv('DATABASE_URL');
-  if (url) return { args: [url], describe: 'DATABASE_URL' };
+  if (url) {
+    rejectPlaceholders('DATABASE_URL', url);
+    return { args: [url], describe: `${describeUrl(url)} (from DATABASE_URL)` };
+  }
 
   const password = resolveEnv('SUPABASE_DB_PASSWORD');
   if (!password) {
@@ -89,6 +118,7 @@ function target(): Target {
         'DATABASE_URL. The password is in the Supabase dashboard under Settings → Database.',
     );
   }
+  rejectPlaceholders('SUPABASE_DB_PASSWORD', password);
   const host = resolveEnv('SUPABASE_DB_HOST') ?? DEFAULT_HOST;
   const user = resolveEnv('SUPABASE_DB_USER') ?? DEFAULT_USER;
   return {
