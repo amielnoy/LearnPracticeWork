@@ -225,16 +225,45 @@ price, product, amount, currency, course SKU, and terms version all match. Keep 
 until local counsel/tax advice confirms the displayed identity, cancellation, invoice, GST and
 VAT treatment for the selling entity.
 
-`SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints. Generate the
-content seed SQL with:
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints.
+
+### Seeding the academy content
+
+The three collections — question bank, coding challenges, lecture series — live in the client's
+TypeScript sources and are extracted from there. Regenerate, then apply:
 
 ```bash
+# 1. Extract from the TS sources and generate the SQL. Re-run both after any
+#    content edit; the generated files are committed, and drift is silent.
 pnpm --filter @workspace/scripts exec tsx src/extract-academy-content.ts
 pnpm --filter @workspace/scripts exec tsx src/generate-academy-seed-sql.ts
+
+# 2. Create the tables. Once per database — the seed only truncates and inserts.
+psql "$DATABASE_URL" -f scripts/src/academy-schema.sql
+
+# 3. Fill them. Idempotent: it truncates first, so re-running replaces the content.
+psql "$DATABASE_URL" -f scripts/src/academy-seed.sql
 ```
 
-Apply the generated SQL to the Supabase database before switching a client to the API; an
-empty or unavailable store is reported as a controlled `503`, not as fabricated content.
+Without `psql`, paste `academy-schema.sql` into the Supabase SQL editor, then the 38
+`seed-chunk-*.sql` files in order — they exist because the editor rejects a single statement
+list this long.
+
+What each step is for, and what breaks without it:
+
+| | Why it matters |
+|---|---|
+| `academy-schema.sql` | Nothing else creates these tables. It also grants `select` to `anon` and adds a read policy — the API reads with the anon key, so without both the tables are full and every response is empty |
+| identity columns | The seed's last six lines call `setval('<table>_id_seq', …)` so a hand-added row cannot collide with a seeded id. Plain `bigint` columns have no sequence, and those calls abort the whole transaction |
+| `academy-seed.sql` | 150 question items, 80 coding challenges and 40 lecture items, in both languages |
+
+`tests/unit/contentSchema.spec.ts` holds the schema, the seed and `content_store.py` to the
+same column names — a rename in one of the three is otherwise reported as a `503` that reads
+like an outage.
+
+An empty or unavailable store is reported as a controlled `503`, not as fabricated content, and
+the academy falls back to its bundled copy of the same content — so a missing seed is invisible
+to a visitor and equally invisible to whoever deployed it.
 
 Configure Stripe to send events to `https://<app>.fly.dev/api/stripe/webhook`. The webhook
 secret is verified against the raw request body. Stripe credentials are read only from the
