@@ -24,17 +24,29 @@ lockfile rather than whatever a hosted build would resolve today.
 
 [bo]: https://vercel.com/docs/build-output-api/v3
 
-That is also why the root `vercel.json` says `git.deploymentEnabled: false`. A
-Vercel project connected to a GitHub repository builds on every push by default,
-and such a build has nowhere to land: the twelve apps each write their own
-`artifacts/<name>/dist/public/`, and the single directory Vercel wants only
-exists after the workflow's assembly step. Left on, it failed every push with
-*No Output Directory named "public" found* — a red deployment next to the green
-one that actually shipped. The setting is read from the pushed commit, so it
-only silences the branches that carry it.
+### If a Vercel project starts building this repo on its own
 
-The file is inert for the deployment itself: `--prebuilt` serves the routes in
-`.vercel/output/config.json`, and never reads `vercel.json`.
+For a while, every push here produced a red deployment alongside the green one
+that actually shipped, failing with *No Output Directory named "public" found*.
+The cause was not this repository: a Vercel project named
+`home-economy-stabilation` — which belongs to an entirely different codebase —
+had its Git integration pointed at **this** repo, so it dutifully built twelve
+Vite apps and then looked for a single `public/` that only exists after the
+workflow's assembly step. Disconnecting it in that project's Vercel settings
+fixed it at the source.
+
+Reach for that fix first. The repo-level lever, `git.deploymentEnabled: false`
+in a root `vercel.json`, looks tempting and is almost always wrong here: Vercel
+reads it per *repository*, not per project, so it silences every project linked
+to this repo at once. This repo has more than one, and at least one of them
+deploys successfully — turning them all off to quiet a single misconfigured
+project trades a visible problem for an invisible one.
+
+Per-project control lives in the project: **Settings → Git** to disconnect, or
+an Ignored Build Step to skip builds conditionally.
+
+None of this touches what CI ships. `--prebuilt` serves the routes in
+`.vercel/output/config.json` and never reads a root `vercel.json` at all.
 
 The academy is the site: it is what the root URL serves, with the portfolio at
 `/portfolio/` and the ten decks at `/ai-testing-lecture-N/`. Each app gets a
