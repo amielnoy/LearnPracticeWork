@@ -1,9 +1,14 @@
 /* AI Testing Academy — hand-written CSS, ported from index.html inline <style>.
    
-   This is the only stylesheet the academy loads: no Tailwind, and no import of
-   the shared bridge in `lib/design`. The `:root` block below is therefore the
-   whole palette, and `lib/design/README.md` documents how it would map onto the
-   `--ds-*` contract if that ever changes. */
+   This is the only stylesheet the academy loads: no Tailwind, and no Tailwind
+   bridge. It does take the shared floor below — plain CSS, nothing to compile —
+   which is where the keyboard focus ring and the reduced-motion guard now live.
+   Both were written here first and were here only; promoting them is what lets
+   the ten decks and the sandbox have them too.
+   
+   The `:root` block is the palette. The `--ds-*` names alias it, so the shared
+   layer resolves to these colours rather than to its own fallbacks. */
+@import '../../../lib/design/foundation.css';
 
 :root{
   /* Tells the engine which way the UA-painted parts go — form controls,
@@ -33,6 +38,14 @@
   --field-bg:#ffffff;
   --track:#f1e4d6;
   --shadow:0 2px 10px rgba(120,80,50,.08);
+
+  /* The shared floor reads these. `--accent2` is the ring rather than `--accent`
+     because the ring lands most often on a control whose own border is already
+     `--accent`, and a ring the same colour as the thing it surrounds is not a
+     ring. The tint is the warm brown the shadow above was hand-mixed from. */
+  --ds-accent:var(--accent);
+  --ds-ring:var(--accent2);
+  --ds-shadow-tint:25deg 41% 33%;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
 /* text-size-adjust: stop iOS Safari inflating body copy in landscape, which
@@ -138,7 +151,12 @@ td{color:var(--muted);}
 textarea,input[type=password],input[type=text],select{
     width:100%; background:var(--field-bg); color:var(--text); border:1px solid var(--border-field);
     border-radius:10px; padding:12px; font-size:.92rem; font-family:inherit; resize:vertical;}
-textarea:focus,input:focus,select:focus{outline:none; border-color:var(--accent);}
+/* The border tint is for any focus; the outline is suppressed only for the
+   pointer. Written as `:not(:focus-visible)` because a blanket `outline:none`
+   here outranks the shared ring — the field would light up its border for a
+   keyboard user and show them nothing else. */
+textarea:focus,input:focus,select:focus{border-color:var(--accent);}
+textarea:focus:not(:focus-visible),input:focus:not(:focus-visible),select:focus:not(:focus-visible){outline:none;}
 input[type=checkbox]{min-width:20px; min-height:20px; accent-color:var(--accent);}
 .remember-key{display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:12px;}
 .remember-key input{width:auto; margin:0; flex:0 0 auto;}
@@ -466,7 +484,6 @@ details.agent-box[open]>summary{margin-bottom:16px;}
     transition:transform .2s ease;}
 .challenge-level[open]>summary::after{transform:rotate(90deg);}
 .challenge-level>summary:hover .level-head{color:var(--accent);}
-.challenge-level>summary:focus-visible{outline:3px solid var(--accent2); outline-offset:2px;}
 .level-count{font-size:.8rem; color:var(--muted); font-weight:700; white-space:nowrap;}
 @media (prefers-reduced-motion: reduce){.challenge-level>summary::after{transition:none;}}
 .agent-box h4{margin:0 0 8px; font-size:1.08rem; font-weight:700; color:var(--accent);}
@@ -486,7 +503,6 @@ details.agent-box[open]>summary{margin-bottom:16px;}
 .q-btn .q-cue{flex:0 0 auto; font-size:.74rem; font-weight:700; letter-spacing:.03em;
     text-transform:uppercase; color:var(--accent); white-space:nowrap; opacity:.85;}
 .q-btn[aria-expanded="true"]{border-color:var(--accent2);}
-.q-btn:focus-visible{outline:2px solid var(--accent2); outline-offset:2px;}
 @media (hover:hover){.q-btn:hover{border-color:var(--accent2);}}
 @media (hover:none){.q-btn:active{transform:scale(.995);}}
 
@@ -595,9 +611,9 @@ footer>p a{text-decoration:underline; text-underline-offset:3px;}
 .skip-link{position:absolute;top:-64px;inset-inline-start:8px;z-index:100;background:var(--accent);color:var(--on-accent);
     padding:10px 18px;border-radius:0 0 10px 10px;font-weight:700;transition:top .2s;}
 .skip-link:focus{top:0;}
-a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex="0"]:focus-visible{
-    outline:3px solid var(--accent2); outline-offset:2px;}
+/* Focus ring and reduced motion: `lib/design/foundation.css`, imported at the
+   top. What stays here is the one exception — a spinner is a statement that
+   something is still happening, so it slows rather than stops. */
 @media (prefers-reduced-motion: reduce){
-  html{scroll-behavior:auto;}
-  *,*::before,*::after{transition:none !important; animation:none !important;}
+  .spinner{animation-duration:1.6s !important; animation-iteration-count:infinite !important;}
 }

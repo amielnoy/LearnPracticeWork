@@ -20,6 +20,8 @@
  * be half-implemented here.
  */
 
+@import './foundation.css';
+
 @theme inline {
   --color-primary: var(--slide-primary);
   --color-accent: var(--slide-accent);
@@ -39,6 +41,13 @@
   --slide-muted: #64748b;
   --font-display-family: 'Inter', system-ui, sans-serif;
   --font-body-family: 'Inter', system-ui, sans-serif;
+
+  /* The focus ring and the shadow tint the shared foundation reads. A deck is
+     navigated from the keyboard as often as from a click — arrow keys, tab to
+     the controls — so the ring is the deck's own accent rather than the
+     foundation's fallback. */
+  --ds-ring: var(--slide-accent);
+  --ds-shadow-tint: 215deg 25% 27%;
 
   /* Tells the engine which way the UA-painted parts go — form controls,
      scrollbars, the canvas behind the slide. */

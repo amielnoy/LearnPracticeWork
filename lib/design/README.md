@@ -12,7 +12,8 @@ decks.
 
 | File | What it is |
 |---|---|
-| `theme.css` | The `@theme inline` bridge: `--ds-*` in, Tailwind utilities out. Imports the other three. |
+| `foundation.css` | The floor: keyboard focus, reduced motion, motion tokens, elevation. Plain CSS — no Tailwind needed |
+| `theme.css` | The `@theme inline` bridge: `--ds-*` in, Tailwind utilities out. Imports the rest. |
 | `scale.css` | Type scale, radius steps, elevation alphas, and the borders derived from a fill |
 | `elevate.css` | Hover / active / toggled states, painted as a translucent layer |
 | `controls.css` | Two form-control defaults every app wanted |
@@ -76,11 +77,44 @@ palette change cannot leave a button outlined in a colour from the old one.
 Themes are selected by `.dark` or `[data-theme='dark']` — the shared layers
 answer to both, and an app picks whichever its own code sets.
 
-## The academy is not a consumer
+## The floor
 
-`artifacts/ai-testing-academy` is hand-written CSS. It loads `src/app.css` and
-nothing else — no Tailwind, no bridge — and its palette is documented in place,
-including the contrast measurements behind three of its colours.
+`foundation.css` is the part every app takes, including the ones that do not use
+Tailwind. It is plain CSS: no `@theme`, no `@apply`, nothing to compile.
+
+It contains one keyboard focus ring, one reduced-motion guard, three motion
+durations with one easing curve, and a three-step elevation scale tinted by a
+token rather than fixed to grey.
+
+None of it is new design. Three of those four were already written, and written
+well, in the academy's `app.css` — and *only* there. The ten lecture decks and
+the sandbox had no visible keyboard focus and no reduced-motion handling at all,
+which is exactly the failure a design system exists to prevent: a floor that
+holds in the app someone thought about, and nowhere else. So the good version
+was promoted rather than reinvented, and the academy now takes it back from here
+instead of keeping its own copy.
+
+Two details worth knowing:
+
+- The focus selector is wrapped in `:where()`, so it carries no specificity and
+  an app overrides it with a single class. That cuts both ways: a rule like
+  `input:focus { outline: none }` outranks it, and the academy had exactly that
+  — it is now written as `input:focus:not(:focus-visible)`, so the pointer gets
+  no ring and the keyboard does.
+- Reduced motion is enforced with a blanket rule, because per-transition
+  discipline is what the decks proved nobody keeps.
+  `[data-motion="essential"]` is the way out for the one case where movement is
+  the message: a spinner that does not spin is not calmer, it is broken. It is
+  slowed to 1.6s rather than stopped.
+
+## The academy is not a Tailwind consumer
+
+`artifacts/ai-testing-academy` is hand-written CSS. It loads `src/app.css`, and
+the only thing that file imports is `foundation.css` above — no Tailwind, no
+bridge. Its palette is documented in place, including the contrast measurements
+behind three of its colours, and it aliases `--ds-accent`, `--ds-ring` and
+`--ds-shadow-tint` onto that palette so the shared floor resolves to its
+colours.
 
 It had a copy of the shadcn boilerplate in `src/index.css` whose every token was
 the literal word `red` with a note to replace it, plus a `.dark` block keyed on a
