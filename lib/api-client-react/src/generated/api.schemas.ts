@@ -137,6 +137,39 @@ export interface EntitlementResponse {
   purchasedAt: string | null;
 }
 
+/**
+ * @nullable
+ */
+export type ProgressLastTool = (typeof ProgressLastTool)[keyof typeof ProgressLastTool] | null;
+
+export const ProgressLastTool = {
+  resume: 'resume',
+  interview: 'interview',
+  practice: 'practice',
+} as const;
+
+export interface Progress {
+  resumeStarted: boolean;
+  resumeCompleted: boolean;
+  interviewStarted: boolean;
+  /**
+   * @minimum 0
+   * @maximum 10000
+   */
+  interviewAnswers: number;
+  interviewCompleted: boolean;
+  /** @maxItems 500 */
+  practiceCompleted: string[];
+  /** @maxItems 500 */
+  lecturesViewed: string[];
+  /** @nullable */
+  lastTool: ProgressLastTool;
+}
+
+export interface ProgressResponse {
+  progress: Progress;
+}
+
 export interface ContentError {
   error: string;
 }

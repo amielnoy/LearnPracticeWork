@@ -2,19 +2,23 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import time
 
 from fastapi import APIRouter, Request, Response
 from pydantic import ValidationError
 
+from ..activity import note_login
 from ..config import env
+from ..database import record_sign_in
 from ..dependencies import SessionUser, client_ip, login_limiter
 from ..errors import error_response
 from ..google_auth import GoogleUser, verify_google_id_token
-from ..metrics import observe_login
 from ..schemas import GoogleLogin
 from ..sessions import COOKIE_NAME, create_session, sessions_configured
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth")
 
@@ -39,23 +43,30 @@ async def auth_config() -> dict[str, str]:
 @router.post("/google")
 async def google_login(request: Request, response: Response):
     if not env("GOOGLE_CLIENT_ID") or not sessions_configured():
-        observe_login(request, None, "unconfigured")
+        await note_login(request, None, "unconfigured")
         return error_response(NOT_CONFIGURED, 503)
     allowed, _ = await login_limiter.hit(client_ip(request))
     if not allowed:
-        observe_login(request, None, "rate_limited")
+        await note_login(request, None, "rate_limited")
         return error_response("Too many sign-in attempts. Please try again later.", 429)
     try:
         body = GoogleLogin.model_validate(await request.json())
     except (ValidationError, ValueError):
-        observe_login(request, None, "invalid_request")
+        await note_login(request, None, "invalid_request")
         return error_response("Invalid request body", 400)
     user = await verify_google_id_token(body.credential)
     if not user:
-        observe_login(request, None, "rejected")
+        await note_login(request, None, "rejected")
         return error_response("Google sign-in could not be verified.", 401)
     _issue_session_cookie(response, user)
-    observe_login(request, user.email, "success")
+    # The account row, and the moment a purchase made at checkout can finally be
+    # attached to the person who made it. Failing to write it must not fail a
+    # sign-in that Google has already verified.
+    try:
+        await record_sign_in(user.subject, user.email)
+    except Exception:
+        logger.exception("Could not record a sign-in for an authenticated user")
+    await note_login(request, user, "success")
     return {"user": public_user(user)}
 
 

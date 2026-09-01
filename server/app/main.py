@@ -43,7 +43,7 @@ def _install_cors(app: FastAPI) -> None:
         allow_origins=cors_allow_origins(),
         allow_origin_regex=cors_allow_origin_regex(),
         allow_credentials=True,
-        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization", "Stripe-Signature"],
         max_age=600,
     )

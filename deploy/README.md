@@ -24,6 +24,30 @@ lockfile rather than whatever a hosted build would resolve today.
 
 [bo]: https://vercel.com/docs/build-output-api/v3
 
+### If a Vercel project starts building this repo on its own
+
+For a while, every push here produced a red deployment alongside the green one
+that actually shipped, failing with *No Output Directory named "public" found*.
+The cause was not this repository: a Vercel project named
+`home-economy-stabilation` — which belongs to an entirely different codebase —
+had its Git integration pointed at **this** repo, so it dutifully built twelve
+Vite apps and then looked for a single `public/` that only exists after the
+workflow's assembly step. Disconnecting it in that project's Vercel settings
+fixed it at the source.
+
+Reach for that fix first. The repo-level lever, `git.deploymentEnabled: false`
+in a root `vercel.json`, looks tempting and is almost always wrong here: Vercel
+reads it per *repository*, not per project, so it silences every project linked
+to this repo at once. This repo has more than one, and at least one of them
+deploys successfully — turning them all off to quiet a single misconfigured
+project trades a visible problem for an invisible one.
+
+Per-project control lives in the project: **Settings → Git** to disconnect, or
+an Ignored Build Step to skip builds conditionally.
+
+None of this touches what CI ships. `--prebuilt` serves the routes in
+`.vercel/output/config.json` and never reads a root `vercel.json` at all.
+
 The academy is the site: it is what the root URL serves, with the portfolio at
 `/portfolio/` and the ten decks at `/ai-testing-lecture-N/`. Each app gets a
 `BASE_PATH` matching where it is mounted, because Vite bakes it into every asset
@@ -75,12 +99,17 @@ Until all three exist, a push to `main` fails the deploy loudly and a pull
 request skips it with a note. Nothing is published from a workflow that cannot
 authenticate.
 
-Two repository **variables** are read at build time:
+Three repository **variables** are read at deploy time:
 
 | Variable | Effect |
 |---|---|
+| `API_ORIGIN` | Where `/api/*` is proxied. Unset, those paths answer `503` instead of being swallowed by the SPA catch-all — see `deploy/vercel/README.md` |
 | `VITE_GOOGLE_CLIENT_ID` | Inlined into the academy bundle; sign-in renders nothing without it |
 | `VERCEL_SITE_ORIGIN` | The deployed origin. Sets `VITE_SITE_ORIGIN` for the twenty lecture links, and is what CI links the architecture page from |
+
+Proxying rather than pointing the client at another host is deliberate: the
+browser sees one origin, so the login cookie stays first-party (`SameSite=Lax`)
+and CORS never applies. It is the same shape as the Replit relay.
 
 ### After the origin changes
 
@@ -213,16 +242,60 @@ price, product, amount, currency, course SKU, and terms version all match. Keep 
 until local counsel/tax advice confirms the displayed identity, cancellation, invoice, GST and
 VAT treatment for the selling entity.
 
-`SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints. Generate the
-content seed SQL with:
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints.
 
-```bash
-pnpm --filter @workspace/scripts exec tsx src/extract-academy-content.ts
-pnpm --filter @workspace/scripts exec tsx src/generate-academy-seed-sql.ts
+### Seeding the academy content
+
+The three collections — question bank, coding challenges, lecture series — live in the client's
+TypeScript sources and are extracted from there. Regenerate, then apply:
+
+Put the database password in `.env.local` — that file is git-ignored, unlike `.env`, which
+this repository commits on purpose for public build-time config:
+
+```
+SUPABASE_DB_PASSWORD=…
 ```
 
-Apply the generated SQL to the Supabase database before switching a client to the API; an
-empty or unavailable store is reported as a controlled `503`, not as fabricated content.
+It is the only value you have to supply. The host and role come from `server/app/config.py`,
+so the seed lands in the database the API reads.
+
+```bash
+# 1. Extract from the TS sources and generate the SQL. Re-run both after any
+#    content edit; the generated files are committed, and drift is silent.
+pnpm --filter @workspace/scripts exec tsx src/extract-academy-content.ts
+pnpm --filter @workspace/scripts exec tsx src/generate-academy-seed-sql.ts
+
+# 2. Apply the schema, apply the seed, then count what landed.
+pnpm --filter @workspace/scripts run seed:academy
+```
+
+`seed:academy` uses `psql` when it is installed and the same client out of a container when it
+is not, so Docker is enough. The password goes through the environment, never the command
+line, and a password found in a git-tracked file is refused rather than used. `--schema-only`,
+`--seed-only` and `--check` (count and stop) narrow what it does.
+
+`DATABASE_URL` overrides the composed connection. Use the **session pooler on 5432**, not the
+transaction pooler on 6543: the seed is one long transaction ending in `setval` calls.
+
+Without a terminal at all, paste `academy-schema.sql` into the Supabase SQL editor, then the 38
+`seed-chunk-*.sql` files in order — they exist because the editor rejects a single statement
+list this long.
+
+What each step is for, and what breaks without it:
+
+| | Why it matters |
+|---|---|
+| `academy-schema.sql` | Nothing else creates these tables. It also grants `select` to `anon` and adds a read policy — the API reads with the anon key, so without both the tables are full and every response is empty |
+| identity columns | The seed's last six lines call `setval('<table>_id_seq', …)` so a hand-added row cannot collide with a seeded id. Plain `bigint` columns have no sequence, and those calls abort the whole transaction |
+| `academy-seed.sql` | 150 question items, 80 coding challenges and 40 lecture items, in both languages |
+
+`tests/unit/contentSchema.spec.ts` holds the schema, the seed and `content_store.py` to the
+same column names — a rename in one of the three is otherwise reported as a `503` that reads
+like an outage.
+
+An empty or unavailable store is reported as a controlled `503`, not as fabricated content, and
+the academy falls back to its bundled copy of the same content — so a missing seed is invisible
+to a visitor and equally invisible to whoever deployed it.
 
 Configure Stripe to send events to `https://<app>.fly.dev/api/stripe/webhook`. The webhook
 secret is verified against the raw request body. Stripe credentials are read only from the

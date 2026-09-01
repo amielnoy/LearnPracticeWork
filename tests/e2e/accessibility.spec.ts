@@ -4,6 +4,37 @@ import { test, expect } from './fixtures';
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'];
 
 async function expectNoWcagViolations(page: import('@playwright/test').Page) {
+  // axe measures rendered colour, so it has to run against a page that has
+  // finished styling itself. `page.goto` resolves on `load`, which fires before
+  // `main.tsx` has run — and axe sampling that gap reports every text node on
+  // the page as a contrast failure at once, which is what made this spec flake
+  // in CI.
+  //
+  // Waiting for a landmark is not enough, and this is the trap: `index.html`
+  // ships a static prerender inside `#root` that already contains
+  // `<main id="main-content">`, so `getByRole('main')` resolves against markup
+  // that is present before any script runs.
+  //
+  // The page carries no inline `<style>`, so `body` keeps the UA's transparent
+  // background until `app.css` — imported by `main.tsx` — is applied, at which
+  // point it becomes `var(--bg)`. A painted background is therefore proof that
+  // the stylesheet axe is about to measure is live, in dev (injected by Vite)
+  // and in a production build (a real stylesheet link) alike. The prerender
+  // marker disappearing is the second half: `createRoot().render()` replaces
+  // `#root` wholesale rather than hydrating it, so its absence means the React
+  // tree — not the crawler shell — is what is on screen.
+  await page.waitForFunction(() => {
+    const painted = !['', 'transparent', 'rgba(0, 0, 0, 0)'].includes(
+      getComputedStyle(document.body).backgroundColor,
+    );
+    const mounted = !document.getElementById('root')?.innerHTML.includes('PRERENDER:START');
+    return painted && mounted;
+  });
+
+  // Webfonts decide the final glyphs, so a swap mid-scan could move text onto a
+  // different background.
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+
   const result = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   expect(
     result.violations.map(violation => ({

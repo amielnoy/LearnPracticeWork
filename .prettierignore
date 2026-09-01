@@ -16,3 +16,10 @@ pnpm-lock.yaml
 
 # Pasted material kept verbatim as a record of what was received.
 attached_assets/
+
+# Written by mockupPreviewPlugin.ts on every sandbox build. Formatting it is a
+# fight nobody wins: Prettier rewrites it, the next build writes it back, and
+# whoever built last commits the difference — which is exactly how it reached
+# `main` and failed the Format gate there. It stays committed because a fresh
+# checkout has to typecheck before anything has run the plugin.
+artifacts/*/src/.generated/

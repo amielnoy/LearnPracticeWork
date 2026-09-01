@@ -188,12 +188,17 @@ jobs:
       # is what `--prebuilt` uploads, so the routes in config.json are the ones
       # that serve the deployment.
       - name: Lay out the Vercel build output
+        env:
+          API_ORIGIN: ${{ vars.API_ORIGIN }}
         run: |
           set -euo pipefail
           rm -rf .vercel/output
           mkdir -p .vercel/output
           cp -R _site .vercel/output/static
-          cp deploy/vercel/config.json .vercel/output/config.json
+          # The route table plus the one decision that cannot be committed:
+          # where /api/* goes. Unset, it answers 503 rather than letting the
+          # SPA catch-all hand an API call the academy's HTML shell at 200.
+          node deploy/vercel/build-config.mjs .vercel/output/config.json
           echo "Static files: $(find .vercel/output/static -type f | wc -l)"
 
       # `--prod` on main, a preview deployment everywhere else. The URL the CLI
@@ -239,6 +244,71 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
+
+          # `vercel deploy` prints the URL as soon as the deployment is created,
+          # which is before the edge is necessarily serving it — the first
+          # request can answer 404 against a deployment that is seconds from
+          # being live. That is exactly what reddened run 32950109049: the URL
+          # was printed at 08:55:32.801 and the check failed at 08:55:33.095,
+          # 294ms later, on a deployment that answers 302 to this day.
+          #
+          # So wait for the root to stop 404-ing before asserting anything. A
+          # public production deployment (200) and a protected preview (302 to
+          # the SSO endpoint) are both "ready"; only 404 — or a connection
+          # failure, which curl reports as 000 — means the edge has not caught
+          # up yet.
+          wait_for_deployment() {
+            local attempts=30 delay=2 attempt code=000
+            for attempt in $(seq 1 "$attempts"); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${URL}/" || true)
+              case "${code:-000}" in
+                404|000) sleep "$delay" ;;
+                *) echo "Deployment reachable after ${attempt} attempt(s) (/ → $code)."; return 0 ;;
+              esac
+            done
+            # 000 is curl's "no response at all", which is a different failure
+            # from a deployment that exists and answers 404 — say which.
+            case "${code:-000}" in
+              000) echo "::error::${URL}/ never responded in $((attempts * delay))s — host unreachable." ;;
+              *)   echo "::error::${URL}/ still returns $code after $((attempts * delay))s — the deployment never became reachable." ;;
+            esac
+            return 1
+          }
+          wait_for_deployment
+
+          # Preview deployments are protected (ssoProtection: preview), so every
+          # path answers with Vercel's login redirect and none of the route
+          # assertions below can run. Assert what is true there instead: the
+          # deployment exists and is protected. Production is public and gets
+          # the full pass.
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            # One request, both facts. Two separate curls can land on different
+            # states and disagree about what this deployment did.
+            headers=$(curl -sSI --max-time 30 "${URL}/" | tr -d '\r')
+            code=$(printf '%s\n' "$headers" \
+              | awk 'toupper($1) ~ /^HTTP/ { print $2; exit }')
+            location=$(printf '%s\n' "$headers" \
+              | awk -F': ' 'tolower($1)=="location"{print $2}')
+            case "$code:$location" in
+              30?:https://vercel.com/sso-api*)
+                echo "✅ preview deployed and protected by Vercel Authentication"
+                exit 0 ;;
+              # Deployment Protection does not always answer with the redirect.
+              # A non-browser client — which `curl -I` is — gets a bare 401
+              # challenge in several configurations, and that is the protection
+              # working, not a broken deployment.
+              401:*)
+                echo "✅ preview deployed and protected (401 challenge)"
+                exit 0 ;;
+              200:*)
+                echo "::warning::This preview is public — expected Vercel Authentication."
+                ;;
+              *)
+                echo "::error::Preview returned $code (location: ${location:-none})."
+                exit 1 ;;
+            esac
+          fi
+
           check() { # path, expected status, what it proves
             code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "${URL}$1")
             if [ "$code" = "$2" ]; then
@@ -266,6 +336,17 @@ jobs:
               *) echo "::error::${asset} cache-control is '${cache}', expected immutable."; fail=1 ;;
             esac
           fi
+
+          # The failure this is here for is silent: an API path answered by the
+          # HTML shell at 200 makes the client conclude there is no server.
+          api_type=$(curl -sSI --max-time 30 "${URL}/api/ai/config" | tr -d '\r' \
+            | awk -F': ' 'tolower($1)=="content-type"{print $2}')
+          case "$api_type" in
+            *text/html*)
+              echo "::error::/api/ai/config is served as HTML — the SPA catch-all is answering it."
+              fail=1 ;;
+            *) echo "✅ /api/ai/config → ${api_type:-no content-type} (not the SPA shell)" ;;
+          esac
 
           csp=$(curl -sSI --max-time 30 "${URL}/" | tr -d '\r' \
             | awk -F': ' 'tolower($1)=="content-security-policy"{print $2}')
