@@ -169,6 +169,106 @@ export const GetCourseEntitlementResponse = zod.object({
 });
 
 /**
+ * The copy kept for the account, which is not necessarily the copy the device is showing — a browser tracks progress for everyone and only syncs it for someone signed in.
+
+ * @summary Read the signed-in reader's stored progress
+ */
+export const getProgressResponseProgressInterviewAnswersMin = 0;
+export const getProgressResponseProgressInterviewAnswersMax = 10000;
+
+export const getProgressResponseProgressPracticeCompletedMax = 500;
+
+export const getProgressResponseProgressLecturesViewedMax = 500;
+
+export const GetProgressResponse = zod.object({
+  progress: zod.object({
+    resumeStarted: zod.boolean(),
+    resumeCompleted: zod.boolean(),
+    interviewStarted: zod.boolean(),
+    interviewAnswers: zod
+      .number()
+      .min(getProgressResponseProgressInterviewAnswersMin)
+      .max(getProgressResponseProgressInterviewAnswersMax),
+    interviewCompleted: zod.boolean(),
+    practiceCompleted: zod.array(zod.string()).max(getProgressResponseProgressPracticeCompletedMax),
+    lecturesViewed: zod.array(zod.string()).max(getProgressResponseProgressLecturesViewedMax),
+    lastTool: zod
+      .union([
+        zod.literal('resume'),
+        zod.literal('interview'),
+        zod.literal('practice'),
+        zod.literal(null),
+      ])
+      .nullable(),
+  }),
+});
+
+/**
+ * A union, not a replacement: booleans are OR-ed, the answer counter takes the larger value, and the two id lists are combined. The response is the result, so a device that knew less does not get its own copy back and a second device cannot discard what the first one recorded.
+
+ * @summary Merge a device's progress into the stored copy
+ */
+export const mergeProgressBodyInterviewAnswersMin = 0;
+export const mergeProgressBodyInterviewAnswersMax = 10000;
+
+export const mergeProgressBodyPracticeCompletedMax = 500;
+
+export const mergeProgressBodyLecturesViewedMax = 500;
+
+export const MergeProgressBody = zod.object({
+  resumeStarted: zod.boolean(),
+  resumeCompleted: zod.boolean(),
+  interviewStarted: zod.boolean(),
+  interviewAnswers: zod
+    .number()
+    .min(mergeProgressBodyInterviewAnswersMin)
+    .max(mergeProgressBodyInterviewAnswersMax),
+  interviewCompleted: zod.boolean(),
+  practiceCompleted: zod.array(zod.string()).max(mergeProgressBodyPracticeCompletedMax),
+  lecturesViewed: zod.array(zod.string()).max(mergeProgressBodyLecturesViewedMax),
+  lastTool: zod
+    .union([
+      zod.literal('resume'),
+      zod.literal('interview'),
+      zod.literal('practice'),
+      zod.literal(null),
+    ])
+    .nullable(),
+});
+
+export const mergeProgressResponseProgressInterviewAnswersMin = 0;
+export const mergeProgressResponseProgressInterviewAnswersMax = 10000;
+
+export const mergeProgressResponseProgressPracticeCompletedMax = 500;
+
+export const mergeProgressResponseProgressLecturesViewedMax = 500;
+
+export const MergeProgressResponse = zod.object({
+  progress: zod.object({
+    resumeStarted: zod.boolean(),
+    resumeCompleted: zod.boolean(),
+    interviewStarted: zod.boolean(),
+    interviewAnswers: zod
+      .number()
+      .min(mergeProgressResponseProgressInterviewAnswersMin)
+      .max(mergeProgressResponseProgressInterviewAnswersMax),
+    interviewCompleted: zod.boolean(),
+    practiceCompleted: zod
+      .array(zod.string())
+      .max(mergeProgressResponseProgressPracticeCompletedMax),
+    lecturesViewed: zod.array(zod.string()).max(mergeProgressResponseProgressLecturesViewedMax),
+    lastTool: zod
+      .union([
+        zod.literal('resume'),
+        zod.literal('interview'),
+        zod.literal('practice'),
+        zod.literal(null),
+      ])
+      .nullable(),
+  }),
+});
+
+/**
  * Stages of interview questions, in reading order. Served from the content store so the bank can change without a redeploy.
 
  * @summary Interview question bank

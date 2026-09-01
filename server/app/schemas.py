@@ -12,6 +12,11 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 MAX_PROMPT_CHARACTERS = 60_000
 
+# Mirrors `database.MAX_PROGRESS_IDS`; the ids themselves are lecture and
+# practice-item keys, which are short by construction.
+MAX_PROGRESS_IDS = 500
+MAX_PROGRESS_ID_LENGTH = 200
+
 
 class GoogleLogin(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -40,6 +45,36 @@ class GenerateBody(BaseModel):
             raise ValueError(
                 f"Combined prompt content must not exceed {MAX_PROMPT_CHARACTERS} characters"
             )
+        return self
+
+
+class ProgressBody(BaseModel):
+    """One device's copy of a reader's progress, on its way to being merged.
+
+    The bounds are the point. Every field here starts life in `localStorage`,
+    which the person holding the browser can edit, and the two lists are stored
+    rather than rendered — so what is guarded is the size of the row, not what
+    is in it. The client caps the same two lists at the same 500.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    resumeStarted: bool = False
+    resumeCompleted: bool = False
+    interviewStarted: bool = False
+    interviewAnswers: int = Field(default=0, ge=0, le=10_000)
+    interviewCompleted: bool = False
+    practiceCompleted: list[str] = Field(default_factory=list, max_length=MAX_PROGRESS_IDS)
+    lecturesViewed: list[str] = Field(default_factory=list, max_length=MAX_PROGRESS_IDS)
+    lastTool: Literal["resume", "interview", "practice"] | None = None
+
+    @model_validator(mode="after")
+    def bounded_ids(self):
+        for name in ("practiceCompleted", "lecturesViewed"):
+            for value in getattr(self, name):
+                if not value or len(value) > MAX_PROGRESS_ID_LENGTH:
+                    raise ValueError(
+                        f"{name} entries must be 1 to {MAX_PROGRESS_ID_LENGTH} characters"
+                    )
         return self
 
 

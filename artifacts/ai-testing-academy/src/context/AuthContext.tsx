@@ -215,3 +215,15 @@ export function useAuth(): AuthContextValue {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
+
+/**
+ * The signed-in reader, for a consumer that works either way.
+ *
+ * `ProgressContext` is the case this exists for: it tracks progress for
+ * everyone and only syncs it for someone with an account, so being mounted
+ * without an `AuthProvider` — which is how most component tests mount it — is
+ * an ordinary state and not the programming error `useAuth` reports.
+ */
+export function useOptionalAuth(): AuthContextValue | null {
+  return useContext(AuthContext);
+}

@@ -18,6 +18,8 @@ tags:
     description: Bounded AI-provider configuration and generation
   - name: payments
     description: Server-authorized Stripe catalog, checkout, webhook, and entitlement operations
+  - name: progress
+    description: What a signed-in reader has finished, merged across their devices
 paths:
   /healthz:
     get:
@@ -240,6 +242,58 @@ paths:
                 $ref: "#/components/schemas/EntitlementResponse"
         "401":
           $ref: "#/components/responses/RequestError"
+        "500":
+          $ref: "#/components/responses/RequestError"
+        "503":
+          $ref: "#/components/responses/RequestError"
+  /progress:
+    get:
+      operationId: getProgress
+      tags: [progress]
+      summary: Read the signed-in reader's stored progress
+      description: >
+        The copy kept for the account, which is not necessarily the copy the
+        device is showing — a browser tracks progress for everyone and only
+        syncs it for someone signed in.
+      responses:
+        "200":
+          description: Stored progress.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "500":
+          $ref: "#/components/responses/RequestError"
+        "503":
+          $ref: "#/components/responses/RequestError"
+    put:
+      operationId: mergeProgress
+      tags: [progress]
+      summary: Merge a device's progress into the stored copy
+      description: >
+        A union, not a replacement: booleans are OR-ed, the answer counter takes
+        the larger value, and the two id lists are combined. The response is the
+        result, so a device that knew less does not get its own copy back and a
+        second device cannot discard what the first one recorded.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Progress"
+      responses:
+        "200":
+          description: The merged progress.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "400":
+          $ref: "#/components/responses/RequestError"
+        "401":
+          $ref: "#/components/responses/AuthError"
         "500":
           $ref: "#/components/responses/RequestError"
         "503":
@@ -591,6 +645,49 @@ components:
           type: [string, "null"]
           format: date-time
       required: [hasAccess, purchasedAt]
+    Progress:
+      type: object
+      properties:
+        resumeStarted:
+          type: boolean
+        resumeCompleted:
+          type: boolean
+        interviewStarted:
+          type: boolean
+        interviewAnswers:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        interviewCompleted:
+          type: boolean
+        practiceCompleted:
+          type: array
+          maxItems: 500
+          items:
+            type: string
+        lecturesViewed:
+          type: array
+          maxItems: 500
+          items:
+            type: string
+        lastTool:
+          type: [string, "null"]
+          enum: [resume, interview, practice, null]
+      required:
+        - resumeStarted
+        - resumeCompleted
+        - interviewStarted
+        - interviewAnswers
+        - interviewCompleted
+        - practiceCompleted
+        - lecturesViewed
+        - lastTool
+    ProgressResponse:
+      type: object
+      properties:
+        progress:
+          $ref: "#/components/schemas/Progress"
+      required: [progress]
     ContentError:
       type: object
       properties:
