@@ -7,6 +7,9 @@ import { test, expect } from '../support/test';
  * Three files describe the academy's content tables and none of them imports
  * the others: `content_store.py` asks PostgREST for exact `select=` lists,
  * `academy-schema.sql` creates the columns, and `academy-seed.sql` fills them.
+ * `lecture_examples` is checked here too — the decks read it directly rather
+ * than through the API, so it has no `select=` list, but it still has to be
+ * created and filled by the same two files.
  *
  * A rename made in one of the three is not an error anywhere — the seed
  * succeeds, the tables exist, and the API returns a 503 that reads like an
@@ -84,6 +87,7 @@ test('the schema covers all three collections, parents and children', () => {
     [
       'coding_challenge_levels',
       'coding_challenges',
+      'lecture_examples',
       'lecture_items',
       'lecture_tracks',
       'question_bank_items',
@@ -133,5 +137,5 @@ test('reads are granted to the anon role the API uses', () => {
   // tables are full and every response is empty.
   expect(schema).toContain('grant select on table %I to anon');
   expect(schema).toContain('for select using (true)');
-  expect(schema.match(/enable row level security/g) ?? []).toHaveLength(6);
+  expect(schema.match(/enable row level security/g) ?? []).toHaveLength(7);
 });
