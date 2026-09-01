@@ -38,6 +38,8 @@ import type {
   HealthStatus,
   LectureSeries,
   LogoutResponse,
+  Progress,
+  ProgressResponse,
   QuestionBank,
   ReadinessStatus,
   RequestErrorResponse,
@@ -804,6 +806,152 @@ export function useGetCourseEntitlement<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * The copy kept for the account, which is not necessarily the copy the device is showing — a browser tracks progress for everyone and only syncs it for someone signed in.
+
+ * @summary Read the signed-in reader's stored progress
+ */
+export const getGetProgressUrl = () => {
+  return `/api/progress`;
+};
+
+export const getProgress = async (options?: RequestInit): Promise<ProgressResponse> => {
+  return customFetch<ProgressResponse>(getGetProgressUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetProgressQueryKey = () => {
+  return [`/api/progress`] as const;
+};
+
+export const getGetProgressQueryOptions = <
+  TData = Awaited<ReturnType<typeof getProgress>>,
+  TError = ErrorType<AuthErrorResponse | RequestErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getProgress>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetProgressQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getProgress>>> = ({ signal }) =>
+    getProgress({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getProgress>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetProgressQueryResult = NonNullable<Awaited<ReturnType<typeof getProgress>>>;
+export type GetProgressQueryError = ErrorType<AuthErrorResponse | RequestErrorResponse>;
+
+/**
+ * @summary Read the signed-in reader's stored progress
+ */
+
+export function useGetProgress<
+  TData = Awaited<ReturnType<typeof getProgress>>,
+  TError = ErrorType<AuthErrorResponse | RequestErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getProgress>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetProgressQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * A union, not a replacement: booleans are OR-ed, the answer counter takes the larger value, and the two id lists are combined. The response is the result, so a device that knew less does not get its own copy back and a second device cannot discard what the first one recorded.
+
+ * @summary Merge a device's progress into the stored copy
+ */
+export const getMergeProgressUrl = () => {
+  return `/api/progress`;
+};
+
+export const mergeProgress = async (
+  progress: Progress,
+  options?: RequestInit,
+): Promise<ProgressResponse> => {
+  return customFetch<ProgressResponse>(getMergeProgressUrl(), {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(progress),
+  });
+};
+
+export const getMergeProgressMutationOptions = <
+  TError = ErrorType<RequestErrorResponse | AuthErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof mergeProgress>>,
+    TError,
+    { data: BodyType<Progress> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof mergeProgress>>,
+  TError,
+  { data: BodyType<Progress> },
+  TContext
+> => {
+  const mutationKey = ['mergeProgress'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof mergeProgress>>,
+    { data: BodyType<Progress> }
+  > = props => {
+    const { data } = props ?? {};
+
+    return mergeProgress(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MergeProgressMutationResult = NonNullable<Awaited<ReturnType<typeof mergeProgress>>>;
+export type MergeProgressMutationBody = BodyType<Progress>;
+export type MergeProgressMutationError = ErrorType<RequestErrorResponse | AuthErrorResponse>;
+
+/**
+ * @summary Merge a device's progress into the stored copy
+ */
+export const useMergeProgress = <
+  TError = ErrorType<RequestErrorResponse | AuthErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof mergeProgress>>,
+    TError,
+    { data: BodyType<Progress> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof mergeProgress>>,
+  TError,
+  { data: BodyType<Progress> },
+  TContext
+> => {
+  return useMutation(getMergeProgressMutationOptions(options));
+};
 
 /**
  * Stages of interview questions, in reading order. Served from the content store so the bank can change without a redeploy.

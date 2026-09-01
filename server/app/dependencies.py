@@ -27,11 +27,14 @@ from .database import (
     find_course_access,
     find_course_purchase,
     list_course_purchases,
+    load_progress,
+    merge_progress,
     record_purchase,
 )
 from .entitlements import EntitlementService
 from .errors import ServiceError
 from .google_auth import GoogleUser, verify_google_id_token
+from .progress import ProgressService
 from .rate_limit import SharedRateLimiter
 from .sessions import read_session
 from .settings import BURST_LIMIT, BURST_WINDOW, DAILY_QUOTA, TRUSTED_PROXY_HOPS
@@ -173,6 +176,10 @@ def get_entitlement_service() -> EntitlementService:
     return EntitlementService(find_course_access)
 
 
+def get_progress_service() -> ProgressService:
+    return ProgressService(load_progress, merge_progress)
+
+
 CurrentUser = Annotated[GoogleUser | None, Depends(current_user)]
 SessionUser = Annotated[GoogleUser | None, Depends(session_user)]
 Catalog = Annotated[CourseCatalog | None, Depends(get_catalog)]
@@ -181,6 +188,7 @@ Content = Annotated[ContentService, Depends(get_content_service)]
 Stripe = Annotated[StripeGateway, Depends(get_stripe_gateway)]
 Purchases = Annotated[PurchaseRecorder, Depends(get_purchase_recorder)]
 Entitlements = Annotated[EntitlementService, Depends(get_entitlement_service)]
+Progress = Annotated[ProgressService, Depends(get_progress_service)]
 DatabaseProbe = Annotated[DatabaseProbeFn, Depends(get_database_probe)]
 Customers = Annotated[CustomerService, Depends(get_customer_service)]
 Recommendations = Annotated[RecommendationService, Depends(get_recommendation_service)]

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from . import admin, ai, auth, commerce, content, entitlements, ops
+from . import admin, ai, auth, commerce, content, entitlements, ops, progress
 
 ROUTERS: tuple[APIRouter, ...] = (
     ops.router,
@@ -17,6 +17,7 @@ ROUTERS: tuple[APIRouter, ...] = (
     ai.router,
     commerce.router,
     entitlements.router,
+    progress.router,
     admin.router,
 )
 

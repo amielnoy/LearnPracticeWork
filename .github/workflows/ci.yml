@@ -165,12 +165,17 @@ jobs:
         if: ${{ !cancelled() }}
         run: ./run-all-tests.sh
 
-      - name: Publish test history to Prometheus
+      # Two destinations, both optional: the Pushgateway holds the latest run
+      # per branch for the dashboard, `test_runs` accumulates so a trend has
+      # something to be a trend across. A missing secret disables that half and
+      # says so; neither can fail the build.
+      - name: Publish test history
         if: ${{ !cancelled() }}
         env:
           PUSHGATEWAY_URL: ${{ secrets.PUSHGATEWAY_URL }}
           PUSHGATEWAY_USERNAME: ${{ secrets.PUSHGATEWAY_USERNAME }}
           PUSHGATEWAY_PASSWORD: ${{ secrets.PUSHGATEWAY_PASSWORD }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: pnpm --filter @workspace/api-server run publish:test-metrics
 
       - name: Link Grafana in the run summary
