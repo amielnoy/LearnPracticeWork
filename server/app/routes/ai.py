@@ -6,9 +6,10 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
+from ..activity import note_ai
 from ..dependencies import Ai, SessionUser, burst_limiter, daily_limiter, quota_key
 from ..errors import error_response, validation_issues
-from ..metrics import observe_ai
+from ..google_auth import GoogleUser
 from ..schemas import GenerateBody
 from ..settings import DAILY_QUOTA
 
@@ -24,19 +25,20 @@ async def ai_config(ai: Ai):
 
 @router.post("/generate")
 async def ai_generate(request: Request, ai: Ai, session: SessionUser):
-    email = session.email if session else None
     key = quota_key(request, session)
 
     burst_ok, _ = await burst_limiter.hit(key)
     if not burst_ok:
-        return _refuse(request, email, "Too many AI requests. Please wait before trying again.")
+        return await _refuse(
+            request, session, "Too many AI requests. Please wait before trying again."
+        )
 
     daily_ok, remaining = await daily_limiter.hit(key)
     headers = {"X-AI-Quota-Limit": str(DAILY_QUOTA), "X-AI-Quota-Remaining": str(remaining)}
     if not daily_ok:
-        return _refuse(
+        return await _refuse(
             request,
-            email,
+            session,
             "Daily AI request quota exceeded. Please try again tomorrow.",
             headers=headers,
         )
@@ -44,7 +46,7 @@ async def ai_generate(request: Request, ai: Ai, session: SessionUser):
     try:
         body = GenerateBody.model_validate(await request.json())
     except (ValidationError, ValueError) as exc:
-        observe_ai(request, provider=UNKNOWN, model=UNKNOWN, email=email, status=400)
+        await note_ai(request, provider=UNKNOWN, model=UNKNOWN, user=session, status=400)
         issues = validation_issues(exc.errors()) if isinstance(exc, ValidationError) else []
         return error_response("Invalid request body", 400, issues=issues, headers=headers)
 
@@ -56,23 +58,23 @@ async def ai_generate(request: Request, ai: Ai, session: SessionUser):
             headers["X-AI-Quota-Remaining"] = str(remaining)
     # Labelled with whoever actually answered, which after a fallback is not the
     # provider the request started with.
-    observe_ai(
+    await note_ai(
         request,
         provider=outcome.provider,
         model=outcome.model,
-        email=email,
+        user=session,
         status=outcome.status,
     )
     return JSONResponse(outcome.payload, status_code=outcome.status, headers=headers)
 
 
-def _refuse(
+async def _refuse(
     request: Request,
-    email: str | None,
+    session: GoogleUser | None,
     message: str,
     *,
     headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     """A throttled request never reaches a provider, so it has no provider labels."""
-    observe_ai(request, provider=UNKNOWN, model=UNKNOWN, email=email, status=429)
+    await note_ai(request, provider=UNKNOWN, model=UNKNOWN, user=session, status=429)
     return error_response(message, 429, headers=headers)
