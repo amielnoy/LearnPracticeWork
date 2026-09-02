@@ -158,17 +158,22 @@
      high priority via preload, but `media="print"` keeps it out of the render
      path until onload flips it to "all". `display=swap` means text paints in
      the fallback immediately rather than waiting on the webfont.
-     Weights are exactly the ones rendered (audited in the browser): 500 was
-     requested but never used, so it is gone. -->
+     Three families, each with a job. DM Sans sets Latin display and body —
+     it has no Hebrew, so Heebo sits behind it in every stack and picks up
+     Hebrew text on its own, which is how the site reads in both languages
+     from one declaration. JetBrains Mono carries the eyebrows, section
+     numbers and counters: the type was already asking for it and falling
+     back to Consolas.
+     Weights are exactly the ones rendered, nothing speculative. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style"
-  href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap">
+  href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Heebo:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap">
 <link rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap"
+  href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Heebo:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
   media="print" onload="this.media='all'">
 <noscript>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Heebo:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap">
 </noscript>
 </head>
 <body>

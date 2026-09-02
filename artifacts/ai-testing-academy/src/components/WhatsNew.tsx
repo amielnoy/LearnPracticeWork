@@ -15,7 +15,7 @@ export function WhatsNew() {
         className="card"
         style={{
           padding: '20px 24px',
-          background: 'linear-gradient(135deg, rgba(13,148,136,.1), rgba(30,58,95,.1))',
+          background: 'var(--bg2)',
         }}
       >
         <h3 style={{ margin: '0 0 12px', fontSize: '1.05rem' }}>{t.title}</h3>
