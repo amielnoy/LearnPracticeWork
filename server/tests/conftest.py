@@ -16,7 +16,7 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256
 
-from app import google_auth, relay
+from app import dependencies, google_auth, relay
 from app.dependencies import get_purchase_recorder, get_stripe_gateway
 from app.main import app
 
@@ -52,6 +52,34 @@ def isolated_auth(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     google_auth.reset_key_cache()
     yield
     google_auth.reset_key_cache()
+
+
+@pytest.fixture(autouse=True)
+def isolated_rate_limits() -> Iterator[None]:
+    """Give every test its own quota, because the limiters are process-wide.
+
+    `dependencies` builds four `SharedRateLimiter` singletons at import time,
+    and outside production they count in memory. So in a test process they are
+    shared by every test that touches a rate-limited route — and the sign-in
+    bucket allows ten attempts, which this suite spends long before it runs out
+    of tests. The eleventh got a 429 and failed on an assertion about something
+    else entirely.
+
+    Which test that was depended on how xdist distributed modules over workers,
+    so it passed locally and failed in CI on the same commit. `test_metrics`
+    was the one that lost the draw there; running with `-n0` moves it to
+    `test_progress` and `test_rate_limit_config` instead. None of them were
+    the test with the problem.
+    """
+    limiters = (
+        dependencies.burst_limiter,
+        dependencies.daily_limiter,
+        dependencies.admin_limiter,
+        dependencies.login_limiter,
+    )
+    for limiter in limiters:
+        limiter.reset()
+    yield
 
 
 @pytest.fixture(autouse=True)
