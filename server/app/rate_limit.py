@@ -57,6 +57,18 @@ class MemoryRateLimiter:
                 hits.pop()
             return max(0, self.limit - len(hits))
 
+    def reset(self) -> None:
+        """Forget every caller. A seam for tests, like `reset_key_cache`.
+
+        These limiters are module-level singletons, so in a test process they
+        are shared by every test that reaches a rate-limited route — and the
+        sign-in limiter allows ten attempts, which a suite passes long before
+        it runs out of tests. Whichever test happened to be the eleventh then
+        failed with a 429, and *which* test that was depended on how xdist had
+        distributed the modules across workers that run.
+        """
+        self._hits.clear()
+
 
 WhenUnavailable = Literal["refuse", "degrade"]
 
@@ -94,6 +106,11 @@ class SharedRateLimiter:
         self.when_unavailable = when_unavailable
         self.memory = MemoryRateLimiter(limit, window_seconds)
         self._warned: set[str] = set()
+
+    def reset(self) -> None:
+        """Drop the in-memory counts and the warned-once set."""
+        self.memory.reset()
+        self._warned.clear()
 
     async def release(self, key: str) -> int | None:
         """Give back a hit that bought the caller nothing, or None if it could not.

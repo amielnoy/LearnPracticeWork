@@ -37,6 +37,38 @@ async function waitUntilStyled(page: import('@playwright/test').Page) {
 }
 
 /**
+ * Wait out every transition the page is currently running.
+ *
+ * `app.css` puts `transition: all .22s ease` on cards, `pre`, badges and nav
+ * links, so flipping `data-theme` does not repaint — it *animates*, and for a
+ * fifth of a second every one of those elements is painted in a colour that is
+ * neither theme. axe measures rendered colour, so a scan that lands inside that
+ * window reports contrast failures that exist only mid-animation: eleven of
+ * them on one run, twenty-six on the next, two hundred and twenty-seven on a
+ * third. The count varying with nothing else changing is the tell.
+ *
+ * `getAnimations()` covers CSS transitions, so this waits for the real thing
+ * rather than sleeping and hoping. Infinite animations are skipped because
+ * their `finished` never resolves — `foundation.css` deliberately keeps
+ * `[data-motion="essential"]` spinning even under reduced motion — and the
+ * whole wait is capped, because waiting on all of them unconditionally hangs.
+ */
+async function settleTransitions(page: import('@playwright/test').Page) {
+  await page.evaluate(async () => {
+    const running = document
+      .getAnimations()
+      .filter(animation => animation.effect?.getTiming().iterations !== Infinity)
+      .map(animation => animation.finished.catch(() => undefined));
+    // Capped, because a transition can stay pending forever without being
+    // stuck: `.reveal` elements below the fold hold one until the observer
+    // brings them into view, which for elements further down the page is
+    // never. The cap is several times the longest colour transition, so the
+    // wait still ends on the real event in every case that has one.
+    await Promise.race([Promise.all(running), new Promise(resolve => setTimeout(resolve, 1_000))]);
+  });
+}
+
+/**
  * Scan the page, optionally in a chosen theme.
  *
  * The theme is applied *after* the mount wait, not before, and that ordering is
@@ -53,6 +85,7 @@ async function expectNoWcagViolations(
   if (theme) {
     await page.evaluate(t => document.documentElement.setAttribute('data-theme', t), theme);
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    await settleTransitions(page);
   }
 
   const result = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
