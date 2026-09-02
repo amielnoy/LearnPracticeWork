@@ -212,7 +212,27 @@ export const en = {
   },
   progress: {
     title: '📊 Your Progress',
-    lead: 'Tracked locally in this browser — come back anytime to pick up where you left off.',
+    lead: 'Where you are in each area, and the one thing worth doing next.',
+    nextEyebrow: 'Next up',
+    nextCta: 'Start',
+    allDoneTitle: 'Every area complete',
+    allDoneMeta: 'Revisit any section to keep it sharp before an interview.',
+    steps: {
+      lecture: { title: 'Watch a lecture', meta: 'Around ten minutes. Nothing to set up.' },
+      challenge: {
+        title: 'Solve a coding challenge',
+        meta: 'Solve it here in the browser. Nothing to set up.',
+      },
+      resume: { title: 'Check your resume', meta: 'Paste your CV. Uses one AI request.' },
+      interview: {
+        title: 'Run a mock interview',
+        meta: 'Five questions, answered live. Uses your AI quota.',
+      },
+    },
+    badgesEarned: 'earned',
+    storedLocal: 'Saved in this browser.',
+    storedSynced: 'Saved to your account.',
+    signInHint: 'Sign in to keep it across your devices.',
     overallLabel: 'Overall',
     lecturesLabel: 'Lectures viewed',
     challengesLabel: 'Coding challenges completed',
