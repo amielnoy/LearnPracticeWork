@@ -1,28 +1,71 @@
 # Deploying
 
-The repository is two deployables with very different shapes, and they are
-hosted separately because they cost very different amounts.
+Everything is one Vercel deployment, on the free tier.
 
 | | What it is | Where it goes | Cost |
 |---|---|---|---|
-| Static | 12 Vite SPAs — portfolio, academy, 10 lecture decks | Vercel (wired) — Cloudflare Pages still supported | $0 |
-| API | One FastAPI server: auth, AI proxy, content, Stripe, entitlements | Fly.io | ~$2–5/month |
+| Static | 12 Vite SPAs — academy, portfolio, 10 lecture decks | Vercel | $0 |
+| API | One FastAPI app: auth, AI proxy, content, Stripe, entitlements | Vercel, same project and origin | $0 |
 | Database | Postgres | Supabase | $0 on the free tier |
-| Monitoring | Python metrics/probes, Prometheus, Pushgateway, Grafana | Private host or managed equivalents | Depends on host |
+| Monitoring | Python probes, Prometheus, Pushgateway, Grafana | Private host or managed equivalents | Depends on host |
 
-## Static
+The static apps and the API used to be hosted separately, on three platforms
+between them, because they cost different amounts. They do not any more: the
+API is a Python function in the same deployment as the site it serves.
 
-`.github/workflows/deploy-vercel.yml` builds all twelve apps, assembles them
-into `_site`, and hands the result to Vercel on every push to `main`. A pull
-request from this repository gets a preview deployment at its own URL; a pull
-request from a fork gets none, because a fork cannot read the secrets.
+That is worth more than the saved few dollars. `/api/*` is now **same-origin**,
+so the login cookie stays first-party (`SameSite=Lax`) without a proxy hop, and
+CORS never enters the picture. The origin can no longer drift out of step with
+an allowlist on another platform, because there is only one origin.
 
-Vercel builds nothing. The workflow writes the [Build Output API v3][bo] layout
-— `.vercel/output/static/` plus `.vercel/output/config.json` — and runs
-`vercel deploy --prebuilt`, so what ships is exactly what CI produced from this
-lockfile rather than whatever a hosted build would resolve today.
+> **Before enabling sales, read this.** Vercel's Hobby plan does not permit
+> commercial use. `SALES_ENABLED` is `false`, so today this is a free
+> educational site and the free tier fits it. Turning Stripe checkout on makes
+> it a commercial deployment and needs a paid Vercel plan — that is a billing
+> decision to make deliberately, not something to discover afterwards.
 
-[bo]: https://vercel.com/docs/build-output-api/v3
+## What serves what
+
+The academy is the site: it is what the root URL serves, with the portfolio at
+`/portfolio/` and the ten decks at `/ai-testing-lecture-N/`. Each app is built
+with a `BASE_PATH` matching where it is mounted, because Vite bakes it into
+every asset URL and each router reads it back.
+
+`deploy/vercel/config.json` is the routing table for all of it — security
+headers, cache policy, the SPA rewrites, and the `/api/*` route onto the
+function. `tests/unit/vercelRoutes.spec.ts` exercises the whole table on every
+branch, before anything ships.
+
+## How a deploy happens
+
+`.github/workflows/deploy-vercel.yml` runs on every push to `main`, and gives a
+pull request from this repository its own preview URL. A pull request from a
+fork gets none, because a fork cannot read the secrets.
+
+The workflow builds the twelve apps itself, assembles them into `_site`, and
+then hands the repository to `vercel build`, which does exactly two things:
+copies `_site` into the deployment and compiles `api/index.py` into a Python
+function. The route table is copied over Vercel's generated one, and
+`vercel deploy --prebuilt` ships the result.
+
+So the frontends are still built from this lockfile in CI rather than by a
+hosted build resolving whatever is current today. The function is the one thing
+Vercel builds, and it has to be: its dependencies are vendored as
+**linux/x86\_64** wheels, which is what the runner is and a developer's laptop
+generally is not. Running `vercel build` on an Apple Silicon machine produces a
+bundle that cannot run on Vercel — fine for inspecting the output, never for
+deploying.
+
+To reproduce the frontend build locally:
+
+```bash
+PORT=5173 BASE_PATH=/portfolio/ pnpm --filter @workspace/portfolio run build
+PORT=5174 BASE_PATH=/ pnpm --filter @workspace/ai-testing-academy run build
+for n in $(seq 1 10); do
+  PORT=$((5174 + n)) BASE_PATH="/ai-testing-lecture-${n}/" \
+    pnpm --filter "@workspace/ai-testing-lecture-${n}" run build
+done
+```
 
 ### If a Vercel project starts building this repo on its own
 
@@ -36,213 +79,112 @@ workflow's assembly step. Disconnecting it in that project's Vercel settings
 fixed it at the source.
 
 Reach for that fix first. The repo-level lever, `git.deploymentEnabled: false`
-in a root `vercel.json`, looks tempting and is almost always wrong here: Vercel
-reads it per *repository*, not per project, so it silences every project linked
-to this repo at once. This repo has more than one, and at least one of them
-deploys successfully — turning them all off to quiet a single misconfigured
-project trades a visible problem for an invisible one.
-
-Per-project control lives in the project: **Settings → Git** to disconnect, or
-an Ignored Build Step to skip builds conditionally.
-
-None of this touches what CI ships. `--prebuilt` serves the routes in
-`.vercel/output/config.json` and never reads a root `vercel.json` at all.
-
-The academy is the site: it is what the root URL serves, with the portfolio at
-`/portfolio/` and the ten decks at `/ai-testing-lecture-N/`. Each app gets a
-`BASE_PATH` matching where it is mounted, because Vite bakes it into every asset
-URL and each router reads it back. (The `/<repo>/` prefix GitHub Pages needed is
-gone too, along with the step that had to ask the Pages API what it was.)
-
-To reproduce the build locally:
-
-```bash
-PORT=5173 BASE_PATH=/portfolio/ pnpm --filter @workspace/portfolio run build
-PORT=5174 BASE_PATH=/ pnpm --filter @workspace/ai-testing-academy run build
-for n in $(seq 1 10); do
-  PORT=$((5174 + n)) BASE_PATH="/ai-testing-lecture-${n}/" \
-    pnpm --filter "@workspace/ai-testing-lecture-${n}" run build
-done
-```
+in `vercel.json`, looks tempting and is almost always wrong here: Vercel reads
+it per *repository*, not per project, so it silences every project linked to
+this repo at once.
 
 ### Why it moved off GitHub Pages
 
 Rewrites. Pages has none, so a deep link like `/ai-testing-lecture-3/slide5` was
 served through the nearest `404.html` — the right page under a 404 status, on
-URLs the academy's own hreflang tags nominate for indexing. `deploy/vercel/config.json`
-rewrites them at 200. The workflow's smoke check asserts that on the real
-deployment, and `tests/unit/vercelRoutes.spec.ts` asserts the whole routing
-table on every branch, before anything ships.
+URLs the academy's own hreflang tags nominate for indexing.
+`deploy/vercel/config.json` rewrites them at 200. The workflow's smoke check
+asserts that on the real deployment.
 
-The routes also carry the security and caching headers that used to live in
-`deploy/cloudflare/_headers`. See `deploy/vercel/README.md` for why they are
-ordered the way they are.
+### Cloudflare Pages
 
-### First deploy
-
-```bash
-pnpm dlx vercel login
-pnpm dlx vercel link          # creates .vercel/project.json (gitignored)
-cat .vercel/project.json      # orgId and projectId
-```
-
-Then add three **repository secrets** under Settings → Secrets and variables →
-Actions:
-
-| Secret | Where it comes from |
-|---|---|
-| `VERCEL_TOKEN` | Vercel account settings → Tokens |
-| `VERCEL_ORG_ID` | `orgId` in `.vercel/project.json` |
-| `VERCEL_PROJECT_ID` | `projectId` in `.vercel/project.json` |
-
-Until all three exist, a push to `main` fails the deploy loudly and a pull
-request skips it with a note. Nothing is published from a workflow that cannot
-authenticate.
-
-Three repository **variables** are read at deploy time:
-
-| Variable | Effect |
-|---|---|
-| `API_ORIGIN` | Where `/api/*` is proxied. Unset, those paths answer `503` instead of being swallowed by the SPA catch-all — see `deploy/vercel/README.md` |
-| `VITE_GOOGLE_CLIENT_ID` | Inlined into the academy bundle; sign-in renders nothing without it |
-| `VERCEL_SITE_ORIGIN` | The deployed origin. Sets `VITE_SITE_ORIGIN` for the twenty lecture links, and is what CI links the architecture page from |
-
-Proxying rather than pointing the client at another host is deliberate: the
-browser sees one origin, so the login cookie stays first-party (`SameSite=Lax`)
-and CORS never applies. It is the same shape as the Replit relay.
-
-### After the origin changes
-
-Three things live outside this repository and do not follow a deployment:
-
-1. **Fly's `ALLOWED_ORIGINS`** must contain the Vercel origin, or every API call
-   from the deployed site is refused by CORS. `PUBLIC_APP_ORIGIN` must match one
-   of its entries, or Stripe checkout fails closed.
-2. **The Google OAuth client** must authorize the exact origin, or sign-in fails
-   on a domain Google has never heard of.
-3. **Each deck's `index.html`** still carries absolute `canonical`, `og:url` and
-   `hreflang` tags naming the Replit origin. Those are static HTML that
-   `VITE_SITE_ORIGIN` does not reach, and changing them changes URLs that are
-   already indexed — a decision, not a cleanup. See "Still pinned" below.
-
-### Cloudflare Pages, still supported
-
-`deploy/cloudflare/_redirects` and `_headers` remain in the tree and say the
-same thing the Vercel routes do. The assembled `_site` is portable: point a
+`deploy/cloudflare/_redirects` and `_headers` remain in the tree and say what
+the Vercel routes say about the *static* site, which is still portable: point a
 Pages project at this repo with the build commands above and `_site` as the
-output directory. The Vercel workflow does not copy those two files into its
-output, because Vercel ignores them.
+output directory.
 
-## API server
+The API is not portable that way any more. It is a Vercel Python function, and
+a Pages deployment of `_site` alone would serve the frontends with no `/api/*`
+behind them.
 
-Fly runs the Python API. Production burst, daily, login and admin quotas are stored atomically
-in Postgres using HMAC-pseudonymized identifiers, so workers and restarts share one allowance.
-The production API fails closed if the database or rate-limit salt is unavailable. Stripe
-webhooks still benefit from a warm endpoint because a cold start inside a delivery timeout
-becomes a retry at best.
+## The API
 
-The same API also serves the academy's localized content at
-`/api/content/question-bank`, `/api/content/coding-challenges`, and
-`/api/content/lecture-series`. Each accepts the optional `lang=en|he` query parameter,
-reads ordered rows from Supabase with the read-only `SUPABASE_ANON_KEY`, and returns `503`
-with a fixed error body when the content store is unavailable. The academy currently renders
-bundled content, so these routes can be deployed independently while the client migration is
-completed.
+`api/index.py` is the whole of it: it puts `server/` on the import path and
+re-exports `app.main:app`. The same FastAPI application runs under Uvicorn
+locally and in `server/Dockerfile`, so there is no Vercel-shaped variant of the
+API to keep in step with the real one.
 
-Interactive API documentation is served by Scalar at `/api/docs`; its runtime FastAPI document
-is available at `/api/openapi.json`. Scalar's agent, telemetry, remote proxy, credential
-persistence, and remote fonts are disabled. The browser bundle is version-pinned, and requests
-from the interactive console go directly to this API origin.
+Three things about it are specific to running serverless, and each is a comment
+in the code as well as a line here:
 
-`fly.toml` therefore sets `min_machines_running = 1` and leaves
-`auto_stop_machines` off — a warm endpoint for Stripe webhooks.
+| | Why |
+|---|---|
+| The schema is not applied at boot | `lifespan` runs on every cold start, not once per deploy. Applying DDL there would put a schema round-trip in front of a visitor's request and let instances race each other. Apply it deliberately instead — see below |
+| `/metrics` answers 404 | `prometheus_client` counts in process memory, and a process here is one invocation. A scrape would report what one instance happened to see, which is not a sample of anything |
+| `functions.excludeFiles` in `vercel.json` | The Python builder starts from the whole repository and removes what it is told to. Unbounded, the bundle is 329MB against a 225MB limit — and it contains `.env.local`. The glob is capped at 256 characters, which is why it names big directories rather than listing files |
 
-The quota no longer depends on that. In production `app/rate_limit.py` counts in atomic
-Postgres rows keyed by an HMAC digest, so allowances are shared across workers and survive a
-restart; it needs `DATABASE_URL` (or `SUPABASE_DB_PASSWORD`) plus `RATE_LIMIT_SALT` — or
-`METRICS_ID_SALT` — and **fails closed** without them rather than falling back to memory. The
-in-memory limiter runs only when `NODE_ENV` is not `production`.
-
-### First deploy
-
-```bash
-fly launch --no-deploy --config server/fly.toml \
-  --dockerfile server/Dockerfile
-
-fly secrets set \
-  GROQ_API_KEY=... \
-  GEMINI_API_KEY=... \
-  GOOGLE_CLIENT_ID=... \
-  SESSION_SECRET=... \
-  RATE_LIMIT_SALT=... \
-  SUPABASE_DB_PASSWORD=... \
-  SUPABASE_URL=... \
-  SUPABASE_ANON_KEY=... \
-  STRIPE_SECRET_KEY=... \
-  STRIPE_WEBHOOK_SECRET=...
-
-fly deploy --config server/fly.toml \
-  --dockerfile server/Dockerfile .
-```
-
-The trailing `.` matters because it is the Docker build context. The image installs uv, syncs
-the locked Python dependencies, copies `server/app`, and runs Uvicorn as a non-root user.
-
-`RATE_LIMIT_SALT` is not optional, and it is the one whose absence is easiest to miss. In
-production every quota is counted in Postgres keyed by an HMAC of the caller's identity, and
-without a salt there is no key — so `SharedRateLimiter` fails closed and **every rate-limited
-route refuses every caller**: Google sign-in, the AI proxy, and the admin seed route. The
-refusal is a `429`, which reads to a visitor exactly like a quota they have exhausted. Any long
-random string works, and `METRICS_ID_SALT` is accepted in its place.
-
-Verify that `curl https://<app>.fly.dev/api/healthz` returns `{"status":"ok"}` and
-`/api/readyz` reports the database available **and carries no `rateLimiting` field** — that
-field appears only when quotas cannot count, and names what is missing. Then open
-`https://<app>.fly.dev/api/docs` and confirm Scalar loads the runtime OpenAPI document.
-
-The current `server/fly.toml` names the app `ata-api`. Create or rename that Fly application
-before pointing the Replit relay at it; the public hostname must resolve and its health check
-must pass.
+Quotas were already serverless-safe and did not need changing: `app/rate_limit.py`
+counts in atomic Postgres rows keyed by an HMAC digest, so allowances are shared
+across instances rather than living in one process's memory. Sessions are signed
+cookies, so they need no server-side store either.
 
 ### Environment
 
-Set in `fly.toml` (not secret):
+Set these on the Vercel project — `vercel env add NAME production`, or
+**Settings → Environment Variables**. Nothing here belongs in the repository.
 
-| Variable | Why |
+| Variable | Why it matters |
 |---|---|
-| `PORT` | Uvicorn's listening port; the package start command defaults to 8080 |
-| `ALLOWED_ORIGINS` | CORS allowlist — every origin serving the static site |
+| `DATABASE_URL` | Point it at Supabase's **transaction pooler on 6543**, not the session pooler. A serverless function opens far more short-lived connections than a long-running server, which is the case the transaction pooler exists for |
+| `RATE_LIMIT_SALT` | Not optional, and the easiest absence to miss. Every quota is counted keyed by an HMAC of the caller's identity; with no salt there is no key, so the limiter **fails closed and every rate-limited route refuses every caller** — Google sign-in, the AI proxy, the admin seed route. The refusal is a `429`, which reads to a visitor exactly like an exhausted quota. Any long random string works, and `METRICS_ID_SALT` is accepted in its place |
+| `SESSION_SECRET` | At least 32 characters. Sign-in returns nothing without it |
+| `ALLOWED_ORIGINS` | `https://learn-practice-work.vercel.app`. Same-origin requests do not need CORS, but `PUBLIC_APP_ORIGIN` is validated against this list |
+| `PUBLIC_APP_ORIGIN` | The same origin. Must match an entry in `ALLOWED_ORIGINS`, or Stripe checkout fails closed |
+| `NODE_ENV` | `production`. It is what switches off the localhost CORS regex and the in-memory rate limiter |
+| `GROQ_API_KEY`, `GEMINI_API_KEY` | The server-side AI proxy. Without them the academy offers BYOK only |
+| `GOOGLE_CLIENT_ID` | Must match the `VITE_GOOGLE_CLIENT_ID` the frontend was built with |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | Required by the content endpoints |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Checkout and webhook verification |
 
-Set via `fly secrets` (never committed): `GROQ_API_KEY`, `GEMINI_API_KEY`,
-`GOOGLE_CLIENT_ID`, a random `SESSION_SECRET` of at least 32 characters,
-`SUPABASE_DB_PASSWORD`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `STRIPE_SECRET_KEY`, and
-`STRIPE_WEBHOOK_SECRET`.
+`METRICS_TOKEN` and `METRICS_ID_SALT` are still read, but `/metrics` does not
+answer on Vercel at all — set them only where the API runs as a real process.
 
-Also set long, independent random `METRICS_TOKEN` and `METRICS_ID_SALT` values with
-`fly secrets set`. Prometheus supplies the token as a bearer token when scraping `/metrics`;
-production returns 404 without it. The salt HMAC-pseudonymizes verified user IDs for Grafana
-and must remain only on Fly.
+Already set, because they are not secret and are the same for every deploy:
+`NODE_ENV`, `ALLOWED_ORIGINS`, `PUBLIC_APP_ORIGIN`, `SALES_ENABLED`. The rest
+carry credentials and have to be supplied by whoever holds them — they exist
+today only on the host being retired:
 
-Before enabling paid sales, configure and
-verify all of the following, then change `SALES_ENABLED` to `true`:
+```bash
+for name in DATABASE_URL RATE_LIMIT_SALT SESSION_SECRET \
+            GROQ_API_KEY GEMINI_API_KEY GOOGLE_CLIENT_ID \
+            SUPABASE_URL SUPABASE_ANON_KEY \
+            STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET; do
+  printf '%s: ' "$name"
+  read -rs value && echo
+  printf '%s' "$value" | vercel env add "$name" production
+done
+```
 
-- `STRIPE_COURSE_PRICE_ID`, `STRIPE_COURSE_PRODUCT_ID`, `STRIPE_COURSE_AMOUNT`, and
-  `STRIPE_COURSE_CURRENCY` for one approved Stripe catalog entry;
-- `STRIPE_TAX_ENABLED=true`, with Stripe Tax and the relevant Indian/Israeli registrations
-  configured in the Stripe account;
-- `BUSINESS_LEGAL_NAME`, `BUSINESS_POSTAL_ADDRESS`, and `BUSINESS_SUPPORT_EMAIL`; and
-- `PUBLIC_APP_ORIGIN`, which must exactly match an entry in `ALLOWED_ORIGINS`.
+`read -rs` keeps the values off the terminal and out of shell history, and
+`printf` pipes them in rather than passing them as arguments, where they would
+be visible to anything that can list processes.
 
-`PURCHASE_RETENTION_DAYS` defaults to 2,922 days. Set it to the accounting/consumer-law period
-confirmed for the selling entity; expired purchase rows are removed during database startup.
+After adding or changing any of these, **redeploy**. A Vercel function reads its
+environment at deploy time; a variable added afterwards reaches the next
+deployment, not the running one.
 
-Checkout ignores client price IDs, requires affirmative terms acceptance, uses automatic local
-payment methods and tax calculation, and records entitlement only when the signed webhook's
-price, product, amount, currency, course SKU, and terms version all match. Keep sales disabled
-until local counsel/tax advice confirms the displayed identity, cancellation, invoice, GST and
-VAT treatment for the selling entity.
+Verify with `curl https://learn-practice-work.vercel.app/api/healthz` for
+`{"status":"ok"}` — that only proves the function booted — and then
+`/api/readyz`, which reports the database and carries a `rateLimiting` field
+**only when quotas cannot count**, naming what is missing. The deploy workflow
+checks both and warns on the second.
 
-`SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for the content endpoints.
+### Applying the schema
+
+Nothing applies the DDL on boot any more, so it is applied from a terminal:
+
+```bash
+pnpm --filter @workspace/scripts run seed:academy --schema-only
+```
+
+Without it the tables do not exist, the database-backed routes answer `503`, and
+the academy falls back to its bundled content — which means a missing schema is
+invisible to a visitor and equally invisible to whoever deployed it.
 
 ### Seeding the academy content
 
@@ -301,21 +243,90 @@ Configure Stripe to send events to `https://<app>.fly.dev/api/stripe/webhook`. T
 secret is verified against the raw request body. Stripe credentials are read only from the
 backend host's `STRIPE_*` secret environment; there is no Replit connector fallback.
 
-## Replit domains without Replit secrets
+Configure Stripe to send events to
+`https://learn-practice-work.vercel.app/api/stripe/webhook`. The webhook secret
+is verified against the raw request body.
 
-The static applications and their existing `*.replit.app` paths remain deployable through the
-committed `.replit-artifact/artifact.toml` files. The Replit API artifact is a secretless,
-same-origin relay: `UPSTREAM_API_BASE_URL=https://ata-api.fly.dev` forwards `/api/*` to Fly,
-while `/api/healthz` stays local so Replit can check the relay process itself.
+Cold starts are worth a thought here and not much more: Stripe retries a
+delivery that times out, and the webhook is idempotent. Fluid Compute keeps
+instances warm between requests, so a webhook arriving during any normal traffic
+does not pay a cold start at all.
 
-This preserves first-party `SameSite=Lax` login cookies on the Replit domain. It also forwards
-Stripe signature headers and raw webhook bodies unchanged. Google/session, Stripe, Supabase,
-AI, admin, database, and metrics secrets exist only on Fly. Before publishing Replit, verify:
+Checkout ignores client price IDs, requires affirmative terms acceptance, uses
+automatic local payment methods and tax calculation, and records entitlement
+only when the signed webhook's price, product, amount, currency, course SKU and
+terms version all match. Before enabling paid sales, configure and verify all of
+the following, then change `SALES_ENABLED` to `true` — and move off the Hobby
+plan:
 
-1. the Fly hostname resolves and `/api/healthz` returns 200;
-2. Fly's `ALLOWED_ORIGINS` contains the exact Replit origin;
-3. the Google OAuth client authorizes the exact Replit origin; and
-4. Stripe sends webhooks to the Fly URL, not to the relay.
+- `STRIPE_COURSE_PRICE_ID`, `STRIPE_COURSE_PRODUCT_ID`, `STRIPE_COURSE_AMOUNT`
+  and `STRIPE_COURSE_CURRENCY` for one approved Stripe catalog entry;
+- `STRIPE_TAX_ENABLED=true`, with Stripe Tax and the relevant registrations
+  configured in the Stripe account;
+- `BUSINESS_LEGAL_NAME`, `BUSINESS_POSTAL_ADDRESS`, `BUSINESS_SUPPORT_EMAIL`;
+- `PUBLIC_APP_ORIGIN`, matching an entry in `ALLOWED_ORIGINS`.
+
+`PURCHASE_RETENTION_DAYS` defaults to 2,922 days. Set it to the accounting and
+consumer-law period confirmed for the selling entity; expired purchase rows are
+removed during database startup.
+
+## The origin moved
+
+The canonical home is `https://learn-practice-work.vercel.app`. It used to be a
+`*.replit.app` origin, and moving it meant editing URLs that were already
+indexed — a decision rather than a cleanup, taken deliberately.
+
+Three mount points differ between the old host and this one, so it was not a
+find-and-replace:
+
+| App | Was | Is |
+|---|---|---|
+| Academy | `/ai-testing-academy/` | `/` — it is the site |
+| Portfolio | `/` | `/portfolio/` |
+| Decks | `/ai-testing-lecture-N/` | unchanged |
+
+That covers `canonical`, `og:url`, `twitter:image`, the JSON-LD `@id`s, the
+`hreflang` clusters, `sitemap.xml` and `robots.txt` in each app, plus
+`DEFAULT_SITE_ORIGIN` in `artifacts/ai-testing-academy/src/lib/lectures.ts` —
+the fallback for the twenty lecture links, so a build that forgets
+`VITE_SITE_ORIGIN` still points at the live site. `tests/unit/hreflang.spec.ts`
+holds the markup and the sitemaps to the same URLs.
+
+Two things live outside this repository and do not follow a deployment:
+
+1. **The Google OAuth client** must authorize
+   `https://learn-practice-work.vercel.app`, or sign-in fails on an origin
+   Google has never heard of.
+2. **Stripe's webhook endpoint** must be the Vercel URL.
+
+### Retiring the old hosts
+
+Neither shuts down by deleting a file, and neither is load-bearing any more:
+
+- **Fly** — `ata-api.fly.dev` no longer resolves; the app is already gone.
+  `server/fly.toml` has been removed, because a config for an application that
+  does not exist is worse than no config at all.
+- **Replit** — still serving at the old origin. Stop the deployment in the
+  Replit dashboard when you are satisfied with this one. The `.replit` and
+  `.replit-artifact/` files are left in the tree on purpose: they describe the
+  development environment as well as the deployment, and removing them is a
+  separate decision from changing where the site is hosted.
+
+Keep the Replit deployment up long enough to redirect from it — the old URLs are
+indexed, and a 301 is what moves that ranking rather than discarding it.
+
+### Repository variables
+
+Three are read by the deploy workflow:
+
+| Variable | Effect |
+|---|---|
+| `VITE_GOOGLE_CLIENT_ID` | Inlined into the academy bundle at build time; sign-in renders nothing without it. An OAuth client **ID** is public by construction — a client *secret* must never appear here |
+| `VERCEL_SITE_ORIGIN` | Sets `VITE_SITE_ORIGIN` for the twenty lecture links. Unset, they fall back to `DEFAULT_SITE_ORIGIN`, which now names this deployment |
+| `GRAFANA_URL` | Links the dashboard from CI runs |
+
+`API_ORIGIN` is gone. It named the host `/api/*` was proxied to; there is no
+proxy now.
 
 ## Grafana and test history
 
@@ -332,41 +343,34 @@ credentials; browser BYOK traffic is intentionally outside server monitoring.
 `server/Dockerfile`, not the one at the repository root — that one
 builds the Playwright test image and its `CMD` runs the suite.
 
+Nothing deploys from this image any more; the API ships as a Vercel function.
+It is still what `monitoring/compose.yaml` builds the local API and the probe
+service from, and it is the one reproducible way to run the API in a container.
+
 The multi-stage image uses uv's locked install, copies only the Python application and virtual
 environment into the runtime stage, and runs Uvicorn as a non-root `app` user. Node and pnpm are
 not part of the API runtime image.
 
 ## Moving the decks to a new origin
 
-The lecture links used to be twenty absolute URLs pinned to
-`free-tier-insights--amielpeled.replit.app`, one per lecture per language. They
-are derived now: `lib/lectures.ts` stores a deck number, and `lectureHref()`
-builds the URL from a configurable origin.
-
-Set `VITE_SITE_ORIGIN` to move all twenty at once:
+The lecture links are derived, not stored: `lectures.ts` holds a deck number and
+`lectureHref()` builds the URL from a configurable origin. Set
+`VITE_SITE_ORIGIN` to move all twenty at once:
 
 ```bash
-VITE_SITE_ORIGIN=https://<project>.vercel.app \
+VITE_SITE_ORIGIN=https://example.com \
   pnpm --filter @workspace/ai-testing-academy run build
 ```
 
 Set it for the prerender generator too — it reads the same name from
 `process.env`, because it runs under Node where `import.meta.env` does not
-exist. Set one and not the other and the crawler-facing shell will disagree
-with the rendered page about where a lecture lives.
+exist. Set one and not the other and the crawler-facing shell will disagree with
+the rendered page about where a lecture lives.
 
-Unset, it falls back to `DEFAULT_SITE_ORIGIN`, which is the origin the links
-were already pinned to — so a build that does not set it is byte-identical to
-one from before the change. The cybersecurity track keeps explicit `url`
-values, because those lectures are hosted on gamma.site and are not ours to
-move.
+The cybersecurity track keeps explicit `url` values, because those lectures are
+hosted on gamma.site and are not ours to move.
 
-### Still pinned
-
-Each deck's own `index.html` carries absolute `canonical`, `og:url` and
-`hreflang` tags naming the Replit origin, and those are static HTML rather than
-anything `VITE_SITE_ORIGIN` reaches. Moving the canonical home means editing
-them — ten files — and it changes URLs that are already indexed, so it is a
-decision rather than a cleanup. Do it together with the env var, not before:
-links that point one way and canonicals that point another are worse than
-either alone.
+Moving the canonical home is more than this variable: it means the `canonical`,
+`og:url` and `hreflang` tags in each app's `index.html`, its `sitemap.xml` and
+`robots.txt`, and `DEFAULT_SITE_ORIGIN`. See "The origin moved" above for the
+full list and for the mount points that differ between hosts.
