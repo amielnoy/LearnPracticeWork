@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo 'dependencies are installed by the workflow before vercel build runs'",
+  "buildCommand": "test -d _site || { echo 'No _site/ \u2014 build the twelve apps first (see deploy/README.md).' >&2; exit 1; }",
+  "outputDirectory": "_site",
+  "functions": {
+    "api/index.py": {
+      "excludeFiles": "{.env*,.npmrc,.claude/**,.agents/**,_uv/**,.playwright-mcp/**,attached_assets/**,allure*/**,*-report/**,test-results/**,{lib,scripts,monitoring,tests,artifacts}/**,server/{tests,dist,.venv,src,scripts}/**,**/__pycache__/**,**/.pytest_cache/**}"
+    }
+  }
+}

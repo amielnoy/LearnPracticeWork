@@ -38,6 +38,13 @@ export default tseslint.config(
       'tests/test-results/**',
       'artifacts/*/components/ui/**',
       'artifacts/*/src/components/ui/**',
+      // Vercel build output. `.vercel/python/` is a vendored virtualenv, and
+      // some Python wheels ship .js of their own — urllib3 carries an
+      // Emscripten worker — which is neither this project's source nor
+      // anything it can fix.
+      '.vercel/**',
+      '_uv/**',
+      '_site/**',
     ],
   },
 

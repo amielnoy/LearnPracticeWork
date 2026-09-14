@@ -78,3 +78,11 @@ _site
 # Vercel CLI scratch: the prebuilt output the deploy workflow assembles, and
 # the project link (`vercel link`) whose IDs belong in repository secrets.
 .vercel
+
+# Written into the repository root by Vercel's Python builder during
+# `vercel build`: it derives these from requirements.txt, which is itself
+# generated from server/uv.lock. All four are build output, not sources.
+/requirements.txt
+/pyproject.toml
+/uv.lock
+/_uv/
