@@ -14,10 +14,11 @@ name: Deploy
 #  cannot publish while a test is red is a site that cannot ship a fix for the
 #  thing that made it red.
 #
-#  The API server is not part of this. It runs on Fly (see deploy/README.md);
-#  the browser reaches it cross-origin, so the Vercel origin has to appear in
-#  Fly's ALLOWED_ORIGINS or every API call from the deployed site is blocked by
-#  CORS.
+#  The API ships in the same deployment. `api/index.py` is the FastAPI
+#  application in `server/app` running as one Python function, so `/api/*` is
+#  same-origin: the login cookie stays first-party and CORS never applies. It is
+#  the one part Vercel does build, because the bundle has to be assembled and
+#  its dependencies vendored on Linux — which is what this runner is.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
@@ -184,22 +185,54 @@ jobs:
           # The Allure report is deliberately NOT copied here — ci.yml publishes
           # it to a separate repository's Pages, so it never lands on the site.
 
-      # The Build Output API layout: a static directory and a config file. This
-      # is what `--prebuilt` uploads, so the routes in config.json are the ones
-      # that serve the deployment.
-      - name: Lay out the Vercel build output
-        env:
-          API_ORIGIN: ${{ vars.API_ORIGIN }}
+      # The function's dependencies, derived from the lockfile the API is
+      # already built from rather than a second list that could disagree with
+      # it. Vercel's Python builder reads requirements.txt; uv.lock is the
+      # source of truth, and this is the translation.
+      - name: Export the API's locked dependencies
         run: |
           set -euo pipefail
-          rm -rf .vercel/output
-          mkdir -p .vercel/output
-          cp -R _site .vercel/output/static
-          # The route table plus the one decision that cannot be committed:
-          # where /api/* goes. Unset, it answers 503 rather than letting the
-          # SPA catch-all hand an API call the academy's HTML shell at 200.
-          node deploy/vercel/build-config.mjs .vercel/output/config.json
+          uv export --frozen --no-dev --no-emit-project \
+            --directory server -o "$GITHUB_WORKSPACE/requirements.txt"
+          echo "Pinned packages: $(grep -c '==' requirements.txt)"
+
+      # Project settings, and the environment variables the function will run
+      # with. The target has to match the deployment below: production and
+      # preview can hold different values for the same name.
+      - name: Pull the Vercel project settings
+        run: |
+          set -euo pipefail
+          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" != "pull_request" ]; then
+            target=production
+          else
+            target=preview
+          fi
+          echo "target=$target" >> "$GITHUB_ENV"
+          pnpm dlx "$VERCEL_CLI" pull --yes --environment="$target" --token "$VERCEL_TOKEN"
+
+      # The one build Vercel does. It copies the assembled _site into
+      # .vercel/output/static (outputDirectory in vercel.json) and compiles
+      # api/index.py into a Python function, vendoring the wheels for
+      # linux/x86_64 — which is why this has to happen on the runner and not on
+      # a developer's machine.
+      - name: Build the API function
+        run: |
+          set -euo pipefail
+          args=(build --yes --token "$VERCEL_TOKEN")
+          if [ "$target" = "production" ]; then args+=(--prod); fi
+          pnpm dlx "$VERCEL_CLI" "${args[@]}"
+
+      # Vercel generates a route table of its own; this is the one that serves
+      # the site. It carries the security headers, the cache policy, the SPA
+      # rewrites for the portfolio and the ten decks, and the /api/* route onto
+      # the function — and it is the table tests/unit/vercelRoutes.spec.ts
+      # checks on every branch, before anything ships.
+      - name: Install the committed route table
+        run: |
+          set -euo pipefail
+          cp deploy/vercel/config.json .vercel/output/config.json
           echo "Static files: $(find .vercel/output/static -type f | wc -l)"
+          echo "Functions: $(find .vercel/output/functions -maxdepth 2 -name '*.func' | wc -l)"
 
       # `--prod` on main, a preview deployment everywhere else. The URL the CLI
       # prints on stdout is the one this run produced — the smoke check below
@@ -218,9 +251,7 @@ jobs:
         run: |
           set -euo pipefail
           args=(deploy --prebuilt --yes --token "$VERCEL_TOKEN")
-          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" != "pull_request" ]; then
-            args+=(--prod)
-          fi
+          if [ "$target" = "production" ]; then args+=(--prod); fi
           url=$(pnpm dlx "$VERCEL_CLI" "${args[@]}" | tail -n 1)
           case "$url" in
             https://*) ;;
@@ -336,6 +367,28 @@ jobs:
               *) echo "::error::${asset} cache-control is '${cache}', expected immutable."; fail=1 ;;
             esac
           fi
+
+          # The API runs in this deployment now, so the smoke check asks it
+          # rather than inferring from a content type. /api/healthz touches
+          # nothing — no database, no key — so a non-200 here means the function
+          # did not boot: a missing module in the bundle, or an import that
+          # threw. That is the failure mode this migration can actually produce.
+          health=$(curl -sS --max-time 30 "${URL}/api/healthz" || true)
+          case "$health" in
+            *'"status":"ok"'*) echo "✅ /api/healthz → $health (the function booted)" ;;
+            *) echo "::error::/api/healthz answered '${health:-nothing}' — the API function is not serving."
+               fail=1 ;;
+          esac
+
+          # Readiness names what is degraded instead of hiding it behind a 200.
+          # It is reported rather than asserted: the database and the quota salt
+          # are configuration that lives in the Vercel project, and a deployment
+          # that ships correctly can still be pointed at a database that is down.
+          ready=$(curl -sS --max-time 30 "${URL}/api/readyz" || true)
+          echo "ℹ️  /api/readyz → ${ready:-no response}"
+          case "$ready" in
+            *rateLimiting*) echo "::warning::Quotas cannot count — every rate-limited route will refuse callers. Set RATE_LIMIT_SALT and DATABASE_URL." ;;
+          esac
 
           # The failure this is here for is silent: an API path answered by the
           # HTML shell at 200 makes the client conclude there is no server.
