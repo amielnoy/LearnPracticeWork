@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/sitemap.xml
+Sitemap: https://learn-practice-work.vercel.app/sitemap.xml

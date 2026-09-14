@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://free-tier-insights--amielpeled.replit.app/sitemap.xml
+Sitemap: https://learn-practice-work.vercel.app/portfolio/sitemap.xml

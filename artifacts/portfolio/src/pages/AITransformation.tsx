@@ -109,7 +109,7 @@ export default function AITransformation() {
   const active = tabs.find(t => t.id === activeTab)!;
 
   useEffect(() => {
-    const BASE = 'https://free-tier-insights--amielpeled.replit.app';
+    const BASE = 'https://learn-practice-work.vercel.app/portfolio';
     const PAGE_URL = `${BASE}/ai-test-transformation`;
     const PAGE_TITLE = 'AI Test Transformation Services | Amiel Peled';
     const PAGE_DESC =
@@ -159,7 +159,7 @@ export default function AITransformation() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Button variant="ghost" size="sm" className="rounded-full" asChild>
-            <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation">
+            <a href="https://learn-practice-work.vercel.app/portfolio/ai-test-transformation">
               <ArrowLeft className="w-4 h-4 mr-2" />
               AI Test Transformation
             </a>
@@ -258,7 +258,7 @@ export default function AITransformation() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" className="rounded-full font-bold px-8" asChild>
-                <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation">
+                <a href="https://learn-practice-work.vercel.app/portfolio/ai-test-transformation">
                   AI Test Transformation
                 </a>
               </Button>
