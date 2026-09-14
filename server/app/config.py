@@ -9,6 +9,17 @@ def env(name: str) -> str | None:
     return value or None
 
 
+def serverless() -> bool:
+    """True when this process is one invocation of a Vercel Function.
+
+    Vercel sets `VERCEL` in every function environment. It is the difference
+    between a process that boots once and serves for days, and one that may be
+    constructed fresh for a single request — which is what decides whether
+    boot-time work and in-process counters mean anything.
+    """
+    return bool(os.getenv("VERCEL"))
+
+
 def positive_int(name: str, fallback: int) -> int:
     try:
         value = int(os.getenv(name, ""))
