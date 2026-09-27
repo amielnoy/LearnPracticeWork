@@ -150,10 +150,15 @@ function rowIndexFor(tab, sub) {
   return found;
 }
 
-function authorized(e) {
+/**
+ * The token travels in the POST body, not the query string: Apps Script's
+ * `doPost(e)` cannot read custom request headers, and a query-string token
+ * would land in Google's execution logs and any proxy log along the way.
+ */
+function authorized(body) {
   var expected = PropertiesService.getScriptProperties().getProperty('ACADEMY_TOKEN');
   if (!expected || expected.length < 32) return false;
-  var given = (e && e.parameter && e.parameter.token) || '';
+  var given = (body && body.token) || '';
   if (given.length !== expected.length) return false;
   var diff = 0;
   for (var i = 0; i < expected.length; i++) {
@@ -171,8 +176,16 @@ function json(body) {
 }
 
 function doPost(e) {
-  if (!authorized(e)) return json({ error: 'unauthorized' });
-  var body = JSON.parse(e.postData.contents);
+  var body;
+  try {
+    body = JSON.parse(e.postData.contents);
+  } catch (err) {
+    // A body that will not parse cannot carry a valid token either; refusing
+    // it here keeps the failure a plain 'unauthorized' instead of an
+    // unhandled exception thrown before any lock is ever touched.
+    return json({ error: 'unauthorized' });
+  }
+  if (!authorized(body)) return json({ error: 'unauthorized' });
   var sub = String(body.sub || '');
   if (!sub) return json({ error: 'missing sub' });
 
