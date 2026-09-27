@@ -24,7 +24,9 @@ packages use pnpm; `server` uses uv and keeps a pnpm package only as a workspace
 - **Lint**: ESLint + Prettier for TypeScript; Ruff for Python
 - **Reporting**: Allure 3 (`allure-report/`, one report across all six layers)
 - **CI**: GitHub Actions — tests on every push/PR, nightly at 05:00 Israel time
-- **Deploy**: GitHub Actions → Vercel (prebuilt) from `main`, preview URLs on pull requests
+- **Deploy**: GitHub Actions → Vercel (prebuilt) from `main`, preview URLs on pull requests.
+  Live at <https://learn-practice-work.vercel.app>, and per deployment at
+  <https://learn-practice-work-73spot260-amielnoy-9725s-projects.vercel.app/>
 
 ## Key Commands
 
@@ -41,8 +43,8 @@ packages use pnpm; `server` uses uv and keeps a pnpm package only as a workspace
 
 With the API running, Scalar is available at <http://localhost:8787/api/docs> and the runtime
 OpenAPI JSON at <http://localhost:8787/api/openapi.json>. Scalar does not enable its agent,
-telemetry, proxy, remote fonts, or credential persistence. On Replit, both paths use the same
-secretless relay as the rest of `/api` and are actually served by Fly.
+telemetry, proxy, remote fonts, or credential persistence. In the deployment both paths are
+served by the same Vercel function as the rest of `/api`.
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
 
@@ -220,43 +222,41 @@ errors and 590 files fell off the Prettier config.
 
 ## Deployment
 
-Static and API are deployed separately, because only one of them costs anything to run.
+The site and its API are one Vercel deployment, served from
+<https://learn-practice-work.vercel.app> — that alias is the canonical home. The
+deployment Vercel currently serves it from is also reachable directly at
+<https://learn-practice-work-73spot260-amielnoy-9725s-projects.vercel.app/>,
+which is the URL to use when checking one deployment rather than production.
 `deploy/README.md` is the runbook; the summary:
 
-- **Replit** — `.replit-artifact/artifact.toml` per artifact. No production secret belongs in
-  Replit. The API artifact relays same-origin `/api/*` requests to Fly over HTTPS, preserving
-  first-party login cookies and Stripe request bodies without storing provider credentials.
 - **Vercel** — `.github/workflows/deploy-vercel.yml` publishes from `main`: the academy at
   the site root, `portfolio/` and **all ten** `ai-testing-lecture-N/` beneath it, and
   `architecture.html` alongside. Actions builds; Vercel builds nothing and receives the
   [Build Output API v3][bo] layout through `vercel deploy --prebuilt`, so what ships is what
-  this lockfile produced. A pull request from this repository gets its own preview URL. Static
-  only, so the academy's AI panel falls back to bring-your-own-key. The Allure report is
-  **not** part of this site — it is published to its own reports repository, with its own
-  Pages URL.
+  this lockfile produced. A pull request from this repository gets its own preview URL. The
+  Allure report is **not** part of this site — it is published to its own reports repository,
+  with its own Pages URL.
+- **The API is in the same deployment** — `api/index.py` re-exports the FastAPI app as a
+  Vercel Python function, so `/api/*` is same-origin with the site. The login cookie stays
+  first-party without a relay hop, and CORS is not in the request path at all. In production
+  `SharedRateLimiter` counts in atomic Postgres rows, so an allowance is shared across
+  instances; without `DATABASE_URL` and a salt it fails closed rather than falling back to
+  memory — the in-memory limiter is the local and test path only.
 - **Why not GitHub Pages** — rewrites. Every app here is a single-page app, and Pages has no
   rewrite rules, so a deep link like `/ai-testing-lecture-3/slide5` was served through the
   nearest `404.html` — the right page carrying a 404 status, on URLs the academy's own
   hreflang tags nominate for indexing. `deploy/vercel/config.json` rewrites them at 200;
   `tests/unit/vercelRoutes.spec.ts` holds the whole routing table to that on every branch, and
   the deploy workflow smoke-checks it against the real deployment.
-- **Cloudflare Pages** — still supported and unchanged. `deploy/cloudflare/_redirects` and
-  `_headers` say what the Vercel routes say, in that host's dialect; the assembled `_site` is
-  portable to it as is.
-
-[bo]: https://vercel.com/docs/build-output-api/v3
-- **Fly.io** — `server/{Dockerfile,fly.toml}` for the Python API. It keeps one machine running
-  rather than scaling to zero so the Stripe webhook endpoint stays warm. This used to be about
-  the quota as well, and no longer is: in production `SharedRateLimiter` counts in atomic
-  Postgres rows, so an allowance survives a restart and is shared across workers. Without
-  `DATABASE_URL` and a salt it fails closed rather than falling back to memory — the in-memory
-  limiter is the local and test path only.
 - **Grafana** — `monitoring/compose.yaml` provisions Grafana, Prometheus, Pushgateway and the
   Python uptime probe. The local test runner prints its dashboard URL; Actions links the public
   dashboard when `GRAFANA_URL` is configured and publishes history when its Pushgateway secrets
   are configured. Login and server-proxied AI panels use only approximate country, derived
   client type, and HMAC-pseudonymous users; they do not export identity, IP, prompt, response,
-  token, or key data. Keep both `METRICS_TOKEN` and `METRICS_ID_SALT` on Fly, never Replit.
+  token, or key data. `METRICS_TOKEN` and `METRICS_ID_SALT` belong wherever the API runs as a
+  real process — not on Vercel, where `/metrics` answers 404 by design.
+
+[bo]: https://vercel.com/docs/build-output-api/v3
 
   Publishing runs **even when the test job fails** — that is when the Allure report is most
   worth reading. The site job overrides the skip-on-failed-dependency default with

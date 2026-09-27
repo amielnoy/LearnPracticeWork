@@ -3,15 +3,20 @@
 The monitoring stack is Grafana + Prometheus + Pushgateway, with both data producers written
 in Python:
 
-- FastAPI exposes request counts, latency histograms, in-flight requests, and Replit relay
-  results at `/metrics`.
+- FastAPI exposes request counts, latency histograms, in-flight requests, and relay results at
+  `/metrics` — available wherever the API runs as a real process, which is this compose stack.
+  The deployed API is a Vercel function and answers 404 there on purpose: each invocation is its
+  own process, so a scrape would report what one instance happened to see.
 - Login counters group attempts by outcome, approximate country, client type (`desktop_web`,
   `ios`, `android`, or `other`), and a pseudonymous user identifier.
 - AI counters group server-proxied requests by provider, model, status, approximate country,
   client type, and pseudonymous user identifier.
-- `python -m app.monitor` probes the local Scalar reference, Fly API, Replit site and academy,
-  and the deployed Vercel site (`VERCEL_SITE_ORIGIN` overrides the default in
-  `compose.yaml`).
+- `python -m app.monitor` probes the local Scalar reference and the deployed site and its API
+  at <https://learn-practice-work.vercel.app> — one origin now, so both probes point at it.
+  `VERCEL_SITE_ORIGIN` overrides that default in `compose.yaml`; point it at a deployment
+  hostname such as
+  <https://learn-practice-work-73spot260-amielnoy-9725s-projects.vercel.app> to watch a
+  single deployment instead of whatever the alias currently serves.
 - `python -m app.test_history` converts the existing Allure result files into Prometheus
   metrics after every local or CI test run.
 
@@ -36,14 +41,18 @@ only and cannot contain embedded credentials. The compose default also checks
 
 ## Production
 
-Set long, independent random values for `METRICS_TOKEN` and `METRICS_ID_SALT` with
-`fly secrets set`. Production FastAPI returns 404 from `/metrics` without the matching bearer
-token. Configure the production Prometheus scrape with that token. The salt creates stable
-HMAC-based user labels without exporting an email address. Do not put either value in Replit.
+Set long, independent random values for `METRICS_TOKEN` and `METRICS_ID_SALT` wherever the API
+runs as a real process — `vercel env add` covers the deployed function, but `/metrics` does not
+answer there at all, so these matter only for a containerised instance. Production FastAPI
+returns 404 from `/metrics` without the matching bearer token. Configure that instance's
+Prometheus scrape with the token. The salt creates stable HMAC-based user labels without
+exporting an email address.
 
 Country is an approximate two-letter code supplied by the trusted hosting proxy, and client
-type is derived from the request's User-Agent. The Replit relay overwrites its internal country
-header before forwarding it, so a browser cannot choose that metric label. Login and AI panels
+type is derived from the request's User-Agent. **On Vercel it is always `unknown`**:
+`metrics.country()` reads `x-academy-client-country`, `fly-client-country` and `cf-ipcountry`,
+and Vercel sends `x-vercel-ip-country`. Adding that name to the list is the whole fix; until
+then the geography panels describe the container, not the deployment. Login and AI panels
 never include names, email addresses, IP addresses, access tokens, prompts, responses, or API
 keys. AI usage covers only requests through the Python proxy; browser-side bring-your-own-key
 requests cannot be observed by the server. Avoid broad Grafana access because even pseudonymous
@@ -61,7 +70,7 @@ private host. Then configure these GitHub repository settings:
 
 When `PUSHGATEWAY_URL` is absent, the CI publisher explicitly reports that history publishing
 is disabled and exits successfully. Credentials never appear in a Vite variable, repository
-variable, Replit environment, or committed file.
+variable, repository variable, or committed file.
 
 Prometheus retains 90 days locally. Pushgateway holds the latest result per branch while
 Prometheus preserves each scrape over time, which is what makes the Grafana test-history panel

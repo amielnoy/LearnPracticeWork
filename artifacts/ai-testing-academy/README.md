@@ -8,11 +8,12 @@ UI still renders its bundled content modules, so the content API is ready for th
 rather than required for the static site to render.
 
 When the Python API is running, its Scalar reference is available at `/api/docs` and its
-runtime OpenAPI JSON at `/api/openapi.json`. Scalar is served by Fly through the same-origin
-Replit relay; it holds no Replit secret and has agent, telemetry, proxying, remote fonts, and
-credential persistence disabled.
+runtime OpenAPI JSON at `/api/openapi.json`. Both are served by the same Vercel function as the
+rest of `/api`, and Scalar has agent, telemetry, proxying, remote fonts, and credential
+persistence disabled.
 
-For the full architecture walkthrough, open `architecture.html` at the repo root.
+Live at <https://learn-practice-work.vercel.app>. For the full architecture walkthrough, open
+`architecture.html` at the repo root.
 
 ## Layout
 
@@ -148,11 +149,11 @@ Connection Setup lets a visitor use a **server-side default key** or **their own
   `src/context/ProviderContext.tsx` and `src/lib/providers.ts`.
 
 The proxy enforces a short burst limit and a small 10-request daily quota by default, strict prompt validation, bounded
-output tokens, request-body limits, and an upstream timeout. Production cross-origin access is
-deny-by-default: set `ALLOWED_ORIGINS` to a comma-separated list when an additional frontend
-origin must call the API. `REPLIT_DOMAINS` is included automatically. The quota and timeout
-defaults can be overridden with `AI_RATE_LIMIT_WINDOW_MS`, `AI_RATE_LIMIT_MAX`,
-`AI_DAILY_QUOTA`, and `AI_UPSTREAM_TIMEOUT_MS`.
+output tokens, request-body limits, and an upstream timeout. The site and the API share one
+Vercel origin, so ordinary traffic is same-origin and never reaches CORS at all. Cross-origin
+access stays deny-by-default: set `ALLOWED_ORIGINS` to a comma-separated list when a *different*
+frontend origin must call the API. The quota and timeout defaults can be overridden with
+`AI_RATE_LIMIT_WINDOW_MS`, `AI_RATE_LIMIT_MAX`, `AI_DAILY_QUOTA`, and `AI_UPSTREAM_TIMEOUT_MS`.
 
 Signed-in visitors are quota-keyed by verified Google subject; anonymous visitors use their
 network identity. Production counters are atomic Postgres rows keyed by an HMAC digest and
@@ -190,10 +191,14 @@ claims and `email_verified`, then returns public profile fields and sets an HMAC
 HttpOnly, `SameSite=Lax` cookie. The raw Google credential is never persisted in browser
 storage. Reloads restore the profile through `GET /api/auth/session`; logout calls
 `POST /api/auth/logout`. When a build has no `VITE_GOOGLE_CLIENT_ID`, the client reads the
-public ID from `GET /api/auth/config`, so a static Replit build needs no authentication
-configuration. Set `GOOGLE_CLIENT_ID` and a random server-only `SESSION_SECRET` of at least
-32 characters on the Fly backend. Register the Vercel and Replit origins in that Google
-OAuth client's authorized JavaScript origins.
+public ID from `GET /api/auth/config`, so a build needs no authentication configuration of its
+own. Set `GOOGLE_CLIENT_ID` and a random server-only `SESSION_SECRET` of at least 32 characters
+on the Vercel project.
+
+Register `https://learn-practice-work.vercel.app` under **Authorized JavaScript origins** on
+that Google OAuth client. An origin Google does not know is refused before the app is reached —
+*Error 400: origin_mismatch* — and no wildcard is accepted there, so a per-deployment or preview
+hostname needs its own entry and expires with that deployment.
 
 ### Content API
 
@@ -255,14 +260,13 @@ shadcn boilerplate used to sit here unimported, with every colour set to the lit
 
 ## Deployment
 
-- **Vercel** — `.github/workflows/deploy-vercel.yml`, at the **site root**: this app is what
-  the deployment serves, with the portfolio at `/portfolio/` and the decks beneath it. Static
-  only, so the AI panel is bring-your-own-key there. Client routes are rewritten at 200 by
-  `deploy/vercel/config.json`.
-- **Replit** — `.replit-artifact/artifact.toml`, `BASE_PATH=/ai-testing-academy/`, same origin
-  as the API server through a secretless relay.
-- **Cloudflare Pages** — the same artifact, still supported. `deploy/cloudflare/_redirects`
-  and `_headers` say what the Vercel routes say, in that host's dialect.
+- **Vercel** — `.github/workflows/deploy-vercel.yml`, at the **site root** of
+  <https://learn-practice-work.vercel.app>: this app is what the deployment serves, with the
+  portfolio at `/portfolio/` and the decks beneath it. Client routes are rewritten at 200 by
+  `deploy/vercel/config.json`. The API is a Python function in the same deployment, so the AI
+  panel has a server key behind it and falls back to bring-your-own-key only without one. The
+  current deployment on its own hostname:
+  <https://learn-practice-work-73spot260-amielnoy-9725s-projects.vercel.app/>.
 
-The API this app calls is deployed separately, to Fly — see `deploy/README.md` for what runs
-where, what it costs, and the first-deploy commands.
+The API this app calls is part of the same Vercel deployment, at `/api/*` on the origin above
+— see `deploy/README.md` for what runs where, what it costs, and the first-deploy commands.

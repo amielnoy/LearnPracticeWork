@@ -2,6 +2,14 @@
 
 Everything is one Vercel deployment, on the free tier.
 
+The live site is <https://learn-practice-work.vercel.app> — the production
+alias, and the origin every canonical tag, sitemap, `robots.txt`,
+`DEFAULT_SITE_ORIGIN` and `ALLOWED_ORIGINS` entry names. Vercel also hands out
+a per-deployment hostname, currently
+<https://learn-practice-work-73spot260-amielnoy-9725s-projects.vercel.app/>.
+Use that one to inspect a single deployment; never for anything durable, because
+it stays pinned to that deployment while the alias moves on to the next.
+
 | | What it is | Where it goes | Cost |
 |---|---|---|---|
 | Static | 12 Vite SPAs — academy, portfolio, 10 lecture decks | Vercel | $0 |
@@ -91,17 +99,6 @@ URLs the academy's own hreflang tags nominate for indexing.
 `deploy/vercel/config.json` rewrites them at 200. The workflow's smoke check
 asserts that on the real deployment.
 
-### Cloudflare Pages
-
-`deploy/cloudflare/_redirects` and `_headers` remain in the tree and say what
-the Vercel routes say about the *static* site, which is still portable: point a
-Pages project at this repo with the build commands above and `_site` as the
-output directory.
-
-The API is not portable that way any more. It is a Vercel Python function, and
-a Pages deployment of `_site` alone would serve the frontends with no `/api/*`
-behind them.
-
 ## The API
 
 `api/index.py` is the whole of it: it puts `server/` on the import path and
@@ -116,7 +113,7 @@ in the code as well as a line here:
 |---|---|
 | The schema is not applied at boot | `lifespan` runs on every cold start, not once per deploy. Applying DDL there would put a schema round-trip in front of a visitor's request and let instances race each other. Apply it deliberately instead — see below |
 | `/metrics` answers 404 | `prometheus_client` counts in process memory, and a process here is one invocation. A scrape would report what one instance happened to see, which is not a sample of anything |
-| `functions.excludeFiles` in `vercel.json` | The Python builder starts from the whole repository and removes what it is told to. Unbounded, the bundle is 329MB against a 225MB limit — and it contains `.env.local`. The glob is capped at 256 characters, which is why it names big directories rather than listing files |
+| `functions.excludeFiles` in `vercel.json` | The Python builder starts from the whole repository and removes what it is told to. Unbounded, the bundle is 329MB against a 225MB limit — and it contains the env files. The glob names `.env*` and `env/**` for that reason — moving them into `env/` would otherwise have walked a database password into the bundle. It is capped at 256 characters, which is why it names big directories rather than listing files |
 
 Quotas were already serverless-safe and did not need changing: `app/rate_limit.py`
 counts in atomic Postgres rows keyed by an HMAC digest, so allowances are shared
@@ -191,8 +188,9 @@ invisible to a visitor and equally invisible to whoever deployed it.
 The three collections — question bank, coding challenges, lecture series — live in the client's
 TypeScript sources and are extracted from there. Regenerate, then apply:
 
-Put the database password in `.env.local` — that file is git-ignored, unlike `.env`, which
-this repository commits on purpose for public build-time config:
+Every env file lives in `env/`, not the repository root. Put the database password in
+`env/.env.local` — that one is git-ignored, unlike `env/.env.example`, which is committed on
+purpose because it holds nothing but public build-time config:
 
 ```
 SUPABASE_DB_PASSWORD=…
@@ -239,13 +237,12 @@ An empty or unavailable store is reported as a controlled `503`, not as fabricat
 the academy falls back to its bundled copy of the same content — so a missing seed is invisible
 to a visitor and equally invisible to whoever deployed it.
 
-Configure Stripe to send events to `https://<app>.fly.dev/api/stripe/webhook`. The webhook
-secret is verified against the raw request body. Stripe credentials are read only from the
-backend host's `STRIPE_*` secret environment; there is no Replit connector fallback.
-
 Configure Stripe to send events to
-`https://learn-practice-work.vercel.app/api/stripe/webhook`. The webhook secret
-is verified against the raw request body.
+`https://learn-practice-work.vercel.app/api/stripe/webhook` — the alias, not a
+per-deployment hostname, which would stop being production at the next deploy.
+The webhook secret is verified against the raw request body. Stripe credentials
+are read only from the Vercel project's `STRIPE_*` environment; there is no
+Replit connector fallback.
 
 Cold starts are worth a thought here and not much more: Stripe retries a
 delivery that times out, and the webhook is idempotent. Fluid Compute keeps
@@ -296,24 +293,31 @@ Two things live outside this repository and do not follow a deployment:
 
 1. **The Google OAuth client** must authorize
    `https://learn-practice-work.vercel.app`, or sign-in fails on an origin
-   Google has never heard of.
+   Google has never heard of — *Error 400: origin_mismatch*, raised by Google
+   before the app is reached, so nothing in this repository can fix it. Add the
+   origin under **Authorized JavaScript origins** on client
+   `1028322175067-…apps.googleusercontent.com` in the Google Cloud Console:
+   scheme and host only, no trailing slash and no path. Google accepts no
+   wildcard there, so a preview or per-deployment hostname would need its own
+   entry and would be dead the next deploy — sign in on the alias, and expect a
+   few minutes before a newly added origin is honoured.
 2. **Stripe's webhook endpoint** must be the Vercel URL.
 
-### Retiring the old hosts
+### The hosts that are gone
 
-Neither shuts down by deleting a file, and neither is load-bearing any more:
+Vercel is the only host. Fly is already gone — `ata-api.fly.dev` no longer
+resolves, and `server/fly.toml` was removed with it. The Cloudflare route files
+went the same way: `deploy/vercel/config.json` is the one routing table, and a
+second one in another host's dialect was a copy nothing kept in step.
 
-- **Fly** — `ata-api.fly.dev` no longer resolves; the app is already gone.
-  `server/fly.toml` has been removed, because a config for an application that
-  does not exist is worse than no config at all.
-- **Replit** — still serving at the old origin. Stop the deployment in the
-  Replit dashboard when you are satisfied with this one. The `.replit` and
-  `.replit-artifact/` files are left in the tree on purpose: they describe the
-  development environment as well as the deployment, and removing them is a
-  separate decision from changing where the site is hosted.
+One shutdown step is left, and it is a browser tab rather than a file: **stop
+the Replit deployment**. Before you do, point its URLs at this origin with a
+301. The old URLs are indexed, and a redirect moves that ranking here instead of
+discarding it — a deployment simply switched off takes its ranking with it.
 
-Keep the Replit deployment up long enough to redirect from it — the old URLs are
-indexed, and a 301 is what moves that ranking rather than discarding it.
+`.replit` and `.replitignore` stay in the tree. They describe a development
+environment, not a host, which is why removing them is a separate decision from
+this one.
 
 ### Repository variables
 

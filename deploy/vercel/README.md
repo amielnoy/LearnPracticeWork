@@ -4,10 +4,10 @@
 route table. The deploy workflow copies it over the one `vercel build` generates,
 so this file — not Vercel's inference — is what serves the deployment.
 
-It replaces two Cloudflare-shaped files — `../cloudflare/_redirects` and
-`../cloudflare/_headers` — which Vercel does not read. Those stay in the tree so
-the same assembled `_site` still deploys to Cloudflare Pages unchanged, minus
-the API.
+It replaced two Cloudflare-shaped files — `../cloudflare/_redirects` and
+`../cloudflare/_headers` — which Vercel never read. They have been deleted:
+Vercel is the only host, and a second routing table in another host's dialect is
+one nothing keeps in step with this one.
 
 ## Why the routes are in this order
 
@@ -61,7 +61,10 @@ throws, the failure is swallowed, and the site concludes no server key exists.
 Every server-backed feature disappears while the page looks perfectly healthy.
 `tests/unit/vercelRoutes.spec.ts` asserts the route resolves to the function and
 never to `/index.html`; the deploy workflow's smoke check asks the deployed
-`/api/healthz` whether the function actually booted.
+`/api/healthz` whether the function actually booted — in production that is
+<https://learn-practice-work.vercel.app/api/healthz>, and for one deployment on
+its own,
+<https://learn-practice-work-73spot260-amielnoy-9725s-projects.vercel.app/api/healthz>.
 
 This route used to be written at deploy time from an `API_ORIGIN` variable,
 because the API lived on another host and had moved twice. It lives here now
@@ -70,5 +73,5 @@ because there is nowhere else for it to point.
 ## Ten decks, one rule
 
 `/ai-testing-lecture-(\d+)/.*` → `/ai-testing-lecture-$1/index.html` replaces
-the ten near-identical lines the Cloudflare file needs. An eleventh deck needs
+the ten near-identical lines the deleted Cloudflare file needed. An eleventh deck needs
 no change here — only a build step and a directory in the assembled site.

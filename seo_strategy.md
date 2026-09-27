@@ -1,5 +1,18 @@
 # SEO Strategy
 
+## Canonical home
+
+`https://learn-practice-work.vercel.app` — the academy at the root, the portfolio at
+`/portfolio/`, the ten decks at `/ai-testing-lecture-N/`. Every `canonical`, `og:url`,
+`hreflang`, JSON-LD `@id`, `sitemap.xml` and `robots.txt` in the tree names that origin, and
+`tests/unit/hreflang.spec.ts` holds them to it.
+
+Vercel also serves each deployment on its own hostname —
+`https://learn-practice-work-73spot260-amielnoy-9725s-projects.vercel.app/` is the current
+one. It is for inspecting a build, and it must never appear in a canonical, a sitemap or a
+shared link: it is a second origin serving identical content, which is exactly the duplicate
+a canonical exists to prevent, and it stops being production at the next deploy.
+
 ## In scope
 
 - Portfolio site (`artifacts/portfolio/`) — public personal/professional marketing site for Amiel Peled
@@ -41,8 +54,7 @@ searches in Hebrew.
   as unconfirmed and the whole cluster is dropped.
 - **Self-referential canonicals.** Each variant canonicalises to itself, otherwise the canonical
   contradicts the hreflang and the alternates are ignored. Only the query is rewritten — the
-  origin stays whatever the document declares, because the sites are served from two hosts and
-  only the Replit one is the canonical home.
+  origin stays whatever the document declares, which is the canonical home above.
 - **A head script that runs before React**, setting `lang`, `dir`, the title, the description
   and the canonical. It exists so a crawler that renders the page sees one consistent document,
   and so a Hebrew load has no flash of English/LTR. In the academy it mirrors the priority order
