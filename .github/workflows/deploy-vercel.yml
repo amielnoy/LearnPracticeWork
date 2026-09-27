@@ -383,13 +383,16 @@ jobs:
           esac
 
           # Readiness names what is degraded instead of hiding it behind a 200.
-          # It is reported rather than asserted: the database and the quota salt
-          # are configuration that lives in the Vercel project, and a deployment
-          # that ships correctly can still be pointed at a database that is down.
+          # It is reported rather than asserted: Redis and the quota salt are
+          # configuration that lives in the Vercel project, and a deployment
+          # that ships correctly can still be pointed at a store that is down.
+          # `database: not_configured` is the intended state here — progress
+          # lives in a spreadsheet and quotas in Redis — so only a *configured*
+          # database that cannot be reached turns this into a 503.
           ready=$(curl -sS --max-time 30 "${URL}/api/readyz" || true)
           echo "ℹ️  /api/readyz → ${ready:-no response}"
           case "$ready" in
-            *rateLimiting*) echo "::warning::Quotas cannot count — every rate-limited route will refuse callers. Set RATE_LIMIT_SALT and DATABASE_URL." ;;
+            *rateLimiting*) echo "::warning::Quotas cannot count — every rate-limited route will refuse callers. Set REDIS_URL and RATE_LIMIT_SALT." ;;
           esac
 
           # The failure this is here for is silent: an API path answered by the

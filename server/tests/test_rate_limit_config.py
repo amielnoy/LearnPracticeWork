@@ -329,3 +329,79 @@ async def test_login_degrades_rather_than_locking_everyone_out(monkeypatch):
     limiter = rate_limit.SharedRateLimiter("login", 10, 300, when_unavailable="degrade")
     allowed, _ = await limiter.hit("someone")
     assert allowed is True
+
+
+@pytest.fixture
+def no_database(monkeypatch: pytest.MonkeyPatch, override_dependency) -> None:
+    """The deployment this branch is for: no Supabase project at all.
+
+    `database_ready()` answers False for an unconfigured URL exactly as it does
+    for an unreachable one, so readiness cannot tell them apart from the probe.
+    """
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_DB_PASSWORD", raising=False)
+
+    async def probe() -> bool:
+        return False
+
+    override_dependency(get_database_probe, lambda: probe)
+
+
+@pytest.fixture
+def database_unreachable(monkeypatch: pytest.MonkeyPatch, override_dependency) -> None:
+    """Configured, and down. That is an outage and has to stay a 503."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://nobody@127.0.0.1:1/none")
+
+    async def probe() -> bool:
+        return False
+
+    override_dependency(get_database_probe, lambda: probe)
+
+
+async def test_no_database_configured_is_reported_as_configuration_not_an_outage(
+    api_client, no_database
+) -> None:
+    """The intended end state of this branch: progress in a sheet, quotas in Redis.
+
+    Answering 503 forever would make readiness useless — Fly and the deploy
+    workflow both read it — and would hide the one field that explains a quota
+    outage behind a check that can never pass.
+    """
+    response = await api_client.get("/api/readyz")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ready"
+    assert response.json()["database"] == "not_configured"
+
+
+async def test_a_configured_database_that_cannot_be_reached_is_still_an_outage(
+    api_client, database_unreachable
+) -> None:
+    response = await api_client.get("/api/readyz")
+
+    assert response.status_code == 503
+    assert response.json() == {"status": "not_ready", "database": "unavailable"}
+
+
+async def test_the_quota_diagnostic_is_reported_with_no_database_at_all(
+    api_client, production, no_database
+) -> None:
+    """The whole point of `rateLimiting`: it is the only thing that names the cause."""
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+
+    response = await api_client.get("/api/readyz")
+
+    assert response.status_code == 200
+    assert "RATE_LIMIT_SALT" in response.json()["rateLimiting"]
+
+
+async def test_the_quota_diagnostic_survives_a_database_outage(
+    api_client, production, database_unreachable
+) -> None:
+    """Two things can be wrong at once, and the 503 must not swallow the second."""
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+
+    response = await api_client.get("/api/readyz")
+
+    assert response.status_code == 503
+    assert "RATE_LIMIT_SALT" in response.json()["rateLimiting"]
