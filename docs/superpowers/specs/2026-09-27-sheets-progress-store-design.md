@@ -80,8 +80,13 @@ A new tab, `learner_progress`, one row per learner:
 | `last_tool` | text | `resume` \| `interview` \| `practice` \| empty |
 | `updated_at` | ISO 8601 text | |
 
-500 ids serialised as JSON is a few kilobytes, far under the 50,000-character
-cell limit.
+A Sheets cell holds at most 50,000 characters, and the accepted input can
+exceed that: `ProgressBody` allows 500 ids of up to 200 characters each, so the
+serialised array reaches about 101,500 characters — roughly twice the limit,
+and more again if the ids contain characters JSON has to escape. Real ids are
+lecture and practice-item keys of a few characters, so the realistic row is a
+couple of kilobytes; the ceiling is a tampering bound, not a typical one, and it
+is the cap at 500 that is doing the work rather than any headroom in the cell.
 
 ### The web app
 

@@ -12,8 +12,10 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 MAX_PROMPT_CHARACTERS = 60_000
 
-# Mirrors `database.MAX_PROGRESS_IDS`; the ids themselves are lecture and
-# practice-item keys, which are short by construction.
+# Mirrors `MAX_IDS` in `server/sheets/Progress.gs`, which caps the stored row;
+# the ids themselves are lecture and practice-item keys, short by construction.
+# 500 ids of 200 characters serialise to ~101,500, past the 50,000-character
+# cell limit — so the count cap, not the cell, is what bounds a tampered payload.
 MAX_PROGRESS_IDS = 500
 MAX_PROGRESS_ID_LENGTH = 200
 

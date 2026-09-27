@@ -90,6 +90,9 @@ the module that owns it.
 | `customers.py` | Recorded purchases, and the AI-written next action for one |
 | `origins.py` | Which origins a redirect may point at |
 | `errors.py` | `ServiceError`, rendered by a single handler |
+| `progress.py` | The learner-progress route's own logic: what a signed-in reader's row is, and the fallback when there is no store |
+| `sheets_store.py` | The progress store — an Apps Script web app over one spreadsheet, reached over HTTP because the script can take a lock the Sheets API cannot |
+| `quota_store.py` | The rate-limit counters, in Redis: `INCR` plus `EXPIRE … NX`, one shared client per process |
 | `schemas.py` · `settings.py` | Request bodies; deployment-wide limits |
 
 Two consequences worth knowing before editing:

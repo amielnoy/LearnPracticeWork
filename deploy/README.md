@@ -146,6 +146,8 @@ Set these on the Vercel project — `vercel env add NAME production`, or
 | `DATABASE_URL` | Point it at Supabase's **transaction pooler on 6543**, not the session pooler. A serverless function opens far more short-lived connections than a long-running server, which is the case the transaction pooler exists for. It no longer has anything to do with quotas |
 | `RATE_LIMIT_SALT` | Every quota is counted keyed by an HMAC of the caller's identity; with no salt there is no key, so the shared store cannot be used. What happens then is **per bucket**, decided by `when_unavailable` in `dependencies.py`. The **AI quotas refuse** — they guard a key billed per call, and a limiter that cannot count must not wave those through, so the caller gets a `429` that reads to a visitor exactly like an exhausted quota. **Sign-in and the admin routes degrade** to a per-worker in-memory bound instead: they guard a credential that is verified independently, so refusing everyone would be an authentication outage protecting nothing. Any long random string works, and `METRICS_ID_SALT` is accepted in its place |
 | `SESSION_SECRET` | At least 32 characters. Sign-in returns nothing without it |
+| `SHEETS_WEBAPP_URL` | The Apps Script web app's `/exec` URL — where signed-in learner progress is read and merged. Absent, `/api/progress` answers `503` and the academy carries on from `localStorage` alone: a visitor sees a working site that silently does not follow them to another device, and nothing in the deployment says so. The URL answers a `302` to `script.googleusercontent.com`, which `sheets_store` follows deliberately |
+| `SHEETS_WEBAPP_TOKEN` | The only guard in front of the sheet — the web app is deployed "anyone with the link". **At least 32 random characters**, and it must be byte-for-byte the same as the `ACADEMY_TOKEN` script property on the Apps Script project, which is where the other half of the comparison lives. A shorter token is refused by the script rather than trusted, so a too-short one and an absent one fail identically. It travels in the POST body, never a query string |
 | `ALLOWED_ORIGINS` | `https://learn-practice-work.vercel.app`. Same-origin requests do not need CORS, but `PUBLIC_APP_ORIGIN` is validated against this list |
 | `PUBLIC_APP_ORIGIN` | The same origin. Must match an entry in `ALLOWED_ORIGINS`, or Stripe checkout fails closed |
 | `NODE_ENV` | `production`. It is what switches off the localhost CORS regex and the in-memory rate limiter |
@@ -185,7 +187,29 @@ Verify with `curl https://learn-practice-work.vercel.app/api/healthz` for
 `{"status":"ok"}` — that only proves the function booted — and then
 `/api/readyz`, which reports the database and carries a `rateLimiting` field
 **only when quotas cannot count**, naming what is missing. The deploy workflow
-checks both and warns on the second.
+checks both and warns on the second. `"database":"not_configured"` is the
+expected answer here and is not an outage: no table in Postgres is required any
+more, so readiness stays `ready` and only a `DATABASE_URL` that is set and
+unreachable answers `503`.
+
+**Neither check can see the progress store, and nothing else can either.** An
+absent or wrong `SHEETS_WEBAPP_URL` or `SHEETS_WEBAPP_TOKEN` makes
+`/api/progress` answer `503`, and the academy is built to treat that as "no
+remote copy right now" and render from `localStorage` — which is exactly what it
+does on a correctly configured deployment for a signed-out reader. So a
+deployment with no progress store is indistinguishable from a working one to a
+visitor *and* to whoever deployed it, and nobody finds out until a learner opens
+the site on a second device. The only way to know is to sign in, record
+something, and check that the `learner_progress` tab of the
+LearnPracticeWorkData spreadsheet gained a row.
+
+`vercel.json` sets no `maxDuration`, so these functions run on the platform
+default of **10 seconds** — below `sheets_store.TIMEOUT`, which is 20. A
+genuinely cold Apps Script start therefore returns a platform `504` rather than
+the clean `500` the design expects, and the request never reaches the handler
+that would have logged why. Raising it is a deliberate change to
+`vercel.json` and is not made here; the asymmetry is recorded so the `504` is
+recognised rather than investigated as something new.
 
 ### Applying the schema
 
@@ -200,7 +224,7 @@ different things own tables in it:
 
 | File | Owns |
 |---|---|
-| `server/app/schema.sql` | What the API *writes*: `academy_users`, `course_purchases`, `login_events`, `ai_usage_events` |
+| `server/app/schema.sql` | What the API *writes*: `academy_users`, `course_purchases`, `login_events`, `ai_usage_events`, `test_runs`, `test_suite_results` |
 | `scripts/src/academy-schema.sql` | What the academy *reads*: the question bank, coding challenges and lecture series |
 
 The first used to be applied by `initialize_database()` on every boot, which is

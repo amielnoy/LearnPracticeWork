@@ -2,9 +2,12 @@
  * Applies both schemas and the content seed to Supabase.
  *
  * Two schemas, because two different things own tables in one database:
- * `server/app/schema.sql` is everything the API writes (sign-ins, learner
- * progress, purchases, quota rows) and `scripts/src/academy-schema.sql` is the
- * content the academy reads.
+ * `server/app/schema.sql` is everything the API writes (accounts, sign-in
+ * events, purchases, AI usage events and the CI test-history tables) and
+ * `scripts/src/academy-schema.sql` is the content the academy reads. Learner
+ * progress lives in a spreadsheet now (`server/sheets/Progress.gs`) and the
+ * quota counters in Redis (`server/app/quota_store.py`); neither has a table
+ * here any more.
  *
  *     pnpm --filter @workspace/scripts run seed:academy
  *
@@ -210,11 +213,13 @@ function main(): void {
   if (!flags.has('--check')) {
     if (!flags.has('--seed-only')) {
       // Two schemas, one database. `server/app/schema.sql` owns what the API
-      // writes — sign-ins, purchases, quota rows — and used to be applied by
+      // writes — accounts, sign-in events, purchases, AI usage and the CI
+      // test-history tables — and used to be applied by
       // `initialize_database()` on every boot. Serverless ended that: a Vercel
       // function boots per invocation, so the DDL moved here and nothing else
-      // runs it. Learner progress itself now lives in a spreadsheet, not here
-      // — see `server/app/sheets_store.py`.
+      // runs it. Learner progress now lives in a spreadsheet (see
+      // `server/app/sheets_store.py`) and the quota counters in Redis (see
+      // `server/app/quota_store.py`), so neither is created here.
       apply(where, path.join('server', 'app', 'schema.sql'));
       apply(where, path.join('scripts', 'src', 'academy-schema.sql'));
     }
