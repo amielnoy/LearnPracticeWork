@@ -69,3 +69,127 @@ function mergeProgress(stored, incoming) {
     lastTool: tool(i.lastTool) || tool(s.lastTool) || null,
   };
 }
+
+var SHEET_NAME = 'learner_progress';
+var HEADERS = [
+  'google_sub', 'resume_started', 'resume_completed', 'interview_started',
+  'interview_answers', 'interview_completed', 'practice_completed',
+  'lectures_viewed', 'last_tool', 'updated_at',
+];
+
+/**
+ * A leading `=`, `+`, `-` or `@` makes Sheets treat a value as a formula, and
+ * both the ids and the sub arrive from a browser. An apostrophe forces text.
+ */
+function text(value) {
+  var s = String(value == null ? '' : value);
+  return /^[=+\-@]/.test(s) ? "'" + s : s;
+}
+
+function untext(value) {
+  var s = String(value == null ? '' : value);
+  return s.charAt(0) === "'" ? s.slice(1) : s;
+}
+
+function rowFromProgress(sub, progress) {
+  return [
+    text(sub),
+    progress.resumeStarted,
+    progress.resumeCompleted,
+    progress.interviewStarted,
+    progress.interviewAnswers,
+    progress.interviewCompleted,
+    text(JSON.stringify(ids(progress.practiceCompleted))),
+    text(JSON.stringify(ids(progress.lecturesViewed))),
+    text(progress.lastTool || ''),
+    new Date().toISOString(),
+  ];
+}
+
+function parseIds(cell) {
+  try {
+    return ids(JSON.parse(untext(cell) || '[]'));
+  } catch (err) {
+    return [];
+  }
+}
+
+function progressFromRow(row) {
+  return {
+    resumeStarted: row[1] === true || row[1] === 'TRUE',
+    resumeCompleted: row[2] === true || row[2] === 'TRUE',
+    interviewStarted: row[3] === true || row[3] === 'TRUE',
+    interviewAnswers: Number(row[4]) || 0,
+    interviewCompleted: row[5] === true || row[5] === 'TRUE',
+    practiceCompleted: parseIds(row[6]),
+    lecturesViewed: parseIds(row[7]),
+    lastTool: tool(untext(row[8])) || null,
+  };
+}
+
+function sheet() {
+  var book = SpreadsheetApp.getActiveSpreadsheet();
+  var tab = book.getSheetByName(SHEET_NAME);
+  if (!tab) {
+    tab = book.insertSheet(SHEET_NAME);
+    tab.appendRow(HEADERS);
+  }
+  return tab;
+}
+
+/** First match wins, and a duplicate sub is an error rather than a coin toss. */
+function rowIndexFor(tab, sub) {
+  var column = tab.getRange(2, 1, Math.max(tab.getLastRow() - 1, 0), 1).getValues();
+  var found = -1;
+  for (var i = 0; i < column.length; i++) {
+    if (untext(column[i][0]) === sub) {
+      if (found !== -1) throw new Error('duplicate rows for one sub');
+      found = i + 2;
+    }
+  }
+  return found;
+}
+
+function authorized(e) {
+  var expected = PropertiesService.getScriptProperties().getProperty('ACADEMY_TOKEN');
+  if (!expected || expected.length < 32) return false;
+  var given = (e && e.parameter && e.parameter.token) || '';
+  if (given.length !== expected.length) return false;
+  var diff = 0;
+  for (var i = 0; i < expected.length; i++) {
+    diff |= expected.charCodeAt(i) ^ given.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/** Apps Script web apps always answer 200; the body carries the outcome, and
+ *  `sheets_store` treats a body without `progress` as a failure. */
+function json(body) {
+  return ContentService.createTextOutput(JSON.stringify(body)).setMimeType(
+    ContentService.MimeType.JSON,
+  );
+}
+
+function doPost(e) {
+  if (!authorized(e)) return json({ error: 'unauthorized' });
+  var body = JSON.parse(e.postData.contents);
+  var sub = String(body.sub || '');
+  if (!sub) return json({ error: 'missing sub' });
+
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return json({ error: 'busy' });
+  try {
+    var tab = sheet();
+    var index = rowIndexFor(tab, sub);
+    var stored = index === -1 ? emptyProgress() : progressFromRow(tab.getRange(index, 1, 1, HEADERS.length).getValues()[0]);
+    if (body.op === 'load') return json({ progress: stored });
+
+    var merged = mergeProgress(stored, body.progress);
+    var row = rowFromProgress(sub, merged);
+    if (index === -1) tab.appendRow(row);
+    else tab.getRange(index, 1, 1, HEADERS.length).setValues([row]);
+    return json({ progress: merged });
+  } finally {
+    lock.releaseLock();
+  }
+}
