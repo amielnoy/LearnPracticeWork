@@ -163,6 +163,10 @@ jobs:
       # failure picture while cutting out the serial wait between layers.
       - name: Run all test suites in parallel
         if: ${{ !cancelled() }}
+        env:
+          # `run-all-tests.sh` closes with "where is this live?"; without this it
+          # can only print how to answer that.
+          VERCEL_SITE_ORIGIN: ${{ vars.VERCEL_SITE_ORIGIN }}
         run: ./run-all-tests.sh
 
       # Two destinations, both optional: the Pushgateway holds the latest run
