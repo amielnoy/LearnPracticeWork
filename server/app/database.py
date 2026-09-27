@@ -28,12 +28,6 @@ def schema() -> str:
     return (Path(__file__).with_name("schema.sql")).read_text(encoding="utf-8")
 
 
-# Rate-limit rows are reused in place, so the table is bounded by the number of
-# distinct callers rather than by traffic — which for IP-keyed buckets grows
-# without limit over time. The longest window is a day, so anything untouched
-# for two is a row no limiter will ever consult again.
-STALE_RATE_LIMIT_DAYS = 2
-
 # How long an event row is kept. These are operational records — enough history
 # to see a trend or investigate a complaint, not a permanent log of what each
 # person did. Purchases have their own, much longer, statutory retention.
@@ -88,11 +82,6 @@ def _expire(connection: psycopg.Connection) -> None:
     connection.execute("DELETE FROM course_purchases WHERE retention_until <= now()")
     connection.execute("DELETE FROM login_events WHERE retention_until <= now()")
     connection.execute("DELETE FROM ai_usage_events WHERE retention_until <= now()")
-    connection.execute(
-        """DELETE FROM api_rate_limits
-           WHERE window_started <= now() - (%s * interval '1 day')""",
-        (STALE_RATE_LIMIT_DAYS,),
-    )
 
 
 async def record_purchase(values: dict[str, Any]) -> None:
@@ -115,49 +104,6 @@ def _record_purchase(values: dict[str, Any]) -> None:
                ON CONFLICT (checkout_session_id) DO NOTHING""",
             purchase,
         )
-
-
-async def hit_rate_limit(
-    bucket: str, key_hash: str, limit: int, window_seconds: float
-) -> tuple[bool, int]:
-    return await asyncio.to_thread(_hit_rate_limit, bucket, key_hash, limit, window_seconds)
-
-
-def _hit_rate_limit(
-    bucket: str, key_hash: str, limit: int, window_seconds: float
-) -> tuple[bool, int]:
-    with psycopg.connect(database_url()) as connection:
-        row = connection.execute(
-            """INSERT INTO api_rate_limits (bucket, key_hash, window_started, hits)
-               VALUES (%s, %s, now(), 1)
-               ON CONFLICT (bucket, key_hash) DO UPDATE SET
-                 hits = CASE
-                   WHEN api_rate_limits.window_started <= now() - (%s * interval '1 second')
-                   THEN 1 ELSE api_rate_limits.hits + 1 END,
-                 window_started = CASE
-                   WHEN api_rate_limits.window_started <= now() - (%s * interval '1 second')
-                   THEN now() ELSE api_rate_limits.window_started END
-               RETURNING hits""",
-            (bucket, key_hash, window_seconds, window_seconds),
-        ).fetchone()
-    hits = int(row[0])
-    return hits <= limit, max(0, limit - hits)
-
-
-async def release_rate_limit(bucket: str, key_hash: str) -> int:
-    """Give back one hit, and report what is left. Never goes below zero."""
-    return await asyncio.to_thread(_release_rate_limit, bucket, key_hash)
-
-
-def _release_rate_limit(bucket: str, key_hash: str) -> int:
-    with psycopg.connect(database_url()) as connection:
-        row = connection.execute(
-            """UPDATE api_rate_limits SET hits = GREATEST(0, hits - 1)
-               WHERE bucket = %s AND key_hash = %s
-               RETURNING hits""",
-            (bucket, key_hash),
-        ).fetchone()
-    return int(row[0]) if row else 0
 
 
 async def list_course_purchases(limit: int = 200) -> list[dict]:

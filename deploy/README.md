@@ -184,7 +184,7 @@ different things own tables in it:
 
 | File | Owns |
 |---|---|
-| `server/app/schema.sql` | What the API *writes*: `academy_users`, `learner_progress`, `course_purchases`, `login_events`, `ai_usage_events`, `api_rate_limits` |
+| `server/app/schema.sql` | What the API *writes*: `academy_users`, `learner_progress`, `course_purchases`, `login_events`, `ai_usage_events` |
 | `scripts/src/academy-schema.sql` | What the academy *reads*: the question bank, coding challenges and lecture series |
 
 The first used to be applied by `initialize_database()` on every boot, which is

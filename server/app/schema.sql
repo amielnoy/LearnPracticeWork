@@ -39,17 +39,6 @@ CREATE INDEX IF NOT EXISTS course_purchases_email_idx ON course_purchases (email
 CREATE INDEX IF NOT EXISTS course_purchases_google_subject_idx ON course_purchases (google_subject);
 CREATE INDEX IF NOT EXISTS course_purchases_retention_idx ON course_purchases (retention_until);
 
--- Quotas, shared between workers. One row per bucket and caller, reused in
--- place; `hit_rate_limit` rolls the window forward rather than inserting again.
-CREATE TABLE IF NOT EXISTS api_rate_limits (
-  bucket text NOT NULL,
-  key_hash text NOT NULL,
-  window_started timestamptz NOT NULL DEFAULT now(),
-  hits integer NOT NULL DEFAULT 0,
-  PRIMARY KEY (bucket, key_hash)
-);
-CREATE INDEX IF NOT EXISTS api_rate_limits_window_idx ON api_rate_limits (window_started);
-
 -- Who signed in, keyed by the Google subject — the one identifier that stays
 -- the same when someone changes their name, their picture or their email.
 --
@@ -168,7 +157,7 @@ DO $$
 DECLARE t text;
 BEGIN
   FOREACH t IN ARRAY ARRAY[
-    'course_purchases', 'api_rate_limits', 'academy_users', 'learner_progress',
+    'course_purchases', 'academy_users', 'learner_progress',
     'login_events', 'ai_usage_events', 'test_runs', 'test_suite_results'
   ] LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY;', t);

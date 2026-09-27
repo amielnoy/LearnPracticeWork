@@ -13,6 +13,7 @@ import logging
 
 import pytest
 
+from app import rate_limit
 from app.dependencies import get_database_probe
 from app.rate_limit import SharedRateLimiter, shared_quota_problem
 
@@ -31,7 +32,7 @@ def database_available(override_dependency):
 def production(monkeypatch: pytest.MonkeyPatch):
     """A production deployment whose configuration a test then removes a piece of."""
     monkeypatch.setenv("NODE_ENV", "production")
-    monkeypatch.setenv("DATABASE_URL", "postgresql://fixture/quotas")
+    monkeypatch.setenv("REDIS_URL", "redis://fixture-host:6379/0")
     monkeypatch.setenv("RATE_LIMIT_SALT", "fixture-salt")
     monkeypatch.delenv("METRICS_ID_SALT", raising=False)
     return monkeypatch
@@ -63,12 +64,13 @@ def test_the_metrics_salt_is_accepted_in_its_place(production) -> None:
     assert shared_quota_problem() is None
 
 
-def test_a_missing_database_is_named(production) -> None:
-    production.delenv("DATABASE_URL", raising=False)
-    production.delenv("SUPABASE_DB_PASSWORD", raising=False)
+def test_a_missing_redis_url_is_named(production) -> None:
+    production.delenv("REDIS_URL", raising=False)
+    production.delenv("KV_URL", raising=False)
+    production.delenv("REDIS_TLS_URL", raising=False)
 
     assert shared_quota_problem() is not None
-    assert "database" in shared_quota_problem()
+    assert "Redis" in shared_quota_problem()
 
 
 @pytest.mark.asyncio
@@ -301,3 +303,29 @@ async def test_an_answered_request_does_spend_the_allowance(
     )
 
     assert int(second.headers["X-AI-Quota-Remaining"]) < int(first.headers["X-AI-Quota-Remaining"])
+
+
+async def test_production_without_redis_names_the_cause(monkeypatch):
+    monkeypatch.setenv("NODE_ENV", "production")
+    monkeypatch.setenv("RATE_LIMIT_SALT", "x" * 32)
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.delenv("KV_URL", raising=False)
+    monkeypatch.delenv("REDIS_TLS_URL", raising=False)
+    problem = rate_limit.shared_quota_problem()
+    assert problem is not None and "Redis" in problem
+
+
+async def test_an_ai_bucket_refuses_when_the_store_is_gone(monkeypatch):
+    monkeypatch.setenv("NODE_ENV", "production")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    limiter = rate_limit.SharedRateLimiter("ai-daily", 10, 86400)
+    allowed, remaining = await limiter.hit("someone")
+    assert (allowed, remaining) == (False, 0)
+
+
+async def test_login_degrades_rather_than_locking_everyone_out(monkeypatch):
+    monkeypatch.setenv("NODE_ENV", "production")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    limiter = rate_limit.SharedRateLimiter("login", 10, 300, when_unavailable="degrade")
+    allowed, _ = await limiter.hit("someone")
+    assert allowed is True
