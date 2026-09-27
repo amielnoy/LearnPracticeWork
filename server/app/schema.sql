@@ -1,8 +1,14 @@
 -- Everything this API owns in Postgres.
 --
--- `initialize_database()` runs this file at boot, every boot, so every
--- statement is idempotent and the file is the whole story: there is no
+-- Every statement is idempotent and the file is the whole story: there is no
 -- migration history to replay and no ordering to remember.
+--
+-- `initialize_database()` used to run it at boot, every boot. On Vercel a boot
+-- is a single invocation, so that became a schema round-trip in front of a
+-- visitor's request and a race between instances. It is applied deliberately
+-- instead, by `pnpm --filter @workspace/scripts run seed:academy --schema-only`
+-- — which is the only thing that runs it now. Nothing creates these tables on
+-- their own any more.
 --
 -- It is applied to the same Supabase project that holds the content tables,
 -- and that is the reason for the security block at the bottom. `public` is the

@@ -179,9 +179,28 @@ Nothing applies the DDL on boot any more, so it is applied from a terminal:
 pnpm --filter @workspace/scripts run seed:academy --schema-only
 ```
 
+That one command applies **two** schemas into the one database, because two
+different things own tables in it:
+
+| File | Owns |
+|---|---|
+| `server/app/schema.sql` | What the API *writes*: `academy_users`, `learner_progress`, `course_purchases`, `login_events`, `ai_usage_events`, `api_rate_limits` |
+| `scripts/src/academy-schema.sql` | What the academy *reads*: the question bank, coding challenges and lecture series |
+
+The first used to be applied by `initialize_database()` on every boot, which is
+why nothing ever had to run it deliberately. Serverless ended that, and for a
+while nothing ran it at all: the seed script knew only about the content schema,
+so on Vercel `learner_progress` was a table the code wrote to and the database
+had never heard of. Both are idempotent — re-running costs nothing.
+
 Without it the tables do not exist, the database-backed routes answer `503`, and
 the academy falls back to its bundled content — which means a missing schema is
 invisible to a visitor and equally invisible to whoever deployed it.
+
+`--check` counts what landed, and now includes `academy_users` and
+`learner_progress`. A count of zero there is the useful signal: it proves the
+table exists, which a 503 from `/api/progress` cannot distinguish from a table
+that was never created.
 
 ### Seeding the academy content
 
