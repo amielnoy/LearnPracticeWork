@@ -8,8 +8,12 @@ import { test, expect } from './fixtures';
  * at the English URL, undoes the hreflang cluster entirely.
  */
 
-const CANONICAL_HOST = 'https://free-tier-insights--amielpeled.replit.app';
-const CANONICAL_BASE = `${CANONICAL_HOST}/ai-testing-academy/`;
+// The canonical home. It is declared in `artifacts/ai-testing-academy/index.html`
+// and mirrored by `DEFAULT_SITE_ORIGIN` in `src/lib/lectures.ts`; move it there
+// and this constant moves with it. The academy sits at the root of that origin
+// now — on the host before this one it was mounted under a sub-path.
+const CANONICAL_HOST = 'https://learn-practice-work.vercel.app';
+const CANONICAL_BASE = `${CANONICAL_HOST}/`;
 
 const head = (page: import('@playwright/test').Page) =>
   page.evaluate(() => ({

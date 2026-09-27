@@ -107,7 +107,9 @@ jobs:
     timeout-minutes: 25
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
-      url: ${{ steps.deploy.outputs.url }}
+      # On `main` the production alias is the durable answer to "where is this
+      # now"; the per-deployment URL stops being production at the next deploy.
+      url: ${{ github.ref == 'refs/heads/main' && (vars.VERCEL_SITE_ORIGIN || steps.deploy.outputs.url) || steps.deploy.outputs.url }}
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -416,20 +418,43 @@ jobs:
         if: ${{ !cancelled() && steps.deploy.outputs.url != '' }}
         env:
           URL: ${{ steps.deploy.outputs.url }}
+          SITE_ORIGIN: ${{ vars.VERCEL_SITE_ORIGIN }}
         run: |
+          set -uo pipefail
+
+          # Two URLs answer "where is this": the production alias someone chose,
+          # and the hostname Vercel minted for this one deployment. Only the
+          # first is still production tomorrow, so on `main` the links point at
+          # it and the deployment URL is kept for checking this build alone. A
+          # preview has no alias, so there it is the only URL there is.
+          base="$URL"
+          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ -n "$SITE_ORIGIN" ]; then
+            base="${SITE_ORIGIN%/}"
+          fi
+
           {
             if [ "${{ github.ref }}" = "refs/heads/main" ]; then
               echo "## 🚀 Deployed to production"
+              echo ""
+              if [ -n "$SITE_ORIGIN" ]; then
+                echo "**🌐 [${base}](${base})**"
+                echo ""
+                echo "<sub>This build on its own hostname: [${URL}](${URL}) — pinned to this deployment.</sub>"
+              else
+                echo "**➡️ [${URL}](${URL})**"
+                echo ""
+                echo "<sub>That hostname is pinned to this deployment. Set the repository variable \`VERCEL_SITE_ORIGIN\` to the production alias to link it here instead.</sub>"
+              fi
             else
               echo "## 🔍 Preview deployment"
+              echo ""
+              echo "**➡️ [${URL}](${URL})**"
             fi
-            echo ""
-            echo "**➡️ [${URL}](${URL})**"
             echo ""
             echo "| App | URL |"
             echo "| --- | --- |"
-            echo "| Academy | [${URL}/](${URL}/) |"
-            echo "| Portfolio | [${URL}/portfolio/](${URL}/portfolio/) |"
-            echo "| Lecture 1 | [${URL}/ai-testing-lecture-1/](${URL}/ai-testing-lecture-1/) |"
-            echo "| Architecture | [${URL}/architecture.html](${URL}/architecture.html) |"
+            echo "| Academy | [${base}/](${base}/) |"
+            echo "| Portfolio | [${base}/portfolio/](${base}/portfolio/) |"
+            echo "| Lecture 1 | [${base}/ai-testing-lecture-1/](${base}/ai-testing-lecture-1/) |"
+            echo "| Architecture | [${base}/architecture.html](${base}/architecture.html) |"
           } >> "$GITHUB_STEP_SUMMARY"
