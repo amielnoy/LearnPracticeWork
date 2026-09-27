@@ -86,10 +86,23 @@ Vite apps and then looked for a single `public/` that only exists after the
 workflow's assembly step. Disconnecting it in that project's Vercel settings
 fixed it at the source.
 
+It happened again on **2026-09-27**, from a different project:
+`learn-practice-work-ai-testing-academy`, connected to this repo on 25 August.
+This time the failure read *No `_site/` — build the twelve apps first*, because
+the guard in `vercel.json` now catches it earlier and says so. Its Git
+integration was disconnected the same way, in that project's **Settings → Git**;
+Vercel's own confirmation notes that the project's settings and deployments are
+preserved, so it is reversible and costs nothing but the auto-build.
+
+Twice is a pattern, so: when a red deployment appears next to a green one, read
+the **project name** on the failing deployment before reading anything else. If
+it is not `learn-practice-work`, nothing in this repository caused it and
+nothing in this repository will fix it.
+
 Reach for that fix first. The repo-level lever, `git.deploymentEnabled: false`
 in `vercel.json`, looks tempting and is almost always wrong here: Vercel reads
 it per *repository*, not per project, so it silences every project linked to
-this repo at once.
+this repo at once — including the one that actually ships.
 
 ### Why it moved off GitHub Pages
 
@@ -115,10 +128,12 @@ in the code as well as a line here:
 | `/metrics` answers 404 | `prometheus_client` counts in process memory, and a process here is one invocation. A scrape would report what one instance happened to see, which is not a sample of anything |
 | `functions.excludeFiles` in `vercel.json` | The Python builder starts from the whole repository and removes what it is told to. Unbounded, the bundle is 329MB against a 225MB limit — and it contains the env files. The glob names `.env*` and `env/**` for that reason — moving them into `env/` would otherwise have walked a database password into the bundle. It is capped at 256 characters, which is why it names big directories rather than listing files |
 
-Quotas were already serverless-safe and did not need changing: `app/rate_limit.py`
-counts in atomic Postgres rows keyed by an HMAC digest, so allowances are shared
-across instances rather than living in one process's memory. Sessions are signed
-cookies, so they need no server-side store either.
+Quotas count in **Redis**, keyed by an HMAC digest of the caller's identity, so
+allowances are shared between instances rather than living in one process's
+memory. They used to be rows in an `api_rate_limits` table, which was emulating
+`INCR` with an upsert and a window comparison; the table is gone. A window is a
+key expiry now, set with `NX` so a steady caller cannot push their own window
+out. Sessions are signed cookies, so they need no server-side store either.
 
 ### Environment
 
@@ -127,9 +142,12 @@ Set these on the Vercel project — `vercel env add NAME production`, or
 
 | Variable | Why it matters |
 |---|---|
-| `DATABASE_URL` | Point it at Supabase's **transaction pooler on 6543**, not the session pooler. A serverless function opens far more short-lived connections than a long-running server, which is the case the transaction pooler exists for |
+| `REDIS_URL` | Where the AI quotas are counted. Set by the Redis Marketplace integration — do not hand-write it. Absent, `shared_quota_problem()` names it, and the AI buckets refuse every caller with a `429` that reads exactly like an exhausted quota. `KV_URL` and `REDIS_TLS_URL` are accepted in its place. **Redis 7.0 or newer**: the window uses `EXPIRE … NX`, which older servers reject |
+| `DATABASE_URL` | Point it at Supabase's **transaction pooler on 6543**, not the session pooler. A serverless function opens far more short-lived connections than a long-running server, which is the case the transaction pooler exists for. It no longer has anything to do with quotas |
 | `RATE_LIMIT_SALT` | Every quota is counted keyed by an HMAC of the caller's identity; with no salt there is no key, so the shared store cannot be used. What happens then is **per bucket**, decided by `when_unavailable` in `dependencies.py`. The **AI quotas refuse** — they guard a key billed per call, and a limiter that cannot count must not wave those through, so the caller gets a `429` that reads to a visitor exactly like an exhausted quota. **Sign-in and the admin routes degrade** to a per-worker in-memory bound instead: they guard a credential that is verified independently, so refusing everyone would be an authentication outage protecting nothing. Any long random string works, and `METRICS_ID_SALT` is accepted in its place |
 | `SESSION_SECRET` | At least 32 characters. Sign-in returns nothing without it |
+| `SHEETS_WEBAPP_URL` | The Apps Script web app's `/exec` URL — where signed-in learner progress is read and merged. Absent, `/api/progress` answers `503` and the academy carries on from `localStorage` alone: a visitor sees a working site that silently does not follow them to another device, and nothing in the deployment says so. The URL answers a `302` to `script.googleusercontent.com`, which `sheets_store` follows deliberately |
+| `SHEETS_WEBAPP_TOKEN` | The only guard in front of the sheet — the web app is deployed "anyone with the link". **At least 32 random characters**, and it must be byte-for-byte the same as the `ACADEMY_TOKEN` script property on the Apps Script project, which is where the other half of the comparison lives. A shorter token is refused by the script rather than trusted, so a too-short one and an absent one fail identically. It travels in the POST body, never a query string |
 | `ALLOWED_ORIGINS` | `https://learn-practice-work.vercel.app`. Same-origin requests do not need CORS, but `PUBLIC_APP_ORIGIN` is validated against this list |
 | `PUBLIC_APP_ORIGIN` | The same origin. Must match an entry in `ALLOWED_ORIGINS`, or Stripe checkout fails closed |
 | `NODE_ENV` | `production`. It is what switches off the localhost CORS regex and the in-memory rate limiter |
@@ -169,7 +187,29 @@ Verify with `curl https://learn-practice-work.vercel.app/api/healthz` for
 `{"status":"ok"}` — that only proves the function booted — and then
 `/api/readyz`, which reports the database and carries a `rateLimiting` field
 **only when quotas cannot count**, naming what is missing. The deploy workflow
-checks both and warns on the second.
+checks both and warns on the second. `"database":"not_configured"` is the
+expected answer here and is not an outage: no table in Postgres is required any
+more, so readiness stays `ready` and only a `DATABASE_URL` that is set and
+unreachable answers `503`.
+
+**Neither check can see the progress store, and nothing else can either.** An
+absent or wrong `SHEETS_WEBAPP_URL` or `SHEETS_WEBAPP_TOKEN` makes
+`/api/progress` answer `503`, and the academy is built to treat that as "no
+remote copy right now" and render from `localStorage` — which is exactly what it
+does on a correctly configured deployment for a signed-out reader. So a
+deployment with no progress store is indistinguishable from a working one to a
+visitor *and* to whoever deployed it, and nobody finds out until a learner opens
+the site on a second device. The only way to know is to sign in, record
+something, and check that the `learner_progress` tab of the
+LearnPracticeWorkData spreadsheet gained a row.
+
+`vercel.json` sets no `maxDuration`, so these functions run on the platform
+default of **10 seconds** — below `sheets_store.TIMEOUT`, which is 20. A
+genuinely cold Apps Script start therefore returns a platform `504` rather than
+the clean `500` the design expects, and the request never reaches the handler
+that would have logged why. Raising it is a deliberate change to
+`vercel.json` and is not made here; the asymmetry is recorded so the `504` is
+recognised rather than investigated as something new.
 
 ### Applying the schema
 
@@ -179,9 +219,31 @@ Nothing applies the DDL on boot any more, so it is applied from a terminal:
 pnpm --filter @workspace/scripts run seed:academy --schema-only
 ```
 
+That one command applies **two** schemas into the one database, because two
+different things own tables in it:
+
+| File | Owns |
+|---|---|
+| `server/app/schema.sql` | What the API *writes*: `academy_users`, `course_purchases`, `login_events`, `ai_usage_events`, `test_runs`, `test_suite_results` |
+| `scripts/src/academy-schema.sql` | What the academy *reads*: the question bank, coding challenges and lecture series |
+
+The first used to be applied by `initialize_database()` on every boot, which is
+why nothing ever had to run it deliberately. Serverless ended that, and for a
+while nothing ran it at all: the seed script knew only about the content schema,
+so on Vercel the API's own tables were ones the code wrote to and the database
+had never heard of. Both are idempotent — re-running costs nothing.
+
 Without it the tables do not exist, the database-backed routes answer `503`, and
 the academy falls back to its bundled content — which means a missing schema is
 invisible to a visitor and equally invisible to whoever deployed it.
+
+`--check` counts what landed, and now includes `academy_users`. A count of zero
+there is the useful signal: it proves the table exists, which a `503` from a
+database-backed route cannot distinguish from a table that was never created.
+
+Learner progress itself is no longer one of these tables: it lives in a
+spreadsheet reached through an Apps Script web app — see
+`server/app/sheets_store.py`.
 
 ### Seeding the academy content
 

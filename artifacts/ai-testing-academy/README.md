@@ -156,8 +156,8 @@ frontend origin must call the API. The quota and timeout defaults can be overrid
 `AI_RATE_LIMIT_WINDOW_MS`, `AI_RATE_LIMIT_MAX`, `AI_DAILY_QUOTA`, and `AI_UPSTREAM_TIMEOUT_MS`.
 
 Signed-in visitors are quota-keyed by verified Google subject; anonymous visitors use their
-network identity. Production counters are atomic Postgres rows keyed by an HMAC digest and
-require `RATE_LIMIT_SALT`, so values are shared across workers without storing raw IPs.
+network identity. Production counters are Redis keys built from an HMAC digest and require
+`RATE_LIMIT_SALT`, so values are shared across instances without storing raw IPs.
 
 Groq and Gemini each have a server-side default, scoped to different purposes (general chat vs.
 search grounding, respectively). Anthropic and OpenAI are own-key or nothing, and when no

@@ -1,5 +1,13 @@
 /**
- * Applies the academy content schema and seed to Supabase.
+ * Applies both schemas and the content seed to Supabase.
+ *
+ * Two schemas, because two different things own tables in one database:
+ * `server/app/schema.sql` is everything the API writes (accounts, sign-in
+ * events, purchases, AI usage events and the CI test-history tables) and
+ * `scripts/src/academy-schema.sql` is the content the academy reads. Learner
+ * progress lives in a spreadsheet now (`server/sheets/Progress.gs`) and the
+ * quota counters in Redis (`server/app/quota_store.py`); neither has a table
+ * here any more.
  *
  *     pnpm --filter @workspace/scripts run seed:academy
  *
@@ -180,13 +188,19 @@ union all select 'coding challenges', l.lang, count(*)
   from coding_challenges c join coding_challenge_levels l on l.id = c.level_id group by l.lang
 union all select 'lecture series', t.lang, count(*)
   from lecture_items i join lecture_tracks t on t.id = i.track_id group by t.lang
+-- Not content: this is the API's own table. It is listed here because a
+-- count of 0 proves the table exists, which is the one thing a --check run
+-- could not tell you before. A missing table and an empty one look identical
+-- from outside.
+union all select 'signed-in readers', '-', count(*) from academy_users
 order by 1, 2;`;
 
 /** Ready lectures with no href render as live cards that open nothing. */
 const DEAD_CARDS = `select count(*) from lecture_items where ready and coalesce(url, '') = '';`;
 
+/** `file` is relative to the repository root, because the two schemas do not live together. */
 function apply(where: Target, file: string): void {
-  const sql = readFileSync(path.join(root, 'scripts', 'src', file), 'utf8');
+  const sql = readFileSync(path.join(root, file), 'utf8');
   psql(where, ['-v', 'ON_ERROR_STOP=1', '-q'], sql);
   console.log(`  applied ${file}`);
 }
@@ -197,8 +211,19 @@ function main(): void {
   console.log(`Seeding academy content into ${where.describe}`);
 
   if (!flags.has('--check')) {
-    if (!flags.has('--seed-only')) apply(where, 'academy-schema.sql');
-    if (!flags.has('--schema-only')) apply(where, 'academy-seed.sql');
+    if (!flags.has('--seed-only')) {
+      // Two schemas, one database. `server/app/schema.sql` owns what the API
+      // writes — accounts, sign-in events, purchases, AI usage and the CI
+      // test-history tables — and used to be applied by
+      // `initialize_database()` on every boot. Serverless ended that: a Vercel
+      // function boots per invocation, so the DDL moved here and nothing else
+      // runs it. Learner progress now lives in a spreadsheet (see
+      // `server/app/sheets_store.py`) and the quota counters in Redis (see
+      // `server/app/quota_store.py`), so neither is created here.
+      apply(where, path.join('server', 'app', 'schema.sql'));
+      apply(where, path.join('scripts', 'src', 'academy-schema.sql'));
+    }
+    if (!flags.has('--schema-only')) apply(where, path.join('scripts', 'src', 'academy-seed.sql'));
   }
 
   console.log(psql(where, ['-A', '-F', ' | ', '-c', COUNTS]).trimEnd());

@@ -9,8 +9,8 @@ import time
 from collections import defaultdict, deque
 from typing import Literal
 
-from .config import database_url, env
-from .database import hit_rate_limit, release_rate_limit
+from .config import env
+from .quota_store import hit_rate_limit, redis_url, release_rate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +25,8 @@ def shared_quota_problem() -> str | None:
     """
     if os.getenv("NODE_ENV") != "production":
         return None
-    if not database_url():
-        return "no database is configured, so quotas cannot be shared between workers"
+    if not redis_url():
+        return "no Redis URL is configured, so quotas cannot be shared between instances"
     if not (env("RATE_LIMIT_SALT") or env("METRICS_ID_SALT")):
         return "RATE_LIMIT_SALT (or METRICS_ID_SALT) is not set"
     return None
@@ -74,7 +74,7 @@ WhenUnavailable = Literal["refuse", "degrade"]
 
 
 class SharedRateLimiter:
-    """Postgres-backed in production, deterministic in-memory in local/test runs.
+    """Redis-backed in production, deterministic in-memory in local/test runs.
 
     `when_unavailable` decides what happens if the shared store cannot be used,
     and the right answer differs by what the quota protects:

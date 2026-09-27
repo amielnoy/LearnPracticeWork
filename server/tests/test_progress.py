@@ -32,13 +32,13 @@ class FakeStore:
 
     def __init__(self, stored: dict | None = None) -> None:
         self.stored = stored
-        self.merged: list[tuple[str, str, dict]] = []
+        self.merged: list[tuple[str, dict]] = []
 
     async def load(self, subject: str) -> dict | None:
         return self.stored
 
-    async def merge(self, subject: str, email: str, incoming: dict) -> dict | None:
-        self.merged.append((subject, email, incoming))
+    async def merge(self, subject: str, incoming: dict) -> dict | None:
+        self.merged.append((subject, incoming))
         return self.stored
 
 
@@ -77,9 +77,17 @@ async def test_a_write_merges_and_answers_with_the_union(authenticated_client):
     # The answer is the merge, not the request — a device that knew less does
     # not get its own smaller copy back.
     assert response.json()["progress"] == STORED
-    _subject, _email, incoming = store.merged[0]
+    _subject, incoming = store.merged[0]
     assert incoming["lecturesViewed"] == ["lecture-9"]
     assert incoming["interviewAnswers"] == 1
+
+
+async def test_an_email_is_never_handed_to_the_store():
+    store = FakeStore(STORED)
+    service = ProgressService(store.load, store.merge)
+    user = GoogleUser(subject="123", email="someone@example.com", name="", picture="", expires_at=0)
+    await service.merge_for_user(user, {"resumeStarted": True})
+    assert store.merged == [("123", {"resumeStarted": True})]
 
 
 async def test_a_deployment_without_a_database_says_so_rather_than_failing(authenticated_client):

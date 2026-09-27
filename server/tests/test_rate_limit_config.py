@@ -13,6 +13,7 @@ import logging
 
 import pytest
 
+from app import rate_limit
 from app.dependencies import get_database_probe
 from app.rate_limit import SharedRateLimiter, shared_quota_problem
 
@@ -31,7 +32,7 @@ def database_available(override_dependency):
 def production(monkeypatch: pytest.MonkeyPatch):
     """A production deployment whose configuration a test then removes a piece of."""
     monkeypatch.setenv("NODE_ENV", "production")
-    monkeypatch.setenv("DATABASE_URL", "postgresql://fixture/quotas")
+    monkeypatch.setenv("REDIS_URL", "redis://fixture-host:6379/0")
     monkeypatch.setenv("RATE_LIMIT_SALT", "fixture-salt")
     monkeypatch.delenv("METRICS_ID_SALT", raising=False)
     return monkeypatch
@@ -63,12 +64,13 @@ def test_the_metrics_salt_is_accepted_in_its_place(production) -> None:
     assert shared_quota_problem() is None
 
 
-def test_a_missing_database_is_named(production) -> None:
-    production.delenv("DATABASE_URL", raising=False)
-    production.delenv("SUPABASE_DB_PASSWORD", raising=False)
+def test_a_missing_redis_url_is_named(production) -> None:
+    production.delenv("REDIS_URL", raising=False)
+    production.delenv("KV_URL", raising=False)
+    production.delenv("REDIS_TLS_URL", raising=False)
 
     assert shared_quota_problem() is not None
-    assert "database" in shared_quota_problem()
+    assert "Redis" in shared_quota_problem()
 
 
 @pytest.mark.asyncio
@@ -301,3 +303,133 @@ async def test_an_answered_request_does_spend_the_allowance(
     )
 
     assert int(second.headers["X-AI-Quota-Remaining"]) < int(first.headers["X-AI-Quota-Remaining"])
+
+
+async def test_production_without_redis_names_the_cause(monkeypatch):
+    monkeypatch.setenv("NODE_ENV", "production")
+    monkeypatch.setenv("RATE_LIMIT_SALT", "x" * 32)
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.delenv("KV_URL", raising=False)
+    monkeypatch.delenv("REDIS_TLS_URL", raising=False)
+    problem = rate_limit.shared_quota_problem()
+    assert problem is not None and "Redis" in problem
+
+
+async def test_an_ai_bucket_refuses_when_the_store_is_gone(monkeypatch):
+    monkeypatch.setenv("NODE_ENV", "production")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    limiter = rate_limit.SharedRateLimiter("ai-daily", 10, 86400)
+    allowed, remaining = await limiter.hit("someone")
+    assert (allowed, remaining) == (False, 0)
+
+
+async def test_login_degrades_rather_than_locking_everyone_out(monkeypatch):
+    monkeypatch.setenv("NODE_ENV", "production")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    limiter = rate_limit.SharedRateLimiter("login", 10, 300, when_unavailable="degrade")
+    allowed, _ = await limiter.hit("someone")
+    assert allowed is True
+
+
+@pytest.fixture
+def no_database(monkeypatch: pytest.MonkeyPatch, override_dependency) -> None:
+    """The deployment this branch is for: no Supabase project at all.
+
+    `database_ready()` answers False for an unconfigured URL exactly as it does
+    for an unreachable one, so readiness cannot tell them apart from the probe.
+    """
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_DB_PASSWORD", raising=False)
+
+    async def probe() -> bool:
+        return False
+
+    override_dependency(get_database_probe, lambda: probe)
+
+
+@pytest.fixture
+def database_unreachable(monkeypatch: pytest.MonkeyPatch, override_dependency) -> None:
+    """Configured, and down. That is an outage and has to stay a 503."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://nobody@127.0.0.1:1/none")
+
+    async def probe() -> bool:
+        return False
+
+    override_dependency(get_database_probe, lambda: probe)
+
+
+async def test_no_database_configured_is_reported_as_configuration_not_an_outage(
+    api_client, no_database
+) -> None:
+    """The intended end state of this branch: progress in a sheet, quotas in Redis.
+
+    Answering 503 forever would make readiness useless — Fly and the deploy
+    workflow both read it — and would hide the one field that explains a quota
+    outage behind a check that can never pass.
+    """
+    response = await api_client.get("/api/readyz")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ready"
+    assert response.json()["database"] == "not_configured"
+
+
+async def test_a_configured_database_that_cannot_be_reached_is_still_an_outage(
+    api_client, database_unreachable
+) -> None:
+    response = await api_client.get("/api/readyz")
+
+    assert response.status_code == 503
+    assert response.json() == {"status": "not_ready", "database": "unavailable"}
+
+
+async def test_the_quota_diagnostic_is_reported_with_no_database_at_all(
+    api_client, production, no_database
+) -> None:
+    """The whole point of `rateLimiting`: it is the only thing that names the cause."""
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+
+    response = await api_client.get("/api/readyz")
+
+    assert response.status_code == 200
+    assert "RATE_LIMIT_SALT" in response.json()["rateLimiting"]
+
+
+async def test_the_quota_diagnostic_survives_a_database_outage(
+    api_client, production, database_unreachable
+) -> None:
+    """Two things can be wrong at once, and the 503 must not swallow the second."""
+    production.delenv("RATE_LIMIT_SALT", raising=False)
+
+    response = await api_client.get("/api/readyz")
+
+    assert response.status_code == 503
+    assert "RATE_LIMIT_SALT" in response.json()["rateLimiting"]
+
+
+async def test_a_redis_that_cannot_be_reached_is_a_different_path_from_a_missing_url(
+    production, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`shared_quota_problem()` is silent here: everything is configured.
+
+    The other tests in this file delete `REDIS_URL` and so never leave that
+    check, which means the `except Exception` arm in `hit()` — the arm a real
+    outage takes, and the arm a connection cap takes — went unexercised. The
+    trade has to hold on this path too: the billed buckets shut, sign-in
+    degrades to a per-worker bound rather than locking everyone out.
+    """
+    from app import quota_store
+
+    class Unreachable:
+        async def incr(self, key: str) -> int:
+            raise ConnectionError("Error 61 connecting to fixture-host:6379. Connection refused.")
+
+    monkeypatch.setattr(quota_store, "_client", lambda: Unreachable())
+    assert shared_quota_problem() is None, "this test is about the store, not the configuration"
+
+    billed = SharedRateLimiter("ai-daily", 10, 86_400)
+    assert await billed.hit("ip:198.51.100.4") == (False, 0)
+
+    credentials = SharedRateLimiter("login", 3, 300, when_unavailable="degrade")
+    verdicts = [(await credentials.hit("ip:198.51.100.4"))[0] for _ in range(4)]
+    assert verdicts == [True, True, True, False], "degrading is a real bound, not no bound"

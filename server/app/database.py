@@ -28,12 +28,6 @@ def schema() -> str:
     return (Path(__file__).with_name("schema.sql")).read_text(encoding="utf-8")
 
 
-# Rate-limit rows are reused in place, so the table is bounded by the number of
-# distinct callers rather than by traffic — which for IP-keyed buckets grows
-# without limit over time. The longest window is a day, so anything untouched
-# for two is a row no limiter will ever consult again.
-STALE_RATE_LIMIT_DAYS = 2
-
 # How long an event row is kept. These are operational records — enough history
 # to see a trend or investigate a complaint, not a permanent log of what each
 # person did. Purchases have their own, much longer, statutory retention.
@@ -88,11 +82,6 @@ def _expire(connection: psycopg.Connection) -> None:
     connection.execute("DELETE FROM course_purchases WHERE retention_until <= now()")
     connection.execute("DELETE FROM login_events WHERE retention_until <= now()")
     connection.execute("DELETE FROM ai_usage_events WHERE retention_until <= now()")
-    connection.execute(
-        """DELETE FROM api_rate_limits
-           WHERE window_started <= now() - (%s * interval '1 day')""",
-        (STALE_RATE_LIMIT_DAYS,),
-    )
 
 
 async def record_purchase(values: dict[str, Any]) -> None:
@@ -115,49 +104,6 @@ def _record_purchase(values: dict[str, Any]) -> None:
                ON CONFLICT (checkout_session_id) DO NOTHING""",
             purchase,
         )
-
-
-async def hit_rate_limit(
-    bucket: str, key_hash: str, limit: int, window_seconds: float
-) -> tuple[bool, int]:
-    return await asyncio.to_thread(_hit_rate_limit, bucket, key_hash, limit, window_seconds)
-
-
-def _hit_rate_limit(
-    bucket: str, key_hash: str, limit: int, window_seconds: float
-) -> tuple[bool, int]:
-    with psycopg.connect(database_url()) as connection:
-        row = connection.execute(
-            """INSERT INTO api_rate_limits (bucket, key_hash, window_started, hits)
-               VALUES (%s, %s, now(), 1)
-               ON CONFLICT (bucket, key_hash) DO UPDATE SET
-                 hits = CASE
-                   WHEN api_rate_limits.window_started <= now() - (%s * interval '1 second')
-                   THEN 1 ELSE api_rate_limits.hits + 1 END,
-                 window_started = CASE
-                   WHEN api_rate_limits.window_started <= now() - (%s * interval '1 second')
-                   THEN now() ELSE api_rate_limits.window_started END
-               RETURNING hits""",
-            (bucket, key_hash, window_seconds, window_seconds),
-        ).fetchone()
-    hits = int(row[0])
-    return hits <= limit, max(0, limit - hits)
-
-
-async def release_rate_limit(bucket: str, key_hash: str) -> int:
-    """Give back one hit, and report what is left. Never goes below zero."""
-    return await asyncio.to_thread(_release_rate_limit, bucket, key_hash)
-
-
-def _release_rate_limit(bucket: str, key_hash: str) -> int:
-    with psycopg.connect(database_url()) as connection:
-        row = connection.execute(
-            """UPDATE api_rate_limits SET hits = GREATEST(0, hits - 1)
-               WHERE bucket = %s AND key_hash = %s
-               RETURNING hits""",
-            (bucket, key_hash),
-        ).fetchone()
-    return int(row[0]) if row else 0
 
 
 async def list_course_purchases(limit: int = 200) -> list[dict]:
@@ -298,129 +244,6 @@ def _ensure_user(connection: psycopg.Connection, subject: str, email: str) -> No
            ON CONFLICT (google_subject) DO NOTHING""",
         (subject, email),
     )
-
-
-# --- Learner progress -------------------------------------------------------
-
-# What a browser is allowed to put in the two set columns. They arrive from
-# `localStorage`, which is editable by whoever owns the browser, and they are
-# stored rather than rendered — so the bound is about the size of the row, not
-# about what it contains. The client applies the same cap on the way in.
-MAX_PROGRESS_IDS = 500
-
-EMPTY_PROGRESS: dict[str, Any] = {
-    "resumeStarted": False,
-    "resumeCompleted": False,
-    "interviewStarted": False,
-    "interviewAnswers": 0,
-    "interviewCompleted": False,
-    "practiceCompleted": [],
-    "lecturesViewed": [],
-    "lastTool": None,
-}
-
-
-def _progress_view(row: tuple) -> dict[str, Any]:
-    return {
-        "resumeStarted": row[0],
-        "resumeCompleted": row[1],
-        "interviewStarted": row[2],
-        "interviewAnswers": row[3],
-        "interviewCompleted": row[4],
-        "practiceCompleted": list(row[5]),
-        "lecturesViewed": list(row[6]),
-        "lastTool": row[7],
-    }
-
-
-_PROGRESS_COLUMNS = """resume_started, resume_completed, interview_started,
-                       interview_answers, interview_completed, practice_completed,
-                       lectures_viewed, last_tool"""
-
-
-async def load_progress(subject: str) -> dict[str, Any] | None:
-    """Stored progress, `EMPTY_PROGRESS` when there is none, None with no database."""
-    if not database_url():
-        return None
-    return await asyncio.to_thread(_load_progress, subject)
-
-
-def _load_progress(subject: str) -> dict[str, Any]:
-    with psycopg.connect(database_url(), row_factory=tuple_row) as connection:
-        row = connection.execute(
-            f"SELECT {_PROGRESS_COLUMNS} FROM learner_progress WHERE google_subject = %s",
-            (subject,),
-        ).fetchone()
-    return _progress_view(row) if row else dict(EMPTY_PROGRESS)
-
-
-async def merge_progress(
-    subject: str, email: str, incoming: dict[str, Any]
-) -> dict[str, Any] | None:
-    if not database_url():
-        return None
-    return await asyncio.to_thread(_merge_progress, subject, email, incoming)
-
-
-def _merge_progress(subject: str, email: str, incoming: dict[str, Any]) -> dict[str, Any]:
-    """Union what arrived with what is stored, and answer with the result.
-
-    Every field merges towards "more done": booleans are OR-ed, the answer
-    counter takes the larger of the two, and the two id lists are unioned. That
-    makes the write idempotent and order-independent, which matters because the
-    same person can be signed in on two devices, each holding a different
-    partial history in `localStorage`. The alternative — last write wins — means
-    opening the site on a second device silently discards the first one's
-    progress.
-
-    `lastTool` is the exception: it is a cursor, not an achievement, so the
-    newer value wins when one was sent.
-    """
-    values = {
-        "subject": subject,
-        "resume_started": bool(incoming.get("resumeStarted")),
-        "resume_completed": bool(incoming.get("resumeCompleted")),
-        "interview_started": bool(incoming.get("interviewStarted")),
-        "interview_answers": max(0, int(incoming.get("interviewAnswers") or 0)),
-        "interview_completed": bool(incoming.get("interviewCompleted")),
-        "practice_completed": list(incoming.get("practiceCompleted") or [])[:MAX_PROGRESS_IDS],
-        "lectures_viewed": list(incoming.get("lecturesViewed") or [])[:MAX_PROGRESS_IDS],
-        "last_tool": incoming.get("lastTool"),
-    }
-    with psycopg.connect(database_url(), row_factory=tuple_row) as connection:
-        _ensure_user(connection, subject, (email or "").strip().lower())
-        row = connection.execute(
-            f"""INSERT INTO learner_progress (
-                  google_subject, resume_started, resume_completed, interview_started,
-                  interview_answers, interview_completed, practice_completed,
-                  lectures_viewed, last_tool)
-                VALUES (%(subject)s, %(resume_started)s, %(resume_completed)s,
-                  %(interview_started)s, %(interview_answers)s, %(interview_completed)s,
-                  %(practice_completed)s, %(lectures_viewed)s, %(last_tool)s)
-                ON CONFLICT (google_subject) DO UPDATE SET
-                  resume_started = learner_progress.resume_started OR EXCLUDED.resume_started,
-                  resume_completed = learner_progress.resume_completed OR EXCLUDED.resume_completed,
-                  interview_started = learner_progress.interview_started
-                                      OR EXCLUDED.interview_started,
-                  interview_answers = GREATEST(learner_progress.interview_answers,
-                                               EXCLUDED.interview_answers),
-                  interview_completed = learner_progress.interview_completed
-                                        OR EXCLUDED.interview_completed,
-                  practice_completed = COALESCE((
-                    SELECT array_agg(DISTINCT id) FROM unnest(
-                      learner_progress.practice_completed || EXCLUDED.practice_completed) AS id
-                  ), '{{}}')::text[],
-                  lectures_viewed = COALESCE((
-                    SELECT array_agg(DISTINCT id) FROM unnest(
-                      learner_progress.lectures_viewed || EXCLUDED.lectures_viewed) AS id
-                  ), '{{}}')::text[],
-                  last_tool = COALESCE(EXCLUDED.last_tool, learner_progress.last_tool),
-                  updated_at = now()
-                RETURNING {_PROGRESS_COLUMNS}""",
-            values,
-        ).fetchone()
-    assert row is not None  # an upsert with RETURNING always produces a row
-    return _progress_view(row)
 
 
 # --- Activity ---------------------------------------------------------------

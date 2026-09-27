@@ -6,8 +6,8 @@ per-browser. Clearing site data lost it, a phone and a laptop each held a
 different half of it, and nothing on the server could see any of it.
 
 This is the same record with an owner. The merge, not the write, is the whole
-design: see `database.merge_progress` for why two devices have to be unioned
-rather than have the later one win.
+design: see `mergeProgress` in `server/sheets/Progress.gs` for why two devices
+have to be unioned rather than have the later one win.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 UNAVAILABLE = "Progress is not available on this server."
 
 LoadProgress = Callable[[str], Awaitable[dict[str, Any] | None]]
-MergeProgress = Callable[[str, str, dict[str, Any]], Awaitable[dict[str, Any] | None]]
+MergeProgress = Callable[[str, dict[str, Any]], Awaitable[dict[str, Any] | None]]
 
 
 class ProgressService:
@@ -36,7 +36,7 @@ class ProgressService:
         return {"progress": await self._call(self._load(user.subject))}
 
     async def merge_for_user(self, user: GoogleUser, incoming: dict[str, Any]) -> dict[str, Any]:
-        return {"progress": await self._call(self._merge(user.subject, user.email, incoming))}
+        return {"progress": await self._call(self._merge(user.subject, incoming))}
 
     async def _call(self, awaitable: Awaitable[dict[str, Any] | None]) -> dict[str, Any]:
         """A store that is absent is a 503; a store that broke is a 500.

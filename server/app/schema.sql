@@ -1,8 +1,14 @@
 -- Everything this API owns in Postgres.
 --
--- `initialize_database()` runs this file at boot, every boot, so every
--- statement is idempotent and the file is the whole story: there is no
+-- Every statement is idempotent and the file is the whole story: there is no
 -- migration history to replay and no ordering to remember.
+--
+-- `initialize_database()` used to run it at boot, every boot. On Vercel a boot
+-- is a single invocation, so that became a schema round-trip in front of a
+-- visitor's request and a race between instances. It is applied deliberately
+-- instead, by `pnpm --filter @workspace/scripts run seed:academy --schema-only`
+-- — which is the only thing that runs it now. Nothing creates these tables on
+-- their own any more.
 --
 -- It is applied to the same Supabase project that holds the content tables,
 -- and that is the reason for the security block at the bottom. `public` is the
@@ -33,17 +39,6 @@ CREATE INDEX IF NOT EXISTS course_purchases_email_idx ON course_purchases (email
 CREATE INDEX IF NOT EXISTS course_purchases_google_subject_idx ON course_purchases (google_subject);
 CREATE INDEX IF NOT EXISTS course_purchases_retention_idx ON course_purchases (retention_until);
 
--- Quotas, shared between workers. One row per bucket and caller, reused in
--- place; `hit_rate_limit` rolls the window forward rather than inserting again.
-CREATE TABLE IF NOT EXISTS api_rate_limits (
-  bucket text NOT NULL,
-  key_hash text NOT NULL,
-  window_started timestamptz NOT NULL DEFAULT now(),
-  hits integer NOT NULL DEFAULT 0,
-  PRIMARY KEY (bucket, key_hash)
-);
-CREATE INDEX IF NOT EXISTS api_rate_limits_window_idx ON api_rate_limits (window_started);
-
 -- Who signed in, keyed by the Google subject — the one identifier that stays
 -- the same when someone changes their name, their picture or their email.
 --
@@ -60,25 +55,6 @@ CREATE TABLE IF NOT EXISTS academy_users (
 );
 CREATE INDEX IF NOT EXISTS academy_users_email_idx ON academy_users (email);
 CREATE INDEX IF NOT EXISTS academy_users_last_seen_idx ON academy_users (last_seen_at);
-
--- What a reader has finished, so it follows them off the device they started on.
---
--- The two array columns are sets, not sequences: `completePracticeItem` and
--- `viewLecture` on the client both check membership before appending, and the
--- merge on the way in does the same. Bounded on write, because they arrive from
--- a browser and `localStorage` is editable by whoever owns the browser.
-CREATE TABLE IF NOT EXISTS learner_progress (
-  google_subject text PRIMARY KEY REFERENCES academy_users (google_subject) ON DELETE CASCADE,
-  resume_started boolean NOT NULL DEFAULT false,
-  resume_completed boolean NOT NULL DEFAULT false,
-  interview_started boolean NOT NULL DEFAULT false,
-  interview_answers integer NOT NULL DEFAULT 0,
-  interview_completed boolean NOT NULL DEFAULT false,
-  practice_completed text[] NOT NULL DEFAULT '{}',
-  lectures_viewed text[] NOT NULL DEFAULT '{}',
-  last_tool text CHECK (last_tool IN ('resume', 'interview', 'practice')),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
 
 -- Sign-in attempts, kept long enough to answer "when did this start failing".
 --
@@ -162,7 +138,7 @@ DO $$
 DECLARE t text;
 BEGIN
   FOREACH t IN ARRAY ARRAY[
-    'course_purchases', 'api_rate_limits', 'academy_users', 'learner_progress',
+    'course_purchases', 'academy_users',
     'login_events', 'ai_usage_events', 'test_runs', 'test_suite_results'
   ] LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY;', t);

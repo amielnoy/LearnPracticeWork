@@ -8,7 +8,7 @@ from fastapi import APIRouter, Header, Request
 from fastapi.responses import JSONResponse
 from scalar_fastapi import AgentScalarConfig, get_scalar_api_reference
 
-from ..config import serverless
+from ..config import database_url, serverless
 from ..dependencies import DatabaseProbe
 from ..errors import error_response
 from ..metrics import metrics_authorized, prometheus_response
@@ -59,13 +59,25 @@ async def health() -> dict[str, str]:
 async def readiness(database_ready: DatabaseProbe):
     """Readiness, plus anything degraded that a 200 would otherwise hide.
 
-    The status code stays a function of the database alone. A deployment whose
-    quotas cannot count is broken for its users but still serving, so it is
-    named in the body instead of being turned into an outage.
+    An absent `DATABASE_URL` is a *configuration*, not a failure. Progress lives
+    in a spreadsheet and quotas in Redis, so a deployment with no Supabase
+    project behind it is the intended end state — reporting it as an outage
+    would make readiness answer 503 forever, and Fly health-checks this path.
+    A database that is configured and cannot be reached is a real outage and
+    still answers 503.
+
+    `rateLimiting` is reported whatever the database is doing. It is the only
+    thing that names the cause of a quota outage, and putting it behind the
+    database check is what made it unreachable: the deploy workflow greps for
+    it and could never have found it.
     """
-    if not await database_ready():
-        return JSONResponse({"status": "not_ready", "database": "unavailable"}, status_code=503)
-    body = {"status": "ready", "database": "available"}
+    body: dict[str, str] = {}
     if problem := shared_quota_problem():
         body["rateLimiting"] = problem
-    return body
+    if not database_url():
+        return {"status": "ready", "database": "not_configured", **body}
+    if not await database_ready():
+        return JSONResponse(
+            {"status": "not_ready", "database": "unavailable", **body}, status_code=503
+        )
+    return {"status": "ready", "database": "available", **body}

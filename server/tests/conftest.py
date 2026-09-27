@@ -16,7 +16,7 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256
 
-from app import dependencies, google_auth, relay
+from app import dependencies, google_auth, quota_store, relay
 from app.dependencies import get_purchase_recorder, get_stripe_gateway
 from app.main import app
 
@@ -80,6 +80,19 @@ def isolated_rate_limits() -> Iterator[None]:
     for limiter in limiters:
         limiter.reset()
     yield
+
+
+@pytest.fixture(autouse=True)
+def isolated_quota_client() -> Iterator[None]:
+    """Drop the cached Redis client, which is keyed on a URL tests set per test.
+
+    `quota_store` holds one client per process on purpose — a fresh one per call
+    exhausted a hosted connection cap — but a cached client that outlived a test
+    is state the next test would inherit, and xdist decides which test that is.
+    """
+    quota_store.reset_client()
+    yield
+    quota_store.reset_client()
 
 
 @pytest.fixture(autouse=True)

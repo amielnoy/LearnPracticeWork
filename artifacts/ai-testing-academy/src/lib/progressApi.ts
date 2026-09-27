@@ -4,12 +4,14 @@
  * `localStorage` stays the thing the page renders from. This is the copy that
  * survives a cleared browser and follows someone from their laptop to their
  * phone, and every call here is allowed to fail: a signed-out reader, a
- * deployment with no database, an offline moment — all of them mean "no remote
+ * deployment with no progress store, an offline moment — all of them mean "no remote
  * copy right now", which is the same answer the site has always worked with.
  *
  * The write is a merge rather than a replace, and the server returns the union.
  * That is what makes two devices safe: whichever one syncs second does not
- * discard what the first one recorded. See `database.merge_progress`.
+ * discard what the first one recorded. The union is computed in
+ * `server/sheets/Progress.gs`, an Apps Script web app holding a script lock
+ * over one spreadsheet row — the SQL `merge_progress` it replaced is gone.
  */
 
 export type ToolId = 'resume' | 'interview' | 'practice';
