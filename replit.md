@@ -69,7 +69,7 @@ is absent fails closed with a controlled 4xx/5xx response. The package scripts d
 | `METRICS_TOKEN` | Protects production `/metrics` scrapes | Metrics are available only outside production |
 | `METRICS_ID_SALT` | HMAC-pseudonymizes user labels in metrics | Authenticated users are labeled `redacted` |
 | `TRUSTED_PROXY_HOPS` | How many rightmost `X-Forwarded-For` entries the platform appends, so the caller can be read past them | Defaults to 1. Too high trusts an entry the caller forged; too low keys everyone behind one proxy to the same quota |
-| `RATE_LIMIT_SALT` | Production quotas are counted in Postgres | **In production every rate-limited route refuses every caller with 429** — sign-in, the AI proxy and the admin seed route. `METRICS_ID_SALT` is accepted instead. `/api/readyz` names it in a `rateLimiting` field |
+| `RATE_LIMIT_SALT` | Production quotas are counted in Postgres, shared across instances | The shared store cannot be used, and each bucket decides what that means: **the AI quotas refuse with 429**, sign-in and the admin routes **degrade to a per-worker bound** rather than take authentication down. `METRICS_ID_SALT` is accepted instead. `/api/readyz` names it in a `rateLimiting` field |
 
 ### API structure
 
