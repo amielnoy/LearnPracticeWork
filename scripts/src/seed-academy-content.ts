@@ -4,7 +4,7 @@
  *     pnpm --filter @workspace/scripts run seed:academy
  *
  * Everything except the password is already in this repository, so that is the
- * only thing to supply. Put it in `.env.local`, which is git-ignored:
+ * only thing to supply. Put it in `env/.env.local`, which is git-ignored:
  *
  *     SUPABASE_DB_PASSWORD=…
  *
@@ -49,22 +49,28 @@ function isTracked(file: string): boolean {
 }
 
 /**
- * A real environment variable wins, then `.env.local`, then `.env`.
+ * A real environment variable wins, then `env/.env.local`, then `env/.env`.
+ *
+ * The env files live in `env/`, not the repository root. The two root paths are
+ * still read after them, so a working copy that predates the move keeps working
+ * rather than failing with a password that is sitting right there.
  *
  * A password found in a *tracked* file is refused rather than used: this
  * repository commits `.env` files on purpose — they hold public build-time
  * config — so a secret that landed in one is a secret on its way to GitHub, and
  * silently accepting it here is how it would stay there.
  */
+const ENV_FILES = ['env/.env.local', 'env/.env', '.env.local', '.env'];
+
 function resolveEnv(name: string): string | undefined {
   if (process.env[name]?.trim()) return process.env[name]!.trim();
-  for (const file of ['.env.local', '.env'].map(f => path.join(root, f))) {
+  for (const file of ENV_FILES.map(f => path.join(root, f))) {
     const value = parseEnvFile(file)[name];
     if (!value) continue;
     if (isTracked(file)) {
       throw new Error(
-        `${name} was found in ${path.basename(file)}, which is tracked by git. ` +
-          'Move it to .env.local — that one is ignored — and rotate it if it has been pushed.',
+        `${name} was found in ${path.relative(root, file)}, which is tracked by git. ` +
+          'Move it to env/.env.local — that one is ignored — and rotate it if it has been pushed.',
       );
     }
     return value;
@@ -89,7 +95,7 @@ function rejectPlaceholders(name: string, value: string): void {
     throw new Error(
       `${name} still contains placeholders: ${value.replace(/:[^:@/]*@/, ':…@')}\n` +
         `It was copied from an example. Either fix it, or \`unset ${name}\` and let ` +
-        'SUPABASE_DB_PASSWORD in .env.local compose the connection.',
+        'SUPABASE_DB_PASSWORD in env/.env.local compose the connection.',
     );
   }
 }
@@ -114,7 +120,7 @@ function target(): Target {
   const password = resolveEnv('SUPABASE_DB_PASSWORD');
   if (!password) {
     throw new Error(
-      'No database password. Add SUPABASE_DB_PASSWORD to .env.local (git-ignored), or set ' +
+      'No database password. Add SUPABASE_DB_PASSWORD to env/.env.local (git-ignored), or set ' +
         'DATABASE_URL. The password is in the Supabase dashboard under Settings → Database.',
     );
   }

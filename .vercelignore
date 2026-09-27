@@ -6,6 +6,7 @@
 # from this directory, without `--prebuilt`, which uploads the working copy.
 # The deploy workflow never does that, but a person debugging one might, and the
 # first two entries below are a database password and an npm token.
+env/
 .env.local
 .env.*.local
 .npmrc

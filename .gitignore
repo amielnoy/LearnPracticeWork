@@ -67,8 +67,9 @@ Thumbs.db
 .cache/
 .local/
 
-# Local env overrides. Unlike the committed `.env` files, which hold only
-# public build-time config, this is where anything you would not publish goes.
+# Local env overrides. The env files live in `env/`; unlike the committed ones,
+# which hold only public build-time config, this is where anything you would not
+# publish goes. These patterns carry no slash, so they match at any depth.
 .env.local
 .env.*.local
 

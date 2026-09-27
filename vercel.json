@@ -6,7 +6,7 @@
   "outputDirectory": "_site",
   "functions": {
     "api/index.py": {
-      "excludeFiles": "{.env*,.npmrc,.claude/**,.agents/**,_uv/**,.playwright-mcp/**,attached_assets/**,allure*/**,*-report/**,test-results/**,{lib,scripts,monitoring,tests,artifacts}/**,server/{tests,dist,.venv,src,scripts}/**,**/__pycache__/**,**/.pytest_cache/**}"
+      "excludeFiles": "{.env*,env/**,.npmrc,.claude/**,.agents/**,_uv/**,.playwright-mcp/**,attached_assets/**,allure*/**,*-report/**,test-results/**,{lib,scripts,monitoring,tests,artifacts}/**,server/{tests,dist,.venv,src,scripts}/**,**/__pycache__/**,**/.pytest_cache/**}"
     }
   }
 }
