@@ -29,6 +29,13 @@ function ids(value) {
   });
 }
 
+/**
+ * Caps the row against a list the visitor controls. When the union exceeds
+ * MAX_IDS, stored ids survive and incoming ids are dropped — an incoming
+ * payload must never evict progress already recorded. Real ceilings are 40
+ * coding challenges and 12 lectures, far below 500, so the cap only engages
+ * under tampering.
+ */
 function union(a, b) {
   var seen = {};
   var out = [];

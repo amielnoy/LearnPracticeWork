@@ -79,3 +79,18 @@ test('an unknown lastTool is refused rather than stored', () => {
   const merged = mergeProgress(emptyProgress(), { ...emptyProgress(), lastTool: 'mystery' });
   expect(merged.lastTool).toBe(null);
 });
+
+/**
+ * The cap defends the row against a list the visitor controls, so when the
+ * union overflows it is the stored ids that survive — an incoming payload
+ * must not be able to evict progress that is already recorded.
+ */
+test('an oversized incoming list cannot evict stored progress', () => {
+  const stored = Array.from({ length: 500 }, (_, i) => `real${i}`);
+  const incoming = Array.from({ length: 500 }, (_, i) => `junk${i}`);
+  const merged = mergeProgress(
+    { ...emptyProgress(), practiceCompleted: stored },
+    { ...emptyProgress(), practiceCompleted: incoming },
+  );
+  expect(merged.practiceCompleted).toEqual(stored);
+});
