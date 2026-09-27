@@ -405,3 +405,31 @@ async def test_the_quota_diagnostic_survives_a_database_outage(
 
     assert response.status_code == 503
     assert "RATE_LIMIT_SALT" in response.json()["rateLimiting"]
+
+
+async def test_a_redis_that_cannot_be_reached_is_a_different_path_from_a_missing_url(
+    production, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`shared_quota_problem()` is silent here: everything is configured.
+
+    The other tests in this file delete `REDIS_URL` and so never leave that
+    check, which means the `except Exception` arm in `hit()` — the arm a real
+    outage takes, and the arm a connection cap takes — went unexercised. The
+    trade has to hold on this path too: the billed buckets shut, sign-in
+    degrades to a per-worker bound rather than locking everyone out.
+    """
+    from app import quota_store
+
+    class Unreachable:
+        async def incr(self, key: str) -> int:
+            raise ConnectionError("Error 61 connecting to fixture-host:6379. Connection refused.")
+
+    monkeypatch.setattr(quota_store, "_client", lambda: Unreachable())
+    assert shared_quota_problem() is None, "this test is about the store, not the configuration"
+
+    billed = SharedRateLimiter("ai-daily", 10, 86_400)
+    assert await billed.hit("ip:198.51.100.4") == (False, 0)
+
+    credentials = SharedRateLimiter("login", 3, 300, when_unavailable="degrade")
+    verdicts = [(await credentials.hit("ip:198.51.100.4"))[0] for _ in range(4)]
+    assert verdicts == [True, True, True, False], "degrading is a real bound, not no bound"
