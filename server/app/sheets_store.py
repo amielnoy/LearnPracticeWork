@@ -21,7 +21,12 @@ import httpx
 
 from .config import env
 
-TIMEOUT = 20  # Apps Script cold starts are seconds, and the UI renders from localStorage anyway.
+# Apps Script cold starts are seconds, and the UI renders from localStorage anyway.
+# `Progress.gs` waits at most LOCK_WAIT_MS (12s) for its script lock, deliberately
+# under this: the script has to be able to give up and answer `{"error":"busy"}`
+# while the client is still listening, or a union it wrote is discarded as a 500.
+# Move one of these two numbers and move the other.
+TIMEOUT = 20
 
 
 def _url() -> str | None:
@@ -40,7 +45,13 @@ async def _call(op: str, subject: str, progress: dict[str, Any] | None) -> dict[
     body: dict[str, Any] = {"op": op, "sub": subject, "token": env("SHEETS_WEBAPP_TOKEN") or ""}
     if progress is not None:
         body["progress"] = progress
-    async with httpx.AsyncClient(timeout=TIMEOUT, transport=_transport()) as client:
+    # An Apps Script `/exec` URL answers 302 and serves the body only from
+    # `script.googleusercontent.com/macros/echo`. httpx does not follow
+    # redirects unless told to, and `raise_for_status()` raises on a 3xx, so
+    # without this every load and merge is a 500.
+    async with httpx.AsyncClient(
+        timeout=TIMEOUT, transport=_transport(), follow_redirects=True
+    ) as client:
         response = await client.post(url, json=body)
     response.raise_for_status()
     payload = response.json()

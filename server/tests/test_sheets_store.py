@@ -77,3 +77,28 @@ async def test_a_body_without_progress_raises(configured, monkeypatch):
     monkeypatch.setattr(sheets_store, "_transport", lambda: transport(handler))
     with pytest.raises(ValueError):
         await sheets_store.load_progress("123")
+
+
+async def test_the_apps_script_redirect_is_followed_to_where_the_body_lives(
+    configured, monkeypatch
+):
+    """An `/exec` URL answers 302; only `script.googleusercontent.com` serves the body.
+
+    Without `follow_redirects=True` every load and merge sees the 302,
+    `raise_for_status()` raises on it, and the route answers 500 forever.
+    """
+    echo = "https://script.googleusercontent.com/macros/echo?user_content_key=abc"
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(str(request.url))
+        if str(request.url) == echo:
+            return httpx.Response(200, json={"progress": {**EMPTY, "resumeStarted": True}})
+        return httpx.Response(302, headers={"Location": echo})
+
+    monkeypatch.setattr(sheets_store, "_transport", lambda: transport(handler))
+    assert await sheets_store.load_progress("110169484474386276334") == {
+        **EMPTY,
+        "resumeStarted": True,
+    }
+    assert seen == ["https://script.example/exec", echo]
