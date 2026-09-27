@@ -87,3 +87,14 @@ _site
 /pyproject.toml
 /uv.lock
 /_uv/
+
+# BMAD skill packages. Rendered from `_bmad/` by the BMAD installer, not written
+# by hand, and updated out of band — 2MB of generated content whose diffs say
+# nothing about this repository. `_bmad/` itself is tracked, so the config and
+# the customizations they are rendered from are shared.
+.claude/skills/
+
+# BMAD's per-developer install answers — a name, a language, a skill level.
+# `_bmad/custom/.gitignore` already excludes its own `*.user.toml`; the one at
+# the root of `_bmad/` is the same kind of file and was simply not covered.
+_bmad/config.user.toml
