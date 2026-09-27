@@ -36,11 +36,46 @@ function harness(properties: Record<string, string | null>) {
       built.rowIndexFor(
         {
           getLastRow: () => column.length + 1,
-          getRange: () => ({ getValues: () => column }),
+          // Apps Script refuses a range of fewer than one row, so this stub
+          // does too: a header-only tab must never reach `getRange` at all.
+          getRange: (_row: number, _col: number, numRows: number) => {
+            if (!(numRows >= 1)) {
+              throw new Error('The number of rows in the range must be at least 1.');
+            }
+            return { getValues: () => column };
+          },
         },
         sub,
       ),
   };
+}
+
+const HEADERS = [
+  'google_sub',
+  'resume_started',
+  'resume_completed',
+  'interview_started',
+  'interview_answers',
+  'interview_completed',
+  'practice_completed',
+  'lectures_viewed',
+  'last_tool',
+  'updated_at',
+];
+
+/**
+ * What a Sheets cell does to a value on the way in, which is the whole of the
+ * corruption this file now pins down. A bare decimal string is *parsed as a
+ * number*: a 21-digit Google `sub` exceeds IEEE-754 precision, so it reads
+ * back as `110169484474386280000` and matches nothing ever again. A leading
+ * apostrophe forces text, and the apostrophe is consumed as that marker
+ * rather than stored as part of the value.
+ */
+function coerce(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+  if (value.charAt(0) === "'") return value.slice(1);
+  if (value !== '' && /^-?\d+(\.\d+)?$/.test(value)) return Number(value);
+  return value;
 }
 
 /**
@@ -48,20 +83,64 @@ function harness(properties: Record<string, string | null>) {
  * and `ContentService`, and the lock/write assertions below need real call
  * tracking, not just data a mock can report back — so this passes live JS
  * objects into the built function instead of splicing JSON into the source.
+ *
+ * The sheet is modelled as one grid whose first row is the header, because two
+ * of the defects this file guards live exactly where a happy-path mock would
+ * have papered over the platform: `getRange` refuses `numRows < 1` the way
+ * Apps Script does, and every write goes through `coerce`.
  */
 function harnessDoPost(options: {
   properties?: Record<string, string | null>;
   tryLockResult?: boolean;
   rows?: unknown[][];
+  tabMissing?: boolean;
 }) {
   const properties = options.properties ?? { ACADEMY_TOKEN: 't'.repeat(40) };
   const tryLockResult = options.tryLockResult ?? true;
-  const rows: unknown[][] = (options.rows ?? []).map(row => [...row]);
+  // A tab that exists carries the header row; a missing one is created by `sheet()`.
+  const grid: unknown[][] = options.tabMissing
+    ? []
+    : [[...HEADERS], ...(options.rows ?? []).map(row => row.map(coerce))];
 
   const released = { called: false };
-  const lockCalls = { tryLock: 0 };
+  const lockCalls = { tryLock: 0, waitedFor: [] as number[] };
   const appendCalls: unknown[][] = [];
   const setValuesCalls: { row: number; values: unknown[][] }[] = [];
+  const numberFormats: { row: number; column: number; numRows: number; format: string }[] = [];
+  const inserted: string[] = [];
+
+  const tab = {
+    getLastRow: () => grid.length,
+    getMaxRows: () => Math.max(grid.length, 1000),
+    getRange: (row: number, col: number, numRows: number, numCols: number) => {
+      // Apps Script's own rule, and its own message. A range of zero rows is
+      // not an empty read there — it throws.
+      if (!(numRows >= 1)) throw new Error('The number of rows in the range must be at least 1.');
+      if (!(numCols >= 1))
+        throw new Error('The number of columns in the range must be at least 1.');
+      return {
+        getValues: () =>
+          grid
+            .slice(row - 1, row - 1 + numRows)
+            .map(r =>
+              r.slice(col - 1, col - 1 + numCols).map(cell => (cell === undefined ? '' : cell)),
+            ),
+        setValues: (values: unknown[][]) => {
+          setValuesCalls.push({ row, values });
+          values.forEach((line, i) => {
+            grid[row - 1 + i] = line.map(coerce);
+          });
+        },
+        setNumberFormat: (format: string) => {
+          numberFormats.push({ row, column: col, numRows, format });
+        },
+      };
+    },
+    appendRow: (row: unknown[]) => {
+      appendCalls.push(row);
+      grid.push(row.map(coerce));
+    },
+  };
 
   const deps = {
     PropertiesService: {
@@ -71,8 +150,9 @@ function harnessDoPost(options: {
     },
     LockService: {
       getScriptLock: () => ({
-        tryLock: () => {
+        tryLock: (ms: number) => {
           lockCalls.tryLock += 1;
+          lockCalls.waitedFor.push(ms);
           return tryLockResult;
         },
         releaseLock: () => {
@@ -91,25 +171,11 @@ function harnessDoPost(options: {
     },
     SpreadsheetApp: {
       getActiveSpreadsheet: () => ({
-        getSheetByName: () => ({
-          getLastRow: () => rows.length + 1,
-          getRange: (row: number, _col: number, _numRows: number, numCols: number) => ({
-            getValues: () => {
-              // The column scan `rowIndexFor` runs (row 2, one column) versus
-              // a single full-row read/write (any row, HEADERS.length columns).
-              if (row === 2 && numCols === 1) return rows.map(r => [r[0]]);
-              return [rows[row - 2]];
-            },
-            setValues: (values: unknown[][]) => {
-              setValuesCalls.push({ row, values });
-              rows[row - 2] = values[0];
-            },
-          }),
-          appendRow: (row: unknown[]) => {
-            appendCalls.push(row);
-            rows.push(row);
-          },
-        }),
+        getSheetByName: () => (options.tabMissing && inserted.length === 0 ? null : tab),
+        insertSheet: (name: string) => {
+          inserted.push(name);
+          return tab;
+        },
       }),
     },
   };
@@ -133,6 +199,9 @@ function harnessDoPost(options: {
     lockCalls,
     appendCalls,
     setValuesCalls,
+    numberFormats,
+    inserted,
+    grid,
   };
 }
 
@@ -213,6 +282,7 @@ test('a lock that is not granted refuses the write rather than falling through',
       contents: JSON.stringify({
         token: TOKEN,
         sub: '123',
+        op: 'merge',
         progress: { ...emptyProgress(), resumeStarted: true },
       }),
     },
@@ -234,7 +304,12 @@ test('the lock is released even when the locked work throws', () => {
   });
   const e = {
     postData: {
-      contents: JSON.stringify({ token: TOKEN, sub: '123', progress: emptyProgress() }),
+      contents: JSON.stringify({
+        token: TOKEN,
+        sub: '123',
+        op: 'merge',
+        progress: emptyProgress(),
+      }),
     },
   };
   expect(() => doPostRaw(e)).toThrow();
@@ -270,4 +345,106 @@ test('only a token carried in the body authorizes the request', () => {
     postData: { contents: JSON.stringify({ token: 'x'.repeat(40), sub: '123', op: 'load' }) },
   });
   expect(body).toEqual({ error: 'unauthorized' });
+});
+
+/**
+ * A real Google `sub` is a ~21-digit decimal string. Written bare into a cell
+ * Sheets parses it as a number, which loses the tail to IEEE-754 — so the row
+ * can never be found again, every sync appends another one, and every load
+ * answers `emptyProgress()` that `ProgressContext.adopt` then writes over the
+ * learner's real `localStorage`. The sub column is therefore forced to text
+ * unconditionally, not only when it looks like a formula.
+ */
+const REAL_SUB = '110169484474386276334';
+
+function post(body: Record<string, unknown>) {
+  return { postData: { contents: JSON.stringify({ token: TOKEN, ...body }) } };
+}
+
+test('a 21-digit Google sub is written as text, not as a number that loses its tail', () => {
+  const row = rowFromProgress(REAL_SUB, emptyProgress());
+  expect(row[0]).toBe("'" + REAL_SUB);
+  expect(coerce(row[0])).toBe(REAL_SUB);
+});
+
+test('a second merge for a real sub updates the row instead of appending another', () => {
+  const h = harnessDoPost({ rows: [] });
+
+  const first = h.doPostBody(
+    post({ sub: REAL_SUB, op: 'merge', progress: { ...emptyProgress(), resumeStarted: true } }),
+  );
+  expect(first.progress.resumeStarted).toBe(true);
+  expect(h.appendCalls).toHaveLength(1);
+  // The stored cell survived Sheets' coercion as the exact digits.
+  expect(h.grid[1][0]).toBe(REAL_SUB);
+
+  const second = h.doPostBody(
+    post({ sub: REAL_SUB, op: 'merge', progress: { ...emptyProgress(), interviewStarted: true } }),
+  );
+  expect(h.appendCalls).toHaveLength(1);
+  expect(h.setValuesCalls).toHaveLength(1);
+  expect(second.progress.resumeStarted).toBe(true);
+  expect(second.progress.interviewStarted).toBe(true);
+});
+
+test('a load after a sync returns the stored progress rather than erasing it', () => {
+  const h = harnessDoPost({ rows: [] });
+  h.doPostBody(
+    post({
+      sub: REAL_SUB,
+      op: 'merge',
+      progress: { ...emptyProgress(), practiceCompleted: ['c1'], lastTool: 'practice' },
+    }),
+  );
+
+  const loaded = h.doPostBody(post({ sub: REAL_SUB, op: 'load' }));
+
+  expect(loaded.progress.practiceCompleted).toEqual(['c1']);
+  expect(loaded.progress.lastTool).toBe('practice');
+});
+
+/**
+ * Apps Script requires `numRows >= 1`. A tab `sheet()` has just created holds
+ * only the header row, so `getLastRow() - 1` is 0 and the range throws — the
+ * first request after deployment, every time, and it never self-clears.
+ */
+test('a tab holding only its header row is scanned without asking for zero rows', () => {
+  const { rowIndexForIn } = harness({});
+  expect(rowIndexForIn([], REAL_SUB)).toBe(-1);
+});
+
+test('the first request against a freshly created tab answers instead of throwing', () => {
+  const h = harnessDoPost({ tabMissing: true });
+
+  const body = h.doPostBody(post({ sub: REAL_SUB, op: 'load' }));
+
+  expect(body).toEqual({ progress: emptyProgress() });
+  expect(h.inserted).toEqual(['learner_progress']);
+  expect(h.appendCalls[0]).toEqual(HEADERS);
+  // Plain text on the sub column, so a hand-typed sub behaves like a written one.
+  expect(h.numberFormats.some(f => f.column === 1 && f.format === '@')).toBe(true);
+});
+
+/**
+ * The lock's wait budget has to stay meaningfully under `sheets_store.TIMEOUT`,
+ * or the client's `ReadTimeout` and the script's own giving-up land together —
+ * the caller reads a 500 and discards a union that was written, and the
+ * designed `{"error":"busy"}` signal can never be observed.
+ */
+test('the lock gives up well before the HTTP client does', () => {
+  const h = harnessDoPost({ rows: [] });
+  h.doPostBody(post({ sub: REAL_SUB, op: 'load' }));
+  expect(h.lockCalls.waitedFor).toHaveLength(1);
+  expect(h.lockCalls.waitedFor[0]).toBeLessThanOrEqual(12000);
+});
+
+/** `doPost` used to special-case only `load`, so anything else — including a
+ *  request with no `op` at all — merged `emptyProgress()` in and wrote it. */
+test('an op that is neither load nor merge is refused rather than written', () => {
+  for (const body of [{ sub: REAL_SUB }, { sub: REAL_SUB, op: 'delete' }]) {
+    const h = harnessDoPost({ rows: [] });
+    expect(h.doPostBody(post(body))).toEqual({ error: 'unknown op' });
+    expect(h.appendCalls).toHaveLength(0);
+    expect(h.setValuesCalls).toHaveLength(0);
+  }
 });

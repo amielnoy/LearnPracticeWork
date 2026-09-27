@@ -9,6 +9,15 @@
 var MAX_IDS = 500;
 var TOOLS = ['resume', 'interview', 'practice'];
 
+/**
+ * How long a request waits for the script lock — deliberately well under
+ * `sheets_store.TIMEOUT`, which is 20 seconds. The two numbers belong together:
+ * a wait budget equal to the HTTP timeout means the client gives up at the same
+ * instant this does, so a successful write is discarded as a 500 and the
+ * `{"error":"busy"}` this exists to return is never seen.
+ */
+var LOCK_WAIT_MS = 12000;
+
 function emptyProgress() {
   return {
     resumeStarted: false,
@@ -37,7 +46,10 @@ function ids(value) {
  * under tampering.
  */
 function union(a, b) {
-  var seen = {};
+  // `Object.create(null)` rather than `{}`: a plain object inherits from
+  // Object.prototype, so an id named `constructor`, `toString`, `valueOf`,
+  // `hasOwnProperty` or `__proto__` read as already seen and was dropped.
+  var seen = Object.create(null);
   var out = [];
   ids(a)
     .concat(ids(b))
@@ -86,6 +98,22 @@ function text(value) {
   return /^[=+\-@]/.test(s) ? "'" + s : s;
 }
 
+/**
+ * The `google_sub` cell, forced to text *unconditionally*.
+ *
+ * A Google `sub` is a ~21-digit decimal string. Written bare, `setValues` and
+ * `appendRow` parse it as a number, which exceeds IEEE-754 precision: it reads
+ * back with its tail zeroed, `rowIndexFor` never matches it again, every sync
+ * appends another row, and every load answers `emptyProgress()` — which the
+ * client then adopts over the learner's real `localStorage`. `text()` cannot
+ * be weakened to cover this, because its job is the narrower one of disarming
+ * a formula; this one applies to a single column whose values are never
+ * anything but opaque text.
+ */
+function forcedText(value) {
+  return "'" + String(value == null ? '' : value);
+}
+
 function untext(value) {
   var s = String(value == null ? '' : value);
   return s.charAt(0) === "'" ? s.slice(1) : s;
@@ -93,7 +121,7 @@ function untext(value) {
 
 function rowFromProgress(sub, progress) {
   return [
-    text(sub),
+    forcedText(sub),
     progress.resumeStarted,
     progress.resumeCompleted,
     progress.interviewStarted,
@@ -133,13 +161,22 @@ function sheet() {
   if (!tab) {
     tab = book.insertSheet(SHEET_NAME);
     tab.appendRow(HEADERS);
+    // Plain text on the sub column, so a value typed in by hand behaves like
+    // one `forcedText` wrote: without it Sheets parses a 21-digit sub as a
+    // number and the row becomes unfindable.
+    tab.getRange(1, 1, tab.getMaxRows(), 1).setNumberFormat('@');
   }
   return tab;
 }
 
 /** First match wins, and a duplicate sub is an error rather than a coin toss. */
 function rowIndexFor(tab, sub) {
-  var column = tab.getRange(2, 1, Math.max(tab.getLastRow() - 1, 0), 1).getValues();
+  // Apps Script requires numRows >= 1, so a tab holding only its header row
+  // must not reach getRange at all — `sheet()` creates exactly that state, and
+  // the range would throw on the first request after every deployment.
+  var dataRows = tab.getLastRow() - 1;
+  if (dataRows < 1) return -1;
+  var column = tab.getRange(2, 1, dataRows, 1).getValues();
   var found = -1;
   for (var i = 0; i < column.length; i++) {
     if (untext(column[i][0]) === sub) {
@@ -188,14 +225,24 @@ function doPost(e) {
   if (!authorized(body)) return json({ error: 'unauthorized' });
   var sub = String(body.sub || '');
   if (!sub) return json({ error: 'missing sub' });
+  // Only these two. `load` used to be the single special case and everything
+  // else fell through to the write, so a request with no `op` at all merged
+  // `emptyProgress()` into the row.
+  var op = String(body.op || '');
+  if (op !== 'load' && op !== 'merge') return json({ error: 'unknown op' });
 
   var lock = LockService.getScriptLock();
-  if (!lock.tryLock(20000)) return json({ error: 'busy' });
+  // Shorter than `sheets_store.TIMEOUT` (20s) on purpose. At 20s the script can
+  // spend the client's whole budget waiting: the caller's ReadTimeout and this
+  // giving up land together, so it reads a 500 and discards a union that was
+  // written, and the 'busy' signal below could never be observed. Keep the two
+  // numbers apart — if TIMEOUT moves, move this with it.
+  if (!lock.tryLock(LOCK_WAIT_MS)) return json({ error: 'busy' });
   try {
     var tab = sheet();
     var index = rowIndexFor(tab, sub);
     var stored = index === -1 ? emptyProgress() : progressFromRow(tab.getRange(index, 1, 1, HEADERS.length).getValues()[0]);
-    if (body.op === 'load') return json({ progress: stored });
+    if (op === 'load') return json({ progress: stored });
 
     var merged = mergeProgress(stored, body.progress);
     var row = rowFromProgress(sub, merged);

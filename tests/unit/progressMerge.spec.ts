@@ -94,3 +94,22 @@ test('an oversized incoming list cannot evict stored progress', () => {
   );
   expect(merged.practiceCompleted).toEqual(stored);
 });
+
+/**
+ * `union()` used `var seen = {}` and `if (!seen[id])`, so any id that names an
+ * `Object.prototype` member read as already seen and was silently dropped —
+ * from a list the learner's own recorded progress lives in.
+ */
+test('an id named after an Object.prototype member is not silently dropped', () => {
+  const merged = mergeProgress(emptyProgress(), {
+    ...emptyProgress(),
+    practiceCompleted: ['constructor', 'toString', 'valueOf', 'hasOwnProperty', 'c1'],
+  });
+  expect(merged.practiceCompleted).toEqual([
+    'constructor',
+    'toString',
+    'valueOf',
+    'hasOwnProperty',
+    'c1',
+  ]);
+});
