@@ -67,8 +67,9 @@ Thumbs.db
 .cache/
 .local/
 
-# Local env overrides. Unlike the committed `.env` files, which hold only
-# public build-time config, this is where anything you would not publish goes.
+# Local env overrides. The env files live in `env/`; unlike the committed ones,
+# which hold only public build-time config, this is where anything you would not
+# publish goes. These patterns carry no slash, so they match at any depth.
 .env.local
 .env.*.local
 
@@ -78,3 +79,11 @@ _site
 # Vercel CLI scratch: the prebuilt output the deploy workflow assembles, and
 # the project link (`vercel link`) whose IDs belong in repository secrets.
 .vercel
+
+# Written into the repository root by Vercel's Python builder during
+# `vercel build`: it derives these from requirements.txt, which is itself
+# generated from server/uv.lock. All four are build output, not sources.
+/requirements.txt
+/pyproject.toml
+/uv.lock
+/_uv/

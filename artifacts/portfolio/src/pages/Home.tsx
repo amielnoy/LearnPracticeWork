@@ -138,7 +138,7 @@ export default function Home() {
                 className="rounded-full font-bold px-8 group"
                 asChild
               >
-                <a href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation">
+                <a href="https://learn-practice-work.vercel.app/portfolio/ai-test-transformation">
                   <Briefcase className="w-4 h-4 mr-2 group-hover:text-primary transition-colors" />
                   AI TEST TRANSFORMATION
                 </a>
@@ -301,7 +301,7 @@ export default function Home() {
             ].map((service, i) => (
               <FadeIn key={service.title} delay={i * 0.1}>
                 <a
-                  href="https://free-tier-insights--amielpeled.replit.app/ai-test-transformation"
+                  href="https://learn-practice-work.vercel.app/portfolio/ai-test-transformation"
                   target="_blank"
                   rel="noreferrer"
                   className="block p-8 rounded-2xl bg-card border hover:border-primary hover:shadow-md transition-all duration-300 group cursor-pointer"

@@ -1,0 +1,27 @@
+# What a `vercel deploy` may upload from this working copy.
+#
+# This does NOT control what goes into the API function bundle — the Python
+# builder ignores it, and `functions.excludeFiles` in vercel.json is the lever
+# for that. This file matters for one case: a plain `vercel deploy` run by hand
+# from this directory, without `--prebuilt`, which uploads the working copy.
+# The deploy workflow never does that, but a person debugging one might, and the
+# first two entries below are a database password and an npm token.
+env/
+.env.local
+.env.*.local
+.npmrc
+
+# Local caches and artifacts — large, and meaningless off this machine.
+.claude/
+.agents/
+_uv/
+.playwright-mcp/
+.pytest_cache/
+allure-results/
+allure-report/
+allure-report-single/
+blob-report/
+playwright-report/
+test-results/
+server/.venv/
+server/dist/

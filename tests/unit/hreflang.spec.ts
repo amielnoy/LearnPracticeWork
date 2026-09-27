@@ -34,8 +34,10 @@ const SITES: Site[] = [
     html: path.join(artifacts, 'ai-testing-academy', 'index.html'),
     sitemap: path.join(artifacts, 'ai-testing-academy', 'public', 'sitemap.xml'),
     robots: path.join(artifacts, 'ai-testing-academy', 'public', 'robots.txt'),
-    base: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/',
-    root: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/',
+    // The academy is the site: it serves the deployment's root, which is why
+    // these are bare origins and not /ai-testing-academy/.
+    base: 'https://learn-practice-work.vercel.app/',
+    root: 'https://learn-practice-work.vercel.app/',
   },
   {
     name: 'ai-testing-lecture-1',
@@ -45,8 +47,8 @@ const SITES: Site[] = [
     // Not the deck root: "/" renders the deck in an iframe, so it is an empty
     // shell to a crawler and its iframe drops `?lang`. Only /slide1 varies by
     // language, so only /slide1 may be declared as a language variant.
-    base: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/slide1',
-    root: 'https://free-tier-insights--amielpeled.replit.app/ai-testing-lecture-1/',
+    base: 'https://learn-practice-work.vercel.app/ai-testing-lecture-1/slide1',
+    root: 'https://learn-practice-work.vercel.app/ai-testing-lecture-1/',
   },
 ];
 

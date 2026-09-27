@@ -13,10 +13,20 @@ from .config import database_url, positive_int
 
 logger = logging.getLogger(__name__)
 
+
 # The DDL for every table this API owns. Kept as SQL next to this module rather
 # than as a string inside it, because it is read far more often than it is run
 # and the comments in it are the documentation for what each table is for.
-SCHEMA = (Path(__file__).with_name("schema.sql")).read_text(encoding="utf-8")
+#
+# Read when it is applied, not when this module is imported. Nothing applies the
+# DDL at boot any more — see `lifespan` in main.py — so an import-time read was
+# work every cold start did and no request needed. It also made importing this
+# module depend on a data file being bundled beside it, which the Vercel Python
+# builder happens to do and does not promise: an import that can fail over a
+# file the application only needs during a migration is a bad trade.
+def schema() -> str:
+    return (Path(__file__).with_name("schema.sql")).read_text(encoding="utf-8")
+
 
 # Rate-limit rows are reused in place, so the table is bounded by the number of
 # distinct callers rather than by traffic — which for IP-keyed buckets grows
@@ -56,7 +66,7 @@ def _database_ready() -> bool:
 
 def _initialize_database() -> None:
     with psycopg.connect(database_url(), autocommit=True) as connection:
-        connection.execute(SCHEMA)
+        connection.execute(schema())
         retention_days = positive_int("PURCHASE_RETENTION_DAYS", 2_922)
         connection.execute(
             """UPDATE course_purchases

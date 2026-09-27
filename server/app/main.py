@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
 from . import middleware
+from .config import serverless
 from .database import initialize_database
 from .errors import ServiceError, error_response, validation_issues
 from .origins import cors_allow_origin_regex, cors_allow_origins
@@ -29,7 +30,20 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    """A failed migration degrades the database-backed routes, it does not stop boot."""
+    """A failed migration degrades the database-backed routes, it does not stop boot.
+
+    The migration is skipped entirely on serverless. There, `lifespan` runs on
+    every cold start rather than once per deploy, so applying the DDL here would
+    put a schema round-trip in front of an unlucky visitor's request and let any
+    number of concurrent instances race each other to run it. The schema is
+    applied deliberately instead — `pnpm --filter @workspace/scripts run
+    seed:academy --schema-only` — which is where a migration belongs when the
+    thing serving requests is not a thing that boots.
+    """
+    if serverless():
+        logger.info("Serverless runtime: skipping schema initialization (apply it at deploy time)")
+        yield
+        return
     try:
         await initialize_database()
     except Exception:

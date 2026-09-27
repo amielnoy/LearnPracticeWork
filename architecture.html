@@ -522,7 +522,8 @@
   OpenAPI document at <code>/api/openapi.json</code> and the interactive Scalar reference at
   <code>/api/docs</code>. The Scalar agent, telemetry, proxy, remote fonts, and credential
   persistence are disabled; its version-pinned browser code sends test requests directly to
-  the same API origin. Replit relays both paths to Fly without storing a backend secret.
+  the same API origin — both paths are served by the same Vercel function as the rest of
+  <code>/api</code>.
 </div>
 
 <div class="callout good">
@@ -1069,21 +1070,21 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   routing agrees with the host. Deploy path is configured once, in one variable.
 </p>
 
-<h3>Deploy targets, one build</h3>
+<h3>One host, one build</h3>
 
 <p>
-  Replit serves the site and a secretless same-origin API relay. The relay forwards relative
-  <code>/api</code> calls to the Python service on Fly while keeping first-party login cookies
-  on the Replit domain. Every static host serves the built output only,
-  under a sub-path, with no API behind it — so the AI panel there falls back to
-  bring-your-own-key, exactly as it does when the proxy is unreachable.
+  Vercel serves the site and the API from a single origin:
+  <a href="https://learn-practice-work.vercel.app">learn-practice-work.vercel.app</a>.
+  <code>api/index.py</code> re-exports the FastAPI app as a Python function behind
+  <code>/api/*</code>, so a relative call never leaves the origin, the login cookie stays
+  first-party without a relay hop, and CORS is not in the request path at all. The site used to
+  be split across Replit, Fly and Cloudflare; it no longer is, and the AI panel falls back to
+  bring-your-own-key only when no server key is configured.
 </p>
 
 <dl class="kv">
-  <dt>Replit</dt><dd><code>.replit-artifact/artifact.toml</code> — <code>BASE_PATH=/ai-testing-academy/</code>, with a secretless same-origin <code>/api</code> relay to Fly.</dd>
   <dt>Vercel</dt><dd><code>.github/workflows/deploy-vercel.yml</code> — <code>BASE_PATH=/</code>: this app <em>is</em> the deployed site, with the portfolio at <code>/portfolio/</code> and the decks beneath it. Built by Actions and shipped as a prebuilt directory on every push to <code>main</code>; pull requests get their own preview URL.</dd>
-  <dt>Cloudflare Pages</dt><dd>Same artifact, still supported. <code>deploy/cloudflare/_redirects</code> and <code>_headers</code> say what <code>deploy/vercel/config.json</code> says, in that host's dialect.</dd>
-  <dt>Fly.io</dt><dd><code>server/{Dockerfile,fly.toml}</code> — the API, separately, because it is the only piece that costs anything to run. <code>deploy/README.md</code> is the runbook.</dd>
+  <dt>The API</dt><dd><code>api/index.py</code> — the same FastAPI app, in the same deployment, routed by <code>deploy/vercel/config.json</code>. <code>deploy/README.md</code> is the runbook.</dd>
   <dt>Grafana</dt><dd><code>monitoring/compose.yaml</code> — Prometheus server and test history, Python uptime probes, and dashboards for health, logins, client type, approximate country, and server-proxied AI usage.</dd>
 </dl>
 

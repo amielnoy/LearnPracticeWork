@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { test, expect } from '../support/test';
-import { buildConfig } from '../../deploy/vercel/build-config.mjs';
 
 /**
  * The routing table the deployed site is served through.
@@ -198,70 +197,68 @@ test.describe('security headers', () => {
 });
 
 /**
- * `/api/*` is the one route that cannot be committed: the static site and the
- * API deploy separately, and the API's home has already moved twice. It is
- * added at deploy time from `API_ORIGIN`, and both outcomes have to be right.
+ * `/api/*` is served by the Python function in `api/index.py` — the FastAPI
+ * application that used to run on another host, deployed into this project so
+ * the browser sees one origin. That is what keeps the login cookie first-party
+ * (`SameSite=Lax`) and takes CORS out of the picture entirely.
  *
  * The failure being guarded is silent. Without an `/api` route the catch-all
  * hands `/api/ai/config` the academy's HTML shell at HTTP 200; the client
  * checks `res.ok`, the status passes, the JSON parse throws, the failure is
  * swallowed, and the site decides no server key exists. Every server-backed
  * feature vanishes and nothing looks broken.
+ *
+ * `/api/index` is a function rather than a file, so it is deliberately absent
+ * from the FILES fixture above — these tests assert where a request is *sent*,
+ * which is the part this table decides.
  */
-test.describe('the API route, decided at deploy time', () => {
-  const withProxy = buildConfig(config, 'https://api.example.com');
-  const without = buildConfig(config, undefined);
+test.describe('the API route', () => {
+  const API_PATHS = [
+    '/api/ai/config',
+    '/api/auth/session',
+    '/api/stripe/webhook',
+    '/api/content/question-bank',
+    '/api/healthz',
+  ];
 
-  function serveWith(built: { routes: HeaderRule[] }, requestPath: string): Served {
-    const previous = config.routes;
-    (config as { routes: HeaderRule[] }).routes = built.routes;
-    try {
-      return serve(requestPath);
-    } finally {
-      (config as { routes: HeaderRule[] }).routes = previous;
-    }
-  }
-
-  test('proxies to the configured origin, keeping the path', () => {
-    expect(serveWith(withProxy, '/api/ai/config').dest).toBe(
-      'https://api.example.com/api/ai/config',
-    );
-    expect(serveWith(withProxy, '/api/content/question-bank').dest).toBe(
-      'https://api.example.com/api/content/question-bank',
-    );
+  test('sends the whole prefix to the one function', () => {
+    // One FastAPI app owns its own routing, so the table hands it the prefix
+    // rather than naming endpoints it would then have to keep in step.
+    for (const apiPath of API_PATHS) expect(serve(apiPath).dest, apiPath).toBe('/api/index');
   });
 
   test('never hands an API path to the SPA shell', () => {
-    for (const built of [withProxy, without])
-      for (const apiPath of ['/api/ai/config', '/api/auth/session', '/api/stripe/webhook'])
-        expect(serveWith(built, apiPath).dest, apiPath).not.toBe('/index.html');
+    for (const apiPath of API_PATHS) expect(serve(apiPath).dest, apiPath).not.toBe('/index.html');
   });
 
-  test('fails loudly rather than silently when no origin is configured', () => {
-    const route = without.routes.find(r => r.src === '/api/(.*)') as HeaderRule & {
-      status?: number;
-    };
-    expect(route.status).toBe(503);
-    expect(route.headers?.['content-type']).toContain('application/json');
+  test('is reached before the SPA catch-all that would otherwise claim it', () => {
+    const api = config.routes.findIndex(r => r.src === '/api/(.*)' && r.dest === '/api/index');
+    const catchAll = config.routes.findIndex(r => r.src === '/.*' && r.dest === '/index.html');
+
+    expect(api).toBeGreaterThan(-1);
+    expect(catchAll).toBeGreaterThan(-1);
+    expect(api).toBeLessThan(catchAll);
   });
 
-  test('is settled before the filesystem, so nothing else can claim it', () => {
-    for (const built of [withProxy, without]) {
-      const api = built.routes.findIndex(r => r.src === '/api/(.*)');
-      const filesystem = built.routes.findIndex(r => r.handle === 'filesystem');
-      expect(api).toBeGreaterThan(-1);
-      expect(api).toBeLessThan(filesystem);
-    }
+  test('lets a real file win, which is why it sits after the filesystem', () => {
+    // Nothing in the assembled site lives under /api/, so this costs nothing —
+    // and it is the order Vercel's own builder emits for a function route.
+    const api = config.routes.findIndex(r => r.src === '/api/(.*)' && r.dest === '/api/index');
+    const filesystem = config.routes.findIndex(r => r.handle === 'filesystem');
+
+    expect(filesystem).toBeLessThan(api);
   });
 
-  test('refuses an origin that is not an https origin', () => {
-    for (const bad of ['http://api.example.com', 'https://api.example.com/api', 'api.example.com'])
-      expect(() => buildConfig(config, bad), bad).toThrow(/https origin/);
+  test('is never cached, whatever the site-wide default says', () => {
+    // The site-wide rule grants `max-age=0, must-revalidate` — a caching
+    // instruction. A signed-in answer to /api/auth/session must not carry one.
+    for (const apiPath of API_PATHS)
+      expect(serve(apiPath).headers['Cache-Control'], apiPath).toBe('no-store');
   });
 
-  test('leaves the static routes exactly as committed', () => {
-    // The deploy-time step adds one route; it must not reorder or rewrite the
-    // table the rest of this suite checks.
-    expect(withProxy.routes.filter(r => r.src !== '/api/(.*)')).toEqual(config.routes);
+  test('still carries the security headers every response gets', () => {
+    const { headers } = serve('/api/ai/config');
+    expect(headers['X-Content-Type-Options']).toBe('nosniff');
+    expect(headers['Strict-Transport-Security']).toContain('max-age=31536000');
   });
 });

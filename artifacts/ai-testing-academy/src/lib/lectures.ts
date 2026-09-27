@@ -26,7 +26,7 @@
  * one before this change — moving hosts is a config flip, not an edit to
  * twenty strings.
  */
-export const DEFAULT_SITE_ORIGIN = 'https://free-tier-insights--amielpeled.replit.app';
+export const DEFAULT_SITE_ORIGIN = 'https://learn-practice-work.vercel.app';
 
 export interface LectureData {
   num: number;

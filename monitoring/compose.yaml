@@ -19,8 +19,11 @@ services:
     environment:
       PORT: '9108'
       PROBE_INTERVAL_SECONDS: '30'
+      # The site and its API are one origin now, so both probes point at it.
+      # The Fly and Replit targets are gone: Fly's hostname no longer resolves,
+      # and Replit is no longer a host this project deploys to.
       MONITORED_SERVERS: >-
-        {"local-scalar":"http://api:8080/api/docs","fly-api":"https://ata-api.fly.dev/api/healthz","replit-root":"https://free-tier-insights--amielpeled.replit.app/","replit-academy":"https://free-tier-insights--amielpeled.replit.app/ai-testing-academy/","vercel-site":"${VERCEL_SITE_ORIGIN:-https://learn-practice-work.vercel.app}/"}
+        {"local-scalar":"http://api:8080/api/docs","vercel-site":"${VERCEL_SITE_ORIGIN:-https://learn-practice-work.vercel.app}/","vercel-api":"${VERCEL_SITE_ORIGIN:-https://learn-practice-work.vercel.app}/api/healthz"}
     ports:
       - 127.0.0.1:9108:9108
     restart: unless-stopped

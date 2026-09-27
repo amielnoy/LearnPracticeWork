@@ -8,6 +8,7 @@ from fastapi import APIRouter, Header, Request
 from fastapi.responses import JSONResponse
 from scalar_fastapi import AgentScalarConfig, get_scalar_api_reference
 
+from ..config import serverless
 from ..dependencies import DatabaseProbe
 from ..errors import error_response
 from ..metrics import metrics_authorized, prometheus_response
@@ -18,8 +19,17 @@ router = APIRouter()
 
 @router.get("/metrics", include_in_schema=False)
 async def metrics(authorization: Annotated[str | None, Header()] = None):
-    """Unauthorized scrapes get a 404: the endpoint should not advertise itself."""
-    if not metrics_authorized(authorization):
+    """Unauthorized scrapes get a 404: the endpoint should not advertise itself.
+
+    Serverless gets the same 404, authorized or not. `prometheus_client` counts
+    in process memory, and on Vercel a process is one invocation: a scrape would
+    return whatever the instance that happened to answer it had seen, which is
+    not a sample of anything. Reporting a number that looks like a rate and is
+    not one is worse than reporting nothing, so this says nothing. Test-history
+    metrics still reach Grafana — CI pushes those to Pushgateway, which does not
+    depend on this endpoint.
+    """
+    if serverless() or not metrics_authorized(authorization):
         return error_response("Not found", 404)
     return prometheus_response()
 
@@ -49,10 +59,9 @@ async def health() -> dict[str, str]:
 async def readiness(database_ready: DatabaseProbe):
     """Readiness, plus anything degraded that a 200 would otherwise hide.
 
-    The status code stays a function of the database alone, because Fly health-
-    checks this path and an unhealthy answer stops the machine. A deployment
-    whose quotas cannot count is broken for its users but still serving, so it
-    is named in the body instead of being turned into an outage.
+    The status code stays a function of the database alone. A deployment whose
+    quotas cannot count is broken for its users but still serving, so it is
+    named in the body instead of being turned into an outage.
     """
     if not await database_ready():
         return JSONResponse({"status": "not_ready", "database": "unavailable"}, status_code=503)
