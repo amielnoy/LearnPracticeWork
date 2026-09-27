@@ -122,9 +122,10 @@ value; there is nothing else to update.
 ### Purchases
 
 `checkout.session.completed` webhooks write a row into `course_purchases`, which is what ties a
-Stripe payment to a person. FastAPI creates the table and indexes idempotently at startup when a
-database is configured; `lib/db/src/schema/coursePurchases.ts` remains the TypeScript schema used
-by repository tooling.
+Stripe payment to a person. The table lives in `server/app/schema.sql` and is created by
+`seed:academy --schema-only`, not at startup — a Vercel function boots per invocation, so
+boot-time DDL was a schema round-trip in front of a visitor's request. `lib/db/src/schema/
+coursePurchases.ts` remains the TypeScript schema used by repository tooling.
 `GET /api/entitlements/course` reads it back for the caller's verified Google identity.
 
 Without a database the server degrades rather than guessing: webhooks cannot persist purchases
