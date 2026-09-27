@@ -74,7 +74,7 @@ WhenUnavailable = Literal["refuse", "degrade"]
 
 
 class SharedRateLimiter:
-    """Postgres-backed in production, deterministic in-memory in local/test runs.
+    """Redis-backed in production, deterministic in-memory in local/test runs.
 
     `when_unavailable` decides what happens if the shared store cannot be used,
     and the right answer differs by what the quota protects:

@@ -86,10 +86,23 @@ Vite apps and then looked for a single `public/` that only exists after the
 workflow's assembly step. Disconnecting it in that project's Vercel settings
 fixed it at the source.
 
+It happened again on **2026-09-27**, from a different project:
+`learn-practice-work-ai-testing-academy`, connected to this repo on 25 August.
+This time the failure read *No `_site/` — build the twelve apps first*, because
+the guard in `vercel.json` now catches it earlier and says so. Its Git
+integration was disconnected the same way, in that project's **Settings → Git**;
+Vercel's own confirmation notes that the project's settings and deployments are
+preserved, so it is reversible and costs nothing but the auto-build.
+
+Twice is a pattern, so: when a red deployment appears next to a green one, read
+the **project name** on the failing deployment before reading anything else. If
+it is not `learn-practice-work`, nothing in this repository caused it and
+nothing in this repository will fix it.
+
 Reach for that fix first. The repo-level lever, `git.deploymentEnabled: false`
 in `vercel.json`, looks tempting and is almost always wrong here: Vercel reads
 it per *repository*, not per project, so it silences every project linked to
-this repo at once.
+this repo at once — including the one that actually ships.
 
 ### Why it moved off GitHub Pages
 
@@ -115,10 +128,12 @@ in the code as well as a line here:
 | `/metrics` answers 404 | `prometheus_client` counts in process memory, and a process here is one invocation. A scrape would report what one instance happened to see, which is not a sample of anything |
 | `functions.excludeFiles` in `vercel.json` | The Python builder starts from the whole repository and removes what it is told to. Unbounded, the bundle is 329MB against a 225MB limit — and it contains the env files. The glob names `.env*` and `env/**` for that reason — moving them into `env/` would otherwise have walked a database password into the bundle. It is capped at 256 characters, which is why it names big directories rather than listing files |
 
-Quotas were already serverless-safe and did not need changing: `app/rate_limit.py`
-counts in atomic Postgres rows keyed by an HMAC digest, so allowances are shared
-across instances rather than living in one process's memory. Sessions are signed
-cookies, so they need no server-side store either.
+Quotas count in **Redis**, keyed by an HMAC digest of the caller's identity, so
+allowances are shared between instances rather than living in one process's
+memory. They used to be rows in an `api_rate_limits` table, which was emulating
+`INCR` with an upsert and a window comparison; the table is gone. A window is a
+key expiry now, set with `NX` so a steady caller cannot push their own window
+out. Sessions are signed cookies, so they need no server-side store either.
 
 ### Environment
 
@@ -127,7 +142,8 @@ Set these on the Vercel project — `vercel env add NAME production`, or
 
 | Variable | Why it matters |
 |---|---|
-| `DATABASE_URL` | Point it at Supabase's **transaction pooler on 6543**, not the session pooler. A serverless function opens far more short-lived connections than a long-running server, which is the case the transaction pooler exists for |
+| `REDIS_URL` | Where the AI quotas are counted. Set by the Redis Marketplace integration — do not hand-write it. Absent, `shared_quota_problem()` names it, and the AI buckets refuse every caller with a `429` that reads exactly like an exhausted quota. `KV_URL` and `REDIS_TLS_URL` are accepted in its place. **Redis 7.0 or newer**: the window uses `EXPIRE … NX`, which older servers reject |
+| `DATABASE_URL` | Point it at Supabase's **transaction pooler on 6543**, not the session pooler. A serverless function opens far more short-lived connections than a long-running server, which is the case the transaction pooler exists for. It no longer has anything to do with quotas |
 | `RATE_LIMIT_SALT` | Every quota is counted keyed by an HMAC of the caller's identity; with no salt there is no key, so the shared store cannot be used. What happens then is **per bucket**, decided by `when_unavailable` in `dependencies.py`. The **AI quotas refuse** — they guard a key billed per call, and a limiter that cannot count must not wave those through, so the caller gets a `429` that reads to a visitor exactly like an exhausted quota. **Sign-in and the admin routes degrade** to a per-worker in-memory bound instead: they guard a credential that is verified independently, so refusing everyone would be an authentication outage protecting nothing. Any long random string works, and `METRICS_ID_SALT` is accepted in its place |
 | `SESSION_SECRET` | At least 32 characters. Sign-in returns nothing without it |
 | `ALLOWED_ORIGINS` | `https://learn-practice-work.vercel.app`. Same-origin requests do not need CORS, but `PUBLIC_APP_ORIGIN` is validated against this list |

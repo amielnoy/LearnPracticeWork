@@ -1128,9 +1128,9 @@ ChallengeLabels{ hint, complexity, showHint, showSolution, hide }</code></pre>
   Uvicorn runs FastAPI as a non-root <code>app</code> user. <code>fly.toml</code>
   deliberately keeps one machine running rather than scaling to zero, so the Stripe webhook
   endpoint stays warm. That setting used to be load-bearing for the quota too, and is not any
-  more: <code>SharedRateLimiter</code> counts in atomic Postgres rows in production, keyed by an
+  more: <code>SharedRateLimiter</code> counts in Redis in production, keyed by an
   HMAC digest so no raw IP is stored, which is what makes an allowance survive a restart and
-  hold across workers. Without a database and a salt it returns <code>False</code> rather than
+  hold across instances. Without a Redis URL and a salt the AI buckets return <code>False</code> rather than
   falling back to memory — a quota that resets on deploy is not a quota, and the in-memory
   limiter is the local and test path only.
 </div>
