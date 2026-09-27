@@ -200,23 +200,26 @@ different things own tables in it:
 
 | File | Owns |
 |---|---|
-| `server/app/schema.sql` | What the API *writes*: `academy_users`, `learner_progress`, `course_purchases`, `login_events`, `ai_usage_events` |
+| `server/app/schema.sql` | What the API *writes*: `academy_users`, `course_purchases`, `login_events`, `ai_usage_events` |
 | `scripts/src/academy-schema.sql` | What the academy *reads*: the question bank, coding challenges and lecture series |
 
 The first used to be applied by `initialize_database()` on every boot, which is
 why nothing ever had to run it deliberately. Serverless ended that, and for a
 while nothing ran it at all: the seed script knew only about the content schema,
-so on Vercel `learner_progress` was a table the code wrote to and the database
+so on Vercel the API's own tables were ones the code wrote to and the database
 had never heard of. Both are idempotent — re-running costs nothing.
 
 Without it the tables do not exist, the database-backed routes answer `503`, and
 the academy falls back to its bundled content — which means a missing schema is
 invisible to a visitor and equally invisible to whoever deployed it.
 
-`--check` counts what landed, and now includes `academy_users` and
-`learner_progress`. A count of zero there is the useful signal: it proves the
-table exists, which a 503 from `/api/progress` cannot distinguish from a table
-that was never created.
+`--check` counts what landed, and now includes `academy_users`. A count of zero
+there is the useful signal: it proves the table exists, which a `503` from a
+database-backed route cannot distinguish from a table that was never created.
+
+Learner progress itself is no longer one of these tables: it lives in a
+spreadsheet reached through an Apps Script web app — see
+`server/app/sheets_store.py`.
 
 ### Seeding the academy content
 

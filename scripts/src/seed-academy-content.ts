@@ -185,12 +185,11 @@ union all select 'coding challenges', l.lang, count(*)
   from coding_challenges c join coding_challenge_levels l on l.id = c.level_id group by l.lang
 union all select 'lecture series', t.lang, count(*)
   from lecture_items i join lecture_tracks t on t.id = i.track_id group by t.lang
--- Not content: these are the API's own tables. They are listed here because a
+-- Not content: this is the API's own table. It is listed here because a
 -- count of 0 proves the table exists, which is the one thing a --check run
 -- could not tell you before. A missing table and an empty one look identical
--- from outside, and only one of them loses a signed-in reader's progress.
+-- from outside.
 union all select 'signed-in readers', '-', count(*) from academy_users
-union all select 'saved progress', '-', count(*) from learner_progress
 order by 1, 2;`;
 
 /** Ready lectures with no href render as live cards that open nothing. */
@@ -211,11 +210,11 @@ function main(): void {
   if (!flags.has('--check')) {
     if (!flags.has('--seed-only')) {
       // Two schemas, one database. `server/app/schema.sql` owns what the API
-      // writes — sign-ins, learner progress, purchases, quota rows — and used
-      // to be applied by `initialize_database()` on every boot. Serverless
-      // ended that: a Vercel function boots per invocation, so the DDL moved
-      // here and nothing else runs it. Without this line `learner_progress`
-      // never exists in production and every signed-in save fails.
+      // writes — sign-ins, purchases, quota rows — and used to be applied by
+      // `initialize_database()` on every boot. Serverless ended that: a Vercel
+      // function boots per invocation, so the DDL moved here and nothing else
+      // runs it. Learner progress itself now lives in a spreadsheet, not here
+      // — see `server/app/sheets_store.py`.
       apply(where, path.join('server', 'app', 'schema.sql'));
       apply(where, path.join('scripts', 'src', 'academy-schema.sql'));
     }

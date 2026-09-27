@@ -56,25 +56,6 @@ CREATE TABLE IF NOT EXISTS academy_users (
 CREATE INDEX IF NOT EXISTS academy_users_email_idx ON academy_users (email);
 CREATE INDEX IF NOT EXISTS academy_users_last_seen_idx ON academy_users (last_seen_at);
 
--- What a reader has finished, so it follows them off the device they started on.
---
--- The two array columns are sets, not sequences: `completePracticeItem` and
--- `viewLecture` on the client both check membership before appending, and the
--- merge on the way in does the same. Bounded on write, because they arrive from
--- a browser and `localStorage` is editable by whoever owns the browser.
-CREATE TABLE IF NOT EXISTS learner_progress (
-  google_subject text PRIMARY KEY REFERENCES academy_users (google_subject) ON DELETE CASCADE,
-  resume_started boolean NOT NULL DEFAULT false,
-  resume_completed boolean NOT NULL DEFAULT false,
-  interview_started boolean NOT NULL DEFAULT false,
-  interview_answers integer NOT NULL DEFAULT 0,
-  interview_completed boolean NOT NULL DEFAULT false,
-  practice_completed text[] NOT NULL DEFAULT '{}',
-  lectures_viewed text[] NOT NULL DEFAULT '{}',
-  last_tool text CHECK (last_tool IN ('resume', 'interview', 'practice')),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-
 -- Sign-in attempts, kept long enough to answer "when did this start failing".
 --
 -- `user_hash` is the same HMAC `metrics.user_id()` puts on the Prometheus
@@ -157,7 +138,7 @@ DO $$
 DECLARE t text;
 BEGIN
   FOREACH t IN ARRAY ARRAY[
-    'course_purchases', 'academy_users', 'learner_progress',
+    'course_purchases', 'academy_users',
     'login_events', 'ai_usage_events', 'test_runs', 'test_suite_results'
   ] LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY;', t);

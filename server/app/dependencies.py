@@ -27,8 +27,6 @@ from .database import (
     find_course_access,
     find_course_purchase,
     list_course_purchases,
-    load_progress,
-    merge_progress,
     record_purchase,
 )
 from .entitlements import EntitlementService
@@ -38,6 +36,7 @@ from .progress import ProgressService
 from .rate_limit import SharedRateLimiter
 from .sessions import read_session
 from .settings import BURST_LIMIT, BURST_WINDOW, DAILY_QUOTA, TRUSTED_PROXY_HOPS
+from .sheets_store import load_progress, merge_progress
 
 logger = logging.getLogger(__name__)
 
